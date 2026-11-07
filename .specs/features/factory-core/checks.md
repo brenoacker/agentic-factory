@@ -60,6 +60,6 @@ Proof: run unit | ✔ C7: cli status aggregates tasks, token usage, USD cost, re
 ## Handoff
 
 - **Settled mid-build:** none
-- **Dispatched:** Verifier at `HEAD`
+- **Dispatched:** Verifier at `4ed6799` - returned (`PASS`)
 - **Boundary:** C1-C7 closed at `20ba391`
 - **Abandoned:** none
