@@ -13,6 +13,7 @@ import {
   pollLinearTracker,
   intakeAndTriageTicket,
   advanceTicketInPanel,
+  evaluateIntakeGuards,
   provisionTaskWorkspace,
   FactoryStore,
 } from '../../../packages/core/index.mjs';
@@ -761,6 +762,110 @@ test('C11: Deliverable validation gate enforces mandatory PR for code workflows 
   } finally {
     store.close();
     await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C12: Controls API persists maxConcurrentAgents within range 1 to 10 and rejects invalid bounds', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    // 1. Valid value (5) is accepted and persisted to factory.yaml
+    const validRes = await fetch(`${baseUrl}/api/controls`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ maxConcurrentAgents: 5 }),
+    });
+    assert.equal(validRes.status, 200);
+    const validJson = await validRes.json();
+    assert.equal(validJson.ok, true);
+    assert.equal(validJson.factoryConfig.factory.limits.maxConcurrentAgents, 5);
+
+    // Verify written to factory.yaml on disk
+    const savedYaml = readFileSync(join(tmpDir, 'factory.yaml'), 'utf8');
+    assert.ok(savedYaml.includes('"maxConcurrentAgents": 5'));
+
+    // 2. Reject out-of-bounds: 0 (less than 1)
+    const lowRes = await fetch(`${baseUrl}/api/controls`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ maxConcurrentAgents: 0 }),
+    });
+    assert.equal(lowRes.status, 400);
+
+    // 3. Reject out-of-bounds: 11 (greater than 10)
+    const highRes = await fetch(`${baseUrl}/api/controls`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ maxConcurrentAgents: 11 }),
+    });
+    assert.equal(highRes.status, 400);
+
+    // 4. Reject non-integer: 3.5
+    const floatRes = await fetch(`${baseUrl}/api/controls`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ maxConcurrentAgents: 3.5 }),
+    });
+    assert.equal(floatRes.status, 400);
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C13: Concurrency intake guard bounds active tasks to maxConcurrentAgents defaulting to 3 and rejecting overflow', () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const store = new FactoryStore(dbPath);
+
+  try {
+    const factoryConfig = {
+      factory: {
+        limits: { maxConcurrentAgents: 3 },
+      },
+    };
+
+    // Initially 0 active tasks
+    assert.equal(store.countActiveTasks(), 0);
+
+    // 1. First 3 tasks are accepted
+    for (let i = 1; i <= 3; i++) {
+      const issue = { issue_number: i, repo: 'brenoacker/agentic-factory', type: 'feature', title: `Task ${i}` };
+      const guard = evaluateIntakeGuards(issue, factoryConfig, store);
+      assert.equal(guard.ok, true, `Task ${i} should be accepted`);
+      store.createTask({
+        executionKey: `brenoacker/agentic-factory#${i}`,
+        issueNumber: i,
+        repo: 'brenoacker/agentic-factory',
+        type: 'feature',
+        stage: 'triage',
+      });
+    }
+
+    assert.equal(store.countActiveTasks(), 3);
+
+    // 2. 4th task is rejected with code max_concurrency_reached
+    const overflowIssue = { issue_number: 4, repo: 'brenoacker/agentic-factory', type: 'feature', title: 'Task 4' };
+    const overflowGuard = evaluateIntakeGuards(overflowIssue, factoryConfig, store);
+    assert.equal(overflowGuard.ok, false);
+    assert.equal(overflowGuard.code, 'max_concurrency_reached');
+    assert.ok(overflowGuard.reason.includes('Active running agents (3) reached maximum concurrency limit (3)'));
+
+    // 3. Complete task #1 -> active tasks becomes 2 -> 4th task is accepted
+    store.updateTaskStage('brenoacker/agentic-factory#1', {
+      stage: 'done',
+      deliverableType: 'pull_request',
+      deliverableUrl: 'https://github.com/brenoacker/agentic-factory/pull/1',
+    });
+    assert.equal(store.countActiveTasks(), 2);
+
+    const retryGuard = evaluateIntakeGuards(overflowIssue, factoryConfig, store);
+    assert.equal(retryGuard.ok, true);
+  } finally {
+    store.close();
     rmSync(tmpDir, { recursive: true, force: true });
   }
 });

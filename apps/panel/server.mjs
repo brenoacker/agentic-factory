@@ -319,9 +319,18 @@ export function createPanelServer({
         if (
           (body.maxTasksPerHour !== undefined && (typeof body.maxTasksPerHour !== 'number' || body.maxTasksPerHour <= 0)) ||
           (body.dailyBudgetUsd !== undefined && (typeof body.dailyBudgetUsd !== 'number' || body.dailyBudgetUsd <= 0)) ||
-          (body.stallThresholdMinutes !== undefined && (typeof body.stallThresholdMinutes !== 'number' || body.stallThresholdMinutes <= 0))
+          (body.stallThresholdMinutes !== undefined && (typeof body.stallThresholdMinutes !== 'number' || body.stallThresholdMinutes <= 0)) ||
+          (body.maxConcurrentAgents !== undefined &&
+            (typeof body.maxConcurrentAgents !== 'number' ||
+              !Number.isInteger(body.maxConcurrentAgents) ||
+              body.maxConcurrentAgents < 1 ||
+              body.maxConcurrentAgents > 10))
         ) {
-          sendJson(res, 400, { ok: false, error: 'maxTasksPerHour, dailyBudgetUsd, and stallThresholdMinutes must be positive numbers' });
+          sendJson(res, 400, {
+            ok: false,
+            error:
+              'maxTasksPerHour, dailyBudgetUsd, and stallThresholdMinutes must be positive numbers, and maxConcurrentAgents must be an integer between 1 and 10',
+          });
           return;
         }
 
@@ -338,6 +347,9 @@ export function createPanelServer({
         }
         if (typeof body.stallThresholdMinutes === 'number') {
           updatedCfg.factory.limits.stallThresholdMinutes = body.stallThresholdMinutes;
+        }
+        if (typeof body.maxConcurrentAgents === 'number') {
+          updatedCfg.factory.limits.maxConcurrentAgents = body.maxConcurrentAgents;
         }
         if (typeof body.autonomy === 'string') {
           updatedCfg.factory.autonomy = body.autonomy;

@@ -393,6 +393,12 @@ export class FactoryStore {
     return Boolean(row && row.stage !== 'done' && row.stage !== 'aborted');
   }
 
+  countActiveTasks() {
+    const stmt = this.db.prepare("SELECT COUNT(*) AS cnt FROM tasks WHERE stage != 'done' AND stage != 'aborted'");
+    const row = stmt.get();
+    return Number(row?.cnt || 0);
+  }
+
   countTasksSince(isoTimestamp) {
     const stmt = this.db.prepare('SELECT COUNT(*) AS cnt FROM tasks WHERE created_at >= ?');
     const row = stmt.get(isoTimestamp);
@@ -706,6 +712,7 @@ export class FactoryStore {
     return {
       ok: true,
       totalTasks: tasks.length,
+      activeTasksCount: this.countActiveTasks(),
       byStage,
       byType,
       tokens: {

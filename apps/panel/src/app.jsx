@@ -183,6 +183,7 @@ function ControlPanelApp() {
   const [ctrlAutonomy, setCtrlAutonomy] = useState('gated');
   const [ctrlRate, setCtrlRate] = useState('10');
   const [ctrlBudget, setCtrlBudget] = useState('25');
+  const [ctrlConcurrent, setCtrlConcurrent] = useState('3');
   const [ctrlStallMinutes, setCtrlStallMinutes] = useState('30');
   const [ctrlKill, setCtrlKill] = useState(false);
   const [controlsFeedback, setControlsFeedback] = useState('');
@@ -202,6 +203,7 @@ function ControlPanelApp() {
       setCtrlAutonomy(f.autonomy || 'gated');
       setCtrlRate(String(f.limits?.maxTasksPerHour ?? 10));
       setCtrlBudget(String(f.limits?.dailyBudgetUsd ?? 25));
+      setCtrlConcurrent(String(f.limits?.maxConcurrentAgents ?? 3));
       setCtrlStallMinutes(String(f.limits?.stallThresholdMinutes ?? 30));
       setCtrlKill(Boolean(f.killSwitch));
     }
@@ -444,6 +446,7 @@ function ControlPanelApp() {
         autonomy: ctrlAutonomy,
         maxTasksPerHour: Number(ctrlRate),
         dailyBudgetUsd: Number(ctrlBudget),
+        maxConcurrentAgents: Number(ctrlConcurrent),
         stallThresholdMinutes: Number(ctrlStallMinutes),
         killSwitch: ctrlKill,
       }),
@@ -737,6 +740,9 @@ function ControlPanelApp() {
                     <div data-testid="kpi-total-tickets">
                       <Box variant="awsui-key-label">Total Tickets</Box>
                       <Box variant="h1">{st.totalTasks}</Box>
+                      <Box variant="small" color="text-body-secondary" data-testid="kpi-active-concurrency">
+                        Active: {st.activeTasksCount ?? (st.totalTasks - (st.byStage?.done || 0))} / {f.limits?.maxConcurrentAgents ?? 3} max agents
+                      </Box>
                       <Box variant="small" color="text-body-secondary">
                         Completed: {st.byStage?.done || 0}
                       </Box>
@@ -1873,6 +1879,28 @@ function ControlPanelApp() {
                         step="0.5"
                         value={ctrlBudget}
                         onChange={(e) => setCtrlBudget(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '0.45rem',
+                          background: '#0f172a',
+                          color: '#fff',
+                          border: '1px solid #334155',
+                          borderRadius: '4px',
+                        }}
+                      />
+                    </FormField>
+                    <FormField
+                      label="Max Concurrent Running Agents (1 to 10, default: 3)"
+                      description="Bounds maximum active simultaneous agent tasks running across all monitored repos"
+                    >
+                      <input
+                        type="number"
+                        id="ctrl-concurrent"
+                        min="1"
+                        max="10"
+                        step="1"
+                        value={ctrlConcurrent}
+                        onChange={(e) => setCtrlConcurrent(e.target.value)}
                         style={{
                           width: '100%',
                           padding: '0.45rem',

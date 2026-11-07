@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { cpSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createPanelServer } from '../server.mjs';
@@ -184,6 +184,11 @@ test('C5: Playwright integration tests verify Workflow editor, Operational Contr
 test('C6: Playwright E2E test triages, advances, approves human gates, and completes all 5 ticket types in the browser', async ({ page }) => {
   mkdirSync(CAPTURES_DIR, { recursive: true });
   const tmpDir = makeTempFactoryClone();
+  // Bump maxConcurrentAgents to 10 in test clone so all 5 diverse tickets can be intaked simultaneously
+  const factoryYamlPath = join(tmpDir, 'factory.yaml');
+  const yamlContent = readFileSync(factoryYamlPath, 'utf8').replace(/"maxConcurrentAgents":\s*\d+/, '"maxConcurrentAgents": 10');
+  writeFileSync(factoryYamlPath, yamlContent, 'utf8');
+
   const dbPath = join(tmpDir, 'factory.db');
   const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
 
@@ -797,6 +802,87 @@ test('C14: Playwright E2E test verifies isolated workspace provisioning, deliver
     rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+test('C15: Playwright E2E test verifies max concurrent agents input, Overview KPI, and live limit updates in Cloudscape UI', async ({ page }) => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    // Populate with 2 active tasks
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#961',
+      issueNumber: 961,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Active Task 1',
+      type: 'feature',
+      stage: 'implementation',
+    });
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#962',
+      issueNumber: 962,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Active Task 2',
+      type: 'bug',
+      stage: 'review',
+    });
+
+    await page.goto(baseUrl);
+
+    // 1. Overview KPI: active concurrency displays Active: 2 / 3 max agents
+    const kpiLocator = page.getByTestId('kpi-active-concurrency');
+    await expect(kpiLocator).toBeVisible();
+    await expect(kpiLocator).toContainText('Active: 2 / 3 max agents');
+
+    // 2. Navigate to Controls tab, check #ctrl-concurrent input value is 3
+    await page.locator('#tabs button[data-tab="controls"]').click();
+    const concurrentInput = page.locator('#ctrl-concurrent');
+    await expect(concurrentInput).toBeVisible();
+    await expect(concurrentInput).toHaveValue('3');
+
+    // 3. Update limit to 6 and save
+    await concurrentInput.fill('6');
+    await page.locator('#save-controls-btn').click();
+    await expect(page.locator('#controls-feedback')).toContainText('Controls saved');
+
+    // 4. Return to Overview and verify KPI reflects new limit 6
+    await page.locator('#tabs button[data-tab="overview"]').click();
+    await expect(kpiLocator).toContainText('Active: 2 / 6 max agents');
+
+    // 5. Populate tasks up to new limit of 6
+    for (let i = 3; i <= 6; i++) {
+      panel.store.createTask({
+        executionKey: `brenoacker/agentic-factory#96${i}`,
+        issueNumber: 960 + i,
+        repo: 'brenoacker/agentic-factory',
+        title: `Active Task ${i}`,
+        type: 'feature',
+        stage: 'implementation',
+      });
+    }
+
+    // Now active count is 6. Intake ticket #970 should be rejected by intake guard with 422 max_concurrency_reached
+    const intakeRes = await page.request.post(`${baseUrl}/api/tickets/intake`, {
+      data: {
+        repo: 'brenoacker/agentic-factory',
+        issueNumber: 970,
+        title: 'Exceeding concurrent agent limit ticket',
+        type: 'feature',
+        body: 'Should be rejected because concurrency reached ceiling 6',
+      },
+    });
+    expect(intakeRes.status()).toBe(422);
+    const intakeJson = await intakeRes.json();
+    expect(intakeJson.code).toBe('max_concurrency_reached');
+    expect(intakeJson.error).toContain('maximum concurrency limit');
+
+    await page.screenshot({ path: join(CAPTURES_DIR, 'cloudscape-concurrency-limits.png'), fullPage: true });
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
 
 
 

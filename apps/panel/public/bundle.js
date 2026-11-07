@@ -338700,6 +338700,7 @@ ${isHandDrawn ? "" : `
     const [ctrlAutonomy, setCtrlAutonomy] = (0, import_react309.useState)("gated");
     const [ctrlRate, setCtrlRate] = (0, import_react309.useState)("10");
     const [ctrlBudget, setCtrlBudget] = (0, import_react309.useState)("25");
+    const [ctrlConcurrent, setCtrlConcurrent] = (0, import_react309.useState)("3");
     const [ctrlStallMinutes, setCtrlStallMinutes] = (0, import_react309.useState)("30");
     const [ctrlKill, setCtrlKill] = (0, import_react309.useState)(false);
     const [controlsFeedback, setControlsFeedback] = (0, import_react309.useState)("");
@@ -338716,6 +338717,7 @@ ${isHandDrawn ? "" : `
         setCtrlAutonomy(f3.autonomy || "gated");
         setCtrlRate(String(f3.limits?.maxTasksPerHour ?? 10));
         setCtrlBudget(String(f3.limits?.dailyBudgetUsd ?? 25));
+        setCtrlConcurrent(String(f3.limits?.maxConcurrentAgents ?? 3));
         setCtrlStallMinutes(String(f3.limits?.stallThresholdMinutes ?? 30));
         setCtrlKill(Boolean(f3.killSwitch));
       }
@@ -338939,6 +338941,7 @@ ${isHandDrawn ? "" : `
           autonomy: ctrlAutonomy,
           maxTasksPerHour: Number(ctrlRate),
           dailyBudgetUsd: Number(ctrlBudget),
+          maxConcurrentAgents: Number(ctrlConcurrent),
           stallThresholdMinutes: Number(ctrlStallMinutes),
           killSwitch: ctrlKill
         })
@@ -339240,6 +339243,13 @@ ${isHandDrawn ? "" : `
                     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { "data-testid": "kpi-total-tickets", children: [
                       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "awsui-key-label", children: "Total Tickets" }),
                       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "h1", children: st2.totalTasks }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", "data-testid": "kpi-active-concurrency", children: [
+                        "Active: ",
+                        st2.activeTasksCount ?? st2.totalTasks - (st2.byStage?.done || 0),
+                        " / ",
+                        f2.limits?.maxConcurrentAgents ?? 3,
+                        " max agents"
+                      ] }),
                       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
                         "Completed: ",
                         st2.byStage?.done || 0
@@ -340348,6 +340358,33 @@ ${isHandDrawn ? "" : `
                         }
                       }
                     ) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                      FormField,
+                      {
+                        label: "Max Concurrent Running Agents (1 to 10, default: 3)",
+                        description: "Bounds maximum active simultaneous agent tasks running across all monitored repos",
+                        children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                          "input",
+                          {
+                            type: "number",
+                            id: "ctrl-concurrent",
+                            min: "1",
+                            max: "10",
+                            step: "1",
+                            value: ctrlConcurrent,
+                            onChange: (e3) => setCtrlConcurrent(e3.target.value),
+                            style: {
+                              width: "100%",
+                              padding: "0.45rem",
+                              background: "#0f172a",
+                              color: "#fff",
+                              border: "1px solid #334155",
+                              borderRadius: "4px"
+                            }
+                          }
+                        )
+                      }
+                    ),
                     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Stall Alarm Threshold (minutes)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
                       "input",
                       {

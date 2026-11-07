@@ -61,6 +61,15 @@ export function loadAndValidateFactory(rootDir) {
       if (!f.limits || typeof f.limits.maxTasksPerHour !== 'number' || typeof f.limits.dailyBudgetUsd !== 'number') {
         errors.push('factory.yaml: limits must define numeric maxTasksPerHour and dailyBudgetUsd');
       }
+      if (
+        f.limits?.maxConcurrentAgents !== undefined &&
+        (typeof f.limits.maxConcurrentAgents !== 'number' ||
+          !Number.isInteger(f.limits.maxConcurrentAgents) ||
+          f.limits.maxConcurrentAgents < 1 ||
+          f.limits.maxConcurrentAgents > 10)
+      ) {
+        errors.push('factory.yaml: limits.maxConcurrentAgents must be an integer between 1 and 10');
+      }
       for (const imp of VALID_IMPACTS) {
         if (!f.modelByImpact || !f.modelByImpact[imp] || !f.modelByImpact[imp].runtime || !f.modelByImpact[imp].model) {
           errors.push(`factory.yaml: modelByImpact missing mapping for impact "${imp}"`);
