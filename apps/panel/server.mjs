@@ -76,7 +76,8 @@ export function createPanelServer({
         const cfg = loadAndValidateFactory(root);
         const lockPath = join(root, 'skills.lock.json');
         const lock = existsSync(lockPath) ? JSON.parse(readFileSync(lockPath, 'utf8')) : { skills: [] };
-        const status = store.getStatusSummary();
+        const stallThresholdMinutes = cfg.factoryConfig?.factory?.limits?.stallThresholdMinutes ?? 30;
+        const status = store.getStatusSummary({ stallThresholdMinutes });
         const agents = listAgentsCatalog(root);
         const brain = loadBrainEntries(root);
         const runtimeHealth = store.listRuntimeHealth();
@@ -147,7 +148,42 @@ export function createPanelServer({
         return;
       }
 
-      // 3. POST /api/tasks/:key/approve
+      // 3. POST /api/tasks/:key/approve & POST /api/tasks/:key/acknowledge & GET /api/alarms/stalled
+      if (req.method === 'GET' && pathname === '/api/alarms/stalled') {
+        const cfg = loadAndValidateFactory(root);
+        const rawParam = url.searchParams.get('thresholdMinutes');
+        const threshold =
+          rawParam !== null ? Number(rawParam) : Number(cfg.factoryConfig?.factory?.limits?.stallThresholdMinutes ?? 30);
+        if (!Number.isFinite(threshold) || threshold <= 0) {
+          sendJson(res, 400, { ok: false, error: 'thresholdMinutes must be a positive number' });
+          return;
+        }
+        const stalledTasks = store.evaluateStalledTasks({ stallThresholdMinutes: threshold });
+        sendJson(res, 200, {
+          ok: true,
+          stallThresholdMinutes: threshold,
+          stalledCount: stalledTasks.length,
+          stalledTasks,
+        });
+        return;
+      }
+
+      const ackMatch = pathname.match(/^\/api\/tasks\/([^/]+)\/acknowledge$/);
+      if (req.method === 'POST' && ackMatch) {
+        const executionKey = decodeURIComponent(ackMatch[1]);
+        const body = await readJsonBody(req);
+        const updated = store.acknowledgeTaskAlarm(executionKey, {
+          actor: body.actor || 'panel-operator',
+          note: body.note || 'Acknowledged in Control Panel',
+        });
+        if (!updated) {
+          sendJson(res, 404, { ok: false, error: `Task not found: ${executionKey}` });
+          return;
+        }
+        sendJson(res, 200, { ok: true, task: updated });
+        return;
+      }
+
       const approveMatch = pathname.match(/^\/api\/tasks\/([^/]+)\/approve$/);
       if (req.method === 'POST' && approveMatch) {
         const executionKey = decodeURIComponent(approveMatch[1]);
@@ -240,9 +276,10 @@ export function createPanelServer({
         const body = await readJsonBody(req);
         if (
           (body.maxTasksPerHour !== undefined && (typeof body.maxTasksPerHour !== 'number' || body.maxTasksPerHour <= 0)) ||
-          (body.dailyBudgetUsd !== undefined && (typeof body.dailyBudgetUsd !== 'number' || body.dailyBudgetUsd <= 0))
+          (body.dailyBudgetUsd !== undefined && (typeof body.dailyBudgetUsd !== 'number' || body.dailyBudgetUsd <= 0)) ||
+          (body.stallThresholdMinutes !== undefined && (typeof body.stallThresholdMinutes !== 'number' || body.stallThresholdMinutes <= 0))
         ) {
-          sendJson(res, 400, { ok: false, error: 'maxTasksPerHour and dailyBudgetUsd must be positive numbers' });
+          sendJson(res, 400, { ok: false, error: 'maxTasksPerHour, dailyBudgetUsd, and stallThresholdMinutes must be positive numbers' });
           return;
         }
 
@@ -256,6 +293,9 @@ export function createPanelServer({
         }
         if (typeof body.dailyBudgetUsd === 'number') {
           updatedCfg.factory.limits.dailyBudgetUsd = body.dailyBudgetUsd;
+        }
+        if (typeof body.stallThresholdMinutes === 'number') {
+          updatedCfg.factory.limits.stallThresholdMinutes = body.stallThresholdMinutes;
         }
         if (typeof body.autonomy === 'string') {
           updatedCfg.factory.autonomy = body.autonomy;

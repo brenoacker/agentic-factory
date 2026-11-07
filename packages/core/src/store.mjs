@@ -191,6 +191,96 @@ export class FactoryStore {
     return this.db.prepare('SELECT * FROM repo_etags ORDER BY repo ASC').all();
   }
 
+  /**
+   * Evaluates all active tasks (`stage != 'done'` and `stage != 'aborted'`) against `stallThresholdMinutes`.
+   * Records a deduplicated `task_stalled_alarm` telemetry event when a task crosses the stall threshold.
+   */
+  evaluateStalledTasks({ stallThresholdMinutes = 30, now = new Date() } = {}) {
+    const threshold = Number(stallThresholdMinutes);
+    if (!Number.isFinite(threshold) || threshold <= 0) {
+      throw new Error('stallThresholdMinutes must be a positive number');
+    }
+    const nowDate = now instanceof Date ? now : new Date(now);
+    const nowMs = nowDate.getTime();
+    const nowIso = nowDate.toISOString();
+
+    const activeTasks = this.db
+      .prepare("SELECT * FROM tasks WHERE stage != 'done' AND stage != 'aborted' ORDER BY issue_number ASC")
+      .all();
+
+    const stalledTasks = [];
+    for (const t of activeTasks) {
+      const updatedMs = new Date(t.updated_at).getTime();
+      const idleMinutes = Math.max(0, Math.floor((nowMs - updatedMs) / 60000));
+      if (idleMinutes >= threshold) {
+        const severity = idleMinutes >= threshold * 2 ? 'critical' : 'warning';
+        const reason =
+          t.needs_human === 1
+            ? `Waiting for human gate approval at stage "${t.stage}" (${idleMinutes}m >= ${threshold}m)`
+            : `Task stalled in stage "${t.stage}" without progress (${idleMinutes}m >= ${threshold}m)`;
+
+        const existingAlarm = this.db
+          .prepare(
+            "SELECT id FROM telemetry_events WHERE execution_key = ? AND event_type = 'task_stalled_alarm' AND created_at >= ?",
+          )
+          .get(t.execution_key, t.updated_at);
+
+        if (!existingAlarm) {
+          this.recordEvent({
+            executionKey: t.execution_key,
+            issueNumber: t.issue_number,
+            eventType: 'task_stalled_alarm',
+            stage: t.stage,
+            runtime: t.runtime,
+            model: t.model,
+            payload: { idleMinutes, stallThresholdMinutes: threshold, severity, reason },
+            now: nowIso,
+          });
+        }
+
+        stalledTasks.push({
+          executionKey: t.execution_key,
+          issueNumber: t.issue_number,
+          repo: t.repo,
+          title: t.title,
+          type: t.type,
+          stage: t.stage,
+          needsHuman: Boolean(t.needs_human),
+          idleMinutes,
+          stallThresholdMinutes: threshold,
+          severity,
+          reason,
+          updatedAt: t.updated_at,
+        });
+      }
+    }
+
+    return stalledTasks;
+  }
+
+  /**
+   * Acknowledges / snoozes a stalled task alarm by refreshing `updated_at` and recording `alarm_acknowledged`.
+   */
+  acknowledgeTaskAlarm(
+    executionKey,
+    { actor = 'operator', note = 'Alarm acknowledged / snoozed', now = new Date().toISOString() } = {},
+  ) {
+    const task = this.getTask(executionKey);
+    if (!task) return null;
+    this.db.prepare('UPDATE tasks SET updated_at = ? WHERE execution_key = ?').run(now, executionKey);
+    this.recordEvent({
+      executionKey,
+      issueNumber: task.issue_number,
+      eventType: 'alarm_acknowledged',
+      stage: task.stage,
+      runtime: task.runtime,
+      model: task.model,
+      payload: { actor, note },
+      now,
+    });
+    return this.getTask(executionKey);
+  }
+
   verifyDeployment({
     executionKey,
     commitSha,
@@ -447,9 +537,10 @@ export class FactoryStore {
     return { costUsd, inputTokens, outputTokens, cachedTokens };
   }
 
-  getStatusSummary() {
+  getStatusSummary({ stallThresholdMinutes = 30, now = new Date() } = {}) {
     const tasks = this.db.prepare('SELECT * FROM tasks ORDER BY issue_number ASC').all();
     const events = this.db.prepare('SELECT * FROM telemetry_events ORDER BY id ASC').all();
+    const stalledTasks = this.evaluateStalledTasks({ stallThresholdMinutes, now });
 
     const byStage = {};
     const byType = {};
@@ -535,6 +626,8 @@ export class FactoryStore {
       byRuntime,
       byModel,
       needsHuman: needsHumanQueue,
+      stalledCount: stalledTasks.length,
+      stalledTasks,
       tasks,
     };
   }

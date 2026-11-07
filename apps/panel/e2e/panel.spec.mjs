@@ -317,3 +317,56 @@ test('C8: Playwright E2E test configures an external GitHub repository in the UI
   }
 });
 
+test('C9: Playwright E2E test verifies stalled feature alarm banner, header badge, Kanban badge, and 1-click resolution', async ({ page }) => {
+  mkdirSync(CAPTURES_DIR, { recursive: true });
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    const eightyMinAgo = new Date(Date.now() - 80 * 60_000).toISOString();
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#601',
+      issueNumber: 601,
+      repo: 'brenoacker/agentic-factory',
+      title: '[feature] Stalled payment webhook feature waiting for operator',
+      type: 'feature',
+      stage: 'plan',
+      now: eightyMinAgo,
+    });
+    panel.store.updateTaskStage('brenoacker/agentic-factory#601', {
+      needsHuman: true,
+      humanQuestion: 'Approve plan before build',
+      now: eightyMinAgo,
+    });
+
+    await page.goto(baseUrl);
+
+    // 1. Verify top Stalled Task Alarm Banner and Header Alarm Badge are visible immediately
+    await expect(page.getByTestId('header-alarm-badge')).toHaveText('1 STALLED ALARM(S)');
+    await expect(page.getByTestId('stalled-alarm-banner')).toBeVisible();
+    await expect(page.getByTestId('alarm-item-601')).toContainText('CRITICAL');
+    await expect(page.getByTestId('alarm-item-601')).toContainText('Stalled payment webhook feature');
+
+    // 2. Verify Kanban Board shows the red STALLED badge on card #601
+    await page.locator('#tabs button[data-tab="board"]').click();
+    await expect(page.getByTestId('task-stalled-badge-601')).toContainText('STALLED');
+    await page.screenshot({ path: join(CAPTURES_DIR, 'stalled-feature-alarm-active.png'), fullPage: true });
+
+    // 3. Configure Stall Alarm Threshold in Operational Controls
+    await page.locator('#tabs button[data-tab="controls"]').click();
+    await page.locator('#ctrl-stall-minutes').fill('45');
+    await page.locator('#save-controls-btn').click();
+    await expect(page.locator('#controls-feedback')).toContainText('Controls saved');
+
+    // 4. Click "Snooze Alarm" on the top Stalled Task Alarm Banner and verify the alarm clears
+    await page.getByTestId('alarm-snooze-btn-601').click();
+    await expect(page.getByTestId('header-alarm-badge')).toHaveText('0 ALARMS');
+    await expect(page.getByTestId('stalled-alarm-banner')).toBeHidden();
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+

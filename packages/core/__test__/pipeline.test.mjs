@@ -269,3 +269,121 @@ test('C7: multi-repo endpoints GET/POST/DELETE /api/projects and POST /api/proje
   }
 });
 
+test('C8: evaluateStalledTasks and GET /api/alarms/stalled detect warning/critical stalled tasks, ignore done tasks, and return 400 on invalid threshold', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    const nowMs = Date.now();
+    const fortyFiveMinAgo = new Date(nowMs - 45 * 60_000).toISOString();
+    const seventyFiveMinAgo = new Date(nowMs - 75 * 60_000).toISOString();
+    const twoHoursAgo = new Date(nowMs - 120 * 60_000).toISOString();
+
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#501',
+      issueNumber: 501,
+      repo: 'brenoacker/agentic-factory',
+      title: '[feature] Stalled warning feature',
+      type: 'feature',
+      stage: 'plan',
+      now: fortyFiveMinAgo,
+    });
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#502',
+      issueNumber: 502,
+      repo: 'brenoacker/agentic-factory',
+      title: '[feature] Stalled critical feature',
+      type: 'feature',
+      stage: 'checks_and_build',
+      now: seventyFiveMinAgo,
+    });
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#503',
+      issueNumber: 503,
+      repo: 'brenoacker/agentic-factory',
+      title: '[feature] Completed feature ignored by alarm',
+      type: 'feature',
+      stage: 'done',
+      now: twoHoursAgo,
+    });
+
+    // Invalid threshold -> 400
+    const badRes = await fetch(`${baseUrl}/api/alarms/stalled?thresholdMinutes=-5`);
+    assert.equal(badRes.status, 400);
+
+    // Valid evaluation with threshold 30 min -> 200
+    const res = await fetch(`${baseUrl}/api/alarms/stalled?thresholdMinutes=30`);
+    assert.equal(res.status, 200);
+    const data = await res.json();
+    assert.equal(data.ok, true);
+    assert.equal(data.stalledCount, 2);
+
+    const warnTask = data.stalledTasks.find((t) => t.issueNumber === 501);
+    const critTask = data.stalledTasks.find((t) => t.issueNumber === 502);
+    assert.equal(warnTask.severity, 'warning');
+    assert.ok(warnTask.idleMinutes >= 45);
+    assert.equal(critTask.severity, 'critical');
+    assert.ok(critTask.idleMinutes >= 75);
+
+    // Repeat call deduplicates task_stalled_alarm telemetry events
+    await fetch(`${baseUrl}/api/alarms/stalled?thresholdMinutes=30`);
+    const alarmEvents = panel.store.db
+      .prepare("SELECT * FROM telemetry_events WHERE event_type = 'task_stalled_alarm'")
+      .all();
+    assert.equal(alarmEvents.length, 2);
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C9: POST /api/tasks/:key/acknowledge clears stalled task alarm with 200 and returns 404 for unknown task', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    const sixtyMinAgo = new Date(Date.now() - 60 * 60_000).toISOString();
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#504',
+      issueNumber: 504,
+      repo: 'brenoacker/agentic-factory',
+      title: '[feature] Acknowledge stalled alarm test',
+      type: 'feature',
+      stage: 'plan',
+      now: sixtyMinAgo,
+    });
+
+    const before = await (await fetch(`${baseUrl}/api/alarms/stalled?thresholdMinutes=30`)).json();
+    assert.equal(before.stalledCount, 1);
+
+    const ackRes = await fetch(
+      `${baseUrl}/api/tasks/${encodeURIComponent('brenoacker/agentic-factory#504')}/acknowledge`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ actor: 'brenoacker', note: 'Snoozing for 30m' }),
+      },
+    );
+    assert.equal(ackRes.status, 200);
+
+    const after = await (await fetch(`${baseUrl}/api/alarms/stalled?thresholdMinutes=30`)).json();
+    assert.equal(after.stalledCount, 0);
+
+    const missingRes = await fetch(
+      `${baseUrl}/api/tasks/${encodeURIComponent('brenoacker/agentic-factory#9999')}/acknowledge`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      },
+    );
+    assert.equal(missingRes.status, 404);
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+

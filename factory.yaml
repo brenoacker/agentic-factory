@@ -12,7 +12,8 @@
       "maxTasksPerHour": 10,
       "maxReviewRounds": 3,
       "dailyBudgetUsd": 25.0,
-      "stageTimeoutMinutes": 30
+      "stageTimeoutMinutes": 30,
+      "stallThresholdMinutes": 30
     },
     "modelByImpact": {
       "low": { "runtime": "antigravity", "model": "gemini-flash" },

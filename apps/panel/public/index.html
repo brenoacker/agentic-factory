@@ -124,6 +124,24 @@
     th, td { text-align: left; padding: 0.6rem; border-bottom: 1px solid var(--border); }
     .hidden { display: none; }
     .form-row { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 0.75rem; }
+    .alarm-banner {
+      background: rgba(239, 68, 68, 0.14);
+      border: 2px solid var(--red);
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .alarm-banner h3 {
+      margin: 0 0 0.5rem 0;
+      color: #fca5a5;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .task-card.stalled {
+      border-color: var(--red);
+      box-shadow: 0 0 0 1px var(--red);
+    }
   </style>
 </head>
 <body>
@@ -132,6 +150,7 @@
       <span>Agentic Factory</span>
       <span class="badge purple">tlc-spec-lean v2.2.0</span>
       <span id="factory-status-badge" class="badge green">ACTIVE</span>
+      <span id="header-alarm-badge" data-testid="header-alarm-badge" class="badge green">0 ALARMS</span>
     </div>
     <div>
       <button id="refresh-telemetry-btn" class="btn" onclick="loadDashboard()">Refresh Telemetry</button>
@@ -148,6 +167,11 @@
   </nav>
 
   <main>
+    <div id="stalled-alarm-banner" data-testid="stalled-alarm-banner" class="alarm-banner hidden">
+      <h3 id="stalled-alarm-title">STALLED TASK ALARM — IMMEDIATE OPERATOR ACTION REQUIRED</h3>
+      <div id="stalled-alarm-list"></div>
+    </div>
+
     <section id="tab-overview">
       <div class="grid" id="kpi-grid"></div>
       <div class="grid">
@@ -284,6 +308,7 @@
           <p><label>Autonomy Mode: <select id="ctrl-autonomy"><option value="manual">manual</option><option value="triage">triage</option><option value="gated">gated</option><option value="auto-low">auto-low</option></select></label></p>
           <p><label>Hourly Task Limit: <input type="number" id="ctrl-rate" value="10" /></label></p>
           <p><label>Daily Budget (USD): <input type="number" id="ctrl-budget" step="0.5" value="25" /></label></p>
+          <p><label>Stall Alarm Threshold (minutes): <input type="number" id="ctrl-stall-minutes" value="30" /></label></p>
           <p><label><input type="checkbox" id="ctrl-kill" style="width:auto;" /> Global Kill Switch (Pause Factory)</label></p>
           <button id="save-controls-btn" class="btn green" onclick="saveControls()">Save Controls to factory.yaml</button>
           <div id="controls-feedback" class="sub"></div>
@@ -451,6 +476,15 @@
       await loadDashboard();
     }
 
+    async function snoozeTaskAlarm(key) {
+      await fetch('/api/tasks/' + encodeURIComponent(key) + '/acknowledge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ actor: 'brenoacker', note: 'Snoozed from Control Panel alarm banner' }),
+      });
+      await loadDashboard();
+    }
+
     async function saveControls() {
       const res = await fetch('/api/controls', {
         method: 'POST',
@@ -459,6 +493,7 @@
           autonomy: document.getElementById('ctrl-autonomy').value,
           maxTasksPerHour: Number(document.getElementById('ctrl-rate').value),
           dailyBudgetUsd: Number(document.getElementById('ctrl-budget').value),
+          stallThresholdMinutes: Number(document.getElementById('ctrl-stall-minutes').value),
           killSwitch: document.getElementById('ctrl-kill').checked,
         }),
       });
@@ -494,6 +529,35 @@
       const badge = document.getElementById('factory-status-badge');
       badge.textContent = f.killSwitch ? 'PAUSED (KILL SWITCH)' : 'ACTIVE (' + f.autonomy.toUpperCase() + ')';
       badge.className = 'badge ' + (f.killSwitch ? 'red' : 'green');
+
+      const stalledList = st.stalledTasks || [];
+      const stalledMap = Object.fromEntries(stalledList.map(s => [s.executionKey, s]));
+      const alarmBadge = document.getElementById('header-alarm-badge');
+      alarmBadge.textContent = stalledList.length > 0 ? `${stalledList.length} STALLED ALARM(S)` : '0 ALARMS';
+      alarmBadge.className = 'badge ' + (stalledList.length > 0 ? 'red' : 'green');
+
+      const alarmBanner = document.getElementById('stalled-alarm-banner');
+      if (stalledList.length > 0) {
+        alarmBanner.classList.remove('hidden');
+        document.getElementById('stalled-alarm-title').textContent =
+          `STALLED TASK ALARM — ${stalledList.length} TASK(S) IDLE BEYOND ${f.limits.stallThresholdMinutes || 30} MIN THRESHOLD`;
+        document.getElementById('stalled-alarm-list').innerHTML = stalledList.map(item =>
+          `<div class="task-card stalled" data-testid="alarm-item-${item.issueNumber}" style="display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+            <div>
+              <span class="badge red">${item.severity.toUpperCase()}</span>
+              <strong>${item.executionKey}</strong> — ${item.title} [${item.type}]<br/>
+              <small>Stage: <strong>${item.stage}</strong> · Idle for <strong>${item.idleMinutes}m</strong> · ${item.reason}</small>
+            </div>
+            <div style="display:flex;gap:0.5rem;">
+              <button data-testid="alarm-act-btn-${item.issueNumber}" class="btn green" onclick="dispatchTicketKey('${item.executionKey}', ${item.needsHuman})">Act Now (Approve & Resume)</button>
+              <button data-testid="alarm-snooze-btn-${item.issueNumber}" class="btn" onclick="snoozeTaskAlarm('${item.executionKey}')">Snooze Alarm</button>
+            </div>
+          </div>`
+        ).join('');
+      } else {
+        alarmBanner.classList.add('hidden');
+        document.getElementById('stalled-alarm-list').innerHTML = '';
+      }
 
       document.getElementById('kpi-grid').innerHTML = [
         `<div class="card" data-testid="kpi-total-tickets"><h3>Total Tickets</h3><div class="metric">${st.totalTasks}</div><div class="sub">Completed: ${st.byStage.done || 0}</div></div>`,
@@ -536,15 +600,19 @@
       document.getElementById('kanban-board').innerHTML = stages.map(col => {
         const items = st.tasks.filter(t => t.stage === col);
         return `<div class="col" data-stage-col="${col}"><h4><span>${col}</span><span class="badge">${items.length}</span></h4>` +
-          items.map(t => `<div class="task-card" data-testid="task-card-${t.issue_number}">
+          items.map(t => {
+            const stalledInfo = stalledMap[t.execution_key];
+            return `<div class="task-card ${stalledInfo ? 'stalled' : ''}" data-testid="task-card-${t.issue_number}">
             <strong>#${t.issue_number} ${t.title}</strong><br/>
             <span class="badge purple" data-testid="task-repo-${t.issue_number}">${t.repo}</span>
             <span class="badge" data-testid="task-type-${t.issue_number}">${t.type}</span>
             <span class="badge">${t.impact}</span>
-            <span class="badge ${t.needs_human ? 'yellow' : 'green'}" data-testid="task-stage-${t.issue_number}">${t.stage}</span><br/>
+            <span class="badge ${t.needs_human ? 'yellow' : 'green'}" data-testid="task-stage-${t.issue_number}">${t.stage}</span>
+            ${stalledInfo ? `<span class="badge red" data-testid="task-stalled-badge-${t.issue_number}">STALLED (${stalledInfo.idleMinutes}m)</span>` : ''}<br/>
             <small>${t.runtime} / ${t.model} · $${t.cost_usd.toFixed(4)}</small>
             ${t.stage !== 'done' ? `<div style="margin-top:0.45rem;"><button data-testid="dispatch-btn-${t.issue_number}" class="btn" onclick="dispatchTicketKey('${t.execution_key}', ${t.needs_human === 1})">${t.needs_human === 1 ? 'Approve & Continue' : 'Run Workflow'}</button></div>` : ''}
-          </div>`).join('') +
+          </div>`;
+          }).join('') +
           `</div>`;
       }).join('');
 
@@ -579,6 +647,7 @@
       document.getElementById('ctrl-autonomy').value = f.autonomy;
       document.getElementById('ctrl-rate').value = f.limits.maxTasksPerHour;
       document.getElementById('ctrl-budget').value = f.limits.dailyBudgetUsd;
+      document.getElementById('ctrl-stall-minutes').value = f.limits.stallThresholdMinutes || 30;
       document.getElementById('ctrl-kill').checked = Boolean(f.killSwitch);
 
       document.getElementById('deployments-list').innerHTML = state.deployments.map(d =>
