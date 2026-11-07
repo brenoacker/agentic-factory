@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contracts/review.schema.json",
+  "title": "Factory PR Judge Review Contract",
+  "type": "object",
+  "required": [
+    "issue_number",
+    "pr_number",
+    "commit_sha",
+    "round",
+    "verdict",
+    "summary",
+    "findings",
+    "needs_human"
+  ],
+  "properties": {
+    "issue_number": { "type": "integer", "minimum": 1 },
+    "pr_number": { "type": "integer", "minimum": 1 },
+    "commit_sha": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+    "round": { "type": "integer", "minimum": 1, "maximum": 3 },
+    "verdict": { "type": "string", "enum": ["APPROVE", "REQUEST_CHANGES", "COMMENT"] },
+    "summary": { "type": "string", "minLength": 15 },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["severity", "file", "line", "message", "evidence"],
+        "properties": {
+          "severity": { "type": "string", "enum": ["blocker", "major", "minor", "nit"] },
+          "file": { "type": "string", "minLength": 1 },
+          "line": { "type": "integer", "minimum": 1 },
+          "message": { "type": "string", "minLength": 10 },
+          "evidence": { "type": "string", "minLength": 10 }
+        }
+      }
+    },
+    "needs_human": { "type": "boolean" }
+  },
+  "additionalProperties": false
+}

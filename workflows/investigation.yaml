@@ -1,0 +1,28 @@
+# Investigation ticket workflow (spike / root-cause analysis -> structured report + follow-up tickets, no PR)
+{
+  "id": "investigation",
+  "label": "type:investigation",
+  "description": "Technical spike or production investigation producing an evidence-backed report and follow-up issues",
+  "autonomy": "gated",
+  "maxReviewRounds": 1,
+  "stages": [
+    {
+      "id": "triage",
+      "mode": "auto",
+      "agent": "triager",
+      "skills": ["codenavi"],
+      "contract": "contracts/triage.schema.json",
+      "humanApproval": false,
+      "next": "investigate"
+    },
+    {
+      "id": "investigate",
+      "mode": "auto",
+      "agent": "investigator",
+      "skills": ["codenavi", "not-your-babysitter", "sentry", "the-fool"],
+      "contract": "contracts/investigation-report.schema.json",
+      "humanApproval": true,
+      "next": "done"
+    }
+  ]
+}

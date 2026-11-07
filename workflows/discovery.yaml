@@ -1,0 +1,27 @@
+# Discovery ticket workflow (vague idea -> PRD / technical design doc -> human approval -> feature tickets)
+{
+  "id": "discovery",
+  "label": "type:discovery",
+  "description": "Product and architecture discovery producing a PRD or Technical Design Doc and slicing into feature issues",
+  "autonomy": "gated",
+  "maxReviewRounds": 1,
+  "stages": [
+    {
+      "id": "triage",
+      "mode": "auto",
+      "agent": "triager",
+      "skills": ["tlc-discover"],
+      "contract": "contracts/triage.schema.json",
+      "humanApproval": false,
+      "next": "discover"
+    },
+    {
+      "id": "discover",
+      "mode": "auto",
+      "agent": "architect",
+      "skills": ["tlc-prd", "tlc-discover", "create-technical-design-doc", "create-adr", "the-jury"],
+      "humanApproval": true,
+      "next": "done"
+    }
+  ]
+}

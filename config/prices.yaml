@@ -1,0 +1,26 @@
+# Model token pricing in USD per 1M tokens (used for telemetry cost calculation when runtime does not report USD cost)
+{
+  "schemaVersion": 1,
+  "models": {
+    "gemini-flash": {
+      "inputPerMillionUsd": 0.30,
+      "outputPerMillionUsd": 1.20,
+      "cachedInputPerMillionUsd": 0.075
+    },
+    "claude-sonnet": {
+      "inputPerMillionUsd": 3.00,
+      "outputPerMillionUsd": 15.00,
+      "cachedInputPerMillionUsd": 0.30
+    },
+    "claude-opus": {
+      "inputPerMillionUsd": 15.00,
+      "outputPerMillionUsd": 75.00,
+      "cachedInputPerMillionUsd": 1.50
+    },
+    "gpt-5-codex": {
+      "inputPerMillionUsd": 2.50,
+      "outputPerMillionUsd": 10.00,
+      "cachedInputPerMillionUsd": 0.25
+    }
+  }
+}

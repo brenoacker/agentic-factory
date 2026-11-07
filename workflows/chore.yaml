@@ -1,0 +1,48 @@
+# Chore ticket workflow (maintenance, CI, docs -> direct build -> review -> merge)
+{
+  "id": "chore",
+  "label": "type:chore",
+  "description": "Maintenance, CI fixes, and documentation updates",
+  "autonomy": "gated",
+  "maxReviewRounds": 3,
+  "stages": [
+    {
+      "id": "triage",
+      "mode": "auto",
+      "agent": "triager",
+      "skills": ["codenavi"],
+      "contract": "contracts/triage.schema.json",
+      "humanApproval": false,
+      "next": "checks_and_build"
+    },
+    {
+      "id": "checks_and_build",
+      "mode": "auto",
+      "agent": "builder",
+      "skills": ["gh-fix-ci", "docs-writer", "mermaid-studio", "coding-guidelines"],
+      "humanApproval": false,
+      "next": "review"
+    },
+    {
+      "id": "review",
+      "mode": "auto",
+      "agent": "judge",
+      "skills": ["the-judge"],
+      "contract": "contracts/review.schema.json",
+      "humanApproval": false,
+      "onChangesRequested": {
+        "goto": "checks_and_build",
+        "maxRounds": 3
+      },
+      "next": "merge"
+    },
+    {
+      "id": "merge",
+      "mode": "human",
+      "agent": "ops",
+      "skills": ["gh-address-comments"],
+      "humanApproval": true,
+      "next": "done"
+    }
+  ]
+}

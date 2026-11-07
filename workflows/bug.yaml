@@ -1,0 +1,58 @@
+# Bug ticket workflow (reproduce -> regression check -> fix -> verify -> review)
+{
+  "id": "bug",
+  "label": "type:bug",
+  "description": "Bug fix workflow: reproduce with codenavi, write regression check in tlc-spec-lean, fix, verify, and review with the-judge",
+  "autonomy": "gated",
+  "maxReviewRounds": 3,
+  "stages": [
+    {
+      "id": "triage",
+      "mode": "auto",
+      "agent": "triager",
+      "skills": ["codenavi", "sentry"],
+      "contract": "contracts/triage.schema.json",
+      "humanApproval": false,
+      "next": "checks_and_build"
+    },
+    {
+      "id": "checks_and_build",
+      "mode": "auto",
+      "agent": "builder",
+      "skills": ["tlc-spec-lean", "coding-guidelines", "gh-fix-ci"],
+      "gate": "python skills/vendor/tlc-spec-lean/scripts/check_proofs.py {feature}",
+      "humanApproval": false,
+      "next": "verify"
+    },
+    {
+      "id": "verify",
+      "mode": "auto",
+      "agent": "verifier",
+      "skills": ["tlc-spec-lean"],
+      "gate": "python skills/vendor/tlc-spec-lean/scripts/validate_verification.py {feature}",
+      "humanApproval": false,
+      "next": "review"
+    },
+    {
+      "id": "review",
+      "mode": "auto",
+      "agent": "judge",
+      "skills": ["the-judge"],
+      "contract": "contracts/review.schema.json",
+      "humanApproval": false,
+      "onChangesRequested": {
+        "goto": "checks_and_build",
+        "maxRounds": 3
+      },
+      "next": "merge"
+    },
+    {
+      "id": "merge",
+      "mode": "human",
+      "agent": "ops",
+      "skills": ["gh-address-comments"],
+      "humanApproval": true,
+      "next": "done"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+# Factory as Code configuration (YAML 1.2 JSON-compatible subset)
+{
+  "schemaVersion": 1,
+  "factory": {
+    "name": "agentic-factory",
+    "repo": "brenoacker/agentic-factory",
+    "defaultRuntime": "antigravity",
+    "autonomy": "gated",
+    "killSwitch": false,
+    "pollIntervalSeconds": 90,
+    "limits": {
+      "maxTasksPerHour": 10,
+      "maxReviewRounds": 3,
+      "dailyBudgetUsd": 25.0,
+      "stageTimeoutMinutes": 30
+    },
+    "modelByImpact": {
+      "low": { "runtime": "antigravity", "model": "gemini-flash" },
+      "medium": { "runtime": "antigravity", "model": "claude-sonnet" },
+      "high": { "runtime": "antigravity", "model": "claude-opus" }
+    },
+    "runtimes": {
+      "antigravity": { "enabled": true, "cli": "agy" },
+      "claude-code": { "enabled": true, "cli": "claude" },
+      "codex": { "enabled": true, "cli": "codex" }
+    },
+    "projects": [
+      {
+        "id": "agentic-factory",
+        "repo": "brenoacker/agentic-factory",
+        "defaultBranch": "main",
+        "paused": false
+      }
+    ]
+  }
+}

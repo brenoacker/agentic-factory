@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contracts/task.schema.json",
+  "title": "Factory Task Intake Contract",
+  "type": "object",
+  "required": ["issue_number", "repo", "title", "type", "body"],
+  "properties": {
+    "issue_number": { "type": "integer", "minimum": 1 },
+    "repo": { "type": "string", "pattern": "^[^/\\s]+/[^/\\s]+$" },
+    "title": { "type": "string", "minLength": 5 },
+    "type": { "type": "string", "enum": ["feature", "bug", "investigation", "discovery", "chore"] },
+    "body": { "type": "string", "minLength": 10 },
+    "runtime_override": { "type": "string", "enum": ["antigravity", "claude-code", "codex"] }
+  },
+  "additionalProperties": false
+}

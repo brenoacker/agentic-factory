@@ -1,0 +1,67 @@
+# Feature ticket workflow (tlc-spec-lean v2.2.0 full loop)
+{
+  "id": "feature",
+  "label": "type:feature",
+  "description": "Spec-driven feature work using tlc-spec-lean v2.2.0 (plan -> human approval -> checks -> build -> independent verifier -> PR judge -> merge)",
+  "autonomy": "gated",
+  "maxReviewRounds": 3,
+  "stages": [
+    {
+      "id": "triage",
+      "mode": "auto",
+      "agent": "triager",
+      "skills": ["codenavi"],
+      "contract": "contracts/triage.schema.json",
+      "humanApproval": false,
+      "next": "plan"
+    },
+    {
+      "id": "plan",
+      "mode": "auto",
+      "agent": "planner",
+      "skills": ["tlc-spec-lean"],
+      "gate": "python skills/vendor/tlc-spec-lean/scripts/validate_plan.py {feature}",
+      "humanApproval": true,
+      "next": "checks_and_build"
+    },
+    {
+      "id": "checks_and_build",
+      "mode": "auto",
+      "agent": "builder",
+      "skills": ["tlc-spec-lean", "coding-guidelines"],
+      "gate": "python skills/vendor/tlc-spec-lean/scripts/check_proofs.py {feature}",
+      "humanApproval": false,
+      "next": "verify"
+    },
+    {
+      "id": "verify",
+      "mode": "auto",
+      "agent": "verifier",
+      "skills": ["tlc-spec-lean"],
+      "gate": "python skills/vendor/tlc-spec-lean/scripts/validate_verification.py {feature}",
+      "humanApproval": false,
+      "next": "review"
+    },
+    {
+      "id": "review",
+      "mode": "auto",
+      "agent": "judge",
+      "skills": ["the-judge", "security-best-practices"],
+      "contract": "contracts/review.schema.json",
+      "humanApproval": false,
+      "onChangesRequested": {
+        "goto": "checks_and_build",
+        "maxRounds": 3
+      },
+      "next": "merge"
+    },
+    {
+      "id": "merge",
+      "mode": "human",
+      "agent": "ops",
+      "skills": ["gh-address-comments"],
+      "humanApproval": true,
+      "next": "done"
+    }
+  ]
+}
