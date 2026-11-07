@@ -1,0 +1,27 @@
+name: Discovery
+description: Ideia ou projeto novo ainda vago (workflow discovery → PRD / design doc → features)
+title: "[discovery] "
+labels: ["type:discovery", "stage:triage"]
+body:
+  - type: input
+    id: project
+    attributes:
+      label: Projeto-alvo
+      description: Repositório existente ou "novo"
+      placeholder: brenoacker/meu-projeto
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Ideia / situação
+    validations:
+      required: true
+  - type: textarea
+    id: success
+    attributes:
+      label: Como saberemos que deu certo
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Restrições conhecidas

@@ -1,0 +1,37 @@
+name: Feature
+description: Nova funcionalidade num projeto-alvo (workflow feature → tlc-spec-lean)
+title: "[feature] "
+labels: ["type:feature", "stage:triage"]
+body:
+  - type: input
+    id: project
+    attributes:
+      label: Projeto-alvo
+      description: Repositório onde a mudança será feita (owner/repo)
+      placeholder: brenoacker/meu-projeto
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema / objetivo
+      description: O que precisa existir e por quê
+    validations:
+      required: true
+  - type: textarea
+    id: criteria
+    attributes:
+      label: Critérios de aceitação
+      description: Comportamentos observáveis, com valores concretos sempre que possível
+      placeholder: "- Quando X, o sistema deve Y"
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto e referências
+      description: Links, capturas (se forem vinculantes, diga), decisões já tomadas
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: Runtime (opcional)
+      options: ["padrão da fábrica", "antigravity", "claude-code", "codex"]
+      default: 0

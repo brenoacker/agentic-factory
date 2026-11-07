@@ -1,0 +1,23 @@
+[
+  { "name": "type:feature", "color": "1d76db", "description": "Nova funcionalidade" },
+  { "name": "type:bug", "color": "d73a4a", "description": "Defeito" },
+  { "name": "type:investigation", "color": "5319e7", "description": "Pergunta técnica / spike" },
+  { "name": "type:discovery", "color": "0e8a16", "description": "Ideia vaga → PRD / design doc" },
+  { "name": "type:chore", "color": "c5def5", "description": "Manutenção, CI, docs" },
+
+  { "name": "stage:triage", "color": "fbca04", "description": "Aguardando triagem" },
+  { "name": "stage:ready", "color": "fef2c0", "description": "Triado, pronto para execução" },
+  { "name": "stage:in-progress", "color": "0052cc", "description": "Em execução pela fábrica" },
+  { "name": "stage:review", "color": "bfd4f2", "description": "PR aberto, em review" },
+  { "name": "stage:done", "color": "0e8a16", "description": "Concluído" },
+
+  { "name": "impact:low", "color": "c2e0c6", "description": "Uma fatia, reversível com revert simples" },
+  { "name": "impact:medium", "color": "f9d0c4", "description": "Várias fatias, mudança visível, migração aditiva" },
+  { "name": "impact:high", "color": "b60205", "description": "Breaking change, migração destrutiva" },
+
+  { "name": "needs-human", "color": "e99695", "description": "A fábrica parou e precisa de você" },
+
+  { "name": "runtime:antigravity", "color": "ededed", "description": "Força o runtime Antigravity" },
+  { "name": "runtime:claude-code", "color": "ededed", "description": "Força o runtime Claude Code" },
+  { "name": "runtime:codex", "color": "ededed", "description": "Força o runtime Codex" }
+]

@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.env
+.env.*
+*.log
+
+# factory runtime state
+runs/
+work/
+*.db
+*.db-journal
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

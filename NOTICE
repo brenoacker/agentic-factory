@@ -1,0 +1,7 @@
+Agentic Factory
+
+This repository vendors agent skills from Tech Leads Club
+(https://github.com/tech-leads-club/agent-skills), licensed under the
+Creative Commons Attribution 4.0 International License (CC-BY-4.0).
+Each vendored skill keeps its original SKILL.md metadata (author, version, license).
+Changes, when made, are recorded in skills.lock.json.

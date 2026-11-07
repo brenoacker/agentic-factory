@@ -1,0 +1,18 @@
+name: Chore
+description: Manutenção, CI, dependências, docs (workflow chore → PR direto)
+title: "[chore] "
+labels: ["type:chore", "stage:triage"]
+body:
+  - type: input
+    id: project
+    attributes:
+      label: Projeto-alvo
+      placeholder: brenoacker/meu-projeto
+    validations:
+      required: true
+  - type: textarea
+    id: task
+    attributes:
+      label: O que fazer
+    validations:
+      required: true
