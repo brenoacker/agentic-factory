@@ -55,7 +55,7 @@ Proof: run e2e | ok 4 [chromium] › C6: Playwright E2E test triages, advances, 
 ## Handoff
 
 - **Settled mid-build:** none
-- **Dispatched:** none
-- **Boundary:** none yet
+- **Dispatched:** S1 -> 68248d4
+- **Boundary:** S1 complete at 68248d4
 - **Abandoned:** none
-- **Walked:** pending browser E2E run
+- **Walked:** Chromium Playwright walked all 6 English tabs, intaked 5 ticket types (#301-#305), approved human gates in 1 click, and completed all 5 to done (screenshots saved in captures/)
