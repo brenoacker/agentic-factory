@@ -1,65 +1,63 @@
 # Agentic Factory
 
-Fábrica de software agêntica **local**, operada por uma pessoa, versionada como código.
+Local, single-operator **Agentic Software Factory**, versioned as code.
 
-Inspirada na [Live 02 da Tech Leads Club — A Fábrica de Software Agêntica](https://www.youtube.com/watch?v=5UwvjCVPigM)
-e construída sobre as skills de [`tech-leads-club/agent-skills`](https://github.com/tech-leads-club/agent-skills).
+Inspired by [Tech Leads Club Live 02 — The Agentic Software Factory](https://www.youtube.com/watch?v=5UwvjCVPigM)
+and built on the skills from [`tech-leads-club/agent-skills`](https://github.com/tech-leads-club/agent-skills).
 
-> **Prosa pede. Contrato garante.** O controle fica na fábrica, não no agente.
+> **Prose asks. Contracts enforce.** Control stays in the factory, not inside the agent.
 
-## Como funciona
+## How It Works
 
-1. Você cria uma **issue neste repositório** usando um dos templates (feature, bug, investigation, discovery, chore)
-   e indica o **projeto‑alvo** (um dos seus repositórios).
-2. O `factory watch` (local) consulta o GitHub, faz a triagem e escolhe o **workflow** do tipo de ticket.
-3. Para cada etapa, a fábrica aciona um **agente CLI** — Antigravity (padrão), Claude Code ou Codex — com as mesmas
-   skills vendorizadas aqui. O agente devolve um **contrato JSON** que a fábrica valida.
-4. A fábrica para apenas nos **checkpoints humanos** (aprovar o plano, aprovar o merge) — pelo painel ou com
-   `/approve` na issue.
-5. Tudo vira **telemetria** (etapas, tokens, custo, vereditos) exibida no **painel de controle**.
+1. Open an **issue in this repository** using one of the structured templates (`feature`, `bug`, `investigation`, `discovery`, `chore`) and specify the **target project**.
+2. `factory watch` (or the Control Panel intake pipeline) polls GitHub with `ETag`, classifies and triages the ticket, and selects the matching **workflow** (`workflows/<type>.yaml`).
+3. For each stage, the factory invokes a **CLI runtime** — Antigravity (`agy`, default), Claude Code (`claude`), or Codex (`codex`) — with the locked skills vendored in this repository. The agent returns a **JSON contract** validated deterministically by the factory.
+4. The factory pauses only at **human gates** (plan approval, merge approval, discovery interview) — approved with 1 click in the Control Panel or via `/approve` on the GitHub issue.
+5. Every stage emits **telemetry** (stages, tokens, USD cost, verdicts, deployments) displayed in the **Control Panel** (`apps/panel`) and tested visually and end-to-end with **Playwright**.
 
-| Etapa | Skill principal |
+| Stage / Workflow | Primary Skills |
 | --- | --- |
-| Feature / bug (coding) | `tlc-spec-lean` |
-| Investigação | `codenavi`, `not-your-babysitter` |
-| Discovery | `tlc-prd`, `tlc-discover` |
-| Review de PR | `the-judge` |
-| CI quebrado | `gh-fix-ci` |
+| Feature / Bug (coding) | `tlc-spec-lean` (v2.2.0), `coding-guidelines` |
+| Investigation | `codenavi`, `not-your-babysitter`, `the-fool` |
+| Discovery | `tlc-prd`, `tlc-discover`, `create-technical-design-doc`, `the-jury` |
+| PR Review | `the-judge` |
+| Broken CI / Review Feedback | `gh-fix-ci`, `gh-address-comments` |
 
-## Estrutura (alvo)
+## Repository Structure
 
 ```
-AGENTS.md / CLAUDE.md   constituição dos agentes
-factory.yaml            fábrica como código (projetos, runtimes, limites, autonomia)
-workflows/              um workflow por tipo de ticket
-contracts/              JSON Schemas dos contratos agente ↔ fábrica
-skills/                 skills vendorizadas (TLC) + custom
-packages/core/          orquestrador (TypeScript, Node 24)
-apps/panel/             painel de controle
-brain/                  memória da fábrica (contexto, ADRs, lessons)
-docs/                   plano e arquitetura
+AGENTS.md / CLAUDE.md   agent constitution (English)
+factory.yaml            factory-as-code config (projects, runtimes, limits, autonomy)
+workflows/              one workflow definition per ticket type
+contracts/              JSON Schemas for agent <-> factory contracts
+skills/                 vendored TLC skills (23 locked in skills.lock.json)
+packages/core/          orchestrator (Node 24 + native node:sqlite)
+apps/panel/             local Control Panel UI/API + Playwright E2E suite
+agents/                 7 specialist agent definitions
+brain/                  factory long-term memory (context, glossary, ADRs, lessons)
+docs/                   architecture and roadmap
 ```
 
-## Comandos Rápidos
+## Quick Commands
 
 ```bash
-# Validar factory.yaml, workflows e schemas de contratos
+# Validate factory.yaml, workflows, and contract schemas
 node packages/core/cli.mjs validate
 
-# Sincronizar e verificar as 23 skills vendorizadas (tlc-spec-lean v2.2.0)
+# Verify all 23 locked TLC skills (including tlc-spec-lean v2.2.0)
 node scripts/sync-skills.mjs --verify-only
 
-# Abrir o Painel de Controle local (http://127.0.0.1:4310)
-node packages/core/cli.mjs panel --port 4310
+# Run unit tests + Playwright visual/component/integration/E2E tests
+npm test
 
-# Consultar status da fábrica via CLI
-node packages/core/cli.mjs status
+# Start the local Control Panel (http://127.0.0.1:4310)
+node packages/core/cli.mjs panel --port 4310
 ```
 
 ## Status
 
-Fases 0 a 7 concluídas (`skills-sync`, `factory-core`, `runtime-loop`, `control-panel`). Veja o roadmap completo em [docs/plan.md](docs/plan.md).
+All roadmap phases (Phases 0–7) and Playwright E2E verification are complete. See [docs/plan.md](docs/plan.md).
 
-## Licença e atribuição
+## License & Attribution
 
-As skills da Tech Leads Club são distribuídas sob CC‑BY‑4.0 — veja [NOTICE](NOTICE).
+Tech Leads Club skills are distributed under CC-BY-4.0 — see [NOTICE](NOTICE).

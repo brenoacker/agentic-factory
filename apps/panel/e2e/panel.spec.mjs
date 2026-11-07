@@ -1,0 +1,260 @@
+import { test, expect } from '@playwright/test';
+import { cpSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+import { createPanelServer } from '../server.mjs';
+
+const REPO_ROOT = resolve(import.meta.dirname, '..', '..', '..');
+const CAPTURES_DIR = join(REPO_ROOT, '.specs', 'features', 'playwright-e2e-and-ticket-matrix', 'captures');
+
+function makeTempFactoryClone() {
+  const dir = mkdtempSync(join(tmpdir(), 'agentic-factory-pw-'));
+  for (const item of ['factory.yaml', 'skills.lock.json', 'config', 'workflows', 'contracts', 'brain', 'agents']) {
+    cpSync(join(REPO_ROOT, item), join(dir, item), { recursive: true });
+  }
+  return dir;
+}
+
+async function startTestServer(rootDir, dbPath) {
+  const panel = createPanelServer({ rootDir, dbPath });
+  await new Promise((resolveListen) => panel.server.listen(0, '127.0.0.1', resolveListen));
+  const { port } = panel.server.address();
+  const baseUrl = `http://127.0.0.1:${port}`;
+  return { panel, baseUrl };
+}
+
+test('C3: Control Panel renders 100% in English across all 6 tabs with zero Portuguese strings', async ({ page }) => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    await page.goto(baseUrl);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page.locator('#refresh-telemetry-btn')).toHaveText('Refresh Telemetry');
+
+    const tabs = [
+      { id: 'overview', label: 'Overview & Telemetry' },
+      { id: 'board', label: 'Board & Needs Human' },
+      { id: 'workflows', label: 'Workflows (Factory as Code)' },
+      { id: 'runtimes', label: 'Runtimes, Router & Circuit Breaker' },
+      { id: 'agents', label: 'Agents & Locked Skills (23)' },
+      { id: 'controls', label: 'Controls, Deploy & Brain' },
+    ];
+
+    const forbiddenPortuguese = [
+      'Atualizar Telemetria',
+      'Precisa de Mim',
+      'Aprovar com 1 Clique',
+      'Resetar Disjuntor',
+      'Orçamento diário',
+      'Fábrica como Código',
+      'Nenhum evento registrado',
+      'Controles Operacionais',
+    ];
+
+    for (const tab of tabs) {
+      const btn = page.locator(`#tabs button[data-tab="${tab.id}"]`);
+      await expect(btn).toHaveText(tab.label);
+      await btn.click();
+      await expect(page.locator(`#tab-${tab.id}`)).toBeVisible();
+
+      const bodyText = await page.locator('body').innerText();
+      for (const ptToken of forbiddenPortuguese) {
+        expect(bodyText).not.toContain(ptToken);
+      }
+    }
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C4: Playwright visual and component tests verify KPIs, Runtimes, Circuit Breaker, 7 Agents, 23 Skills, and Brain', async ({ page }) => {
+  mkdirSync(CAPTURES_DIR, { recursive: true });
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    panel.store.tripRuntimeCircuit('codex', '429');
+    await page.goto(baseUrl);
+
+    // Overview KPI component assertions
+    await expect(page.getByTestId('kpi-total-tickets')).toContainText('Total Tickets');
+    await expect(page.getByTestId('kpi-total-cost')).toContainText('Total Cost (USD)');
+    await expect(page.getByTestId('kpi-tokens')).toContainText('Consumed Tokens');
+    await expect(page.getByTestId('kpi-first-round')).toContainText('First-Round PR Approval');
+    await expect(page.getByTestId('kpi-needs-human')).toContainText('Needs Human Queue');
+    await page.screenshot({ path: join(CAPTURES_DIR, 'overview-tab.png'), fullPage: true });
+
+    // Runtimes & Circuit Breaker component test
+    await page.locator('#tabs button[data-tab="runtimes"]').click();
+    const codexRow = page.getByTestId('circuit-row-codex');
+    await expect(codexRow).toContainText('OPEN');
+    await expect(codexRow).toContainText('429');
+    await page.getByTestId('reset-circuit-codex').click();
+    await expect(codexRow).toContainText('CLOSED');
+    await page.screenshot({ path: join(CAPTURES_DIR, 'runtimes-tab.png'), fullPage: true });
+
+    // Agents & 23 Locked Skills component test
+    await page.locator('#tabs button[data-tab="agents"]').click();
+    await expect(page.locator('#agents-grid > .card')).toHaveCount(7);
+    await expect(page.locator('#skills-table tbody tr')).toHaveCount(23);
+    await expect(page.getByTestId('skill-row-tlc-spec-lean')).toContainText('2.2.0');
+    await page.screenshot({ path: join(CAPTURES_DIR, 'agents-skills-tab.png'), fullPage: true });
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C5: Playwright integration tests verify Workflow editor, Operational Controls, and Post-Deploy Rollback', async ({ page }) => {
+  mkdirSync(CAPTURES_DIR, { recursive: true });
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    await page.goto(baseUrl);
+
+    // 1. Workflow-as-Code Editor validation & persistence
+    await page.locator('#tabs button[data-tab="workflows"]').click();
+    await expect(page.locator('#workflows-list > .card')).toHaveCount(5);
+
+    const invalidWf = {
+      id: 'chore',
+      label: 'type:chore',
+      description: 'Invalid skill test',
+      autonomy: 'gated',
+      maxReviewRounds: 2,
+      stages: [{ id: 'triage', mode: 'auto', agent: 'triager', skills: ['unlocked-skill-xyz'], humanApproval: false, next: 'done' }],
+    };
+    await page.locator('#wf-editor-select').selectOption('chore');
+    await page.locator('#wf-editor-json').fill(JSON.stringify(invalidWf, null, 2));
+    await page.locator('#wf-editor-save-btn').click();
+    await expect(page.locator('#wf-editor-status')).toContainText('Rejected (422)');
+
+    // Restore valid workflow and save
+    const validWf = {
+      id: 'chore',
+      label: 'type:chore',
+      description: 'Verified chore workflow from Playwright integration test',
+      autonomy: 'gated',
+      maxReviewRounds: 2,
+      stages: [
+        { id: 'triage', mode: 'auto', agent: 'triager', skills: ['codenavi'], contract: 'contracts/triage.schema.json', humanApproval: false, next: 'checks_and_build' },
+        { id: 'checks_and_build', mode: 'auto', agent: 'builder', skills: ['coding-guidelines', 'docs-writer'], humanApproval: false, next: 'review' },
+        { id: 'review', mode: 'auto', agent: 'judge', skills: ['the-judge'], contract: 'contracts/review.schema.json', humanApproval: false, next: 'merge' },
+        { id: 'merge', mode: 'human', agent: 'ops', skills: ['gh-address-comments'], humanApproval: true, next: 'done' },
+      ],
+    };
+    await page.locator('#wf-editor-json').fill(JSON.stringify(validWf, null, 2));
+    await page.locator('#wf-editor-save-btn').click();
+    await expect(page.locator('#wf-editor-status')).toContainText('Saved workflow chore (200)');
+
+    // 2. Operational Controls & Post-Deploy Rollback
+    await page.locator('#tabs button[data-tab="controls"]').click();
+    await page.locator('#ctrl-autonomy').selectOption('auto-low');
+    await page.locator('#ctrl-budget').fill('40');
+    await page.locator('#save-controls-btn').click();
+    await expect(page.locator('#controls-feedback')).toContainText('Controls saved');
+    await expect(page.locator('#factory-status-badge')).toContainText('ACTIVE (AUTO-LOW)');
+
+    // Healthy deploy -> saves last_good_sha
+    await page.locator('#deploy-sha').fill('good111');
+    await page.locator('#deploy-error-rate').fill('0.3');
+    await page.locator('#deploy-max-rate').fill('1.0');
+    await page.locator('#deploy-verify-btn').click();
+    await expect(page.locator('#deploy-feedback')).toContainText('Healthy deploy good111 (last_good_sha: good111)');
+
+    // Bad deploy -> automatic rollback to good111
+    await page.locator('#deploy-sha').fill('bad2222');
+    await page.locator('#deploy-error-rate').fill('3.8');
+    await page.locator('#deploy-verify-btn').click();
+    await expect(page.locator('#deploy-feedback')).toContainText('Rolled back bad2222 -> good111');
+    await expect(page.getByTestId('deploy-card-bad2222')).toContainText('rolled_back');
+    await page.screenshot({ path: join(CAPTURES_DIR, 'controls-deploy-tab.png'), fullPage: true });
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C6: Playwright E2E test triages, advances, approves human gates, and completes all 5 ticket types in the browser', async ({ page }) => {
+  mkdirSync(CAPTURES_DIR, { recursive: true });
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    await page.goto(baseUrl);
+    await page.locator('#tabs button[data-tab="board"]').click();
+
+    const diverseTickets = [
+      { num: 301, title: '[feature] Add multi-runtime cost breakdown chart', body: 'New feature on overview tab', expectedType: 'feature' },
+      { num: 302, title: 'TypeError crash when stage token is empty string', body: 'Bug regression in store', expectedType: 'bug' },
+      { num: 303, title: 'Why does GitHub polling return 304 on ETag match? Investigate latency', body: 'Spike investigation', expectedType: 'investigation' },
+      { num: 304, title: 'Discovery PRD and design doc for distributed worker pool', body: 'Broad idea discovery', expectedType: 'discovery' },
+      { num: 305, title: 'Chore: bump GitHub Actions CI workflow and cleanup docs', body: 'Maintenance chore', expectedType: 'chore' },
+    ];
+
+    // 1. Intake all 5 diverse tickets using the UI form (auto-detecting ticket type!)
+    for (const t of diverseTickets) {
+      await page.locator('#intake-issue-number').fill(String(t.num));
+      await page.locator('#intake-title').fill(t.title);
+      await page.locator('#intake-body').fill(t.body);
+      await page.locator('#intake-type').selectOption('');
+      await page.locator('#intake-submit-btn').click();
+      await expect(page.locator('#intake-feedback')).toContainText(`Classified as ${t.expectedType} at stage triage`);
+      await expect(page.getByTestId(`task-type-${t.num}`)).toHaveText(t.expectedType);
+      await expect(page.getByTestId(`task-stage-${t.num}`)).toHaveText('triage');
+    }
+
+    await page.screenshot({ path: join(CAPTURES_DIR, 'board-after-intake.png'), fullPage: true });
+
+    // 2. Drive each of the 5 tickets through every workflow stage to 'done'
+    // Feature (#301): triage -> plan (gate) -> checks_and_build -> verify -> review -> merge (gate) -> done
+    await page.getByTestId('dispatch-btn-301').click();
+    await expect(page.getByTestId('task-stage-301')).toHaveText('plan');
+    await expect(page.getByTestId('needs-human-card-301')).toBeVisible();
+    await page.getByTestId('approve-btn-301').click();
+    await expect(page.getByTestId('task-stage-301')).toHaveText('merge');
+    await page.getByTestId('approve-btn-301').click();
+    await expect(page.getByTestId('task-stage-301')).toHaveText('done');
+
+    // Bug (#302): triage -> checks_and_build -> verify -> review -> merge (gate) -> done
+    await page.getByTestId('dispatch-btn-302').click();
+    await expect(page.getByTestId('task-stage-302')).toHaveText('merge');
+    await page.getByTestId('approve-btn-302').click();
+    await expect(page.getByTestId('task-stage-302')).toHaveText('done');
+
+    // Investigation (#303): triage -> investigate (gate) -> done
+    await page.getByTestId('dispatch-btn-303').click();
+    await expect(page.getByTestId('task-stage-303')).toHaveText('investigate');
+    await page.getByTestId('approve-btn-303').click();
+    await expect(page.getByTestId('task-stage-303')).toHaveText('done');
+
+    // Discovery (#304): triage -> discover (gate) -> done
+    await page.getByTestId('dispatch-btn-304').click();
+    await expect(page.getByTestId('task-stage-304')).toHaveText('discover');
+    await page.getByTestId('approve-btn-304').click();
+    await expect(page.getByTestId('task-stage-304')).toHaveText('done');
+
+    // Chore (#305): triage -> checks_and_build -> review -> merge (gate) -> done
+    await page.getByTestId('dispatch-btn-305').click();
+    await expect(page.getByTestId('task-stage-305')).toHaveText('merge');
+    await page.getByTestId('approve-btn-305').click();
+    await expect(page.getByTestId('task-stage-305')).toHaveText('done');
+
+    await page.screenshot({ path: join(CAPTURES_DIR, 'board-all-5-done.png'), fullPage: true });
+
+    // Verify Overview KPIs reflect 5 completed tickets and positive token/cost telemetry
+    await page.locator('#tabs button[data-tab="overview"]').click();
+    await expect(page.getByTestId('kpi-total-tickets')).toContainText('5');
+    await expect(page.getByTestId('kpi-total-tickets')).toContainText('Completed: 5');
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});

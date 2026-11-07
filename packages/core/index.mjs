@@ -14,4 +14,11 @@ export {
   extractFollowUpTickets,
   canAutoMergeTask,
 } from './src/brain.mjs';
+export {
+  classifyTicketType,
+  createStageContractRunner,
+  intakeAndTriageTicket,
+  advanceTicketInPanel,
+} from './src/pipeline.mjs';
+
 

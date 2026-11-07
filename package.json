@@ -1,0 +1,19 @@
+{
+  "name": "agentic-factory",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local, single-operator Agentic Software Factory built on Tech Leads Club skills and tlc-spec-lean v2.2.0",
+  "type": "module",
+  "scripts": {
+    "validate": "node packages/core/cli.mjs validate",
+    "sync-skills": "node scripts/sync-skills.mjs --verify-only",
+    "test:unit": "node --test scripts/__test__/skills-sync.test.mjs packages/core/__test__/factory-core.test.mjs packages/core/__test__/runtime-loop.test.mjs packages/core/__test__/pipeline.test.mjs apps/panel/__test__/control-panel.test.mjs",
+    "test:e2e": "npx playwright test",
+    "test": "npm run test:unit && npm run test:e2e",
+    "panel": "node packages/core/cli.mjs panel --port 4310"
+  },
+  "devDependencies": {
+    "@playwright/mcp": "^0.0.28",
+    "@playwright/test": "^1.52.0"
+  }
+}

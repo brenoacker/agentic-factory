@@ -1,37 +1,37 @@
 name: Feature
-description: Nova funcionalidade num projeto-alvo (workflow feature → tlc-spec-lean)
+description: New feature in a target repository (feature workflow -> tlc-spec-lean v2.2.0)
 title: "[feature] "
 labels: ["type:feature", "stage:triage"]
 body:
   - type: input
     id: project
     attributes:
-      label: Projeto-alvo
-      description: Repositório onde a mudança será feita (owner/repo)
-      placeholder: brenoacker/meu-projeto
+      label: Target Repository
+      description: Repository where the change will be implemented (owner/repo)
+      placeholder: brenoacker/agentic-factory
     validations:
       required: true
   - type: textarea
     id: problem
     attributes:
-      label: Problema / objetivo
-      description: O que precisa existir e por quê
+      label: Problem / Objective
+      description: What needs to exist and why
     validations:
       required: true
   - type: textarea
     id: criteria
     attributes:
-      label: Critérios de aceitação
-      description: Comportamentos observáveis, com valores concretos sempre que possível
-      placeholder: "- Quando X, o sistema deve Y"
+      label: Acceptance Criteria
+      description: Observable behaviors with concrete values whenever possible
+      placeholder: "- WHEN X happens THEN the system SHALL Y"
   - type: textarea
     id: context
     attributes:
-      label: Contexto e referências
-      description: Links, capturas (se forem vinculantes, diga), decisões já tomadas
+      label: Context & References
+      description: Links, binding screenshots, or prior architectural decisions
   - type: dropdown
     id: runtime
     attributes:
-      label: Runtime (opcional)
-      options: ["padrão da fábrica", "antigravity", "claude-code", "codex"]
+      label: Runtime Override (optional)
+      options: ["factory default", "antigravity", "claude-code", "codex"]
       default: 0

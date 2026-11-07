@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Sincroniza os labels de .github/labels.json com o repositório via gh CLI (idempotente).
-// Uso: node scripts/setup-labels.mjs [owner/repo]
+// Synchronizes labels from .github/labels.json to the GitHub repository via gh CLI (idempotent).
+// Usage: node scripts/setup-labels.mjs [owner/repo]
 import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 

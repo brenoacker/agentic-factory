@@ -1,40 +1,40 @@
 name: Bug
-description: Defeito num projeto-alvo (workflow bug → reproduzir, teste de regressão, correção)
+description: Software defect in a target repository (bug workflow -> reproduce, regression test first, fix)
 title: "[bug] "
 labels: ["type:bug", "stage:triage"]
 body:
   - type: input
     id: project
     attributes:
-      label: Projeto-alvo
-      placeholder: brenoacker/meu-projeto
+      label: Target Repository
+      placeholder: brenoacker/agentic-factory
     validations:
       required: true
   - type: textarea
     id: actual
     attributes:
-      label: Comportamento atual
+      label: Actual Behavior
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: Comportamento esperado
+      label: Expected Behavior
     validations:
       required: true
   - type: textarea
     id: repro
     attributes:
-      label: Passos para reproduzir
+      label: Steps to Reproduce
       placeholder: "1. ...\n2. ..."
   - type: textarea
     id: evidence
     attributes:
-      label: Evidências
-      description: Logs, stack trace, link do Sentry, prints
+      label: Evidence
+      description: Logs, stack traces, Sentry link, or screenshots
   - type: dropdown
     id: runtime
     attributes:
-      label: Runtime (opcional)
-      options: ["padrão da fábrica", "antigravity", "claude-code", "codex"]
+      label: Runtime Override (optional)
+      options: ["factory default", "antigravity", "claude-code", "codex"]
       default: 0

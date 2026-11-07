@@ -1,23 +1,23 @@
 [
-  { "name": "type:feature", "color": "1d76db", "description": "Nova funcionalidade" },
-  { "name": "type:bug", "color": "d73a4a", "description": "Defeito" },
-  { "name": "type:investigation", "color": "5319e7", "description": "Pergunta técnica / spike" },
-  { "name": "type:discovery", "color": "0e8a16", "description": "Ideia vaga → PRD / design doc" },
-  { "name": "type:chore", "color": "c5def5", "description": "Manutenção, CI, docs" },
+  { "name": "type:feature", "color": "1d76db", "description": "New feature request" },
+  { "name": "type:bug", "color": "d73a4a", "description": "Software defect or regression" },
+  { "name": "type:investigation", "color": "5319e7", "description": "Technical question or spike" },
+  { "name": "type:discovery", "color": "0e8a16", "description": "Broad idea -> PRD / design doc" },
+  { "name": "type:chore", "color": "c5def5", "description": "Maintenance, CI, dependencies, docs" },
 
-  { "name": "stage:triage", "color": "fbca04", "description": "Aguardando triagem" },
-  { "name": "stage:ready", "color": "fef2c0", "description": "Triado, pronto para execução" },
-  { "name": "stage:in-progress", "color": "0052cc", "description": "Em execução pela fábrica" },
-  { "name": "stage:review", "color": "bfd4f2", "description": "PR aberto, em review" },
-  { "name": "stage:done", "color": "0e8a16", "description": "Concluído" },
+  { "name": "stage:triage", "color": "fbca04", "description": "Awaiting triage" },
+  { "name": "stage:ready", "color": "fef2c0", "description": "Triaged and ready for execution" },
+  { "name": "stage:in-progress", "color": "0052cc", "description": "Currently executing in the factory" },
+  { "name": "stage:review", "color": "bfd4f2", "description": "PR open and under review" },
+  { "name": "stage:done", "color": "0e8a16", "description": "Completed" },
 
-  { "name": "impact:low", "color": "c2e0c6", "description": "Uma fatia, reversível com revert simples" },
-  { "name": "impact:medium", "color": "f9d0c4", "description": "Várias fatias, mudança visível, migração aditiva" },
-  { "name": "impact:high", "color": "b60205", "description": "Breaking change, migração destrutiva" },
+  { "name": "impact:low", "color": "c2e0c6", "description": "Single slice, easily reversible" },
+  { "name": "impact:medium", "color": "f9d0c4", "description": "Multi-slice, visible change, additive migration" },
+  { "name": "impact:high", "color": "b60205", "description": "Breaking change or destructive migration" },
 
-  { "name": "needs-human", "color": "e99695", "description": "A fábrica parou e precisa de você" },
+  { "name": "needs-human", "color": "e99695", "description": "Factory paused and waiting for human input" },
 
-  { "name": "runtime:antigravity", "color": "ededed", "description": "Força o runtime Antigravity" },
-  { "name": "runtime:claude-code", "color": "ededed", "description": "Força o runtime Claude Code" },
-  { "name": "runtime:codex", "color": "ededed", "description": "Força o runtime Codex" }
+  { "name": "runtime:antigravity", "color": "ededed", "description": "Force Antigravity runtime" },
+  { "name": "runtime:claude-code", "color": "ededed", "description": "Force Claude Code runtime" },
+  { "name": "runtime:codex", "color": "ededed", "description": "Force Codex runtime" }
 ]

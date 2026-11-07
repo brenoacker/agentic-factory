@@ -1,28 +1,28 @@
 name: Investigation
-description: Pergunta técnica ou spike (workflow investigation → relatório + tickets de follow-up, sem PR)
+description: Technical question or spike (investigation workflow -> report + follow-up tickets, no code PR)
 title: "[investigation] "
 labels: ["type:investigation", "stage:triage"]
 body:
   - type: input
     id: project
     attributes:
-      label: Projeto-alvo
-      placeholder: brenoacker/meu-projeto
+      label: Target Repository
+      placeholder: brenoacker/agentic-factory
     validations:
       required: true
   - type: textarea
     id: question
     attributes:
-      label: Pergunta a responder
-      description: O que precisa ser descoberto
+      label: Question to Answer
+      description: What needs to be investigated and proven
     validations:
       required: true
   - type: textarea
     id: done
     attributes:
-      label: O que conta como resposta
-      description: Ex. causa raiz com evidência, comparação de opções, estimativa de impacto
+      label: Definition of Done
+      description: E.g. root cause with file/line evidence, option comparison, impact estimate
   - type: textarea
     id: context
     attributes:
-      label: Contexto e pistas
+      label: Context & Leads

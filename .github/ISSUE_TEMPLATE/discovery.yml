@@ -1,27 +1,27 @@
 name: Discovery
-description: Ideia ou projeto novo ainda vago (workflow discovery → PRD / design doc → features)
+description: Broad idea or new project (discovery workflow -> PRD / design doc -> feature slices)
 title: "[discovery] "
 labels: ["type:discovery", "stage:triage"]
 body:
   - type: input
     id: project
     attributes:
-      label: Projeto-alvo
-      description: Repositório existente ou "novo"
-      placeholder: brenoacker/meu-projeto
+      label: Target Repository
+      description: Existing repository or "new"
+      placeholder: brenoacker/agentic-factory
     validations:
       required: true
   - type: textarea
     id: idea
     attributes:
-      label: Ideia / situação
+      label: Idea / Situation
     validations:
       required: true
   - type: textarea
     id: success
     attributes:
-      label: Como saberemos que deu certo
+      label: Success Criteria
   - type: textarea
     id: constraints
     attributes:
-      label: Restrições conhecidas
+      label: Known Constraints

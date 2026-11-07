@@ -7,6 +7,8 @@ import {
   validateWorkflowObject,
   FactoryStore,
   approveTask,
+  intakeAndTriageTicket,
+  advanceTicketInPanel,
 } from '../../packages/core/index.mjs';
 import { listAgentsCatalog, loadBrainEntries } from '../../packages/core/src/brain.mjs';
 
@@ -241,6 +243,50 @@ export function createPanelServer({
           maxErrorRate: Number(body.maxErrorRate ?? 1.0),
         });
         sendJson(res, 200, deployRes);
+        return;
+      }
+
+      // 8. POST /api/tickets/intake
+      if (req.method === 'POST' && pathname === '/api/tickets/intake') {
+        const body = await readJsonBody(req);
+        const cfg = loadAndValidateFactory(root);
+        const intakeRes = intakeAndTriageTicket({
+          issue: {
+            issue_number: Number(body.issue_number),
+            repo: body.repo || cfg.factoryConfig?.factory?.repo || 'brenoacker/agentic-factory',
+            title: body.title,
+            body: body.body || '',
+            type: body.type || null,
+            labels: Array.isArray(body.labels) ? body.labels : [],
+            runtime_override: body.runtime_override || null,
+          },
+          factoryConfig: cfg.factoryConfig,
+          workflows: cfg.workflows,
+          store,
+        });
+        sendJson(res, intakeRes.status, intakeRes);
+        return;
+      }
+
+      // 9. POST /api/tickets/:key/dispatch
+      const dispatchMatch = pathname.match(/^\/api\/tickets\/([^/]+)\/dispatch$/);
+      if (req.method === 'POST' && dispatchMatch) {
+        const executionKey = decodeURIComponent(dispatchMatch[1]);
+        const body = await readJsonBody(req);
+        const cfg = loadAndValidateFactory(root);
+        const dispatchRes = advanceTicketInPanel({
+          executionKey,
+          factoryRoot: root,
+          factoryConfig: cfg.factoryConfig,
+          workflows: cfg.workflows,
+          pricesConfig: cfg.pricesConfig,
+          store,
+          approveCurrentStage: Boolean(body.approveCurrentStage),
+          impact: body.impact || 'medium',
+          verdict: body.verdict || 'APPROVE',
+          headSha: body.headSha || '64e6a79',
+        });
+        sendJson(res, dispatchRes.status, dispatchRes);
         return;
       }
 
