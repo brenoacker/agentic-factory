@@ -647,6 +647,10 @@ test('C13: Playwright E2E test configures Linear tracker in Cloudscape UI, syncs
 
   const trackerCalls = [];
   const mockRunner = (callSpec) => {
+    if (callSpec.action === 'linear_update') {
+      trackerCalls.push(callSpec);
+      return { ok: true, status: 200 };
+    }
     if (callSpec.provider === 'linear' && callSpec.repo === 'brenoack/agentic-factory-80f4e9bb2ce1') {
       return {
         status: 200,
@@ -722,6 +726,9 @@ test('C13: Playwright E2E test configures Linear tracker in Cloudscape UI, syncs
     await expect(page.getByTestId('task-stage-901')).toHaveText('merge');
     await page.getByTestId('approve-btn-901').click();
     await expect(page.getByTestId('task-stage-901')).toHaveText('done');
+
+    // 5. Verify Linear tracker lifecycle feedback: state set to Done and completed
+    expect(trackerCalls.some((c) => c.action === 'linear_update' && c.stateName === 'Done')).toBe(true);
 
     await page.screenshot({ path: join(CAPTURES_DIR, 'cloudscape-linear-synced-and-done.png'), fullPage: true });
   } finally {

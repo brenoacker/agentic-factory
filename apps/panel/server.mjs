@@ -417,6 +417,7 @@ export function createPanelServer({
           impact: body.impact || 'medium',
           verdict: body.verdict || 'APPROVE',
           headSha: body.headSha || '64e6a79',
+          trackerRunner: issuePollRunner,
         });
         sendJson(res, dispatchRes.status, dispatchRes);
         return;

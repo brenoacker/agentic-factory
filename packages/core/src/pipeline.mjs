@@ -239,7 +239,22 @@ export function intakeAndTriageTicket({
 
   // Automatic Tracker Lifecycle: update labels and post in-progress pickup comment
   try {
-    if (trackerRunner || issue.provider === 'github' || (!issue.provider && !issue.external_id && normalizedIssue.repo.includes('/'))) {
+    const resolvedProvider = String(
+      issue.provider ||
+        factoryConfig?.factory?.projects?.find(
+          (p) => String(p.repo).toLowerCase() === String(normalizedIssue.repo).toLowerCase(),
+        )?.provider ||
+        (issue.external_id ? 'linear' : 'github'),
+    ).toLowerCase();
+
+    if (resolvedProvider === 'linear') {
+      updateLinearIssueStatus({
+        issueId: issue.external_id || normalizedIssue.issue_number,
+        stateName: 'In Progress',
+        comment: `🚀 **Agentic Factory Pickup**: Issue intaked under workflow \`${classifiedType}\` (initial stage: \`${initialStage}\`).`,
+        runner: trackerRunner,
+      });
+    } else if (resolvedProvider === 'github' || normalizedIssue.repo.includes('/')) {
       commentOnGitHubIssue({
         repo: normalizedIssue.repo,
         issueNumber: normalizedIssue.issue_number,
@@ -252,13 +267,6 @@ export function intakeAndTriageTicket({
         labelsToAdd: [`stage:${initialStage}`, 'in-progress'],
         labelsToRemove: ['stage:triage'],
         assignees: ['@me'],
-        runner: trackerRunner,
-      });
-    } else if (issue.provider === 'linear') {
-      updateLinearIssueStatus({
-        issueId: issue.external_id || normalizedIssue.issue_number,
-        stateName: 'In Progress',
-        comment: `🚀 **Agentic Factory Pickup**: Issue intaked under workflow \`${classifiedType}\` (initial stage: \`${initialStage}\`).`,
         runner: trackerRunner,
       });
     }
@@ -328,7 +336,23 @@ export function advanceTicketInPanel({
   let trackerFeedback = null;
   if (res.stage === 'done') {
     try {
-      if (trackerRunner || (existing.repo && existing.repo.includes('/') && !existing.external_id && !String(existing.execution_key).startsWith('linear:'))) {
+      const resolvedProvider = String(
+        existing.provider ||
+          factoryConfig?.factory?.projects?.find(
+            (p) => String(p.repo).toLowerCase() === String(existing.repo).toLowerCase(),
+          )?.provider ||
+          (String(existing.execution_key).startsWith('linear:') || existing.external_id ? 'linear' : 'github'),
+      ).toLowerCase();
+
+      if (resolvedProvider === 'linear') {
+        updateLinearIssueStatus({
+          issueId: existing.external_id || existing.issue_number,
+          stateName: 'Done',
+          comment: `✅ **Completed via Agentic Factory**: Workflow \`${existing.type}\` finished at commit \`${headSha}\`.`,
+          runner: trackerRunner,
+        });
+        trackerFeedback = { closed: true, tracker: 'linear' };
+      } else if (resolvedProvider === 'github' || (existing.repo && existing.repo.includes('/'))) {
         commentOnGitHubIssue({
           repo: existing.repo,
           issueNumber: existing.issue_number,
@@ -349,14 +373,6 @@ export function advanceTicketInPanel({
           runner: trackerRunner,
         });
         trackerFeedback = { closed: true, tracker: 'github' };
-      } else if (existing.provider === 'linear' || String(existing.execution_key).startsWith('linear:')) {
-        updateLinearIssueStatus({
-          issueId: existing.external_id || existing.issue_number,
-          stateName: 'Done',
-          comment: `✅ **Completed via Agentic Factory**: Workflow \`${existing.type}\` finished at commit \`${headSha}\`.`,
-          runner: trackerRunner,
-        });
-        trackerFeedback = { closed: true, tracker: 'linear' };
       }
     } catch {
       // Non-blocking tracker updates

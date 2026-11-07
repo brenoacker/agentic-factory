@@ -245,10 +245,12 @@ export function syncMonitoredProjectsIssues({ rootDir, store, runner = null }) {
           ...issue,
           type: hasExplicitTypeLabel ? issue.type : null,
           repo: proj.repo,
+          provider: proj.provider || issue.provider,
         },
         factoryConfig: cfg.factoryConfig,
         workflows: cfg.workflows,
         store,
+        trackerRunner: runner,
       });
       if (intakeRes.ok) {
         intakedForRepo += 1;

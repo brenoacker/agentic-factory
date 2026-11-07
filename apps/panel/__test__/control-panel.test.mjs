@@ -552,6 +552,70 @@ test('C9: Tracker lifecycle updates status to in-progress, posts pickup comment,
     assert.ok(trackerCalls.some((c) => c.action === 'comment' && c.comment.includes('Completed via Agentic Factory')));
     assert.ok(trackerCalls.some((c) => c.action === 'close'));
     assert.ok(trackerCalls.some((c) => c.action === 'update' && c.labelsToAdd.includes('stage:done')));
+
+    // 3. Linear project ticket lifecycle verification:
+    const linearCalls = [];
+    const mockLinearTrackerRunner = (call) => {
+      linearCalls.push(call);
+      return { ok: true, status: 200 };
+    };
+
+    const linearIntake = intakeAndTriageTicket({
+      issue: {
+        issue_number: 99,
+        repo: 'brenoack/agentic-factory-80f4e9bb2ce1',
+        title: '[feature] Real-time Linear board integration',
+        provider: 'linear',
+        external_id: 'lin-issue-99',
+      },
+      factoryConfig: {
+        factory: {
+          autonomy: 'auto-low',
+          repo: 'brenoacker/agentic-factory',
+          defaultRuntime: 'antigravity',
+          projects: [{ repo: 'brenoack/agentic-factory-80f4e9bb2ce1', provider: 'linear' }],
+        },
+      },
+      workflows: {
+        feature: {
+          id: 'feature',
+          autonomy: 'auto-low',
+          stages: [{ id: 'triage', mode: 'auto', agent: 'triager', next: 'done' }],
+        },
+      },
+      store,
+      trackerRunner: mockLinearTrackerRunner,
+    });
+
+    assert.equal(linearIntake.ok, true);
+    assert.ok(linearCalls.some((c) => c.action === 'linear_update' && c.stateName === 'In Progress'));
+
+    const linearDispatch = advanceTicketInPanel({
+      executionKey: linearIntake.executionKey,
+      factoryRoot: tmpDir,
+      factoryConfig: {
+        factory: {
+          autonomy: 'auto-low',
+          projects: [{ repo: 'brenoack/agentic-factory-80f4e9bb2ce1', provider: 'linear' }],
+        },
+      },
+      workflows: {
+        feature: {
+          id: 'feature',
+          autonomy: 'auto-low',
+          stages: [{ id: 'triage', mode: 'auto', agent: 'triager', next: 'done' }],
+        },
+      },
+      pricesConfig: {},
+      store,
+      headSha: 'lincommit99',
+      trackerRunner: mockLinearTrackerRunner,
+    });
+
+    assert.equal(linearDispatch.ok, true);
+    assert.equal(linearDispatch.stage, 'done');
+    assert.equal(linearDispatch.trackerFeedback?.tracker, 'linear');
+    assert.ok(linearCalls.some((c) => c.action === 'linear_update' && c.stateName === 'Done'));
   } finally {
     store.close();
     rmSync(tmpDir, { recursive: true, force: true });
