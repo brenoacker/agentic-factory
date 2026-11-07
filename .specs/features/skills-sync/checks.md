@@ -55,5 +55,5 @@ Proof: run unit | ✔ C6: unknown CLI flag exits 2 without writing files
 
 - **Settled mid-build:** none
 - **Dispatched:** none
-- **Boundary:** none yet
+- **Boundary:** C1-C6 closed at `31bf794`
 - **Abandoned:** none
