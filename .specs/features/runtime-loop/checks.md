@@ -54,6 +54,6 @@ Proof: run unit | ✔ C6: dispatchTask loops on REQUEST_CHANGES and halts with n
 ## Handoff
 
 - **Settled mid-build:** none
-- **Dispatched:** Verifier at `HEAD`
+- **Dispatched:** Verifier at `957e6a9` - returned (`PASS`)
 - **Boundary:** C1-C6 closed at `c4a2c07`
 - **Abandoned:** none
