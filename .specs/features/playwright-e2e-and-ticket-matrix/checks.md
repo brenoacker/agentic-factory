@@ -65,7 +65,7 @@ Proof: run e2e | ok 5 [chromium] › C8: Playwright E2E test configures an exter
 ## Handoff
 
 - **Settled mid-build:** user requested configuring and monitoring external GitHub repositories via UI/config so the factory is a standalone tool decoupled from its own repository
-- **Dispatched:** none
-- **Boundary:** none yet
+- **Dispatched:** S1 -> fc07a0a
+- **Boundary:** S1 complete at fc07a0a
 - **Abandoned:** none
-- **Walked:** pending browser E2E run
+- **Walked:** Chromium Playwright walked all 6 English tabs, added external repository brenoacker/external-webapp, synced issues, intaked 5 ticket types (#301-#305), approved human gates in 1 click, and completed all tickets to done
