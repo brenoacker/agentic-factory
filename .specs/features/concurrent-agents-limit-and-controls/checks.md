@@ -45,7 +45,7 @@ Proof: run e2e | ok 12 [chromium] › C15: Playwright E2E test verifies max conc
 ## Handoff
 
 - **Settled mid-build:** none
-- **Dispatched:** pending
+- **Dispatched:** Independent Feature Verifier at 89a161f
 - **Boundary:** pending
 - **Abandoned:** none
 - **Walked:** pending
