@@ -61,6 +61,6 @@ Proof: run unit | ✔ C7: queryBrain, extractFollowUpTickets, and canAutoMergeTa
 ## Handoff
 
 - **Settled mid-build:** none
-- **Dispatched:** none
-- **Boundary:** none yet
+- **Dispatched:** S1 -> 5ca4b8d
+- **Boundary:** S1 complete at 5ca4b8d
 - **Abandoned:** none
