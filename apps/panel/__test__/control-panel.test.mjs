@@ -29,8 +29,8 @@ function makeTempFactoryClone() {
   return dir;
 }
 
-async function startTestServer(rootDir, dbPath) {
-  const panel = createPanelServer({ rootDir, dbPath });
+async function startTestServer(rootDir, dbPath, issuePollRunner = null) {
+  const panel = createPanelServer({ rootDir, dbPath, issuePollRunner });
   await new Promise((resolveListen) => panel.server.listen(0, '127.0.0.1', resolveListen));
   const { port } = panel.server.address();
   const baseUrl = `http://127.0.0.1:${port}`;
@@ -842,11 +842,12 @@ test('C13: Concurrency intake guard bounds active tasks to maxConcurrentAgents d
         issueNumber: i,
         repo: 'brenoacker/agentic-factory',
         type: 'feature',
-        stage: 'triage',
+        stage: 'implementation',
       });
     }
 
     assert.equal(store.countActiveTasks(), 3);
+    assert.equal(store.countExecutingAgents(), 3);
 
     // 2. 4th task is rejected with code max_concurrency_reached
     const overflowIssue = { issue_number: 4, repo: 'brenoacker/agentic-factory', type: 'feature', title: 'Task 4' };
@@ -971,7 +972,8 @@ test('C14: Executing agent concurrency excludes merge and needs_human tasks, pre
 test('C15: Periodic scheduler auto-dispatches queued triage tasks up to executing concurrency ceiling', async () => {
   const tmpDir = makeTempFactoryClone();
   const dbPath = join(tmpDir, 'factory.db');
-  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+  const mockIssueRunner = () => ({ status: 200, etag: 'etag-sched', body: [] });
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockIssueRunner);
 
   try {
     // 1. Set concurrency limit to 2
@@ -981,7 +983,7 @@ test('C15: Periodic scheduler auto-dispatches queued triage tasks up to executin
       body: JSON.stringify({ maxConcurrentAgents: 2 }),
     });
 
-    // 2. Create 3 queued tasks in triage
+    // 2. Create 3 queued tasks in triage with pre-set workspace to avoid git worktree delays
     for (let i = 21; i <= 23; i++) {
       panel.store.createTask({
         executionKey: `brenoacker/agentic-factory#${i}`,
@@ -990,13 +992,16 @@ test('C15: Periodic scheduler auto-dispatches queued triage tasks up to executin
         title: `Queued Task ${i}`,
         type: 'chore',
         stage: 'triage',
+        workspacePath: join(tmpDir, 'runs', `ws-${i}`),
       });
     }
 
-    panel.store.db.prepare("UPDATE tasks SET stage = 'merge' WHERE execution_key = 'brenoacker/agentic-factory#21'").run();
-    assert.equal(panel.store.countExecutingAgents(), 2);
+    // Triage backlog tasks are NOT executing agents
+    assert.equal(panel.store.countExecutingAgents(), 0);
+    assert.equal(panel.store.countActiveTasks(), 3);
 
-    // Trigger auto-dispatch via POST /api/scheduler with runImmediately: true
+    // 3. Trigger auto-dispatch via POST /api/scheduler with runImmediately: true
+    // Available capacity is 2 (maxConcurrentAgents: 2 - executing: 0 = 2)
     const schedRes = await fetch(`${baseUrl}/api/scheduler`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1005,7 +1010,52 @@ test('C15: Periodic scheduler auto-dispatches queued triage tasks up to executin
     assert.equal(schedRes.status, 200);
     const schedJson = await schedRes.json();
     assert.equal(schedJson.ok, true);
-    assert.equal(typeof schedJson.autoDispatchedCount, 'number');
+    // Asserts exact positive auto-dispatch count of 2
+    assert.equal(schedJson.autoDispatchedCount, 2);
+
+    // Verify tasks 21 and 22 advanced out of triage, while task 23 remains in triage queue
+    const t21 = panel.store.getTask('brenoacker/agentic-factory#21');
+    const t22 = panel.store.getTask('brenoacker/agentic-factory#22');
+    const t23 = panel.store.getTask('brenoacker/agentic-factory#23');
+    assert.notEqual(t21.stage, 'triage');
+    assert.notEqual(t22.stage, 'triage');
+    assert.equal(t23.stage, 'triage');
+
+    // 4. Simulate active executing agents at ceiling (2 executing in implementation)
+    panel.store.db
+      .prepare(
+        "UPDATE tasks SET stage = 'implementation', needs_human = 0 WHERE execution_key IN ('brenoacker/agentic-factory#21', 'brenoacker/agentic-factory#22')",
+      )
+      .run();
+    assert.equal(panel.store.countExecutingAgents(), 2);
+
+    // Subsequent cycle when executing slots are at ceiling (2/2) dispatches 0
+    const schedRes2 = await fetch(`${baseUrl}/api/scheduler`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: true, intervalSeconds: 60, runImmediately: true }),
+    });
+    const schedJson2 = await schedRes2.json();
+    assert.equal(schedJson2.autoDispatchedCount, 0);
+    assert.equal(panel.store.getTask('brenoacker/agentic-factory#23').stage, 'triage');
+
+    // 5. Free a slot by advancing task 21 to PR creation stage (merge)
+    panel.store.updateTaskStage('brenoacker/agentic-factory#21', {
+      stage: 'merge',
+      deliverableType: 'pull_request',
+      deliverableUrl: 'https://github.com/brenoacker/agentic-factory/pull/21',
+    });
+    assert.equal(panel.store.countExecutingAgents(), 1);
+
+    // 6. Now task 23 is auto-dispatched because 1 executing slot is available
+    const schedRes3 = await fetch(`${baseUrl}/api/scheduler`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: true, intervalSeconds: 60, runImmediately: true }),
+    });
+    const schedJson3 = await schedRes3.json();
+    assert.equal(schedJson3.autoDispatchedCount, 1);
+    assert.notEqual(panel.store.getTask('brenoacker/agentic-factory#23').stage, 'triage');
 
     // Reject invalid interval
     const invalidSched = await fetch(`${baseUrl}/api/scheduler`, {

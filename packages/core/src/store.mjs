@@ -403,7 +403,7 @@ export class FactoryStore {
 
   countExecutingAgents() {
     const stmt = this.db.prepare(
-      "SELECT COUNT(*) AS cnt FROM tasks WHERE stage != 'done' AND stage != 'aborted' AND stage != 'merge' AND needs_human = 0",
+      "SELECT COUNT(*) AS cnt FROM tasks WHERE stage != 'done' AND stage != 'aborted' AND stage != 'merge' AND stage != 'triage' AND needs_human = 0",
     );
     const row = stmt.get();
     return Number(row?.cnt || 0);
