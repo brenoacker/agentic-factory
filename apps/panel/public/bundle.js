@@ -339954,12 +339954,47 @@ ${isHandDrawn ? "" : `
               {
                 activeHref: `#${activeTab}`,
                 header: { href: "#", text: "Agentic Factory" },
-                items: NAV_ITEMS.map((item) => ({
-                  type: "link",
-                  text: item.text,
-                  href: item.href,
-                  info: item.id === "board" && (st2.needsHuman || []).length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "severity-medium", children: (st2.needsHuman || []).length }) : item.id === "overview" && stalledList.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "red", children: stalledList.length }) : void 0
-                })),
+                items: [
+                  {
+                    type: "link",
+                    text: "\u{1F579}\uFE0F Control Tower (Live Operations)",
+                    href: "#overview",
+                    id: "nav-operations",
+                    info: (st2.needsHuman || []).length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Badge, { color: "severity-medium", children: [
+                      (st2.needsHuman || []).length,
+                      " waiting"
+                    ] }) : stalledList.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Badge, { color: "red", children: [
+                      stalledList.length,
+                      " stalled"
+                    ] }) : void 0
+                  },
+                  {
+                    type: "link",
+                    text: "\u{1F4CB} Board & Timeline (Kanban)",
+                    href: "#board",
+                    id: "nav-board"
+                  },
+                  {
+                    type: "link",
+                    text: "\u{1F6E1}\uFE0F Settings, Health & Integrations",
+                    href: "#controls",
+                    id: "nav-settings"
+                  },
+                  {
+                    type: "divider"
+                  },
+                  {
+                    type: "section",
+                    text: "Advanced Diagnostics & Factory as Code",
+                    defaultExpanded: true,
+                    items: [
+                      { type: "link", text: "\u26A1 Workflows (Factory as Code)", href: "#workflows", id: "workflows" },
+                      { type: "link", text: "\u{1F916} Agents & Locked Skills (23)", href: "#agents", id: "agents" },
+                      { type: "link", text: "\u{1F50C} Runtime Router & Circuit Breaker", href: "#runtimes", id: "runtimes" },
+                      { type: "link", text: "\u{1F9E0} Factory Long-Term Brain", href: "#controls", id: "brain" }
+                    ]
+                  }
+                ],
                 onFollow: (e3) => {
                   e3.preventDefault();
                   const target = e3.detail.href.replace("#", "");
@@ -341490,39 +341525,54 @@ ${isHandDrawn ? "" : `
                       wf.id
                     )) })
                   ] }) }),
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { id: "tab-runtimes", style: { display: activeTab === "runtimes" ? "block" : "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Runtime Router & Circuit Breaker" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { id: "circuit-table", style: { width: "100%", borderCollapse: "collapse" }, children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { style: { borderBottom: "1px solid #2b3646", textAlign: "left" }, children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Runtime" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Status" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Remaining Quota" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Consecutive Failures" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Last Error" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Action" })
-                    ] }) }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: (state5?.runtimeHealth || []).map((r3) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                      "tr",
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { id: "tab-runtimes", style: { display: activeTab === "runtimes" ? "block" : "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Runtime Router & Circuit Breaker" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "m", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                      alert_default,
                       {
-                        "data-testid": `circuit-row-${r3.runtime}`,
-                        style: { borderBottom: "1px solid #1e293b" },
+                        type: "info",
+                        "data-testid": "circuit-breaker-explainer",
+                        header: "Why this exists: Automatic Cost and Rate-Limit Protection",
                         children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: r3.runtime }) }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusIndicator2, { type: r3.status === "closed" ? "success" : "error", children: r3.status.toUpperCase() }) }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: r3.quota_remaining }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: r3.consecutive_failures }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: r3.last_error_code || "-" }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                            button_default2,
-                            {
-                              variant: "primary",
-                              "data-testid": `reset-circuit-${r3.runtime}`,
-                              onClick: () => resetCircuit(r3.runtime),
-                              children: "Reset Circuit Breaker"
-                            }
-                          ) })
+                          "The Circuit Breaker automatically pauses a malfunctioning AI runtime (e.g. Anthropic Claude, Gemini, Codex) when it encounters consecutive network timeouts or rate-limit errors. This prevents runaway billing and infinite loops. Operators can click ",
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Reset" }),
+                          " to resume once upstream services stabilize."
                         ]
-                      },
-                      r3.runtime
-                    )) })
+                      }
+                    ),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { id: "circuit-table", style: { width: "100%", borderCollapse: "collapse" }, children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { style: { borderBottom: "1px solid #2b3646", textAlign: "left" }, children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Runtime" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Status" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Remaining Quota" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Consecutive Failures" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Last Error" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Action" })
+                      ] }) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: (state5?.runtimeHealth || []).map((r3) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                        "tr",
+                        {
+                          "data-testid": `circuit-row-${r3.runtime}`,
+                          style: { borderBottom: "1px solid #1e293b" },
+                          children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: r3.runtime }) }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusIndicator2, { type: r3.status === "closed" ? "success" : "error", children: r3.status.toUpperCase() }) }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: r3.quota_remaining }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: r3.consecutive_failures }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: r3.last_error_code || "-" }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                              button_default2,
+                              {
+                                variant: "primary",
+                                "data-testid": `reset-circuit-${r3.runtime}`,
+                                onClick: () => resetCircuit(r3.runtime),
+                                children: "Reset Circuit Breaker"
+                              }
+                            ) })
+                          ]
+                        },
+                        r3.runtime
+                      )) })
+                    ] })
                   ] }) }) }),
                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { id: "tab-agents", style: { display: activeTab === "agents" ? "block" : "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "l", children: [
                     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
@@ -341572,6 +341622,7 @@ ${isHandDrawn ? "" : `
                   ] }) }),
                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { id: "tab-controls", style: { display: activeTab === "controls" ? "block" : "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Grid, { gridDefinition: [{ colspan: 4 }, { colspan: 4 }, { colspan: 4 }], children: [
                     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Operational Controls" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "s", children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(alert_default, { type: "info", "data-testid": "controls-explainer", children: "Factory governance: configure autonomy level, hourly throughput, daily budget limits, and maximum simultaneous running agents." }),
                       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Autonomy Mode", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
                         "select",
                         {
@@ -341689,6 +341740,11 @@ ${isHandDrawn ? "" : `
                       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "controls-feedback", style: { fontSize: "0.85rem", color: "#93c5fd" }, children: controlsFeedback })
                     ] }) }),
                     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Post-Deploy Gate & Automatic Rollback" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "s", children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(alert_default, { type: "info", "data-testid": "deploy-gate-explainer", children: [
+                        "Monitors live production canary metrics post-deploy. If error rates exceed your threshold, it automatically triggers an instant rollback to the last known healthy commit (",
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "last_good_sha" }),
+                        ")."
+                      ] }),
                       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Commit SHA", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
                         "input",
                         {
@@ -341771,29 +341827,32 @@ ${isHandDrawn ? "" : `
                         `${d3.id}-${d3.commit_sha}`
                       )) })
                     ] }) }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Factory Brain (Long-Term Memory)" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "brain-list", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "xs", children: (state5?.brain || []).map((b11) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                      "div",
-                      {
-                        "data-testid": `brain-card-${b11.source}`,
-                        style: {
-                          padding: "0.6rem",
-                          background: "#0f172a",
-                          borderRadius: "6px",
-                          border: "1px solid #2b3646"
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Factory Brain (Long-Term Memory)" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "s", children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(alert_default, { type: "info", "data-testid": "brain-explainer", children: "Persistent cross-ticket repository memory: stores architectural decision records, team conventions, and run postmortems so agents never repeat past mistakes." }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "brain-list", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "xs", children: (state5?.brain || []).map((b11) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                        "div",
+                        {
+                          "data-testid": `brain-card-${b11.source}`,
+                          style: {
+                            padding: "0.6rem",
+                            background: "#0f172a",
+                            borderRadius: "6px",
+                            border: "1px solid #2b3646"
+                          },
+                          children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: b11.source }),
+                            " (",
+                            b11.kind,
+                            ")",
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
+                              String(b11.content || "").slice(0, 140),
+                              "..."
+                            ] })
+                          ]
                         },
-                        children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: b11.source }),
-                          " (",
-                          b11.kind,
-                          ")",
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
-                            String(b11.content || "").slice(0, 140),
-                            "..."
-                          ] })
-                        ]
-                      },
-                      b11.source
-                    )) }) }) })
+                        b11.source
+                      )) }) })
+                    ] }) })
                   ] }) })
                 ]
               }

@@ -763,17 +763,46 @@ function ControlPanelApp() {
               <SideNavigation
                 activeHref={`#${activeTab}`}
                 header={{ href: '#', text: 'Agentic Factory' }}
-                items={NAV_ITEMS.map((item) => ({
-                  type: 'link',
-                  text: item.text,
-                  href: item.href,
-                  info:
-                    item.id === 'board' && (st.needsHuman || []).length > 0 ? (
-                      <Badge color="severity-medium">{(st.needsHuman || []).length}</Badge>
-                    ) : item.id === 'overview' && stalledList.length > 0 ? (
-                      <Badge color="red">{stalledList.length}</Badge>
-                    ) : undefined,
-                }))}
+                items={[
+                  {
+                    type: 'link',
+                    text: '🕹️ Control Tower (Live Operations)',
+                    href: '#overview',
+                    id: 'nav-operations',
+                    info:
+                      (st.needsHuman || []).length > 0 ? (
+                        <Badge color="severity-medium">{(st.needsHuman || []).length} waiting</Badge>
+                      ) : stalledList.length > 0 ? (
+                        <Badge color="red">{stalledList.length} stalled</Badge>
+                      ) : undefined,
+                  },
+                  {
+                    type: 'link',
+                    text: '📋 Board & Timeline (Kanban)',
+                    href: '#board',
+                    id: 'nav-board',
+                  },
+                  {
+                    type: 'link',
+                    text: '🛡️ Settings, Health & Integrations',
+                    href: '#controls',
+                    id: 'nav-settings',
+                  },
+                  {
+                    type: 'divider',
+                  },
+                  {
+                    type: 'section',
+                    text: 'Advanced Diagnostics & Factory as Code',
+                    defaultExpanded: true,
+                    items: [
+                      { type: 'link', text: '⚡ Workflows (Factory as Code)', href: '#workflows', id: 'workflows' },
+                      { type: 'link', text: '🤖 Agents & Locked Skills (23)', href: '#agents', id: 'agents' },
+                      { type: 'link', text: '🔌 Runtime Router & Circuit Breaker', href: '#runtimes', id: 'runtimes' },
+                      { type: 'link', text: '🧠 Factory Long-Term Brain', href: '#controls', id: 'brain' },
+                    ],
+                  },
+                ]}
                 onFollow={(e) => {
                   e.preventDefault();
                   const target = e.detail.href.replace('#', '');
@@ -2246,7 +2275,15 @@ function ControlPanelApp() {
             {/* TAB 4: RUNTIMES */}
             <section id="tab-runtimes" style={{ display: activeTab === 'runtimes' ? 'block' : 'none' }}>
               <Container header={<Header variant="h2">Runtime Router & Circuit Breaker</Header>}>
-                <table id="circuit-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <SpaceBetween size="m">
+                  <Alert
+                    type="info"
+                    data-testid="circuit-breaker-explainer"
+                    header="Why this exists: Automatic Cost and Rate-Limit Protection"
+                  >
+                    The Circuit Breaker automatically pauses a malfunctioning AI runtime (e.g. Anthropic Claude, Gemini, Codex) when it encounters consecutive network timeouts or rate-limit errors. This prevents runaway billing and infinite loops. Operators can click <strong>Reset</strong> to resume once upstream services stabilize.
+                  </Alert>
+                  <table id="circuit-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid #2b3646', textAlign: 'left' }}>
                       <th style={{ padding: '0.6rem' }}>Runtime</th>
@@ -2288,6 +2325,7 @@ function ControlPanelApp() {
                     ))}
                   </tbody>
                 </table>
+                </SpaceBetween>
               </Container>
             </section>
 
@@ -2356,6 +2394,9 @@ function ControlPanelApp() {
               <Grid gridDefinition={[{ colspan: 4 }, { colspan: 4 }, { colspan: 4 }]}>
                 <Container header={<Header variant="h2">Operational Controls</Header>}>
                   <SpaceBetween size="s">
+                    <Alert type="info" data-testid="controls-explainer">
+                      Factory governance: configure autonomy level, hourly throughput, daily budget limits, and maximum simultaneous running agents.
+                    </Alert>
                     <FormField label="Autonomy Mode">
                       <select
                         id="ctrl-autonomy"
@@ -2467,6 +2508,9 @@ function ControlPanelApp() {
 
                 <Container header={<Header variant="h2">Post-Deploy Gate & Automatic Rollback</Header>}>
                   <SpaceBetween size="s">
+                    <Alert type="info" data-testid="deploy-gate-explainer">
+                      Monitors live production canary metrics post-deploy. If error rates exceed your threshold, it automatically triggers an instant rollback to the last known healthy commit (<code>last_good_sha</code>).
+                    </Alert>
                     <FormField label="Commit SHA">
                       <input
                         type="text"
@@ -2548,27 +2592,32 @@ function ControlPanelApp() {
                 </Container>
 
                 <Container header={<Header variant="h2">Factory Brain (Long-Term Memory)</Header>}>
-                  <div id="brain-list">
-                    <SpaceBetween size="xs">
-                      {(state?.brain || []).map((b) => (
-                        <div
-                          key={b.source}
-                          data-testid={`brain-card-${b.source}`}
-                          style={{
-                            padding: '0.6rem',
-                            background: '#0f172a',
-                            borderRadius: '6px',
-                            border: '1px solid #2b3646',
-                          }}
-                        >
-                          <strong>{b.source}</strong> ({b.kind})
-                          <Box variant="small" color="text-body-secondary">
-                            {String(b.content || '').slice(0, 140)}...
-                          </Box>
-                        </div>
-                      ))}
-                    </SpaceBetween>
-                  </div>
+                  <SpaceBetween size="s">
+                    <Alert type="info" data-testid="brain-explainer">
+                      Persistent cross-ticket repository memory: stores architectural decision records, team conventions, and run postmortems so agents never repeat past mistakes.
+                    </Alert>
+                    <div id="brain-list">
+                      <SpaceBetween size="xs">
+                        {(state?.brain || []).map((b) => (
+                          <div
+                            key={b.source}
+                            data-testid={`brain-card-${b.source}`}
+                            style={{
+                              padding: '0.6rem',
+                              background: '#0f172a',
+                              borderRadius: '6px',
+                              border: '1px solid #2b3646',
+                            }}
+                          >
+                            <strong>{b.source}</strong> ({b.kind})
+                            <Box variant="small" color="text-body-secondary">
+                              {String(b.content || '').slice(0, 140)}...
+                            </Box>
+                          </div>
+                        ))}
+                      </SpaceBetween>
+                    </div>
+                  </SpaceBetween>
                 </Container>
               </Grid>
             </section>

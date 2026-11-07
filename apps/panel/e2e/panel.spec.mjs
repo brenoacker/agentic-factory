@@ -1356,6 +1356,81 @@ test('C23: Playwright E2E verifies clickable vscode:// link, 1-click Open in Edi
   }
 });
 
+test('C24: Playwright E2E verifies consolidated 3-tier SideNavigation and collapsible diagnostics', async ({ page }) => {
+  mkdirSync(CAPTURES_DIR, { recursive: true });
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    await page.goto(baseUrl);
+    await expect(page.locator('.awsui-side-navigation')).toBeVisible();
+
+    // 1. Verify primary links in SideNavigation
+    const sideNavText = await page.locator('.awsui-side-navigation').innerText();
+    expect(sideNavText).toContain('Control Tower');
+    expect(sideNavText).toContain('Board & Timeline');
+    expect(sideNavText).toContain('Settings, Health & Integrations');
+    expect(sideNavText).toContain('Advanced Diagnostics & Factory as Code');
+
+    // 2. Click Settings in SideNavigation
+    await page.locator('.awsui-side-navigation a[href="#controls"]').first().click();
+    await expect(page.locator('#tab-controls')).toBeVisible();
+
+    // 3. Click Board & Timeline in SideNavigation
+    await page.locator('.awsui-side-navigation a[href="#board"]').click();
+    await expect(page.locator('#tab-board')).toBeVisible();
+
+    // 4. Click Control Tower in SideNavigation
+    await page.locator('.awsui-side-navigation a[href="#overview"]').click();
+    await expect(page.locator('#tab-overview')).toBeVisible();
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C25: Playwright E2E verifies contextual purpose explainers for circuit breaker, deploy gate, and brain', async ({ page }) => {
+  mkdirSync(CAPTURES_DIR, { recursive: true });
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    await page.goto(baseUrl);
+
+    // 1. Verify Circuit Breaker explainer in Runtimes tab
+    await page.locator('#tabs button[data-tab="runtimes"]').click();
+    await expect(page.locator('#tab-runtimes')).toBeVisible();
+    const circuitExplainer = page.locator('[data-testid="circuit-breaker-explainer"]');
+    await expect(circuitExplainer).toBeVisible();
+    await expect(circuitExplainer).toContainText('Automatic Cost and Rate-Limit Protection');
+
+    // 2. Verify Operational Controls, Deploy Gate, and Factory Brain explainers in Controls tab
+    await page.locator('#tabs button[data-tab="controls"]').click();
+    await expect(page.locator('#tab-controls')).toBeVisible();
+
+    const controlsExplainer = page.locator('[data-testid="controls-explainer"]');
+    await expect(controlsExplainer).toBeVisible();
+    await expect(controlsExplainer).toContainText('Factory governance');
+
+    const deployExplainer = page.locator('[data-testid="deploy-gate-explainer"]');
+    await expect(deployExplainer).toBeVisible();
+    await expect(deployExplainer).toContainText('Monitors live production canary metrics post-deploy');
+
+    const brainExplainer = page.locator('[data-testid="brain-explainer"]');
+    await expect(brainExplainer).toBeVisible();
+    await expect(brainExplainer).toContainText('Persistent cross-ticket repository memory');
+
+    await page.screenshot({ path: join(CAPTURES_DIR, 'unified-navigation-and-explainers.png'), fullPage: true });
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
 
 
 
