@@ -45,7 +45,7 @@ Proof: run e2e | ok 14 [chromium] › apps\panel\e2e\panel.spec.mjs:972:1 › C1
 ## Handoff
 
 - **Settled mid-build:** none
-- **Dispatched:** pending
+- **Dispatched:** Independent Feature Verifier at 6a8def2
 - **Boundary:** pending
 - **Abandoned:** none
 - **Walked:** pending
