@@ -77,11 +77,71 @@ export class FactoryStore {
         payload_json TEXT NOT NULL DEFAULT '{}',
         created_at TEXT NOT NULL
       );
+
+      CREATE TABLE IF NOT EXISTS runtime_health (
+        runtime TEXT PRIMARY KEY,
+        status TEXT NOT NULL DEFAULT 'closed',
+        quota_remaining INTEGER NOT NULL DEFAULT 100,
+        consecutive_failures INTEGER NOT NULL DEFAULT 0,
+        last_error_code TEXT NOT NULL DEFAULT '',
+        tripped_at TEXT NOT NULL DEFAULT ''
+      );
     `);
+
+    const defaultRuntimes = ['antigravity', 'claude-code', 'codex'];
+    const insertRt = this.db.prepare(
+      'INSERT OR IGNORE INTO runtime_health (runtime, status, quota_remaining, consecutive_failures, last_error_code, tripped_at) VALUES (?, ?, ?, 0, ?, ?)',
+    );
+    for (const rt of defaultRuntimes) {
+      insertRt.run(rt, 'closed', 100, '', '');
+    }
   }
 
   close() {
     this.db.close();
+  }
+
+  getRuntimeHealth(runtime) {
+    return this.db.prepare('SELECT * FROM runtime_health WHERE runtime = ?').get(runtime) || null;
+  }
+
+  listRuntimeHealth() {
+    return this.db.prepare('SELECT * FROM runtime_health ORDER BY runtime ASC').all();
+  }
+
+  setRuntimeQuota(runtime, quotaRemaining) {
+    this.db
+      .prepare('UPDATE runtime_health SET quota_remaining = ? WHERE runtime = ?')
+      .run(quotaRemaining, runtime);
+    return this.getRuntimeHealth(runtime);
+  }
+
+  tripRuntimeCircuit(runtime, errorCode, now = new Date().toISOString()) {
+    this.db
+      .prepare(`
+        UPDATE runtime_health
+        SET status = 'open',
+            consecutive_failures = consecutive_failures + 1,
+            last_error_code = ?,
+            tripped_at = ?
+        WHERE runtime = ?
+      `)
+      .run(String(errorCode), now, runtime);
+    return this.getRuntimeHealth(runtime);
+  }
+
+  resetRuntimeCircuit(runtime) {
+    this.db
+      .prepare(`
+        UPDATE runtime_health
+        SET status = 'closed',
+            consecutive_failures = 0,
+            last_error_code = '',
+            tripped_at = ''
+        WHERE runtime = ?
+      `)
+      .run(runtime);
+    return this.getRuntimeHealth(runtime);
   }
 
   getTask(executionKey) {

@@ -1,11 +1,13 @@
 #!/usr/bin/env node
-// Factory Core CLI: validate | status | intake | contract-check
+// Factory Core CLI: validate | status | intake | contract-check | run | approve | watch
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { loadAndValidateFactory } from './src/config.mjs';
 import { validateContract, verifyContractSchemasOnDisk } from './src/contracts.mjs';
 import { evaluateIntakeGuards } from './src/guards.mjs';
 import { FactoryStore } from './src/store.mjs';
+import { approveTask, dispatchTask } from './src/dispatcher.mjs';
+import { pollIssuesWithEtag } from './src/github.mjs';
 
 const args = process.argv.slice(2);
 const subcommand = args[0];
@@ -14,6 +16,9 @@ let dbPath = null;
 let kind = null;
 let file = null;
 let headSha = null;
+let key = null;
+let approveFlag = false;
+let onceFlag = false;
 
 for (let i = 1; i < args.length; i++) {
   const arg = args[i];
@@ -27,6 +32,12 @@ for (let i = 1; i < args.length; i++) {
     file = resolve(args[++i]);
   } else if (arg === '--head-sha' && i + 1 < args.length) {
     headSha = args[++i];
+  } else if (arg === '--key' && i + 1 < args.length) {
+    key = args[++i];
+  } else if (arg === '--approve') {
+    approveFlag = true;
+  } else if (arg === '--once') {
+    onceFlag = true;
   } else {
     process.stderr.write(`Unknown or incomplete flag: ${arg}\n`);
     process.exit(2);
@@ -103,6 +114,51 @@ if (subcommand === 'validate') {
       runtime: issue.runtime_override || cfg.factoryConfig.factory.defaultRuntime,
     });
     process.stdout.write(`${JSON.stringify({ ok: true, executionKey: guard.executionKey, task })}\n`);
+  } finally {
+    store.close();
+  }
+} else if (subcommand === 'approve') {
+  if (!key) {
+    process.stderr.write('Usage: cli.mjs approve --key <repo#issue> [--db <path>]\n');
+    process.exit(2);
+  }
+  const store = new FactoryStore(resolvedDbPath);
+  try {
+    const task = approveTask(store, key);
+    process.stdout.write(`${JSON.stringify({ ok: true, task })}\n`);
+  } finally {
+    store.close();
+  }
+} else if (subcommand === 'run') {
+  if (!key) {
+    process.stderr.write('Usage: cli.mjs run --key <repo#issue> [--approve] [--db <path>]\n');
+    process.exit(2);
+  }
+  const cfg = loadAndValidateFactory(root);
+  const store = new FactoryStore(resolvedDbPath);
+  try {
+    const res = dispatchTask({
+      executionKey: key,
+      factoryRoot: root,
+      factoryConfig: cfg.factoryConfig,
+      workflows: cfg.workflows,
+      pricesConfig: cfg.pricesConfig,
+      store,
+      headSha: headSha || '64e6a79',
+      humanApprovedCurrentStage: approveFlag,
+    });
+    process.stdout.write(`${JSON.stringify(res)}\n`);
+    if (!res.ok) process.exit(1);
+  } finally {
+    store.close();
+  }
+} else if (subcommand === 'watch') {
+  const cfg = loadAndValidateFactory(root);
+  const repo = cfg.factoryConfig.factory.repo || 'brenoacker/agentic-factory';
+  const store = new FactoryStore(resolvedDbPath);
+  try {
+    const polled = pollIssuesWithEtag({ repo });
+    process.stdout.write(`${JSON.stringify({ ok: true, repo, notModified: polled.notModified, count: polled.issues.length, once: onceFlag })}\n`);
   } finally {
     store.close();
   }
