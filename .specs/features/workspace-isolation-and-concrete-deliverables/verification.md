@@ -1,7 +1,7 @@
 # workspace-isolation-and-concrete-deliverables verification
 
 **Verdict**: PASS
-**Proofs**: `proofs.md` at bc04200
+**Proofs**: `proofs.md` at c31f8e2
 **Verifier**: independent sub-agent (author != verifier)
 
 ## Checks
