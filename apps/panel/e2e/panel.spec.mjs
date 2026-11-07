@@ -465,4 +465,138 @@ test('C10: Playwright E2E test verifies AWS Cloudscape Design System components 
   }
 });
 
+test('C11: Playwright E2E test customizes combinable pickup triggers (stage + flags + custom fields + blocker exclusions) for Jira and Asana in the Cloudscape UI', async ({ page }) => {
+  mkdirSync(CAPTURES_DIR, { recursive: true });
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+
+  const mockTriggerRunner = ({ provider, repo }) => {
+    if (provider === 'jira' && repo === 'brenoacker/jira-custom-triggers') {
+      return {
+        status: 200,
+        etag: 'W/"jira-ct-1"',
+        body: {
+          issues: [
+            {
+              key: 'TRG-911',
+              fields: {
+                summary: '[feature] Eligible Jira ticket matching Ready to be Developed + agent-ready + AI_Allowed=true',
+                description: 'Should be picked up by combinable trigger rules',
+                status: { name: 'Ready to be Developed' },
+                labels: ['agent-ready'],
+                customFields: { AI_Allowed: 'true' },
+                assignee: null,
+              },
+            },
+            {
+              key: 'TRG-912',
+              fields: {
+                summary: 'Jira ticket in Ready to be Developed but carrying blocked flag',
+                description: 'Must be excluded by blocked flag trigger',
+                status: { name: 'Ready to be Developed' },
+                labels: ['agent-ready', 'blocked'],
+                customFields: { AI_Allowed: 'true' },
+                assignee: null,
+              },
+            },
+          ],
+        },
+      };
+    }
+
+    if (provider === 'asana' && repo === 'brenoacker/asana-custom-triggers') {
+      return {
+        status: 200,
+        etag: 'W/"asana-ct-1"',
+        body: {
+          data: [
+            {
+              gid: '1200913',
+              name: 'TypeError in Asana payment worker when card token is null',
+              notes: 'Matches Ready to be Developed + agent-ready + AI_Allowed=true',
+              completed: false,
+              assignee: null,
+              memberships: [{ section: { name: 'Ready to be Developed' } }],
+              tags: [{ name: 'agent-ready' }],
+              custom_fields: [{ name: 'AI_Allowed', display_value: 'true' }],
+            },
+            {
+              gid: '1200914',
+              name: 'Asana task in Ready to be Developed without agent-ready flag',
+              notes: 'Must be skipped because required flag is missing',
+              completed: false,
+              assignee: null,
+              memberships: [{ section: { name: 'Ready to be Developed' } }],
+              tags: [],
+              custom_fields: [{ name: 'AI_Allowed', display_value: 'true' }],
+            },
+          ],
+        },
+      };
+    }
+
+    return { status: 200, etag: 'W/"gh-default"', body: [] };
+  };
+
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockTriggerRunner);
+
+  try {
+    await page.goto(baseUrl);
+    await page.locator('#tabs button[data-tab="board"]').click();
+
+    // 1. Configure Jira project with combinable triggers in the UI
+    await page.locator('#proj-provider-select').selectOption('jira');
+    await page.locator('#proj-repo-input').fill('brenoacker/jira-custom-triggers');
+    await page.locator('#proj-branch-input').fill('main');
+    await page.locator('#proj-status-filter-input').fill('Ready to be Developed');
+    await page.locator('#proj-tracker-key-input').fill('TRG');
+    await page.locator('#proj-required-labels-input').fill('agent-ready');
+    await page.locator('#proj-excluded-labels-input').fill('blocked');
+    await page.locator('#proj-custom-fields-input').fill('AI_Allowed=true');
+    await page.locator('#proj-assignee-filter-input').fill('unassigned');
+    await page.locator('#proj-add-btn').click();
+
+    const jiraRow = page.getByTestId('project-row-brenoacker/jira-custom-triggers');
+    await expect(jiraRow).toContainText('Stage: Ready to be Developed');
+    await expect(jiraRow).toContainText('+Flags: [agent-ready]');
+    await expect(jiraRow).toContainText('-Exclude: [blocked]');
+    await expect(jiraRow).toContainText('+Fields: [AI_Allowed=true]');
+    await expect(jiraRow).toContainText('Assignee: unassigned');
+
+    // 2. Configure Asana project with combinable triggers in the UI
+    await page.locator('#proj-provider-select').selectOption('asana');
+    await page.locator('#proj-repo-input').fill('brenoacker/asana-custom-triggers');
+    await page.locator('#proj-status-filter-input').fill('Ready to be Developed');
+    await page.locator('#proj-tracker-key-input').fill('120099');
+    await page.locator('#proj-required-labels-input').fill('agent-ready');
+    await page.locator('#proj-excluded-labels-input').fill('blocked');
+    await page.locator('#proj-custom-fields-input').fill('AI_Allowed=true');
+    await page.locator('#proj-assignee-filter-input').fill('unassigned');
+    await page.locator('#proj-add-btn').click();
+
+    const asanaRow = page.getByTestId('project-row-brenoacker/asana-custom-triggers');
+    await expect(asanaRow).toContainText('Stage: Ready to be Developed');
+    await expect(asanaRow).toContainText('+Flags: [agent-ready]');
+    await expect(asanaRow).toContainText('-Exclude: [blocked]');
+    await expect(asanaRow).toContainText('+Fields: [AI_Allowed=true]');
+
+    // 3. Sync and verify that only matching tickets (#911 and #1200913) are intaked while 2 non-matching tickets are skipped
+    await page.locator('#sync-repos-btn').click();
+    await expect(page.locator('#proj-feedback')).toContainText('2 new issue(s) intaked (2 skipped by triggers)');
+
+    await expect(page.getByTestId('task-repo-911')).toHaveText('brenoacker/jira-custom-triggers');
+    await expect(page.getByTestId('task-type-911')).toHaveText('feature');
+    await expect(page.getByTestId('task-card-912')).toHaveCount(0);
+
+    await expect(page.getByTestId('task-repo-1200913')).toHaveText('brenoacker/asana-custom-triggers');
+    await expect(page.getByTestId('task-type-1200913')).toHaveText('bug');
+    await expect(page.getByTestId('task-card-1200914')).toHaveCount(0);
+
+    await page.screenshot({ path: join(CAPTURES_DIR, 'cloudscape-combinable-triggers.png'), fullPage: true });
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
 

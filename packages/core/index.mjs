@@ -30,6 +30,8 @@ export {
 export {
   SUPPORTED_PROVIDERS,
   normalizeNumericIssueId,
+  normalizeTriggerRules,
+  evaluateTicketPickupTriggers,
   buildJiraJql,
   pollGitHubTracker,
   pollJiraTracker,

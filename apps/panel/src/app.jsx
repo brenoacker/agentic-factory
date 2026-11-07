@@ -53,6 +53,10 @@ function ControlPanelApp() {
   const [projBranch, setProjBranch] = useState('main');
   const [projTrackerKey, setProjTrackerKey] = useState('');
   const [projStatusFilter, setProjStatusFilter] = useState('Ready for Agent');
+  const [projRequiredLabels, setProjRequiredLabels] = useState('');
+  const [projExcludedLabels, setProjExcludedLabels] = useState('');
+  const [projCustomFields, setProjCustomFields] = useState('');
+  const [projAssigneeFilter, setProjAssigneeFilter] = useState('any');
   const [projJql, setProjJql] = useState('');
   const [projFeedback, setProjFeedback] = useState('');
 
@@ -134,6 +138,18 @@ function ControlPanelApp() {
     } else if (projStatusFilter.trim() && projStatusFilter.trim() !== 'Ready for Agent') {
       trackerConfig.statusFilter = projStatusFilter.trim();
     }
+    if (projRequiredLabels.trim()) {
+      trackerConfig.requiredLabels = projRequiredLabels.trim();
+    }
+    if (projExcludedLabels.trim()) {
+      trackerConfig.excludedLabels = projExcludedLabels.trim();
+    }
+    if (projCustomFields.trim()) {
+      trackerConfig.requiredCustomFields = projCustomFields.trim();
+    }
+    if (projAssigneeFilter.trim() && projAssigneeFilter.trim() !== 'any') {
+      trackerConfig.assigneeFilter = projAssigneeFilter.trim();
+    }
 
     const res = await fetch('/api/projects', {
       method: 'POST',
@@ -184,7 +200,11 @@ function ControlPanelApp() {
     const res = await fetch('/api/projects/sync', { method: 'POST' });
     const data = await res.json();
     if (res.ok) {
-      setProjFeedback(`Synced ${data.polledRepos} repo(s): ${data.newTasksCount} new issue(s) intaked`);
+      const skippedNote =
+        data.skippedByTriggersCount > 0 ? ` (${data.skippedByTriggersCount} skipped by triggers)` : '';
+      setProjFeedback(
+        `Synced ${data.polledRepos} repo(s): ${data.newTasksCount} new issue(s) intaked${skippedNote}`,
+      );
     } else {
       setProjFeedback(`Sync error: ${data.error}`);
     }
@@ -769,6 +789,77 @@ function ControlPanelApp() {
                   </ColumnLayout>
                 )}
 
+                <ColumnLayout columns={4}>
+                  <FormField label="Required Flags / Labels / Tags (AND)">
+                    <input
+                      type="text"
+                      id="proj-required-labels-input"
+                      value={projRequiredLabels}
+                      onChange={(e) => setProjRequiredLabels(e.target.value)}
+                      placeholder="agent-ready, approved"
+                      style={{
+                        width: '100%',
+                        padding: '0.45rem',
+                        background: '#0f172a',
+                        color: '#fff',
+                        border: '1px solid #334155',
+                        borderRadius: '4px',
+                      }}
+                    />
+                  </FormField>
+                  <FormField label="Excluded Blocker Flags / Labels">
+                    <input
+                      type="text"
+                      id="proj-excluded-labels-input"
+                      value={projExcludedLabels}
+                      onChange={(e) => setProjExcludedLabels(e.target.value)}
+                      placeholder="blocked, manual-only, on-hold"
+                      style={{
+                        width: '100%',
+                        padding: '0.45rem',
+                        background: '#0f172a',
+                        color: '#fff',
+                        border: '1px solid #334155',
+                        borderRadius: '4px',
+                      }}
+                    />
+                  </FormField>
+                  <FormField label="Required Custom Fields (key=value)">
+                    <input
+                      type="text"
+                      id="proj-custom-fields-input"
+                      value={projCustomFields}
+                      onChange={(e) => setProjCustomFields(e.target.value)}
+                      placeholder="AI_Allowed=true, Priority=High"
+                      style={{
+                        width: '100%',
+                        padding: '0.45rem',
+                        background: '#0f172a',
+                        color: '#fff',
+                        border: '1px solid #334155',
+                        borderRadius: '4px',
+                      }}
+                    />
+                  </FormField>
+                  <FormField label="Assignee Trigger Rule">
+                    <input
+                      type="text"
+                      id="proj-assignee-filter-input"
+                      value={projAssigneeFilter}
+                      onChange={(e) => setProjAssigneeFilter(e.target.value)}
+                      placeholder="any or unassigned"
+                      style={{
+                        width: '100%',
+                        padding: '0.45rem',
+                        background: '#0f172a',
+                        color: '#fff',
+                        border: '1px solid #334155',
+                        borderRadius: '4px',
+                      }}
+                    />
+                  </FormField>
+                </ColumnLayout>
+
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
                   <button
                     id="proj-add-btn"
@@ -855,12 +946,33 @@ function ControlPanelApp() {
                     {(state?.projects || []).map((p) => {
                       const prov = (p.provider || 'github').toLowerCase();
                       const etagKey = prov === 'github' ? p.repo : `${prov}:${p.repo}`;
-                      const filterDesc =
-                        prov === 'jira'
-                          ? `Key: ${p.trackerConfig?.projectKey || '-'} · Status: ${p.trackerConfig?.statusFilter || 'Ready for Agent'}`
-                          : prov === 'asana'
-                            ? `GID: ${p.trackerConfig?.projectGid || '-'} · Status: ${p.trackerConfig?.statusFilter || 'Ready for Agent'}`
-                            : p.trackerConfig?.statusFilter || 'state=open';
+                      const tc = p.trackerConfig || {};
+                      const triggerParts = [];
+                      if (prov === 'jira') {
+                        triggerParts.push(`Key: ${tc.projectKey || '-'}`);
+                        triggerParts.push(`Stage: ${tc.statusFilter || 'Ready for Agent'}`);
+                      } else if (prov === 'asana') {
+                        triggerParts.push(`GID: ${tc.projectGid || '-'}`);
+                        triggerParts.push(`Stage: ${tc.statusFilter || 'Ready for Agent'}`);
+                      } else {
+                        triggerParts.push(tc.statusFilter ? `Stage: ${tc.statusFilter}` : 'state=open');
+                      }
+                      if (Array.isArray(tc.requiredLabels) && tc.requiredLabels.length > 0) {
+                        triggerParts.push(`+Flags: [${tc.requiredLabels.join(', ')}]`);
+                      }
+                      if (Array.isArray(tc.excludedLabels) && tc.excludedLabels.length > 0) {
+                        triggerParts.push(`-Exclude: [${tc.excludedLabels.join(', ')}]`);
+                      }
+                      if (tc.requiredCustomFields && Object.keys(tc.requiredCustomFields).length > 0) {
+                        const cfStr = Object.entries(tc.requiredCustomFields)
+                          .map(([k, v]) => `${k}=${v}`)
+                          .join(', ');
+                        triggerParts.push(`+Fields: [${cfStr}]`);
+                      }
+                      if (tc.assigneeFilter && tc.assigneeFilter !== 'any') {
+                        triggerParts.push(`Assignee: ${tc.assigneeFilter}`);
+                      }
+                      const filterDesc = triggerParts.join(' · ');
                       return (
                         <tr
                           key={`${prov}:${p.repo}`}

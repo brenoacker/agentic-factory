@@ -4,7 +4,7 @@ import { cpSync, mkdtempSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createPanelServer } from '../../../apps/panel/server.mjs';
-import { classifyTicketType } from '../index.mjs';
+import { classifyTicketType, evaluateTicketPickupTriggers } from '../index.mjs';
 
 const REPO_ROOT = resolve(import.meta.dirname, '..', '..', '..');
 
@@ -575,6 +575,225 @@ test('C11: POST /api/scheduler configures periodic polling loop, executes immedi
     assert.ok(data.scheduler.pollCount >= 1);
     assert.ok(data.scheduler.lastPollAt);
     assert.equal(panel.store.getTask('brenoacker/agentic-factory#750').type, 'chore');
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C12: evaluateTicketPickupTriggers and POST /api/projects/sync enforce combinable stage, required flags, excluded blocker flags, custom fields, and assignee triggers for Jira and Asana', async () => {
+  const triggerConfig = {
+    projectKey: 'DEV',
+    statusFilter: 'Ready to be Developed, Ready for Agent',
+    requiredLabels: ['agent-ready', 'approved'],
+    excludedLabels: ['blocked', 'manual-only'],
+    requiredCustomFields: { AI_Allowed: 'true', Priority: 'High' },
+    assigneeFilter: 'unassigned',
+  };
+
+  // Direct unit evaluation of combinable rules
+  const eligibleCheck = evaluateTicketPickupTriggers(
+    {
+      key: 'DEV-901',
+      fields: {
+        status: { name: 'Ready to be Developed' },
+        labels: ['agent-ready', 'approved'],
+        priority: { name: 'High' },
+        customFields: { AI_Allowed: 'true' },
+        assignee: null,
+      },
+    },
+    triggerConfig,
+    'jira',
+  );
+  assert.equal(eligibleCheck.eligible, true);
+  assert.equal(eligibleCheck.blockedReason, null);
+
+  const blockedFlagCheck = evaluateTicketPickupTriggers(
+    {
+      key: 'DEV-902',
+      fields: {
+        status: { name: 'Ready to be Developed' },
+        labels: ['agent-ready', 'approved', 'blocked'],
+        priority: { name: 'High' },
+        customFields: { AI_Allowed: 'true' },
+        assignee: null,
+      },
+    },
+    triggerConfig,
+    'jira',
+  );
+  assert.equal(blockedFlagCheck.eligible, false);
+  assert.equal(blockedFlagCheck.blockedReason, 'excluded_flag:blocked');
+
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+
+  const mockTriggerRunner = ({ provider, repo }) => {
+    if (provider === 'jira' && repo === 'brenoacker/jira-triggers') {
+      return {
+        status: 200,
+        etag: 'W/"jira-trig-1"',
+        body: {
+          issues: [
+            {
+              key: 'DEV-901',
+              fields: {
+                summary: '[feature] Implement multi-flag triggered Jira checkout flow',
+                description: 'Matches all combinable triggers',
+                status: { name: 'Ready to be Developed' },
+                labels: ['agent-ready', 'approved'],
+                priority: { name: 'High' },
+                customFields: { AI_Allowed: 'true' },
+                assignee: null,
+              },
+            },
+            {
+              key: 'DEV-902',
+              fields: {
+                summary: 'Blocked Jira ticket that must be skipped',
+                description: 'Has blocked flag',
+                status: { name: 'Ready to be Developed' },
+                labels: ['agent-ready', 'approved', 'blocked'],
+                priority: { name: 'High' },
+                customFields: { AI_Allowed: 'true' },
+                assignee: null,
+              },
+            },
+            {
+              key: 'DEV-903',
+              fields: {
+                summary: 'Jira ticket missing AI_Allowed=true custom field',
+                description: 'Custom field is false',
+                status: { name: 'Ready to be Developed' },
+                labels: ['agent-ready', 'approved'],
+                priority: { name: 'High' },
+                customFields: { AI_Allowed: 'false' },
+                assignee: null,
+              },
+            },
+          ],
+        },
+      };
+    }
+
+    if (provider === 'asana' && repo === 'brenoacker/asana-triggers') {
+      return {
+        status: 200,
+        etag: 'W/"asana-trig-1"',
+        body: {
+          data: [
+            {
+              gid: '1200904',
+              name: 'TypeError in Asana webhook handler when payload is empty',
+              notes: 'Matches section + required tag + custom field',
+              completed: false,
+              assignee: null,
+              memberships: [{ section: { name: 'Ready to be Developed' } }],
+              tags: [{ name: 'agent-ready' }],
+              custom_fields: [{ name: 'AI_Allowed', display_value: 'true' }],
+            },
+            {
+              gid: '1200905',
+              name: 'Asana task missing agent-ready tag',
+              notes: 'Should be skipped because required tag is missing',
+              completed: false,
+              assignee: null,
+              memberships: [{ section: { name: 'Ready to be Developed' } }],
+              tags: [],
+              custom_fields: [{ name: 'AI_Allowed', display_value: 'true' }],
+            },
+          ],
+        },
+      };
+    }
+
+    return { status: 200, etag: 'W/"gh-default"', body: [] };
+  };
+
+  const panel = createPanelServer({ rootDir: tmpDir, dbPath, issuePollRunner: mockTriggerRunner });
+  await new Promise((resolveListen) => panel.server.listen(0, '127.0.0.1', resolveListen));
+  const baseUrl = `http://127.0.0.1:${panel.server.address().port}`;
+
+  try {
+    // 1. Register Jira project with combinable triggers -> 201
+    const jiraRes = await fetch(`${baseUrl}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        repo: 'brenoacker/jira-triggers',
+        provider: 'jira',
+        defaultBranch: 'main',
+        trackerConfig: triggerConfig,
+      }),
+    });
+    assert.equal(jiraRes.status, 201);
+
+    // 2. Register Asana project with combinable triggers -> 201
+    const asanaRes = await fetch(`${baseUrl}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        repo: 'brenoacker/asana-triggers',
+        provider: 'asana',
+        defaultBranch: 'main',
+        trackerConfig: {
+          projectGid: '120099',
+          statusFilter: 'Ready to be Developed',
+          requiredLabels: 'agent-ready',
+          excludedLabels: 'blocked',
+          requiredCustomFields: 'AI_Allowed=true',
+          assigneeFilter: 'unassigned',
+        },
+      }),
+    });
+    assert.equal(asanaRes.status, 201);
+
+    // 3. Update existing project triggers -> 200
+    const updateRes = await fetch(`${baseUrl}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        repo: 'brenoacker/asana-triggers',
+        provider: 'asana',
+        defaultBranch: 'main',
+        trackerConfig: {
+          projectGid: '120099',
+          statusFilter: 'Ready to be Developed',
+          requiredLabels: 'agent-ready',
+          excludedLabels: 'blocked, manual-only',
+          requiredCustomFields: 'AI_Allowed=true',
+          assigneeFilter: 'unassigned',
+        },
+      }),
+    });
+    assert.equal(updateRes.status, 200);
+
+    // 4. Invalid project missing GID -> 400
+    const badAsana = await fetch(`${baseUrl}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        repo: 'brenoacker/asana-bad',
+        provider: 'asana',
+        trackerConfig: { statusFilter: 'Ready to be Developed' },
+      }),
+    });
+    assert.equal(badAsana.status, 400);
+
+    // 5. Sync projects -> picks up only DEV-901 and 1200904, skipping DEV-902, DEV-903, and 1200905 (3 skipped by triggers)
+    const syncData = await (await fetch(`${baseUrl}/api/projects/sync`, { method: 'POST' })).json();
+    assert.equal(syncData.ok, true);
+    assert.equal(syncData.newTasksCount, 2);
+    assert.equal(syncData.skippedByTriggersCount, 3);
+
+    assert.ok(panel.store.getTask('brenoacker/jira-triggers#901'));
+    assert.equal(panel.store.getTask('brenoacker/jira-triggers#902'), null);
+    assert.equal(panel.store.getTask('brenoacker/jira-triggers#903'), null);
+
+    assert.ok(panel.store.getTask('brenoacker/asana-triggers#1200904'));
+    assert.equal(panel.store.getTask('brenoacker/asana-triggers#1200904').type, 'bug');
+    assert.equal(panel.store.getTask('brenoacker/asana-triggers#1200905'), null);
   } finally {
     await panel.close();
     rmSync(tmpDir, { recursive: true, force: true });

@@ -28536,6 +28536,10 @@
     const [projBranch, setProjBranch] = (0, import_react188.useState)("main");
     const [projTrackerKey, setProjTrackerKey] = (0, import_react188.useState)("");
     const [projStatusFilter, setProjStatusFilter] = (0, import_react188.useState)("Ready for Agent");
+    const [projRequiredLabels, setProjRequiredLabels] = (0, import_react188.useState)("");
+    const [projExcludedLabels, setProjExcludedLabels] = (0, import_react188.useState)("");
+    const [projCustomFields, setProjCustomFields] = (0, import_react188.useState)("");
+    const [projAssigneeFilter, setProjAssigneeFilter] = (0, import_react188.useState)("any");
     const [projJql, setProjJql] = (0, import_react188.useState)("");
     const [projFeedback, setProjFeedback] = (0, import_react188.useState)("");
     const [schedulerInterval, setSchedulerInterval] = (0, import_react188.useState)("60");
@@ -28603,6 +28607,18 @@
       } else if (projStatusFilter.trim() && projStatusFilter.trim() !== "Ready for Agent") {
         trackerConfig.statusFilter = projStatusFilter.trim();
       }
+      if (projRequiredLabels.trim()) {
+        trackerConfig.requiredLabels = projRequiredLabels.trim();
+      }
+      if (projExcludedLabels.trim()) {
+        trackerConfig.excludedLabels = projExcludedLabels.trim();
+      }
+      if (projCustomFields.trim()) {
+        trackerConfig.requiredCustomFields = projCustomFields.trim();
+      }
+      if (projAssigneeFilter.trim() && projAssigneeFilter.trim() !== "any") {
+        trackerConfig.assigneeFilter = projAssigneeFilter.trim();
+      }
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -28647,7 +28663,10 @@
       const res = await fetch("/api/projects/sync", { method: "POST" });
       const data = await res.json();
       if (res.ok) {
-        setProjFeedback(`Synced ${data.polledRepos} repo(s): ${data.newTasksCount} new issue(s) intaked`);
+        const skippedNote = data.skippedByTriggersCount > 0 ? ` (${data.skippedByTriggersCount} skipped by triggers)` : "";
+        setProjFeedback(
+          `Synced ${data.polledRepos} repo(s): ${data.newTasksCount} new issue(s) intaked${skippedNote}`
+        );
       } else {
         setProjFeedback(`Sync error: ${data.error}`);
       }
@@ -29251,6 +29270,80 @@
                     }
                   ) })
                 ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ColumnLayout2, { columns: 4, children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Required Flags / Labels / Tags (AND)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                    "input",
+                    {
+                      type: "text",
+                      id: "proj-required-labels-input",
+                      value: projRequiredLabels,
+                      onChange: (e) => setProjRequiredLabels(e.target.value),
+                      placeholder: "agent-ready, approved",
+                      style: {
+                        width: "100%",
+                        padding: "0.45rem",
+                        background: "#0f172a",
+                        color: "#fff",
+                        border: "1px solid #334155",
+                        borderRadius: "4px"
+                      }
+                    }
+                  ) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Excluded Blocker Flags / Labels", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                    "input",
+                    {
+                      type: "text",
+                      id: "proj-excluded-labels-input",
+                      value: projExcludedLabels,
+                      onChange: (e) => setProjExcludedLabels(e.target.value),
+                      placeholder: "blocked, manual-only, on-hold",
+                      style: {
+                        width: "100%",
+                        padding: "0.45rem",
+                        background: "#0f172a",
+                        color: "#fff",
+                        border: "1px solid #334155",
+                        borderRadius: "4px"
+                      }
+                    }
+                  ) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Required Custom Fields (key=value)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                    "input",
+                    {
+                      type: "text",
+                      id: "proj-custom-fields-input",
+                      value: projCustomFields,
+                      onChange: (e) => setProjCustomFields(e.target.value),
+                      placeholder: "AI_Allowed=true, Priority=High",
+                      style: {
+                        width: "100%",
+                        padding: "0.45rem",
+                        background: "#0f172a",
+                        color: "#fff",
+                        border: "1px solid #334155",
+                        borderRadius: "4px"
+                      }
+                    }
+                  ) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Assignee Trigger Rule", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                    "input",
+                    {
+                      type: "text",
+                      id: "proj-assignee-filter-input",
+                      value: projAssigneeFilter,
+                      onChange: (e) => setProjAssigneeFilter(e.target.value),
+                      placeholder: "any or unassigned",
+                      style: {
+                        width: "100%",
+                        padding: "0.45rem",
+                        background: "#0f172a",
+                        color: "#fff",
+                        border: "1px solid #334155",
+                        borderRadius: "4px"
+                      }
+                    }
+                  ) })
+                ] }),
                 /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }, children: [
                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
                     "button",
@@ -29341,7 +29434,31 @@
                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: (state?.projects || []).map((p) => {
                     const prov = (p.provider || "github").toLowerCase();
                     const etagKey = prov === "github" ? p.repo : `${prov}:${p.repo}`;
-                    const filterDesc = prov === "jira" ? `Key: ${p.trackerConfig?.projectKey || "-"} \xB7 Status: ${p.trackerConfig?.statusFilter || "Ready for Agent"}` : prov === "asana" ? `GID: ${p.trackerConfig?.projectGid || "-"} \xB7 Status: ${p.trackerConfig?.statusFilter || "Ready for Agent"}` : p.trackerConfig?.statusFilter || "state=open";
+                    const tc = p.trackerConfig || {};
+                    const triggerParts = [];
+                    if (prov === "jira") {
+                      triggerParts.push(`Key: ${tc.projectKey || "-"}`);
+                      triggerParts.push(`Stage: ${tc.statusFilter || "Ready for Agent"}`);
+                    } else if (prov === "asana") {
+                      triggerParts.push(`GID: ${tc.projectGid || "-"}`);
+                      triggerParts.push(`Stage: ${tc.statusFilter || "Ready for Agent"}`);
+                    } else {
+                      triggerParts.push(tc.statusFilter ? `Stage: ${tc.statusFilter}` : "state=open");
+                    }
+                    if (Array.isArray(tc.requiredLabels) && tc.requiredLabels.length > 0) {
+                      triggerParts.push(`+Flags: [${tc.requiredLabels.join(", ")}]`);
+                    }
+                    if (Array.isArray(tc.excludedLabels) && tc.excludedLabels.length > 0) {
+                      triggerParts.push(`-Exclude: [${tc.excludedLabels.join(", ")}]`);
+                    }
+                    if (tc.requiredCustomFields && Object.keys(tc.requiredCustomFields).length > 0) {
+                      const cfStr = Object.entries(tc.requiredCustomFields).map(([k, v]) => `${k}=${v}`).join(", ");
+                      triggerParts.push(`+Fields: [${cfStr}]`);
+                    }
+                    if (tc.assigneeFilter && tc.assigneeFilter !== "any") {
+                      triggerParts.push(`Assignee: ${tc.assigneeFilter}`);
+                    }
+                    const filterDesc = triggerParts.join(" \xB7 ");
                     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
                       "tr",
                       {

@@ -1,7 +1,7 @@
 import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { loadAndValidateFactory } from './config.mjs';
-import { SUPPORTED_PROVIDERS, pollProjectTracker } from './trackers.mjs';
+import { SUPPORTED_PROVIDERS, normalizeTriggerRules, pollProjectTracker } from './trackers.mjs';
 import { intakeAndTriageTicket } from './pipeline.mjs';
 
 const REPO_RE = /^[^/\s]+\/[^/\s]+$/;
@@ -63,6 +63,7 @@ export function upsertMonitoredProject(
 
   const normalizedTrackerConfig =
     trackerConfig && typeof trackerConfig === 'object' ? { ...trackerConfig } : {};
+  const triggerRules = normalizeTriggerRules(normalizedTrackerConfig, cleanProvider);
 
   if (cleanProvider === 'jira') {
     const projectKey = String(normalizedTrackerConfig.projectKey || '').trim();
@@ -75,8 +76,6 @@ export function upsertMonitoredProject(
       };
     }
     normalizedTrackerConfig.projectKey = projectKey || 'JIRA';
-    normalizedTrackerConfig.statusFilter =
-      String(normalizedTrackerConfig.statusFilter || 'Ready for Agent').trim();
   } else if (cleanProvider === 'asana') {
     const projectGid = String(normalizedTrackerConfig.projectGid || '').trim();
     if (!projectGid) {
@@ -87,12 +86,23 @@ export function upsertMonitoredProject(
       };
     }
     normalizedTrackerConfig.projectGid = projectGid;
-    normalizedTrackerConfig.statusFilter =
-      String(
-        normalizedTrackerConfig.statusFilter ||
-          normalizedTrackerConfig.sectionFilter ||
-          'Ready for Agent',
-      ).trim();
+  }
+
+  if (triggerRules.statuses.length > 0) {
+    normalizedTrackerConfig.statuses = triggerRules.statuses;
+    normalizedTrackerConfig.statusFilter = triggerRules.statusFilter;
+  }
+  if (triggerRules.requiredLabels.length > 0) {
+    normalizedTrackerConfig.requiredLabels = triggerRules.requiredLabels;
+  }
+  if (triggerRules.excludedLabels.length > 0) {
+    normalizedTrackerConfig.excludedLabels = triggerRules.excludedLabels;
+  }
+  if (Object.keys(triggerRules.requiredCustomFields).length > 0) {
+    normalizedTrackerConfig.requiredCustomFields = triggerRules.requiredCustomFields;
+  }
+  if (triggerRules.assigneeFilter && triggerRules.assigneeFilter !== 'any') {
+    normalizedTrackerConfig.assigneeFilter = triggerRules.assigneeFilter;
   }
 
   const cfg = loadAndValidateFactory(rootDir);
@@ -181,11 +191,12 @@ export function syncMonitoredProjectsIssues({ rootDir, store, runner = null }) {
   const newTasks = [];
   let polledRepos = 0;
   let skippedNotModified = 0;
+  let skippedByTriggersCount = 0;
 
   for (const proj of projects) {
     const provider = String(proj.provider || 'github').toLowerCase();
     if (proj.paused === true) {
-      results.push({ repo: proj.repo, provider, status: 'paused', intaked: 0 });
+      results.push({ repo: proj.repo, provider, status: 'paused', intaked: 0, skippedByTriggersCount: 0 });
       continue;
     }
 
@@ -204,9 +215,19 @@ export function syncMonitoredProjectsIssues({ rootDir, store, runner = null }) {
 
     if (polled.notModified) {
       skippedNotModified += 1;
-      results.push({ repo: proj.repo, provider, status: 'not_modified', intaked: 0, etag: polled.etag });
+      results.push({
+        repo: proj.repo,
+        provider,
+        status: 'not_modified',
+        intaked: 0,
+        skippedByTriggersCount: 0,
+        etag: polled.etag,
+      });
       continue;
     }
+
+    const repoSkippedCount = Number(polled.skippedByTriggersCount || 0);
+    skippedByTriggersCount += repoSkippedCount;
 
     let intakedForRepo = 0;
     for (const issue of polled.issues) {
@@ -233,6 +254,8 @@ export function syncMonitoredProjectsIssues({ rootDir, store, runner = null }) {
       status: 'polled',
       issuesFound: polled.issues.length,
       intaked: intakedForRepo,
+      skippedByTriggersCount: repoSkippedCount,
+      skippedByTriggers: polled.skippedByTriggers || [],
       etag: polled.etag || '',
     });
   }
@@ -241,6 +264,7 @@ export function syncMonitoredProjectsIssues({ rootDir, store, runner = null }) {
     ok: true,
     polledRepos,
     skippedNotModified,
+    skippedByTriggersCount,
     newTasksCount: newTasks.length,
     newTasks,
     results,
