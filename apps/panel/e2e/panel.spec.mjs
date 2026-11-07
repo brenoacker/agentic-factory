@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { createPanelServer } from '../server.mjs';
 
 const REPO_ROOT = resolve(import.meta.dirname, '..', '..', '..');
-const CAPTURES_DIR = join(REPO_ROOT, '.specs', 'features', 'playwright-e2e-and-ticket-matrix', 'captures');
+const CAPTURES_DIR = join(REPO_ROOT, 'runs', 'screenshots');
 
 function makeTempFactoryClone() {
   const dir = mkdtempSync(join(tmpdir(), 'agentic-factory-pw-'));
@@ -15,8 +15,8 @@ function makeTempFactoryClone() {
   return dir;
 }
 
-async function startTestServer(rootDir, dbPath) {
-  const panel = createPanelServer({ rootDir, dbPath });
+async function startTestServer(rootDir, dbPath, issuePollRunner = null) {
+  const panel = createPanelServer({ rootDir, dbPath, issuePollRunner });
   await new Promise((resolveListen) => panel.server.listen(0, '127.0.0.1', resolveListen));
   const { port } = panel.server.address();
   const baseUrl = `http://127.0.0.1:${port}`;
@@ -258,3 +258,62 @@ test('C6: Playwright E2E test triages, advances, approves human gates, and compl
     rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+test('C8: Playwright E2E test configures an external GitHub repository in the UI and syncs its issues onto the board', async ({ page }) => {
+  mkdirSync(CAPTURES_DIR, { recursive: true });
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+
+  const mockRunner = ({ repo }) => {
+    if (repo === 'brenoacker/external-webapp') {
+      return {
+        status: 200,
+        etag: 'W/"ext-webapp-etag"',
+        body: [
+          {
+            number: 401,
+            title: 'TypeError exception when checkout cart is empty on mobile',
+            body: 'Steps to reproduce: open /checkout with empty cart',
+            labels: [],
+          },
+        ],
+      };
+    }
+    return { status: 200, etag: 'W/"default-etag"', body: [] };
+  };
+
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockRunner);
+
+  try {
+    await page.goto(baseUrl);
+    await page.locator('#tabs button[data-tab="board"]').click();
+
+    // 1. Add external GitHub repository in the Control Panel UI
+    await page.locator('#proj-repo-input').fill('brenoacker/external-webapp');
+    await page.locator('#proj-branch-input').fill('main');
+    await page.locator('#proj-add-btn').click();
+    await expect(page.locator('#proj-feedback')).toContainText('Monitoring brenoacker/external-webapp (main)');
+    await expect(page.getByTestId('project-row-brenoacker/external-webapp')).toContainText('MONITORING');
+
+    // 2. Click "Sync Issues from All Monitored Repos"
+    await page.locator('#sync-repos-btn').click();
+    await expect(page.locator('#proj-feedback')).toContainText('1 new issue(s) intaked');
+
+    // 3. Verify the issue from brenoacker/external-webapp appears on the Kanban board classified as 'bug'
+    await expect(page.getByTestId('task-repo-401')).toHaveText('brenoacker/external-webapp');
+    await expect(page.getByTestId('task-type-401')).toHaveText('bug');
+    await expect(page.getByTestId('task-stage-401')).toHaveText('triage');
+
+    // 4. Advance the external repository's ticket to completion
+    await page.getByTestId('dispatch-btn-401').click();
+    await expect(page.getByTestId('task-stage-401')).toHaveText('merge');
+    await page.getByTestId('approve-btn-401').click();
+    await expect(page.getByTestId('task-stage-401')).toHaveText('done');
+
+    await page.screenshot({ path: join(CAPTURES_DIR, 'multi-repo-synced-and-done.png'), fullPage: true });
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+

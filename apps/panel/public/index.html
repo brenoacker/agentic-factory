@@ -170,8 +170,32 @@
 
     <section id="tab-board" class="hidden">
       <div class="card" style="margin-bottom: 1rem;">
+        <h3>Monitored GitHub Repositories (Multi-Repo Issue Poller)</h3>
+        <div class="form-row">
+          <div>
+            <label>GitHub Repository (owner/repo)<input type="text" id="proj-repo-input" placeholder="brenoacker/my-existing-repo" /></label>
+          </div>
+          <div>
+            <label>Default Branch<input type="text" id="proj-branch-input" value="main" /></label>
+          </div>
+        </div>
+        <div style="display:flex;gap:0.75rem;align-items:center;margin-bottom:0.75rem;">
+          <button id="proj-add-btn" class="btn green" onclick="addMonitoredProject()">Add Monitored Repository</button>
+          <button id="sync-repos-btn" class="btn" onclick="syncAllMonitoredProjects()">Sync Issues from All Monitored Repos</button>
+          <span id="proj-feedback" class="sub"></span>
+        </div>
+        <table id="projects-table">
+          <thead><tr><th>Repository</th><th>Branch</th><th>Status</th><th>Last ETag</th><th>Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="card" style="margin-bottom: 1rem;">
         <h3>Ticket Intake & Automatic Classifier</h3>
         <div class="form-row">
+          <div>
+            <label>Target Repository (owner/repo)<input type="text" id="intake-repo" placeholder="brenoacker/agentic-factory" /></label>
+          </div>
           <div>
             <label>Issue #<input type="number" id="intake-issue-number" placeholder="101" /></label>
           </div>
@@ -298,7 +322,52 @@
       render();
     }
 
+    async function addMonitoredProject() {
+      const repo = document.getElementById('proj-repo-input').value;
+      const defaultBranch = document.getElementById('proj-branch-input').value || 'main';
+      const res = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repo, defaultBranch }),
+      });
+      const data = await res.json();
+      const fb = document.getElementById('proj-feedback');
+      if (res.ok) {
+        fb.textContent = `Monitoring ${data.project.repo} (${data.project.defaultBranch})`;
+      } else {
+        fb.textContent = `Error: ${data.error}`;
+      }
+      await loadDashboard();
+    }
+
+    async function toggleProjectPause(repo, paused) {
+      await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repo, paused }),
+      });
+      await loadDashboard();
+    }
+
+    async function removeProject(repo) {
+      await fetch('/api/projects/' + encodeURIComponent(repo), { method: 'DELETE' });
+      await loadDashboard();
+    }
+
+    async function syncAllMonitoredProjects() {
+      const res = await fetch('/api/projects/sync', { method: 'POST' });
+      const data = await res.json();
+      const fb = document.getElementById('proj-feedback');
+      if (res.ok) {
+        fb.textContent = `Synced ${data.polledRepos} repo(s): ${data.newTasksCount} new issue(s) intaked`;
+      } else {
+        fb.textContent = `Sync error: ${data.error}`;
+      }
+      await loadDashboard();
+    }
+
     async function submitTicketIntake() {
+      const repo = document.getElementById('intake-repo').value || undefined;
       const issueNumber = Number(document.getElementById('intake-issue-number').value);
       const title = document.getElementById('intake-title').value;
       const body = document.getElementById('intake-body').value;
@@ -306,7 +375,7 @@
       const res = await fetch('/api/tickets/intake', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ issue_number: issueNumber, title, body, type }),
+        body: JSON.stringify({ repo, issue_number: issueNumber, title, body, type }),
       });
       const data = await res.json();
       const fb = document.getElementById('intake-feedback');
@@ -449,12 +518,27 @@
         </div>`
       ).join('') || '<div class="sub">No tickets blocked awaiting human approval.</div>';
 
+      const etagMap = Object.fromEntries((state.repoEtags || []).map(e => [e.repo, e.etag]));
+      document.querySelector('#projects-table tbody').innerHTML = (state.projects || []).map(p =>
+        `<tr data-testid="project-row-${p.repo}">
+          <td><strong>${p.repo}</strong></td>
+          <td><code>${p.defaultBranch || 'main'}</code></td>
+          <td><span class="badge ${p.paused ? 'red' : 'green'}">${p.paused ? 'PAUSED' : 'MONITORING'}</span></td>
+          <td><code>${etagMap[p.repo] || '-'}</code></td>
+          <td>
+            <button data-testid="toggle-proj-${p.repo}" class="btn" onclick="toggleProjectPause('${p.repo}', ${!p.paused})">${p.paused ? 'Resume' : 'Pause'}</button>
+            <button data-testid="remove-proj-${p.repo}" class="btn red" onclick="removeProject('${p.repo}')">Remove</button>
+          </td>
+        </tr>`
+      ).join('') || '<tr><td colspan="5">No repositories configured</td></tr>';
+
       const stages = ['triage', 'plan', 'checks_and_build', 'verify', 'review', 'investigate', 'discover', 'merge', 'done'];
       document.getElementById('kanban-board').innerHTML = stages.map(col => {
         const items = st.tasks.filter(t => t.stage === col);
         return `<div class="col" data-stage-col="${col}"><h4><span>${col}</span><span class="badge">${items.length}</span></h4>` +
           items.map(t => `<div class="task-card" data-testid="task-card-${t.issue_number}">
             <strong>#${t.issue_number} ${t.title}</strong><br/>
+            <span class="badge purple" data-testid="task-repo-${t.issue_number}">${t.repo}</span>
             <span class="badge" data-testid="task-type-${t.issue_number}">${t.type}</span>
             <span class="badge">${t.impact}</span>
             <span class="badge ${t.needs_human ? 'yellow' : 'green'}" data-testid="task-stage-${t.issue_number}">${t.stage}</span><br/>

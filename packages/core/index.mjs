@@ -20,5 +20,12 @@ export {
   intakeAndTriageTicket,
   advanceTicketInPanel,
 } from './src/pipeline.mjs';
+export {
+  listMonitoredProjects,
+  upsertMonitoredProject,
+  removeMonitoredProject,
+  syncMonitoredProjectsIssues,
+} from './src/projects.mjs';
+
 
 

@@ -168,3 +168,104 @@ test('C2: POST /api/tickets/:key/dispatch executes full stage lifecycles for fea
     rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+test('C7: multi-repo endpoints GET/POST/DELETE /api/projects and POST /api/projects/sync manage external repos and sync issues with per-repo ETag caching', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+
+  let callCount = 0;
+  const mockIssuePollRunner = ({ repo, etag }) => {
+    callCount += 1;
+    if (repo === 'brenoacker/external-service') {
+      if (etag === 'W/"etag-ext-1"') {
+        return { status: 304, etag: 'W/"etag-ext-1"', body: [] };
+      }
+      return {
+        status: 200,
+        etag: 'W/"etag-ext-1"',
+        body: [
+          {
+            number: 12,
+            title: 'TypeError crash when user session expires on external-service',
+            body: 'Stack trace in auth middleware',
+            labels: [],
+          },
+          {
+            number: 15,
+            title: '[feature] Add rate-limit header to external-service responses',
+            body: 'Expose X-RateLimit-Remaining',
+            labels: [{ name: 'type:feature' }],
+          },
+        ],
+      };
+    }
+    return { status: 200, etag: 'W/"etag-default"', body: [] };
+  };
+
+  const panel = createPanelServer({ rootDir: tmpDir, dbPath, issuePollRunner: mockIssuePollRunner });
+  await new Promise((resolveListen) => panel.server.listen(0, '127.0.0.1', resolveListen));
+  const baseUrl = `http://127.0.0.1:${panel.server.address().port}`;
+
+  try {
+    // 1. Invalid repo string -> 400
+    const badRes = await fetch(`${baseUrl}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ repo: 'invalid-repo-name' }),
+    });
+    assert.equal(badRes.status, 400);
+
+    // 2. Add new external repository -> 201
+    const addRes = await fetch(`${baseUrl}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ repo: 'brenoacker/external-service', defaultBranch: 'develop' }),
+    });
+    assert.equal(addRes.status, 201);
+    const addData = await addRes.json();
+    assert.equal(addData.project.repo, 'brenoacker/external-service');
+    assert.equal(addData.project.defaultBranch, 'develop');
+
+    // 3. Update existing repository (pause/unpause) -> 200
+    const updRes = await fetch(`${baseUrl}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ repo: 'brenoacker/agentic-factory', paused: true }),
+    });
+    assert.equal(updRes.status, 200);
+
+    // 4. Sync issues across unpaused monitored repositories -> polls only brenoacker/external-service (since agentic-factory is paused)
+    const sync1 = await (await fetch(`${baseUrl}/api/projects/sync`, { method: 'POST' })).json();
+    assert.equal(sync1.ok, true);
+    assert.equal(sync1.polledRepos, 1);
+    assert.equal(sync1.newTasksCount, 2);
+    assert.equal(panel.store.getTask('brenoacker/external-service#12').type, 'bug');
+    assert.equal(panel.store.getTask('brenoacker/external-service#15').type, 'feature');
+
+    // 5. Second sync uses cached ETag W/"etag-ext-1" and receives 304 Not Modified
+    const sync2 = await (await fetch(`${baseUrl}/api/projects/sync`, { method: 'POST' })).json();
+    assert.equal(sync2.skippedNotModified, 1);
+    assert.equal(sync2.newTasksCount, 0);
+    assert.equal(callCount, 2);
+
+    // 6. GET /api/projects lists both projects and saved ETag
+    const listData = await (await fetch(`${baseUrl}/api/projects`)).json();
+    assert.equal(listData.projects.length, 2);
+    assert.ok(listData.etags.some((e) => e.repo === 'brenoacker/external-service' && e.etag === 'W/"etag-ext-1"'));
+
+    // 7. DELETE /api/projects/:repo returns 200 on existing and 404 on unknown
+    const delRes = await fetch(`${baseUrl}/api/projects/${encodeURIComponent('brenoacker/external-service')}`, {
+      method: 'DELETE',
+    });
+    assert.equal(delRes.status, 200);
+
+    const delMissing = await fetch(`${baseUrl}/api/projects/${encodeURIComponent('brenoacker/unknown-repo')}`, {
+      method: 'DELETE',
+    });
+    assert.equal(delMissing.status, 404);
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+

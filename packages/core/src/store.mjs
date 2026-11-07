@@ -96,6 +96,12 @@ export class FactoryStore {
         violation_reason TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL
       );
+
+      CREATE TABLE IF NOT EXISTS repo_etags (
+        repo TEXT PRIMARY KEY,
+        etag TEXT NOT NULL DEFAULT '',
+        updated_at TEXT NOT NULL
+      );
     `);
 
     const defaultRuntimes = ['antigravity', 'claude-code', 'codex'];
@@ -163,6 +169,26 @@ export class FactoryStore {
 
   listDeployments() {
     return this.db.prepare('SELECT * FROM deployments ORDER BY id DESC').all();
+  }
+
+  getRepoEtag(repo) {
+    const row = this.db.prepare('SELECT etag FROM repo_etags WHERE repo = ?').get(repo);
+    return row ? row.etag : null;
+  }
+
+  setRepoEtag(repo, etag, now = new Date().toISOString()) {
+    this.db
+      .prepare(`
+        INSERT INTO repo_etags (repo, etag, updated_at)
+        VALUES (?, ?, ?)
+        ON CONFLICT(repo) DO UPDATE SET etag = excluded.etag, updated_at = excluded.updated_at
+      `)
+      .run(repo, String(etag || ''), now);
+    return this.db.prepare('SELECT * FROM repo_etags WHERE repo = ?').get(repo);
+  }
+
+  listRepoEtags() {
+    return this.db.prepare('SELECT * FROM repo_etags ORDER BY repo ASC').all();
   }
 
   verifyDeployment({

@@ -7,7 +7,12 @@ import { validateContract, verifyContractSchemasOnDisk } from './src/contracts.m
 import { evaluateIntakeGuards } from './src/guards.mjs';
 import { FactoryStore } from './src/store.mjs';
 import { approveTask, dispatchTask } from './src/dispatcher.mjs';
-import { pollIssuesWithEtag } from './src/github.mjs';
+import {
+  listMonitoredProjects,
+  upsertMonitoredProject,
+  removeMonitoredProject,
+  syncMonitoredProjectsIssues,
+} from './src/projects.mjs';
 import { createPanelServer } from '../../apps/panel/server.mjs';
 
 const args = process.argv.slice(2);
@@ -18,6 +23,9 @@ let kind = null;
 let file = null;
 let headSha = null;
 let key = null;
+let repoArg = null;
+let branchArg = 'main';
+let actionArg = null;
 let approveFlag = false;
 let onceFlag = false;
 let port = 4310;
@@ -36,6 +44,12 @@ for (let i = 1; i < args.length; i++) {
     headSha = args[++i];
   } else if (arg === '--key' && i + 1 < args.length) {
     key = args[++i];
+  } else if (arg === '--repo' && i + 1 < args.length) {
+    repoArg = args[++i];
+  } else if (arg === '--branch' && i + 1 < args.length) {
+    branchArg = args[++i];
+  } else if (arg === '--action' && i + 1 < args.length) {
+    actionArg = args[++i];
   } else if (arg === '--port' && i + 1 < args.length) {
     port = Number(args[++i]);
   } else if (arg === '--approve') {
@@ -157,14 +171,34 @@ if (subcommand === 'validate') {
     store.close();
   }
 } else if (subcommand === 'watch') {
-  const cfg = loadAndValidateFactory(root);
-  const repo = cfg.factoryConfig.factory.repo || 'brenoacker/agentic-factory';
   const store = new FactoryStore(resolvedDbPath);
   try {
-    const polled = pollIssuesWithEtag({ repo });
-    process.stdout.write(`${JSON.stringify({ ok: true, repo, notModified: polled.notModified, count: polled.issues.length, once: onceFlag })}\n`);
+    const syncRes = syncMonitoredProjectsIssues({ rootDir: root, store });
+    process.stdout.write(`${JSON.stringify({ ...syncRes, once: onceFlag })}\n`);
   } finally {
     store.close();
+  }
+} else if (subcommand === 'projects') {
+  const act = actionArg || 'list';
+  if (act === 'list') {
+    process.stdout.write(`${JSON.stringify({ ok: true, projects: listMonitoredProjects(root) })}\n`);
+  } else if (act === 'add') {
+    const res = upsertMonitoredProject(root, { repo: repoArg, defaultBranch: branchArg });
+    if (!res.ok) {
+      process.stderr.write(`${res.error}\n`);
+      process.exit(1);
+    }
+    process.stdout.write(`${JSON.stringify(res)}\n`);
+  } else if (act === 'remove') {
+    const res = removeMonitoredProject(root, repoArg);
+    if (!res.ok) {
+      process.stderr.write(`${res.error}\n`);
+      process.exit(1);
+    }
+    process.stdout.write(`${JSON.stringify(res)}\n`);
+  } else {
+    process.stderr.write(`Unknown projects action: ${act}\n`);
+    process.exit(2);
   }
 } else if (subcommand === 'panel') {
   const { server } = createPanelServer({ rootDir: root, dbPath: resolvedDbPath });

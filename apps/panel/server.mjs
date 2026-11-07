@@ -9,6 +9,10 @@ import {
   approveTask,
   intakeAndTriageTicket,
   advanceTicketInPanel,
+  listMonitoredProjects,
+  upsertMonitoredProject,
+  removeMonitoredProject,
+  syncMonitoredProjectsIssues,
 } from '../../packages/core/index.mjs';
 import { listAgentsCatalog, loadBrainEntries } from '../../packages/core/src/brain.mjs';
 
@@ -45,6 +49,7 @@ function sendJson(res, statusCode, payload) {
 export function createPanelServer({
   rootDir = resolve(import.meta.dirname, '..', '..'),
   dbPath = null,
+  issuePollRunner = null,
 } = {}) {
   const root = resolve(rootDir);
   const resolvedDbPath = dbPath || join(root, 'runs', 'factory.db');
@@ -76,11 +81,15 @@ export function createPanelServer({
         const brain = loadBrainEntries(root);
         const runtimeHealth = store.listRuntimeHealth();
         const deployments = store.listDeployments();
+        const projects = listMonitoredProjects(root);
+        const repoEtags = store.listRepoEtags();
 
         sendJson(res, 200, {
           ok: true,
           status,
           factoryConfig: cfg.factoryConfig,
+          projects,
+          repoEtags,
           pricesConfig: cfg.pricesConfig,
           workflows: cfg.workflows,
           skills: lock.skills,
@@ -89,11 +98,52 @@ export function createPanelServer({
           runtimeHealth,
           deployments,
           integrations: [
-            { id: 'github', name: 'GitHub Issues & PRs (REST + ETag)', status: 'connected' },
+            { id: 'github', name: 'GitHub Issues & PRs (Multi-Repo ETag Polling)', status: 'connected' },
             { id: 'sentry', name: 'Sentry Production Alerts Webhook', status: 'ready' },
             { id: 'posthog', name: 'PostHog Post-Deploy Metrics', status: 'ready' },
           ],
         });
+        return;
+      }
+
+      // 2b. GET / POST / DELETE /api/projects & POST /api/projects/sync
+      if (req.method === 'GET' && pathname === '/api/projects') {
+        sendJson(res, 200, {
+          ok: true,
+          projects: listMonitoredProjects(root),
+          etags: store.listRepoEtags(),
+        });
+        return;
+      }
+
+      if (req.method === 'POST' && pathname === '/api/projects') {
+        const body = await readJsonBody(req);
+        const projRes = upsertMonitoredProject(root, {
+          repo: body.repo,
+          id: body.id,
+          defaultBranch: body.defaultBranch || 'main',
+          localPath: body.localPath || '',
+          paused: Boolean(body.paused),
+        });
+        sendJson(res, projRes.status, projRes);
+        return;
+      }
+
+      if (req.method === 'POST' && pathname === '/api/projects/sync') {
+        const syncRes = syncMonitoredProjectsIssues({
+          rootDir: root,
+          store,
+          runner: issuePollRunner,
+        });
+        sendJson(res, 200, syncRes);
+        return;
+      }
+
+      const delProjMatch = pathname.match(/^\/api\/projects\/(.+)$/);
+      if (req.method === 'DELETE' && delProjMatch) {
+        const targetRepo = decodeURIComponent(delProjMatch[1]);
+        const delRes = removeMonitoredProject(root, targetRepo);
+        sendJson(res, delRes.status, delRes);
         return;
       }
 
