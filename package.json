@@ -22,6 +22,7 @@
     "@cloudscape-design/design-tokens": "^3.0.117",
     "@cloudscape-design/global-styles": "^1.0.72",
     "esbuild": "^0.28.2",
+    "mermaid": "^12.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   }

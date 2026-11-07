@@ -9,6 +9,7 @@ import {
   queryBrain,
   extractFollowUpTickets,
   canAutoMergeTask,
+  generateWorkflowMermaid,
 } from '../../../packages/core/index.mjs';
 
 const REPO_ROOT = resolve(import.meta.dirname, '..', '..', '..');
@@ -237,6 +238,22 @@ test('C4: POST /api/workflows/:id returns 200 on valid workflow, 422 on unlocked
     assert.equal(okData.ok, true);
     assert.equal(okData.committed, true);
     assert.ok(okData.commitSha);
+
+    // Verify generateWorkflowMermaid color-codes human gates with amber (:::human) and auto with blue (:::auto)
+    const testWf = {
+      id: 'feature',
+      stages: [
+        { id: 'triage', agent: 'triager', humanApproval: false, next: 'plan' },
+        { id: 'plan', agent: 'planner', humanApproval: true, next: 'build' },
+      ],
+    };
+    const mermaidCode = generateWorkflowMermaid(testWf);
+    assert.ok(mermaidCode.includes('classDef human fill:#78350f,stroke:#f59e0b'));
+    assert.ok(mermaidCode.includes('classDef auto fill:#1e293b,stroke:#0972d3'));
+    assert.ok(mermaidCode.includes('triage["triage\\n(triager)"]:::auto'));
+    assert.ok(mermaidCode.includes('plan["plan\\n(planner)"]:::human'));
+    assert.ok(mermaidCode.includes('triage -->|Auto| plan'));
+    assert.ok(mermaidCode.includes('plan -->|Human Gate| build'));
   } finally {
     await panel.close();
     rmSync(tmpDir, { recursive: true, force: true });

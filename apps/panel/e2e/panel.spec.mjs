@@ -599,4 +599,45 @@ test('C11: Playwright E2E test customizes combinable pickup triggers (stage + fl
   }
 });
 
+test('C12: Playwright E2E test verifies authentic AWS Cloudscape AppLayout, SideNavigation, and visual Mermaid workflow diagram editor', async ({ page }) => {
+  mkdirSync(CAPTURES_DIR, { recursive: true });
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    await page.goto(baseUrl);
+
+    // 1. Verify authentic AWS Cloudscape AppLayout, TopNavigation, and SideNavigation
+    await expect(page.locator('.awsui-app-layout')).toBeVisible();
+    await expect(page.locator('.awsui-side-navigation')).toBeVisible();
+    await expect(page.locator('.awsui-top-navigation')).toBeVisible();
+
+    // 2. Navigate to Workflows tab via SideNavigation
+    await page.locator('.awsui-side-navigation a[href="#workflows"]').click();
+    await expect(page.locator('#tab-workflows')).toBeVisible();
+
+    // 3. Verify visual Mermaid SVG diagram is rendered dynamically
+    const mermaidContainer = page.locator('#wf-mermaid-diagram');
+    await expect(mermaidContainer).toBeVisible();
+    const mermaidSvg = mermaidContainer.locator('svg');
+    await expect(mermaidSvg).toBeVisible();
+
+    // 4. Modify workflow in the UI: select "chore" workflow and change autonomy
+    await page.locator('#wf-editor-select').selectOption('chore');
+    await expect(page.locator('#wf-mermaid-diagram svg')).toBeVisible();
+
+    await page.locator('#wf-autonomy-select').selectOption('auto-low');
+
+    // 5. Save modified workflow and verify 200 persistence
+    await page.locator('#wf-editor-save-btn').click();
+    await expect(page.locator('#wf-editor-status')).toContainText('Saved workflow chore (200)');
+
+    await page.screenshot({ path: join(CAPTURES_DIR, 'cloudscape-mermaid-workflows.png'), fullPage: true });
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
 

@@ -38,6 +38,7 @@ export {
   pollAsanaTracker,
   pollProjectTracker,
 } from './src/trackers.mjs';
+export { generateWorkflowMermaid } from './src/mermaid.mjs';
 
 
 
