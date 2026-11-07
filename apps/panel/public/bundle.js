@@ -338912,6 +338912,24 @@ ${isHandDrawn ? "" : `
       }
       await loadDashboard();
     };
+    const checkTaskPr = async (key2) => {
+      try {
+        const res = await fetch("/api/tasks/" + encodeURIComponent(key2) + "/check-pr", {
+          method: "POST"
+        });
+        const data6 = await res.json();
+        if (!res.ok) {
+          setIntakeFeedback(`PR Check Notice (${res.status}): ${data6.error || "Failed to check PR"}`);
+        } else if (data6.merged) {
+          setIntakeFeedback(`\u2705 PR #${data6.prNumber || ""} is MERGED! Task advanced to done.`);
+        } else {
+          setIntakeFeedback(`\u23F3 PR #${data6.prNumber || ""} state is ${data6.state || "OPEN"}. Awaiting merge on GitHub.`);
+        }
+      } catch (err) {
+        setIntakeFeedback(`PR Check Error: ${err.message}`);
+      }
+      await loadDashboard();
+    };
     const submitHumanReply = async (key2, replyWords) => {
       const text5 = replyWords || "Operator clarification provided";
       const res = await fetch("/api/tasks/" + encodeURIComponent(key2) + "/approve", {
@@ -340082,7 +340100,16 @@ ${isHandDrawn ? "" : `
                             }
                           ) }) }),
                           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { direction: "horizontal", size: "xs", children: [
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                            item.stage === "merge" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                              button_default2,
+                              {
+                                variant: "primary",
+                                id: `human-check-pr-btn-${item.issueNumber}`,
+                                "data-testid": `human-check-pr-btn-${item.issueNumber}`,
+                                onClick: () => checkTaskPr(item.executionKey),
+                                children: "Check PR Merge Status & Sync"
+                              }
+                            ) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
                               button_default2,
                               {
                                 variant: "primary",
@@ -340262,7 +340289,36 @@ ${isHandDrawn ? "" : `
                                         }
                                       )
                                     ] }),
-                                    t4.stage !== "done" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: "0.45rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                    t4.stage === "merge" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                                      "div",
+                                      {
+                                        "data-testid": `pr-status-box-${t4.issue_number}`,
+                                        style: {
+                                          marginTop: "0.35rem",
+                                          padding: "0.35rem 0.5rem",
+                                          background: "#1e293b",
+                                          border: "1px solid #3b82f6",
+                                          borderRadius: "4px",
+                                          fontSize: "0.75rem",
+                                          color: "#93c5fd"
+                                        },
+                                        children: [
+                                          "\u23F3 ",
+                                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Awaiting GitHub Merge:" }),
+                                          " Pull Request is open. Awaiting review and merge on GitHub."
+                                        ]
+                                      }
+                                    ),
+                                    t4.stage !== "done" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: "0.45rem" }, children: t4.stage === "merge" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                      button_default2,
+                                      {
+                                        variant: "primary",
+                                        id: `check-pr-btn-${t4.issue_number}`,
+                                        "data-testid": `check-pr-btn-${t4.issue_number}`,
+                                        onClick: () => checkTaskPr(t4.execution_key),
+                                        children: "Check PR Merge Status & Sync"
+                                      }
+                                    ) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
                                       button_default2,
                                       {
                                         variant: "primary",

@@ -16,6 +16,8 @@ import {
   evaluateIntakeGuards,
   provisionTaskWorkspace,
   autoDispatchQueuedTasks,
+  checkGitHubPullRequest,
+  syncMergedPullRequests,
   FactoryStore,
 } from '../../../packages/core/index.mjs';
 
@@ -551,6 +553,7 @@ test('C9: Tracker lifecycle updates status to in-progress, posts pickup comment,
       pricesConfig: {},
       store,
       headSha: 'commit8888',
+      deliverable: { type: 'pull_request', url: 'https://github.com/brenoacker/agentic-factory/pull/88', ref: 'commit8888' },
       trackerRunner: mockTrackerRunner,
     });
 
@@ -616,6 +619,7 @@ test('C9: Tracker lifecycle updates status to in-progress, posts pickup comment,
       pricesConfig: {},
       store,
       headSha: 'lincommit99',
+      deliverable: { type: 'pull_request', url: 'https://linear.app/issue/lin-issue-99', ref: 'lincommit99' },
       trackerRunner: mockLinearTrackerRunner,
     });
 
@@ -1168,4 +1172,255 @@ test('C16: Factory store persists ticket_url, provider, and triage contract type
     rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+test('C18: Live GitHub PR verification and premature done transition rejection', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+
+  const ghCalls = [];
+  const mockGhRunner = (spec) => {
+    ghCalls.push(spec);
+    if (spec.action === 'check_pr') {
+      const isMerged = String(spec.prNumberOrUrl).includes('899');
+      return {
+        ok: true,
+        prNumber: isMerged ? 899 : 801,
+        title: isMerged ? 'Merged Feature PR' : 'Open Feature PR',
+        state: isMerged ? 'MERGED' : 'OPEN',
+        merged: isMerged,
+        mergedAt: isMerged ? '2026-11-07T12:00:00Z' : null,
+        url: spec.prNumberOrUrl,
+      };
+    }
+    return { ok: true, status: 200 };
+  };
+
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockGhRunner);
+
+  try {
+    // 1. Verify checkGitHubPullRequest returns live state and merged boolean
+    const openPrCheck = checkGitHubPullRequest({
+      repo: 'brenoacker/agentic-factory',
+      prNumberOrUrl: 'https://github.com/brenoacker/agentic-factory/pull/801',
+      runner: mockGhRunner,
+    });
+    assert.equal(openPrCheck.ok, true);
+    assert.equal(openPrCheck.state, 'OPEN');
+    assert.equal(openPrCheck.merged, false);
+
+    const mergedPrCheck = checkGitHubPullRequest({
+      repo: 'brenoacker/agentic-factory',
+      prNumberOrUrl: 'https://github.com/brenoacker/agentic-factory/pull/899',
+      runner: mockGhRunner,
+    });
+    assert.equal(mergedPrCheck.ok, true);
+    assert.equal(mergedPrCheck.state, 'MERGED');
+    assert.equal(mergedPrCheck.merged, true);
+
+    // 2. Verify advanceTicketInPanel strictly prohibits synthetic PR URL fabrication
+    const taskTriage = panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#800',
+      issueNumber: 800,
+      repo: 'brenoacker/agentic-factory',
+      title: 'No Fake PR Task',
+      type: 'feature',
+      stage: 'triage',
+    });
+
+    const triageRunner = (callSpec) => ({
+      ok: true,
+      status: 0,
+      stdout: JSON.stringify({
+        usage: { input_tokens: 100, output_tokens: 50, cached_tokens: 0 },
+        total_cost_usd: 0.001,
+        contract: {
+          stage_token: callSpec.stageToken,
+          issue_number: 800,
+          type: 'feature',
+          impact: 'medium',
+          root_cause: 'Real investigation without fake PR fabrication.',
+          evidence: 'packages/core/src/pipeline.mjs#L360',
+          affected_paths: ['packages/core/src/pipeline.mjs'],
+          needs_human: false,
+        },
+      }),
+    });
+
+    advanceTicketInPanel({
+      executionKey: taskTriage.execution_key,
+      factoryRoot: tmpDir,
+      store: panel.store,
+      runner: triageRunner,
+    });
+
+    const taskAfterTriage = panel.store.getTask(taskTriage.execution_key);
+    assert.equal(taskAfterTriage.deliverable_url, '');
+    assert.equal(taskAfterTriage.deliverable_type, '');
+
+    // 3. Task in stage merge with OPEN pull request
+    const taskInMerge = panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#801',
+      issueNumber: 801,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Feature Waiting for Real Merge',
+      type: 'feature',
+      stage: 'merge',
+    });
+    panel.store.updateTaskStage(taskInMerge.execution_key, {
+      needsHuman: true,
+      humanQuestion: 'Stage "merge" requires human action',
+    });
+    panel.store.attachTaskDeliverable(taskInMerge.execution_key, {
+      type: 'pull_request',
+      url: 'https://github.com/brenoacker/agentic-factory/pull/801',
+      ref: 'head801',
+    });
+
+    // 4. Reject POST /api/tasks/:key/approve with HTTP 409 pr_not_merged
+    const approveRes = await fetch(`${baseUrl}/api/tasks/${encodeURIComponent(taskInMerge.execution_key)}/approve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ approver: 'operator', words: 'premature approval attempt' }),
+    });
+    assert.equal(approveRes.status, 409);
+    const approveJson = await approveRes.json();
+    assert.equal(approveJson.ok, false);
+    assert.equal(approveJson.code, 'pr_not_merged');
+    assert.match(approveJson.error, /still OPEN on GitHub/i);
+
+    // Verify task remained in stage merge
+    const taskStillMerge = panel.store.getTask(taskInMerge.execution_key);
+    assert.equal(taskStillMerge.stage, 'merge');
+
+    // 5. Reject advanceTicketInPanel with approveCurrentStage: true
+    const advReject = advanceTicketInPanel({
+      executionKey: taskInMerge.execution_key,
+      factoryRoot: tmpDir,
+      store: panel.store,
+      approveCurrentStage: true,
+      trackerRunner: mockGhRunner,
+    });
+    assert.equal(advReject.ok, false);
+    assert.equal(advReject.status, 409);
+    assert.equal(advReject.code, 'pr_not_merged');
+
+    // 6. Test POST /api/tasks/:key/check-pr returns open status
+    const checkPrRes = await fetch(`${baseUrl}/api/tasks/${encodeURIComponent(taskInMerge.execution_key)}/check-pr`, {
+      method: 'POST',
+    });
+    assert.equal(checkPrRes.status, 200);
+    const checkPrJson = await checkPrRes.json();
+    assert.equal(checkPrJson.ok, true);
+    assert.equal(checkPrJson.state, 'OPEN');
+    assert.equal(checkPrJson.merged, false);
+    assert.equal(checkPrJson.advancedToDone, false);
+
+    // 7. Error cases for check-pr
+    const checkNotFound = await fetch(`${baseUrl}/api/tasks/unknown%23999/check-pr`, { method: 'POST' });
+    assert.equal(checkNotFound.status, 404);
+
+    const checkNoDeliv = await fetch(`${baseUrl}/api/tasks/${encodeURIComponent(taskTriage.execution_key)}/check-pr`, {
+      method: 'POST',
+    });
+    assert.equal(checkNoDeliv.status, 422);
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C19: Cron scheduler syncMergedPullRequests auto-completes tasks upon PR merge', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+
+  const trackerCalls = [];
+  const mockGhRunner = (spec) => {
+    trackerCalls.push(spec);
+    if (spec.action === 'check_pr') {
+      return {
+        ok: true,
+        prNumber: 802,
+        title: 'Real Merged PR',
+        state: 'MERGED',
+        merged: true,
+        mergedAt: '2026-11-07T14:30:00Z',
+        url: spec.prNumberOrUrl,
+      };
+    }
+    return { ok: true, status: 200 };
+  };
+
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockGhRunner);
+
+  try {
+    // 1. Create task in stage merge with real PR deliverable
+    const task = panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#802',
+      issueNumber: 802,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Automated Merge Completion Task',
+      type: 'feature',
+      stage: 'merge',
+    });
+    panel.store.updateTaskStage(task.execution_key, {
+      needsHuman: true,
+      humanQuestion: 'Stage "merge" requires human action',
+    });
+    panel.store.attachTaskDeliverable(task.execution_key, {
+      type: 'pull_request',
+      url: 'https://github.com/brenoacker/agentic-factory/pull/802',
+      ref: 'merge802',
+    });
+
+    // 2. Run syncMergedPullRequests
+    const syncRes = syncMergedPullRequests({
+      rootDir: tmpDir,
+      store: panel.store,
+      runner: mockGhRunner,
+    });
+    assert.equal(syncRes.ok, true);
+    assert.equal(syncRes.mergedTasksCount, 1);
+    assert.equal(syncRes.mergedTasks[0].execution_key, task.execution_key);
+
+    // 3. Verify task stage transitioned to done and needs_human cleared
+    const updated = panel.store.getTask(task.execution_key);
+    assert.equal(updated.stage, 'done');
+    assert.equal(updated.needs_human, 0);
+
+    // 4. Verify GitHub comment, close, and label updates
+    assert.ok(trackerCalls.some((c) => c.action === 'comment' && c.comment.includes('was merged into default branch')));
+    assert.ok(trackerCalls.some((c) => c.action === 'close' && c.comment.includes('Merged PR: https://github.com/brenoacker/agentic-factory/pull/802')));
+    assert.ok(trackerCalls.some((c) => c.action === 'update' && c.labelsToAdd.includes('stage:done')));
+
+    // 5. Test manual 1-click check-pr on a second task when merged
+    const task2 = panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#803',
+      issueNumber: 803,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Manual Check PR Merged Task',
+      type: 'bug',
+      stage: 'merge',
+    });
+    panel.store.attachTaskDeliverable(task2.execution_key, {
+      type: 'pull_request',
+      url: 'https://github.com/brenoacker/agentic-factory/pull/803',
+      ref: 'merge803',
+    });
+
+    const checkRes = await fetch(`${baseUrl}/api/tasks/${encodeURIComponent(task2.execution_key)}/check-pr`, {
+      method: 'POST',
+    });
+    assert.equal(checkRes.status, 200);
+    const checkJson = await checkRes.json();
+    assert.equal(checkJson.ok, true);
+    assert.equal(checkJson.state, 'MERGED');
+    assert.equal(checkJson.merged, true);
+    assert.equal(checkJson.advancedToDone, true);
+    assert.equal(checkJson.task.stage, 'done');
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
 

@@ -16,7 +16,33 @@ function makeTempFactoryClone() {
 }
 
 async function startTestServer(rootDir, dbPath, issuePollRunner = null) {
-  const panel = createPanelServer({ rootDir, dbPath, issuePollRunner });
+  const defaultRunner = (spec) => {
+    if (spec?.action === 'check_pr') {
+      return {
+        ok: true,
+        prNumber: 401,
+        state: 'MERGED',
+        merged: true,
+        url: spec.prNumberOrUrl,
+      };
+    }
+    return { ok: true, status: 200 };
+  };
+
+  const activeRunner = issuePollRunner
+    ? (spec) => {
+        if (spec?.action === 'check_pr') {
+          const res = issuePollRunner(spec);
+          if (res && typeof res === 'object' && ('state' in res || 'merged' in res)) {
+            return res;
+          }
+          return defaultRunner(spec);
+        }
+        return issuePollRunner(spec);
+      }
+    : defaultRunner;
+
+  const panel = createPanelServer({ rootDir, dbPath, issuePollRunner: activeRunner });
   await new Promise((resolveListen) => panel.server.listen(0, '127.0.0.1', resolveListen));
   const { port } = panel.server.address();
   const baseUrl = `http://127.0.0.1:${port}`;
@@ -26,7 +52,19 @@ async function startTestServer(rootDir, dbPath, issuePollRunner = null) {
 test('C3: Control Panel renders 100% in English across all 6 tabs with zero Portuguese strings', async ({ page }) => {
   const tmpDir = makeTempFactoryClone();
   const dbPath = join(tmpDir, 'factory.db');
-  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+  const mockGhRunner = (spec) => {
+    if (spec.action === 'check_pr') {
+      return {
+        ok: true,
+        prNumber: 401,
+        state: 'MERGED',
+        merged: true,
+        url: spec.prNumberOrUrl,
+      };
+    }
+    return { ok: true, status: 200 };
+  };
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockGhRunner);
 
   try {
     await page.goto(baseUrl);
@@ -74,7 +112,19 @@ test('C4: Playwright visual and component tests verify KPIs, Runtimes, Circuit B
   mkdirSync(CAPTURES_DIR, { recursive: true });
   const tmpDir = makeTempFactoryClone();
   const dbPath = join(tmpDir, 'factory.db');
-  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+  const mockGhRunner = (spec) => {
+    if (spec.action === 'check_pr') {
+      return {
+        ok: true,
+        prNumber: 401,
+        state: 'MERGED',
+        merged: true,
+        url: spec.prNumberOrUrl,
+      };
+    }
+    return { ok: true, status: 200 };
+  };
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockGhRunner);
 
   try {
     panel.store.tripRuntimeCircuit('codex', '429');
@@ -113,7 +163,19 @@ test('C5: Playwright integration tests verify Workflow editor, Operational Contr
   mkdirSync(CAPTURES_DIR, { recursive: true });
   const tmpDir = makeTempFactoryClone();
   const dbPath = join(tmpDir, 'factory.db');
-  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+  const mockGhRunner = (spec) => {
+    if (spec.action === 'check_pr') {
+      return {
+        ok: true,
+        prNumber: 401,
+        state: 'MERGED',
+        merged: true,
+        url: spec.prNumberOrUrl,
+      };
+    }
+    return { ok: true, status: 200 };
+  };
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockGhRunner);
 
   try {
     await page.goto(baseUrl);
@@ -190,7 +252,19 @@ test('C6: Playwright E2E test triages, advances, approves human gates, and compl
   writeFileSync(factoryYamlPath, yamlContent, 'utf8');
 
   const dbPath = join(tmpDir, 'factory.db');
-  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+  const mockGhRunner = (spec) => {
+    if (spec.action === 'check_pr') {
+      return {
+        ok: true,
+        prNumber: 401,
+        state: 'MERGED',
+        merged: true,
+        url: spec.prNumberOrUrl,
+      };
+    }
+    return { ok: true, status: 200 };
+  };
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockGhRunner);
 
   try {
     await page.goto(baseUrl);
@@ -326,7 +400,19 @@ test('C9: Playwright E2E test verifies stalled feature alarm banner, header badg
   mkdirSync(CAPTURES_DIR, { recursive: true });
   const tmpDir = makeTempFactoryClone();
   const dbPath = join(tmpDir, 'factory.db');
-  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+  const mockGhRunner = (spec) => {
+    if (spec.action === 'check_pr') {
+      return {
+        ok: true,
+        prNumber: 401,
+        state: 'MERGED',
+        merged: true,
+        url: spec.prNumberOrUrl,
+      };
+    }
+    return { ok: true, status: 200 };
+  };
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockGhRunner);
 
   try {
     const eightyMinAgo = new Date(Date.now() - 80 * 60_000).toISOString();
@@ -608,7 +694,19 @@ test('C12: Playwright E2E test verifies authentic AWS Cloudscape AppLayout, Side
   mkdirSync(CAPTURES_DIR, { recursive: true });
   const tmpDir = makeTempFactoryClone();
   const dbPath = join(tmpDir, 'factory.db');
-  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+  const mockGhRunner = (spec) => {
+    if (spec.action === 'check_pr') {
+      return {
+        ok: true,
+        prNumber: 401,
+        state: 'MERGED',
+        merged: true,
+        url: spec.prNumberOrUrl,
+      };
+    }
+    return { ok: true, status: 200 };
+  };
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockGhRunner);
 
   try {
     await page.goto(baseUrl);
@@ -747,7 +845,19 @@ test('C14: Playwright E2E test verifies isolated workspace provisioning, deliver
 }) => {
   const tmpDir = makeTempFactoryClone();
   const dbPath = join(tmpDir, 'factory.db');
-  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+  const mockGhRunner = (spec) => {
+    if (spec.action === 'check_pr') {
+      return {
+        ok: true,
+        prNumber: 401,
+        state: 'MERGED',
+        merged: true,
+        url: spec.prNumberOrUrl,
+      };
+    }
+    return { ok: true, status: 200 };
+  };
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockGhRunner);
 
   try {
     // 1. Intake feature ticket #950 and investigation ticket #951
@@ -806,7 +916,19 @@ test('C14: Playwright E2E test verifies isolated workspace provisioning, deliver
 test('C15: Playwright E2E test verifies max concurrent agents input, Overview KPI, and live limit updates in Cloudscape UI', async ({ page }) => {
   const tmpDir = makeTempFactoryClone();
   const dbPath = join(tmpDir, 'factory.db');
-  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+  const mockGhRunner = (spec) => {
+    if (spec.action === 'check_pr') {
+      return {
+        ok: true,
+        prNumber: 401,
+        state: 'MERGED',
+        merged: true,
+        url: spec.prNumberOrUrl,
+      };
+    }
+    return { ok: true, status: 200 };
+  };
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockGhRunner);
 
   try {
     // Populate with 2 active tasks
@@ -886,7 +1008,19 @@ test('C15: Playwright E2E test verifies max concurrent agents input, Overview KP
 test('C16: Playwright E2E test verifies interactive human clarification screen, reply submission, and cron auto-dispatch', async ({ page }) => {
   const tmpDir = makeTempFactoryClone();
   const dbPath = join(tmpDir, 'factory.db');
-  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+  const mockGhRunner = (spec) => {
+    if (spec.action === 'check_pr') {
+      return {
+        ok: true,
+        prNumber: 401,
+        state: 'MERGED',
+        merged: true,
+        url: spec.prNumberOrUrl,
+      };
+    }
+    return { ok: true, status: 200 };
+  };
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockGhRunner);
 
   try {
     // 1. Create a task that paused with needs_human=1 and an explicit question
@@ -1051,6 +1185,99 @@ test('C17: Playwright E2E test verifies 3-view navigation, clickable tracker hyp
     rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+test('C20: Playwright E2E verifies PR merge status and check button', async ({ page }) => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+
+  let prState = 'OPEN';
+  let isMerged = false;
+
+  const mockGhRunner = (spec) => {
+    if (spec.action === 'check_pr') {
+      return {
+        ok: true,
+        prNumber: 901,
+        title: 'Feature PR 901',
+        state: prState,
+        merged: isMerged,
+        mergedAt: isMerged ? '2026-11-07T15:00:00Z' : null,
+        url: spec.prNumberOrUrl,
+      };
+    }
+    return { ok: true, status: 200 };
+  };
+
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockGhRunner);
+
+  try {
+    // 1. Seed task in stage merge with real PR deliverable
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#901',
+      issueNumber: 901,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Real Deliverable PR Verification',
+      type: 'feature',
+      stage: 'merge',
+      provider: 'github',
+      ticketUrl: 'https://github.com/brenoacker/agentic-factory/issues/901',
+    });
+    panel.store.updateTaskStage('brenoacker/agentic-factory#901', {
+      needsHuman: true,
+      humanQuestion: 'Stage "merge" requires human action (PR review & merge)',
+    });
+    panel.store.attachTaskDeliverable('brenoacker/agentic-factory#901', {
+      type: 'pull_request',
+      url: 'https://github.com/brenoacker/agentic-factory/pull/901',
+      ref: 'merge901',
+    });
+
+    // 2. Open Board & Timeline view
+    await page.goto(baseUrl);
+    await expect(page.locator('#tabs')).toBeVisible();
+    await page.locator('#btn-view-board').click();
+    await expect(page.locator('#tab-board')).toBeVisible();
+
+    // 3. Verify Kanban card for task 901 displays Awaiting GitHub Merge banner
+    const prStatusBox = page.locator('[data-testid="pr-status-box-901"]');
+    await expect(prStatusBox).toBeVisible();
+    await expect(prStatusBox).toContainText('Awaiting GitHub Merge');
+
+    // 4. Verify Check PR button exists on Kanban card
+    const checkPrBtn = page.locator('#check-pr-btn-901');
+    await expect(checkPrBtn).toBeVisible();
+    await expect(checkPrBtn).toContainText('Check PR Merge Status & Sync');
+
+    // 5. Click Check PR button while still OPEN
+    await checkPrBtn.click();
+    await expect(page.locator('#intake-feedback')).toContainText('state is OPEN. Awaiting merge on GitHub');
+
+    // 6. Verify task remains in stage merge on Kanban
+    const stageBadge = page.locator('[data-testid="task-stage-901"]');
+    await expect(stageBadge).toContainText('merge');
+
+    // 7. Attempting 1-Click Approve on Waiting Human screen rejected with 409 pr_not_merged
+    const approveBtn = page.locator('#approve-btn-901');
+    await expect(approveBtn).toBeVisible();
+    await approveBtn.click();
+    await expect(page.locator('#intake-feedback')).toContainText('still OPEN on GitHub');
+
+    // 8. Human operator merges PR on GitHub
+    prState = 'MERGED';
+    isMerged = true;
+
+    // 9. Operator clicks Check PR Merge Status & Sync again
+    await checkPrBtn.click();
+    await expect(page.locator('#intake-feedback')).toContainText('is MERGED! Task advanced to done');
+
+    // 10. Verify task 901 is now in stage done
+    await expect(stageBadge).toContainText('done');
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
 
 
 

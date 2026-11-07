@@ -2,6 +2,7 @@ import { join, resolve } from 'node:path';
 import { invokeRuntimeAdapter } from './adapters.mjs';
 import { validateContract } from './contracts.mjs';
 import { selectRuntime, recordRuntimeFailure } from './router.mjs';
+import { checkGitHubPullRequest } from './github.mjs';
 
 function contractKindFromPath(contractPath) {
   if (!contractPath) return null;
@@ -47,6 +48,7 @@ export function dispatchTask({
   pricesConfig,
   store,
   runner = null,
+  trackerRunner = null,
   headSha = '64e6a79',
   humanApprovedCurrentStage = false,
 }) {
@@ -66,6 +68,28 @@ export function dispatchTask({
 
   // If the operator just approved a human-gated stage, advance to `next` before continuing
   if (humanApprovedCurrentStage) {
+    if (task.stage === 'merge' && task.deliverable_type === 'pull_request') {
+      const prCheck = checkGitHubPullRequest({
+        repo: task.repo,
+        prNumberOrUrl: task.deliverable_url,
+        runner: trackerRunner,
+      });
+      if (!prCheck.merged) {
+        task = store.updateTaskStage(executionKey, {
+          needsHuman: true,
+          humanQuestion: `Pull request #${prCheck.prNumber || 'unknown'} is still ${prCheck.state || 'OPEN'} on GitHub. Awaiting human merge before completing ticket.`,
+        });
+        return {
+          ok: false,
+          status: 'pr_not_merged',
+          code: 'pr_not_merged',
+          error: `Pull request #${prCheck.prNumber || 'unknown'} is still ${prCheck.state || 'OPEN'} on GitHub. Awaiting human merge before completing ticket.`,
+          stage: 'merge',
+          stepsExecuted: [],
+          task,
+        };
+      }
+    }
     if (task.needs_human === 1) {
       approveTask(store, executionKey);
     }
@@ -293,12 +317,14 @@ export function dispatchTask({
       }
 
       if (contractKind === 'review') {
-        const prNumber = cleanPayload.pr_number || task.issue_number + 100;
-        store.attachTaskDeliverable(executionKey, {
-          type: 'pull_request',
-          url: `https://github.com/${task.repo}/pull/${prNumber}`,
-          ref: cleanPayload.commit_sha || headSha,
-        });
+        const prNumber = cleanPayload.pr_number;
+        if (prNumber) {
+          store.attachTaskDeliverable(executionKey, {
+            type: 'pull_request',
+            url: `https://github.com/${task.repo}/pull/${prNumber}`,
+            ref: cleanPayload.commit_sha || headSha,
+          });
+        }
 
         const newRound = cleanPayload.round;
         const approvedFirstRound =

@@ -10,6 +10,8 @@ export {
   commentOnGitHubIssue,
   updateGitHubIssue,
   closeGitHubIssue,
+  checkGitHubPullRequest,
+  createGitHubPullRequest,
 } from './src/github.mjs';
 export { prepareWorktree, provisionTaskWorkspace } from './src/worktree.mjs';
 export { approveTask, dispatchTask } from './src/dispatcher.mjs';
@@ -33,6 +35,7 @@ export {
   syncMonitoredProjectsIssues,
   createPollingScheduler,
   autoDispatchQueuedTasks,
+  syncMergedPullRequests,
 } from './src/projects.mjs';
 export {
   SUPPORTED_PROVIDERS,

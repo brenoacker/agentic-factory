@@ -14,6 +14,10 @@ import {
   removeMonitoredProject,
   syncMonitoredProjectsIssues,
   createPollingScheduler,
+  checkGitHubPullRequest,
+  commentOnGitHubIssue,
+  closeGitHubIssue,
+  updateGitHubIssue,
 } from '../../packages/core/index.mjs';
 import { listAgentsCatalog, loadBrainEntries } from '../../packages/core/src/brain.mjs';
 
@@ -227,6 +231,81 @@ export function createPanelServer({
         return;
       }
 
+      const checkPrMatch = pathname.match(/^\/api\/tasks\/([^/]+)\/check-pr$/);
+      if (req.method === 'POST' && checkPrMatch) {
+        const executionKey = decodeURIComponent(checkPrMatch[1]);
+        const task = store.getTask(executionKey);
+        if (!task) {
+          sendJson(res, 404, { ok: false, error: `Task not found: ${executionKey}` });
+          return;
+        }
+        if (!task.deliverable_url) {
+          sendJson(res, 422, { ok: false, error: 'Task has no pull request deliverable attached' });
+          return;
+        }
+        const prCheck = checkGitHubPullRequest({
+          repo: task.repo,
+          prNumberOrUrl: task.deliverable_url,
+          runner: issuePollRunner,
+        });
+        let advancedToDone = false;
+        if (prCheck.ok && prCheck.merged && task.stage === 'merge') {
+          store.updateTaskStage(executionKey, { stage: 'done', needsHuman: false, humanQuestion: '' });
+          store.recordEvent({
+            executionKey,
+            issueNumber: task.issue_number,
+            eventType: 'pr_merged',
+            stage: 'merge',
+            runtime: task.runtime,
+            model: task.model,
+            payload: { prNumber: prCheck.prNumber, prUrl: prCheck.url, mergedAt: prCheck.mergedAt },
+          });
+          store.recordEvent({
+            executionKey,
+            issueNumber: task.issue_number,
+            eventType: 'completed',
+            stage: 'done',
+            runtime: task.runtime,
+            model: task.model,
+            payload: { deliverableUrl: task.deliverable_url, deliverableType: task.deliverable_type },
+          });
+          try {
+            commentOnGitHubIssue({
+              repo: task.repo,
+              issueNumber: task.issue_number,
+              comment: `✅ **Completed via Agentic Factory**: Pull Request ${task.deliverable_url} was merged into default branch. Issue closed as completed.`,
+              runner: issuePollRunner,
+            });
+            closeGitHubIssue({
+              repo: task.repo,
+              issueNumber: task.issue_number,
+              comment: `Closed as completed by Agentic Factory (Merged PR: ${task.deliverable_url}).`,
+              runner: issuePollRunner,
+            });
+            updateGitHubIssue({
+              repo: task.repo,
+              issueNumber: task.issue_number,
+              labelsToAdd: ['stage:done'],
+              labelsToRemove: ['in-progress', 'stage:merge'],
+              runner: issuePollRunner,
+            });
+          } catch {}
+          advancedToDone = true;
+        }
+        const updatedTask = store.getTask(executionKey);
+        sendJson(res, 200, {
+          ok: true,
+          executionKey,
+          state: prCheck.state,
+          merged: prCheck.merged,
+          prNumber: prCheck.prNumber,
+          prUrl: prCheck.url,
+          advancedToDone,
+          task: updatedTask,
+        });
+        return;
+      }
+
       const approveMatch = pathname.match(/^\/api\/tasks\/([^/]+)\/approve$/);
       if (req.method === 'POST' && approveMatch) {
         const executionKey = decodeURIComponent(approveMatch[1]);
@@ -234,6 +313,26 @@ export function createPanelServer({
         if (!existing) {
           sendJson(res, 404, { ok: false, error: `Task not found: ${executionKey}` });
           return;
+        }
+        if (existing.stage === 'merge') {
+          if (!existing.deliverable_url) {
+            sendJson(res, 422, { ok: false, error: 'Task in stage merge has no pull request deliverable attached' });
+            return;
+          }
+          const prCheck = checkGitHubPullRequest({
+            repo: existing.repo,
+            prNumberOrUrl: existing.deliverable_url,
+            runner: issuePollRunner,
+          });
+          if (!prCheck.merged) {
+            sendJson(res, 409, {
+              ok: false,
+              code: 'pr_not_merged',
+              error: `Pull request #${prCheck.prNumber || 'unknown'} is still ${prCheck.state || 'OPEN'} on GitHub. Awaiting human merge before completing ticket.`,
+              task: existing,
+            });
+            return;
+          }
         }
         const body = await readJsonBody(req);
         const updated = approveTask(store, executionKey, {

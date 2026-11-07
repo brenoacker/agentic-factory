@@ -3,6 +3,7 @@ import { join, resolve } from 'node:path';
 import { loadAndValidateFactory } from './config.mjs';
 import { SUPPORTED_PROVIDERS, normalizeTriggerRules, pollProjectTracker } from './trackers.mjs';
 import { intakeAndTriageTicket, advanceTicketInPanel } from './pipeline.mjs';
+import { checkGitHubPullRequest, commentOnGitHubIssue, closeGitHubIssue, updateGitHubIssue } from './github.mjs';
 
 const REPO_RE = /^[^/\s]+\/[^/\s]+$/;
 
@@ -279,6 +280,13 @@ export function syncMonitoredProjectsIssues({ rootDir, store, runner = null, aut
     }
   }
 
+  let mergedReport = null;
+  try {
+    mergedReport = syncMergedPullRequests({ rootDir, store, runner, trackerRunner: runner });
+  } catch {
+    // Non-blocking fallback
+  }
+
   return {
     ok: true,
     polledRepos,
@@ -288,7 +296,94 @@ export function syncMonitoredProjectsIssues({ rootDir, store, runner = null, aut
     newTasks,
     autoDispatchedCount: autoDispatchReport?.autoDispatchedCount || 0,
     dispatchedTasks: autoDispatchReport?.dispatchedTasks || [],
+    mergedTasksCount: mergedReport?.mergedTasksCount || 0,
+    mergedTasks: mergedReport?.mergedTasks || [],
     results,
+  };
+}
+
+/**
+ * Automatically inspects active tasks in stage `merge`, checks live Pull Request status via GitHub,
+ * and advances merged PRs to `done`, commenting on and closing the issue on GitHub.
+ */
+export function syncMergedPullRequests({ rootDir, store, runner = null, trackerRunner = null }) {
+  const tasksInMerge = store.db
+    .prepare("SELECT * FROM tasks WHERE stage = 'merge' AND deliverable_type = 'pull_request' AND deliverable_url IS NOT NULL")
+    .all();
+
+  const activeRunner = trackerRunner || runner;
+  const mergedTasks = [];
+
+  for (const task of tasksInMerge) {
+    try {
+      const prCheck = checkGitHubPullRequest({
+        repo: task.repo,
+        prNumberOrUrl: task.deliverable_url,
+        runner: activeRunner,
+      });
+
+      if (prCheck.ok && prCheck.merged) {
+        store.updateTaskStage(task.execution_key, {
+          stage: 'done',
+          needsHuman: false,
+          humanQuestion: '',
+        });
+
+        store.recordEvent({
+          executionKey: task.execution_key,
+          issueNumber: task.issue_number,
+          eventType: 'pr_merged',
+          stage: 'merge',
+          runtime: task.runtime,
+          model: task.model,
+          payload: { prNumber: prCheck.prNumber, prUrl: prCheck.url, mergedAt: prCheck.mergedAt },
+        });
+
+        store.recordEvent({
+          executionKey: task.execution_key,
+          issueNumber: task.issue_number,
+          eventType: 'completed',
+          stage: 'done',
+          runtime: task.runtime,
+          model: task.model,
+          payload: { deliverableUrl: task.deliverable_url, deliverableType: task.deliverable_type },
+        });
+
+        const provider = String(task.provider || 'github').toLowerCase();
+        if (provider === 'github' || (task.repo && task.repo.includes('/'))) {
+          commentOnGitHubIssue({
+            repo: task.repo,
+            issueNumber: task.issue_number,
+            comment: `✅ **Completed via Agentic Factory**: Pull Request ${task.deliverable_url} was merged into default branch. Issue closed as completed.`,
+            runner: activeRunner,
+          });
+          closeGitHubIssue({
+            repo: task.repo,
+            issueNumber: task.issue_number,
+            comment: `Closed as completed by Agentic Factory (Merged PR: ${task.deliverable_url}).`,
+            runner: activeRunner,
+          });
+          updateGitHubIssue({
+            repo: task.repo,
+            issueNumber: task.issue_number,
+            labelsToAdd: ['stage:done'],
+            labelsToRemove: ['in-progress', 'stage:merge'],
+            runner: activeRunner,
+          });
+        }
+
+        mergedTasks.push(store.getTask(task.execution_key));
+      }
+    } catch {
+      // Non-blocking telemetry
+    }
+  }
+
+  return {
+    ok: true,
+    checkedCount: tasksInMerge.length,
+    mergedTasksCount: mergedTasks.length,
+    mergedTasks,
   };
 }
 
@@ -379,6 +474,7 @@ export function createPollingScheduler({
         polledRepos: res.polledRepos,
         newTasksCount: res.newTasksCount,
         autoDispatchedCount: res.autoDispatchedCount || 0,
+        mergedTasksCount: res.mergedTasksCount || 0,
       };
       return res;
     } catch (err) {

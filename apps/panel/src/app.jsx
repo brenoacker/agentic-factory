@@ -415,6 +415,25 @@ function ControlPanelApp() {
     await loadDashboard();
   };
 
+  const checkTaskPr = async (key) => {
+    try {
+      const res = await fetch('/api/tasks/' + encodeURIComponent(key) + '/check-pr', {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setIntakeFeedback(`PR Check Notice (${res.status}): ${data.error || 'Failed to check PR'}`);
+      } else if (data.merged) {
+        setIntakeFeedback(`✅ PR #${data.prNumber || ''} is MERGED! Task advanced to done.`);
+      } else {
+        setIntakeFeedback(`⏳ PR #${data.prNumber || ''} state is ${data.state || 'OPEN'}. Awaiting merge on GitHub.`);
+      }
+    } catch (err) {
+      setIntakeFeedback(`PR Check Error: ${err.message}`);
+    }
+    await loadDashboard();
+  };
+
   const submitHumanReply = async (key, replyWords) => {
     const text = replyWords || 'Operator clarification provided';
     const res = await fetch('/api/tasks/' + encodeURIComponent(key) + '/approve', {
@@ -1553,14 +1572,25 @@ function ControlPanelApp() {
                                   </FormField>
                                 </div>
                                 <SpaceBetween direction="horizontal" size="xs">
-                                  <Button
-                                    variant="primary"
-                                    id={`human-reply-btn-${item.issueNumber}`}
-                                    data-testid={`human-reply-btn-${item.issueNumber}`}
-                                    onClick={() => submitHumanReply(item.executionKey, humanReplies[item.executionKey])}
-                                  >
-                                    Send Reply & Resume Agent
-                                  </Button>
+                                  {item.stage === 'merge' ? (
+                                    <Button
+                                      variant="primary"
+                                      id={`human-check-pr-btn-${item.issueNumber}`}
+                                      data-testid={`human-check-pr-btn-${item.issueNumber}`}
+                                      onClick={() => checkTaskPr(item.executionKey)}
+                                    >
+                                      Check PR Merge Status & Sync
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      variant="primary"
+                                      id={`human-reply-btn-${item.issueNumber}`}
+                                      data-testid={`human-reply-btn-${item.issueNumber}`}
+                                      onClick={() => submitHumanReply(item.executionKey, humanReplies[item.executionKey])}
+                                    >
+                                      Send Reply & Resume Agent
+                                    </Button>
+                                  )}
                                   <Button
                                     variant="normal"
                                     id={`approve-btn-${item.issueNumber}`}
@@ -1718,15 +1748,42 @@ function ControlPanelApp() {
                                     </a>
                                   </div>
                                 )}
+                                {t.stage === 'merge' && (
+                                  <div
+                                    data-testid={`pr-status-box-${t.issue_number}`}
+                                    style={{
+                                      marginTop: '0.35rem',
+                                      padding: '0.35rem 0.5rem',
+                                      background: '#1e293b',
+                                      border: '1px solid #3b82f6',
+                                      borderRadius: '4px',
+                                      fontSize: '0.75rem',
+                                      color: '#93c5fd',
+                                    }}
+                                  >
+                                    ⏳ <strong>Awaiting GitHub Merge:</strong> Pull Request is open. Awaiting review and merge on GitHub.
+                                  </div>
+                                )}
                                 {t.stage !== 'done' && (
                                   <div style={{ marginTop: '0.45rem' }}>
-                                    <Button
-                                      variant="primary"
-                                      data-testid={`dispatch-btn-${t.issue_number}`}
-                                      onClick={() => dispatchTicketKey(t.execution_key, t.needs_human === 1)}
-                                    >
-                                      {t.needs_human === 1 ? 'Approve & Continue' : 'Run Workflow'}
-                                    </Button>
+                                    {t.stage === 'merge' ? (
+                                      <Button
+                                        variant="primary"
+                                        id={`check-pr-btn-${t.issue_number}`}
+                                        data-testid={`check-pr-btn-${t.issue_number}`}
+                                        onClick={() => checkTaskPr(t.execution_key)}
+                                      >
+                                        Check PR Merge Status & Sync
+                                      </Button>
+                                    ) : (
+                                      <Button
+                                        variant="primary"
+                                        data-testid={`dispatch-btn-${t.issue_number}`}
+                                        onClick={() => dispatchTicketKey(t.execution_key, t.needs_human === 1)}
+                                      >
+                                        {t.needs_human === 1 ? 'Approve & Continue' : 'Run Workflow'}
+                                      </Button>
+                                    )}
                                   </div>
                                 )}
                               </div>

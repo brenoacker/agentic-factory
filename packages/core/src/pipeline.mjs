@@ -1,7 +1,7 @@
 import { evaluateIntakeGuards } from './guards.mjs';
 import { dispatchTask } from './dispatcher.mjs';
 import { extractFollowUpTickets } from './brain.mjs';
-import { commentOnGitHubIssue, updateGitHubIssue, closeGitHubIssue } from './github.mjs';
+import { commentOnGitHubIssue, updateGitHubIssue, closeGitHubIssue, checkGitHubPullRequest } from './github.mjs';
 import { updateLinearIssueStatus } from './trackers.mjs';
 import { provisionTaskWorkspace } from './worktree.mjs';
 import { loadAndValidateFactory } from './config.mjs';
@@ -362,18 +362,42 @@ export function advanceTicketInPanel({
     store.attachTaskDeliverable(executionKey, deliverable);
   } else if (autoAttachDeliverable && !existing.deliverable_url) {
     const taskType = String(existing.type || '').toLowerCase();
-    if (['feature', 'bug', 'chore'].includes(taskType)) {
-      store.attachTaskDeliverable(executionKey, {
-        type: 'pull_request',
-        url: `https://github.com/${existing.repo}/pull/${existing.issue_number + 100}`,
-        ref: headSha,
-      });
-    } else if (['investigation', 'discovery'].includes(taskType)) {
+    if (['investigation', 'discovery'].includes(taskType)) {
       store.attachTaskDeliverable(executionKey, {
         type: 'research_document',
         url: `docs/research/issue-${existing.issue_number}-report.md`,
         ref: `Research Document for #${existing.issue_number}`,
       });
+    }
+  }
+
+  // 3. Stage merge completion gate: verify real PR merge status before allowing transition to done
+  if (existing.stage === 'merge' && approveCurrentStage) {
+    const currentTask = store.getTask(executionKey) || existing;
+    if (!currentTask.deliverable_url) {
+      return {
+        ok: false,
+        status: 422,
+        code: 'missing_deliverable',
+        error: 'Task in stage merge has no pull request deliverable attached.',
+        stage: 'merge',
+        task: currentTask,
+      };
+    }
+    const prCheck = checkGitHubPullRequest({
+      repo: currentTask.repo,
+      prNumberOrUrl: currentTask.deliverable_url,
+      runner: trackerRunner || runner,
+    });
+    if (!prCheck.merged) {
+      return {
+        ok: false,
+        status: 409,
+        code: 'pr_not_merged',
+        error: `Pull request #${prCheck.prNumber || 'unknown'} is still ${prCheck.state || 'OPEN'} on GitHub. Awaiting human merge before completing ticket.`,
+        stage: 'merge',
+        task: currentTask,
+      };
     }
   }
 
@@ -390,6 +414,7 @@ export function advanceTicketInPanel({
     headSha,
     humanApprovedCurrentStage: approveCurrentStage,
     runner: activeRunner,
+    trackerRunner,
   });
 
   if (!res.ok && res.status === 'missing_deliverable') {

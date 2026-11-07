@@ -156,3 +156,79 @@ export function closeGitHubIssue({ repo, issueNumber, comment = '', runner = nul
   };
 }
 
+/**
+ * Checks live GitHub Pull Request status using `gh pr view`. Accepts an injectable runner for tests.
+ */
+export function checkGitHubPullRequest({ repo, prNumberOrUrl, runner = null }) {
+  if (!prNumberOrUrl) {
+    return { ok: false, error: 'PR number or URL is required', state: 'UNKNOWN', merged: false };
+  }
+  if (runner) {
+    return runner({ action: 'check_pr', repo, prNumberOrUrl });
+  }
+
+  // Extract PR number or use URL directly
+  const target = String(prNumberOrUrl).trim();
+  const prMatch = target.match(/\/pull\/(\d+)/i);
+  const prNumber = prMatch ? Number(prMatch[1]) : Number.isInteger(Number(target)) ? Number(target) : target;
+
+  const args = ['pr', 'view', String(prNumber), '--json', 'number,title,state,mergedAt,url,headRefName'];
+  if (repo) {
+    args.push('-R', repo);
+  }
+
+  const proc = spawnSync('gh', args, { encoding: 'utf8' });
+  if (proc.status !== 0) {
+    return {
+      ok: false,
+      error: proc.stderr?.trim() || proc.stdout?.trim() || 'Failed to inspect PR',
+      state: 'UNKNOWN',
+      merged: false,
+      prNumber: typeof prNumber === 'number' ? prNumber : null,
+      url: target,
+    };
+  }
+
+  try {
+    const data = JSON.parse(proc.stdout || '{}');
+    const state = String(data.state || 'OPEN').toUpperCase();
+    const merged = state === 'MERGED' || Boolean(data.mergedAt);
+    return {
+      ok: true,
+      prNumber: data.number || (typeof prNumber === 'number' ? prNumber : null),
+      title: data.title || '',
+      state,
+      merged,
+      mergedAt: data.mergedAt || null,
+      url: data.url || target,
+      headRefName: data.headRefName || null,
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      error: `Failed to parse gh output: ${err.message}`,
+      state: 'UNKNOWN',
+      merged: false,
+      url: target,
+    };
+  }
+}
+
+/**
+ * Creates a GitHub Pull Request using `gh pr create`. Accepts an injectable runner for tests.
+ */
+export function createGitHubPullRequest({ repo, head, base = 'main', title, body = '', cwd, runner = null }) {
+  if (runner) {
+    return runner({ action: 'create_pr', repo, head, base, title, body, cwd });
+  }
+  const args = ['pr', 'create', '--repo', repo, '--head', head, '--base', base, '--title', title, '--body', body];
+  const proc = spawnSync('gh', args, { cwd: cwd || undefined, encoding: 'utf8' });
+  const raw = proc.stdout?.trim() || '';
+  const match = raw.match(/https:\/\/github\.com\/[^\s]+/);
+  return {
+    ok: proc.status === 0,
+    url: match ? match[0] : raw,
+    output: raw || proc.stderr?.trim() || '',
+  };
+}
+
