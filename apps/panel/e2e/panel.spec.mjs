@@ -1278,6 +1278,85 @@ test('C20: Playwright E2E verifies PR merge status and check button', async ({ p
   }
 });
 
+test('C23: Playwright E2E verifies clickable vscode:// link, 1-click Open in Editor button, and inline Preview Document modal', async ({ page }) => {
+  mkdirSync(CAPTURES_DIR, { recursive: true });
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    // 1. Create a plan review file in the temp repo
+    const specDir = join(tmpDir, '.specs', 'features', 'test-review');
+    mkdirSync(specDir, { recursive: true });
+    const planPath = join(specDir, 'plan.md');
+    const planText = '# Implementation Plan for Test Review\n\n## Summary\nVerify operator can review and launch editor directly.';
+    writeFileSync(planPath, planText, 'utf-8');
+
+    // 2. Create task in stage plan awaiting operator evaluation
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#902',
+      issueNumber: 902,
+      repo: 'brenoacker/agentic-factory',
+      title: '[feature] Interactive Plan Review and Editor Launching',
+      type: 'feature',
+      stage: 'plan',
+      provider: 'github',
+      ticketUrl: 'https://github.com/brenoacker/agentic-factory/issues/902',
+    });
+    panel.store.updateTaskStage('brenoacker/agentic-factory#902', {
+      needsHuman: true,
+      humanQuestion: 'Please inspect the plan before build: .specs/features/test-review/plan.md#L1-L10',
+    });
+
+    // 3. Open Board & Timeline view
+    await page.goto(baseUrl);
+    await expect(page.locator('#tabs')).toBeVisible();
+    await page.locator('#btn-view-board').click();
+    await expect(page.locator('#tab-board')).toBeVisible();
+
+    // 4. Verify Needs Human card displays Evaluation & Review Files
+    const reviewFilesBox = page.locator('[data-testid="human-review-files-902"]');
+    await expect(reviewFilesBox).toBeVisible();
+
+    // 5. Verify vscode:// link is rendered with correct URI
+    const vscodeLink = page.locator('[data-testid="vscode-link-902"]').first();
+    await expect(vscodeLink).toBeVisible();
+    const href = await vscodeLink.getAttribute('href');
+    expect(href).toMatch(/^vscode:\/\/file\//);
+
+    // 6. Test 1-click Open in Editor button
+    const openEditorBtn = page.locator('#open-editor-btn-902').first();
+    await expect(openEditorBtn).toBeVisible();
+    await openEditorBtn.click();
+    await expect(page.locator('#intake-feedback')).toContainText('Opened in editor:');
+
+    // 7. Test Preview Document modal
+    const previewBtn = page.locator('#preview-doc-btn-902').first();
+    await expect(previewBtn).toBeVisible();
+    await previewBtn.click();
+
+    // Modal should be visible with preview content
+    const modalContent = page.locator('#doc-preview-content');
+    await expect(modalContent).toBeVisible();
+    await expect(modalContent).toContainText('Implementation Plan for Test Review');
+    await expect(modalContent).toContainText('Verify operator can review');
+
+    // Take screenshot for visual evidence
+    await page.screenshot({ path: join(CAPTURES_DIR, 'plan-inline-preview-modal.png'), fullPage: true });
+
+    // Close preview modal
+    const closeBtn = page.locator('#close-preview-modal-btn');
+    await expect(closeBtn).toBeVisible();
+    await closeBtn.click();
+    await expect(modalContent).toBeHidden();
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+
 
 
 

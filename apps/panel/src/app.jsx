@@ -20,6 +20,7 @@ import {
   Grid,
   Header,
   Input,
+  Modal,
   Select,
   SideNavigation,
   SpaceBetween,
@@ -209,6 +210,8 @@ function ControlPanelApp() {
   const [ctrlKill, setCtrlKill] = useState(false);
   const [controlsFeedback, setControlsFeedback] = useState('');
   const [humanReplies, setHumanReplies] = useState({});
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState({ title: '', path: '', content: '', loading: false, error: null });
 
   // Post-deploy gate form state
   const [deploySha, setDeploySha] = useState('');
@@ -450,6 +453,60 @@ function ControlPanelApp() {
       setHumanReplies((prev) => ({ ...prev, [key]: '' }));
     }
     await loadDashboard();
+  };
+
+  const openFileInEditor = async (filePath, executionKey, line) => {
+    try {
+      const res = await fetch('/api/files/open', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filePath, executionKey, line }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setIntakeFeedback(`Failed to open in editor: ${data.error || 'Unknown error'}`);
+      } else {
+        setIntakeFeedback(`Opened in editor: ${filePath}`);
+      }
+    } catch (err) {
+      setIntakeFeedback(`Editor launcher error: ${err.message}`);
+    }
+  };
+
+  const openPreviewModal = async (filePath, executionKey, label) => {
+    setPreviewDoc({ title: label || filePath, path: filePath, content: '', loading: true, error: null });
+    setPreviewModalOpen(true);
+    try {
+      const q = new URLSearchParams({ path: filePath });
+      if (executionKey) q.set('executionKey', executionKey);
+      const res = await fetch(`/api/files/content?${q.toString()}`);
+      const data = await res.json();
+      if (!res.ok) {
+        setPreviewDoc({
+          title: label || filePath,
+          path: filePath,
+          content: '',
+          loading: false,
+          error: data.error || 'Failed to read file',
+        });
+      } else {
+        setPreviewDoc({
+          title: label || filePath,
+          path: filePath,
+          content: data.content,
+          loading: false,
+          error: null,
+        });
+      }
+    } catch (err) {
+      setPreviewDoc({
+        title: label || filePath,
+        path: filePath,
+        content: '',
+        loading: false,
+        error: err.message,
+      });
+    }
   };
 
   const snoozeTaskAlarm = async (key) => {
@@ -1544,6 +1601,68 @@ function ControlPanelApp() {
                                 <strong>⚠️ Clarification Needed:</strong> {item.question || 'Agent requested human assistance to proceed'}
                               </div>
 
+                              {item.reviewFiles && item.reviewFiles.length > 0 && (
+                                <div
+                                  id={`human-review-files-${item.issueNumber}`}
+                                  data-testid={`human-review-files-${item.issueNumber}`}
+                                  style={{
+                                    padding: '0.5rem 0.75rem',
+                                    background: 'rgba(30, 41, 59, 0.7)',
+                                    borderRadius: '4px',
+                                    border: '1px solid #334155',
+                                  }}
+                                >
+                                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#38bdf8', marginBottom: '0.35rem' }}>
+                                    Evaluation & Review Files:
+                                  </div>
+                                  <SpaceBetween size="xs">
+                                    {item.reviewFiles.map((rf, idx) => (
+                                      <div
+                                        key={rf.resolvedPath || idx}
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'space-between',
+                                          gap: '0.5rem',
+                                          fontSize: '0.82rem',
+                                        }}
+                                      >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', wordBreak: 'break-all' }}>
+                                          <span style={{ color: '#94a3b8' }}>📄 {rf.label}:</span>
+                                          <a
+                                            id={`vscode-link-${item.issueNumber}-${idx}`}
+                                            data-testid={`vscode-link-${item.issueNumber}`}
+                                            href={rf.vscodeUri || `vscode://file/${rf.resolvedPath}`}
+                                            title="Open directly in VS Code / Keiro via vscode:// URI scheme"
+                                            style={{ color: '#60a5fa', textDecoration: 'underline' }}
+                                          >
+                                            <code>{rf.path}</code>
+                                          </a>
+                                        </div>
+                                        <SpaceBetween direction="horizontal" size="xs">
+                                          <Button
+                                            variant="normal"
+                                            id={`open-editor-btn-${item.issueNumber}`}
+                                            data-testid={`open-editor-btn-${item.issueNumber}`}
+                                            onClick={() => openFileInEditor(rf.path, item.executionKey, rf.line)}
+                                          >
+                                            Open in Editor
+                                          </Button>
+                                          <Button
+                                            variant="normal"
+                                            id={`preview-doc-btn-${item.issueNumber}`}
+                                            data-testid={`preview-doc-btn-${item.issueNumber}`}
+                                            onClick={() => openPreviewModal(rf.path, item.executionKey, rf.label || rf.path)}
+                                          >
+                                            Preview Document
+                                          </Button>
+                                        </SpaceBetween>
+                                      </div>
+                                    ))}
+                                  </SpaceBetween>
+                                </div>
+                              )}
+
                               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end' }}>
                                 <div style={{ flex: 1 }}>
                                   <FormField label="Operator Clarification / Missing Requirements">
@@ -1746,6 +1865,77 @@ function ControlPanelApp() {
                                     >
                                       {t.deliverable_ref || t.deliverable_url}
                                     </a>
+                                  </div>
+                                )}
+                                {t.reviewFiles && t.reviewFiles.length > 0 && (
+                                  <div
+                                    data-testid={`task-review-files-${t.issue_number}`}
+                                    style={{
+                                      marginTop: '0.35rem',
+                                      padding: '0.25rem 0.4rem',
+                                      background: '#0f172a',
+                                      borderRadius: '4px',
+                                      border: '1px solid #1e293b',
+                                    }}
+                                  >
+                                    <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#38bdf8', marginBottom: '0.2rem' }}>
+                                      📄 Review Files:
+                                    </div>
+                                    {t.reviewFiles.map((rf, idx) => (
+                                      <div
+                                        key={rf.resolvedPath || idx}
+                                        style={{
+                                          display: 'flex',
+                                          justifyContent: 'space-between',
+                                          alignItems: 'center',
+                                          gap: '0.3rem',
+                                          marginTop: '0.15rem',
+                                        }}
+                                      >
+                                        <a
+                                          href={rf.vscodeUri || `vscode://file/${rf.resolvedPath}`}
+                                          data-testid={`kanban-vscode-link-${t.issue_number}`}
+                                          title="Open in VS Code"
+                                          style={{ fontSize: '0.72rem', color: '#60a5fa', textDecoration: 'underline' }}
+                                        >
+                                          {rf.label || rf.path}
+                                        </a>
+                                        <div style={{ display: 'flex', gap: '0.2rem' }}>
+                                          <button
+                                            id={`kanban-open-editor-${t.issue_number}-${idx}`}
+                                            data-testid={`kanban-open-editor-${t.issue_number}`}
+                                            onClick={() => openFileInEditor(rf.path, t.execution_key, rf.line)}
+                                            style={{
+                                              fontSize: '0.65rem',
+                                              padding: '1px 5px',
+                                              background: '#1e293b',
+                                              color: '#93c5fd',
+                                              border: '1px solid #334155',
+                                              borderRadius: '3px',
+                                              cursor: 'pointer',
+                                            }}
+                                          >
+                                            Editor
+                                          </button>
+                                          <button
+                                            id={`kanban-preview-btn-${t.issue_number}-${idx}`}
+                                            data-testid={`kanban-preview-btn-${t.issue_number}`}
+                                            onClick={() => openPreviewModal(rf.path, t.execution_key, rf.label || rf.path)}
+                                            style={{
+                                              fontSize: '0.65rem',
+                                              padding: '1px 5px',
+                                              background: '#1e293b',
+                                              color: '#a78bfa',
+                                              border: '1px solid #334155',
+                                              borderRadius: '3px',
+                                              cursor: 'pointer',
+                                            }}
+                                          >
+                                            Preview
+                                          </button>
+                                        </div>
+                                      </div>
+                                    ))}
                                   </div>
                                 )}
                                 {t.stage === 'merge' && (
@@ -2385,6 +2575,56 @@ function ControlPanelApp() {
           </ContentLayout>
         }
       />
+      <Modal
+        visible={previewModalOpen}
+        onDismiss={() => setPreviewModalOpen(false)}
+        header={<Header variant="h2">{previewDoc.title || 'Document Preview'}</Header>}
+        footer={
+          <Box float="right">
+            <Button
+              variant="primary"
+              id="close-preview-modal-btn"
+              data-testid="close-preview-modal-btn"
+              onClick={() => setPreviewModalOpen(false)}
+            >
+              Close
+            </Button>
+          </Box>
+        }
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+            Path: <code>{previewDoc.path}</code>
+          </div>
+          {previewDoc.loading && <Box color="text-body-secondary">Loading file content...</Box>}
+          {previewDoc.error && (
+            <Alert type="error" header="Failed to load file">
+              {previewDoc.error}
+            </Alert>
+          )}
+          {!previewDoc.loading && !previewDoc.error && (
+            <pre
+              id="doc-preview-content"
+              data-testid="doc-preview-content"
+              style={{
+                maxHeight: '60vh',
+                overflow: 'auto',
+                padding: '0.75rem',
+                background: '#0a0f1d',
+                color: '#e2e8f0',
+                border: '1px solid #1e293b',
+                borderRadius: '6px',
+                fontSize: '0.82rem',
+                lineHeight: '1.45',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-all',
+              }}
+            >
+              {previewDoc.content}
+            </pre>
+          )}
+        </div>
+      </Modal>
       </div>
     </div>
   );

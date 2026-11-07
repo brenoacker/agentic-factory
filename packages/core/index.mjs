@@ -51,6 +51,12 @@ export {
   pollProjectTracker,
 } from './src/trackers.mjs';
 export { generateWorkflowMermaid } from './src/mermaid.mjs';
+export {
+  isPathContained,
+  resolveTaskReviewFiles,
+  openInEditor,
+  readFileContent,
+} from './src/files.mjs';
 
 
 

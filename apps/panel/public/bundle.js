@@ -302285,7 +302285,7 @@ ${isHandDrawn ? "" : `
   });
 
   // apps/panel/src/app.jsx
-  var import_react309 = __toESM(require_react(), 1);
+  var import_react311 = __toESM(require_react(), 1);
   var import_client = __toESM(require_client(), 1);
 
   // node_modules/mermaid/dist/mermaid.core.mjs
@@ -305867,6 +305867,7 @@ ${isHandDrawn ? "" : `
   var DATA_ATTR_FUNNEL_STEP = `${DATA_ATTR_FUNNEL}-step`;
   var DATA_ATTR_FUNNEL_SUBSTEP = `${DATA_ATTR_FUNNEL}-substep`;
   var DATA_ATTR_RESOURCE_TYPE = `${DATA_ATTR_FUNNEL}-resource-type`;
+  var DATA_ATTR_MODAL_ID = "data-analytics-modal-id";
   var DATA_ATTR_FIELD_LABEL = "data-analytics-field-label";
   var DATA_ATTR_FIELD_ERROR = "data-analytics-field-error";
   var DATA_ATTR_ANALYTICS_ALERT = "data-analytics-alert";
@@ -330726,6 +330727,347 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/internal/analytics/components/analytics-funnel.js
   var import_react214 = __toESM(require_react());
+  var FUNNEL_VERSION = "1.4";
+  var AnalyticsFunnel = (props) => {
+    const { isInFunnel } = useFunnel();
+    if (isInFunnel && props.funnelType === "single-page") {
+      return import_react214.default.createElement(import_react214.default.Fragment, null, props.children);
+    }
+    return import_react214.default.createElement(InnerAnalyticsFunnel, { ...props });
+  };
+  var CREATION_EDIT_FLOW_DONE_EVENT_NAME = "awsui-creation-edit-flow-done";
+  var dispatchCreateEditFlowDoneEvent = () => {
+    var _a213;
+    try {
+      (_a213 = window.top) === null || _a213 === void 0 ? void 0 : _a213.document.dispatchEvent(new Event(CREATION_EDIT_FLOW_DONE_EVENT_NAME));
+    } catch {
+    }
+  };
+  var onFunnelCancelled = ({ funnelInteractionId, funnelIdentifier }) => {
+    FunnelMetrics.funnelCancelled({ funnelInteractionId, funnelIdentifier });
+  };
+  var onFunnelComplete = (taskCompletionDataProps) => {
+    FunnelMetrics.funnelComplete({
+      funnelInteractionId: taskCompletionDataProps.taskInteractionId,
+      funnelIdentifier: taskCompletionDataProps.taskIdentifier
+    });
+    PerformanceMetrics.taskCompletionData(taskCompletionDataProps);
+    dispatchCreateEditFlowDoneEvent();
+  };
+  function evaluateSelectors(selectors, defaultSelector) {
+    for (const selector2 of selectors) {
+      const element3 = document.querySelector(selector2);
+      if (element3) {
+        return selector2;
+      }
+    }
+    return defaultSelector;
+  }
+  var InnerAnalyticsFunnel = ({ mounted = true, children: children2, stepConfiguration, ...props }) => {
+    const [funnelInteractionId, setFunnelInteractionId] = (0, import_react214.useState)("");
+    const [submissionAttempt, setSubmissionAttempt] = (0, import_react214.useState)(0);
+    const isVisualRefresh = useVisualRefresh();
+    const funnelState = (0, import_react214.useRef)("default");
+    const funnelNameSelector = (0, import_react214.useRef)(getFunnelNameSelector());
+    const componentSelector = (0, import_react214.useRef)();
+    const errorCount = (0, import_react214.useRef)(0);
+    const loadingButtonCount = (0, import_react214.useRef)(0);
+    const wizardCount = (0, import_react214.useRef)(0);
+    const latestFocusCleanupFunction = (0, import_react214.useRef)(void 0);
+    const formSubmitStartTime = (0, import_react214.useRef)(0);
+    const activeValidationTimerId = (0, import_react214.useRef)();
+    (0, import_react214.useLayoutEffect)(() => {
+      if (!mounted) {
+        return;
+      }
+      let funnelInteractionId2;
+      const handle = setTimeout(() => {
+        var _a213, _b, _c;
+        funnelNameSelector.current = evaluateSelectors(((_a213 = props.funnelNameSelectors) === null || _a213 === void 0 ? void 0 : _a213.call(props)) || [], getFunnelNameSelector());
+        componentSelector.current = evaluateSelectors(((_b = props.componentSelectors) === null || _b === void 0 ? void 0 : _b.call(props)) || [], "");
+        if (props.funnelType === "single-page" && wizardCount.current > 0) {
+          return;
+        }
+        funnelState.current = "default";
+        const funnelName = (_c = getTextFromSelector(funnelNameSelector.current)) !== null && _c !== void 0 ? _c : "";
+        const singleStepFlowStepConfiguration = [
+          {
+            number: 1,
+            isOptional: false,
+            name: funnelName,
+            stepIdentifier: props.funnelIdentifier
+          }
+        ];
+        let componentTheme = THEME;
+        if (THEME === "polaris") {
+          componentTheme = isVisualRefresh ? "vr" : "classic";
+        }
+        funnelInteractionId2 = FunnelMetrics.funnelStart({
+          funnelName,
+          funnelIdentifier: props.funnelIdentifier,
+          flowType: props.funnelFlowType,
+          funnelNameSelector: funnelNameSelector.current,
+          componentSelector: componentSelector.current,
+          optionalStepNumbers: props.optionalStepNumbers,
+          funnelType: props.funnelType,
+          totalFunnelSteps: props.totalFunnelSteps,
+          componentVersion: PACKAGE_VERSION,
+          componentTheme,
+          funnelVersion: FUNNEL_VERSION,
+          stepConfiguration: stepConfiguration !== null && stepConfiguration !== void 0 ? stepConfiguration : singleStepFlowStepConfiguration,
+          resourceType: props.funnelResourceType || getTextFromSelector(`[${DATA_ATTR_RESOURCE_TYPE}]`)
+        });
+        setFunnelInteractionId(funnelInteractionId2);
+      }, 1);
+      return () => {
+        clearTimeout(activeValidationTimerId.current);
+        clearTimeout(handle);
+        if (!funnelInteractionId2) {
+          return;
+        }
+        if (props.funnelType === "single-page" && wizardCount.current > 0) {
+          return;
+        }
+        if (funnelState.current === "validating") {
+          const taskCompletionDataProps = {
+            taskIdentifier: props.funnelIdentifier,
+            taskType: props.funnelType,
+            timeToRespondAfterFormSubmit: performance.now() - formSubmitStartTime.current,
+            taskInteractionId: funnelInteractionId2,
+            taskFlowType: props.funnelFlowType
+          };
+          onFunnelComplete(taskCompletionDataProps);
+          funnelState.current = "complete";
+        }
+        if (funnelState.current === "complete") {
+          FunnelMetrics.funnelSuccessful({ funnelInteractionId: funnelInteractionId2, funnelIdentifier: props.funnelIdentifier });
+        } else {
+          funnelState.current = "cancelled";
+          onFunnelCancelled({ funnelInteractionId: funnelInteractionId2, funnelIdentifier: props.funnelIdentifier });
+        }
+      };
+    }, [mounted]);
+    const funnelSubmit = () => {
+      clearTimeout(activeValidationTimerId.current);
+      funnelState.current = "validating";
+      formSubmitStartTime.current = performance.now();
+      const VALIDATION_WAIT_DELAY = 50;
+      const LOADING_WAIT_DELAY = 100;
+      const checkForCompleteness = () => {
+        if (funnelState.current === "complete") {
+          return;
+        }
+        if (loadingButtonCount.current > 0) {
+          activeValidationTimerId.current = setTimeout(checkForCompleteness, LOADING_WAIT_DELAY);
+          return;
+        }
+        if (errorCount.current === 0) {
+          const taskCompletionDataProps = {
+            taskIdentifier: props.funnelIdentifier,
+            taskType: props.funnelType,
+            timeToRespondAfterFormSubmit: performance.now() - formSubmitStartTime.current,
+            taskInteractionId: funnelInteractionId,
+            taskFlowType: props.funnelFlowType
+          };
+          onFunnelComplete(taskCompletionDataProps);
+          funnelState.current = "complete";
+        } else {
+          funnelState.current = "default";
+        }
+      };
+      activeValidationTimerId.current = setTimeout(checkForCompleteness, VALIDATION_WAIT_DELAY);
+    };
+    const funnelNextOrSubmitAttempt = () => setSubmissionAttempt((i4) => i4 + 1);
+    const funnelCancel = () => {
+    };
+    const funnelContextValue = {
+      funnelInteractionId,
+      funnelIdentifier: props.funnelIdentifier,
+      funnelFlowType: props.funnelFlowType,
+      funnelErrorContext: props.funnelErrorContext,
+      setFunnelInteractionId,
+      funnelType: props.funnelType,
+      optionalStepNumbers: props.optionalStepNumbers,
+      totalFunnelSteps: props.totalFunnelSteps,
+      funnelNameSelector: funnelNameSelector.current,
+      funnelSubmit,
+      funnelCancel,
+      submissionAttempt,
+      funnelNextOrSubmitAttempt,
+      funnelState,
+      errorCount,
+      loadingButtonCount,
+      latestFocusCleanupFunction,
+      isInFunnel: true,
+      wizardCount
+    };
+    return import_react214.default.createElement(FunnelContext.Provider, { value: funnelContextValue }, children2);
+  };
+  var AnalyticsFunnelStep = (props) => {
+    return import_react214.default.createElement(InnerAnalyticsFunnelStep, { ...props, key: props.stepNumber });
+  };
+  function getSubStepConfiguration() {
+    const subSteps = Array.from(document.querySelectorAll(getSubStepAllSelector()));
+    const subStepConfiguration = subSteps.map((substep, index2) => {
+      var _a213, _b, _c, _d, _e2;
+      const subStepIdentifier = (_b = (_a213 = substep === null || substep === void 0 ? void 0 : substep.__awsuiMetadata__) === null || _a213 === void 0 ? void 0 : _a213.analytics) === null || _b === void 0 ? void 0 : _b.instanceIdentifier;
+      const name = (_e2 = (_d = (_c = substep.querySelector(getSubStepNameSelector())) === null || _c === void 0 ? void 0 : _c.innerText) === null || _d === void 0 ? void 0 : _d.trim()) !== null && _e2 !== void 0 ? _e2 : "";
+      return {
+        name,
+        number: index2 + 1,
+        subStepIdentifier
+      };
+    });
+    return subStepConfiguration;
+  }
+  function useStepChangeListener(stepNumber, handler2) {
+    const subStepConfiguration = (0, import_react214.useRef)(/* @__PURE__ */ new Map());
+    const SUBSTEP_CHANGE_DEBOUNCE = 50;
+    const listenForSubStepChanges = (0, import_react214.useRef)(false);
+    (0, import_react214.useEffect)(() => {
+      const handle = setTimeout(() => listenForSubStepChanges.current = true, SUBSTEP_CHANGE_DEBOUNCE);
+      return () => {
+        clearTimeout(handle);
+        listenForSubStepChanges.current = false;
+      };
+    }, []);
+    (0, import_react214.useEffect)(() => {
+      const handle = setTimeout(() => subStepConfiguration.current.set(stepNumber, getSubStepConfiguration()), SUBSTEP_CHANGE_DEBOUNCE);
+      return () => {
+        clearTimeout(handle);
+      };
+    }, [stepNumber]);
+    const stepChangeCallback = useDebounceCallback(() => {
+      if (!listenForSubStepChanges.current) {
+        return;
+      }
+      subStepConfiguration.current.set(stepNumber, getSubStepConfiguration());
+      handler2(subStepConfiguration.current.get(stepNumber));
+    }, SUBSTEP_CHANGE_DEBOUNCE);
+    return { onStepChange: stepChangeCallback, subStepConfiguration };
+  }
+  var InnerAnalyticsFunnelStep = ({ mounted = true, children: children2, stepNumber, stepIdentifier, stepErrorContext, ...rest }) => {
+    const { funnelInteractionId, funnelIdentifier, funnelNameSelector, funnelState, funnelType } = useFunnel();
+    const parentStep = useFunnelStep();
+    const parentStepExists = parentStep.isInStep;
+    const parentStepFunnelInteractionId = parentStep.funnelInteractionId;
+    const funnelStepProps = { [DATA_ATTR_FUNNEL_STEP]: stepNumber };
+    const subStepCount = (0, import_react214.useRef)(0);
+    const stepNameSelector = rest.stepNameSelector || funnelNameSelector;
+    const { onStepChange, subStepConfiguration } = useStepChangeListener(stepNumber, (subStepConfiguration2) => {
+      if (!funnelInteractionId) {
+        return;
+      }
+      FunnelMetrics.funnelStepChange({
+        stepIdentifier,
+        funnelIdentifier,
+        funnelInteractionId,
+        stepNumber,
+        stepNameSelector,
+        subStepAllSelector: getSubStepAllSelector(),
+        totalSubSteps: subStepCount.current,
+        subStepConfiguration: subStepConfiguration2
+      });
+    });
+    (0, import_react214.useEffect)(() => {
+      if (!funnelInteractionId) {
+        return;
+      }
+      if (mounted) {
+        return;
+      }
+      const stepName = getTextFromSelector(stepNameSelector);
+      const handler2 = setTimeout(() => {
+        if (funnelState.current !== "cancelled") {
+          FunnelMetrics.funnelStepComplete({
+            funnelIdentifier,
+            funnelInteractionId,
+            stepIdentifier,
+            stepNumber,
+            stepName,
+            stepNameSelector,
+            subStepAllSelector: getSubStepAllSelector(),
+            totalSubSteps: subStepCount.current
+          });
+        }
+      }, 0);
+      return () => {
+        clearTimeout(handler2);
+      };
+    }, [
+      stepIdentifier,
+      funnelIdentifier,
+      funnelInteractionId,
+      stepNumber,
+      stepNameSelector,
+      funnelState,
+      parentStepExists,
+      funnelType,
+      parentStepFunnelInteractionId,
+      mounted
+    ]);
+    (0, import_react214.useLayoutEffect)(() => {
+      if (!funnelInteractionId) {
+        return;
+      }
+      if (parentStepExists && parentStepFunnelInteractionId) {
+        return;
+      }
+      const stepName = getTextFromSelector(stepNameSelector);
+      if (funnelState.current === "default") {
+        FunnelMetrics.funnelStepStart({
+          stepIdentifier,
+          funnelIdentifier,
+          funnelInteractionId,
+          stepNumber,
+          stepName,
+          stepNameSelector,
+          subStepAllSelector: getSubStepAllSelector(),
+          totalSubSteps: subStepCount.current,
+          subStepConfiguration: getSubStepConfiguration()
+        });
+      }
+      return () => {
+        if (funnelState.current !== "cancelled") {
+          FunnelMetrics.funnelStepComplete({
+            funnelIdentifier,
+            funnelInteractionId,
+            stepIdentifier,
+            stepNumber,
+            stepName,
+            stepNameSelector,
+            subStepAllSelector: getSubStepAllSelector(),
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            totalSubSteps: subStepCount.current
+          });
+        }
+      };
+    }, [
+      stepIdentifier,
+      funnelIdentifier,
+      funnelInteractionId,
+      stepNumber,
+      stepNameSelector,
+      funnelState,
+      parentStepExists,
+      funnelType,
+      parentStepFunnelInteractionId
+    ]);
+    const contextValue = {
+      stepIdentifier,
+      stepNumber,
+      stepNameSelector,
+      funnelStepProps,
+      subStepCount,
+      isInStep: true,
+      funnelInteractionId,
+      onStepChange,
+      subStepConfiguration,
+      stepErrorContext
+    };
+    const effectiveContextValue = parentStepExists && parentStepFunnelInteractionId ? parentStep : contextValue;
+    return import_react214.default.createElement(FunnelStepContext.Provider, { value: effectiveContextValue }, typeof children2 === "function" ? children2(effectiveContextValue) : children2);
+  };
   var AnalyticsFunnelSubStep = ({ children: children2, subStepIdentifier, subStepErrorContext }) => {
     const subStepId = useUniqueId("substep");
     const subStepSelector = getSubStepSelector(subStepId);
@@ -332697,24 +333039,328 @@ ${isHandDrawn ? "" : `
     return import_react238.default.createElement("div", { ...baseProps, className: clsx_m_default(baseProps.className, styles_css_default98["column-layout"]), ref: __internalRootRef }, minColumnWidth ? import_react238.default.createElement(FlexibleColumnLayout, { columns, borders, variant, minColumnWidth, disableGutters, __tagOverride }, children2) : import_react238.default.createElement(GridColumnLayout, { columns, variant, borders, disableGutters, __breakpoint, __tagOverride }, children2));
   }
 
-  // node_modules/@cloudscape-design/components/internal/context/collection-preferences-metadata-context.js
+  // node_modules/@cloudscape-design/components/modal/internal.js
   var import_react239 = __toESM(require_react());
-  var CollectionPreferencesMetadata = (0, import_react239.createContext)({});
+
+  // node_modules/@cloudscape-design/components/modal/styles.css.js
+  var styles_css_default99 = {
+    "dialog": "awsui_dialog_1d2i7_14utw_25",
+    "modal-slide-up": "awsui_modal-slide-up_1d2i7_14utw_1",
+    "awsui-motion-fade-in-0": "awsui_awsui-motion-fade-in-0_1d2i7_14utw_1",
+    "refresh": "awsui_refresh_1d2i7_14utw_48",
+    "awsui-motion-scale-popup": "awsui_awsui-motion-scale-popup_1d2i7_14utw_1",
+    "root": "awsui_root_1d2i7_14utw_81",
+    "awsui-motion-fade-in": "awsui_awsui-motion-fade-in_1d2i7_14utw_1",
+    "hide-dismiss-button": "awsui_hide-dismiss-button_1d2i7_14utw_158",
+    "hidden": "awsui_hidden_1d2i7_14utw_161",
+    "focus-lock": "awsui_focus-lock_1d2i7_14utw_165",
+    "position-top": "awsui_position-top_1d2i7_14utw_173",
+    "position-center": "awsui_position-center_1d2i7_14utw_176",
+    "small": "awsui_small_1d2i7_14utw_190",
+    "medium": "awsui_medium_1d2i7_14utw_193",
+    "large": "awsui_large_1d2i7_14utw_196",
+    "x-large": "awsui_x-large_1d2i7_14utw_199",
+    "xx-large": "awsui_xx-large_1d2i7_14utw_202",
+    "custom-width": "awsui_custom-width_1d2i7_14utw_205",
+    "max": "awsui_max_1d2i7_14utw_208",
+    "breakpoint-xs": "awsui_breakpoint-xs_1d2i7_14utw_208",
+    "custom-height": "awsui_custom-height_1d2i7_14utw_213",
+    "container": "awsui_container_1d2i7_14utw_218",
+    "custom-height-container": "awsui_custom-height-container_1d2i7_14utw_258",
+    "content": "awsui_content_1d2i7_14utw_264",
+    "no-paddings": "awsui_no-paddings_1d2i7_14utw_269",
+    "custom-height-content": "awsui_custom-height-content_1d2i7_14utw_273",
+    "header": "awsui_header_1d2i7_14utw_278",
+    "header--text": "awsui_header--text_1d2i7_14utw_290",
+    "footer": "awsui_footer_1d2i7_14utw_294",
+    "footer--rounded": "awsui_footer--rounded_1d2i7_14utw_303",
+    "dismiss-control": "awsui_dismiss-control_1d2i7_14utw_315",
+    "modal-open": "awsui_modal-open_1d2i7_14utw_319"
+  };
+
+  // node_modules/@cloudscape-design/components/modal/body-scroll.js
+  var initialBodyPaddingRightStyle = void 0;
+  function disableBodyScrolling() {
+    setBodyScrollbarPadding();
+    document.body.classList.add(styles_css_default99["modal-open"]);
+  }
+  function enableBodyScrolling() {
+    document.body.classList.remove(styles_css_default99["modal-open"]);
+    restoreBodyScrollbarPadding();
+  }
+  function setBodyScrollbarPadding() {
+    if (bodyHasScrollbar()) {
+      initialBodyPaddingRightStyle = document.body.style.paddingRight;
+      const initialBodyPaddingRight = computedBodyPaddingRightPixels();
+      const scrollbarWidth = browserScrollbarSize().width;
+      const newBodyPaddingRight = initialBodyPaddingRight + scrollbarWidth;
+      document.body.style.paddingRight = newBodyPaddingRight + "px";
+    }
+  }
+  function computedBodyPaddingRightPixels() {
+    return parseInt(window.getComputedStyle(document.body).paddingRight, 10);
+  }
+  function restoreBodyScrollbarPadding() {
+    if (initialBodyPaddingRightStyle) {
+      document.body.style.setProperty("padding-right", initialBodyPaddingRightStyle);
+    } else {
+      document.body.style.removeProperty("padding-right");
+    }
+    initialBodyPaddingRightStyle = void 0;
+  }
+  function bodyHasScrollbar() {
+    return document.body.clientWidth < window.innerWidth;
+  }
+
+  // node_modules/@cloudscape-design/components/modal/use-modal-dimensions.js
+  var MIN_CONTENT_HEIGHT = 60;
+  var MIN_MODAL_WIDTH = 320;
+  function useModalDimensions({ height: height2, width: width3, hasFooter }) {
+    const [footerHeight, footerRef] = useContainerQuery((rect2) => rect2.borderBoxHeight);
+    const [headerHeight, headerRef] = useContainerQuery((rect2) => rect2.borderBoxHeight);
+    const minModalHeight = (headerHeight !== null && headerHeight !== void 0 ? headerHeight : 0) + (hasFooter ? footerHeight !== null && footerHeight !== void 0 ? footerHeight : 0 : 0) + MIN_CONTENT_HEIGHT;
+    const constrainedHeight = Math.max(height2 !== null && height2 !== void 0 ? height2 : 0, minModalHeight);
+    const constrainedWidth = Math.max(width3 !== null && width3 !== void 0 ? width3 : 0, MIN_MODAL_WIDTH);
+    const hasCustomHeight = height2 !== void 0 && !Number.isNaN(height2);
+    const hasCustomWidth = width3 !== void 0 && !Number.isNaN(width3);
+    if (isDevelopment2) {
+      if (Number.isNaN(height2)) {
+        warnOnce("Modal", "Height is NaN and will not be set. This is likely a bug in your code.");
+      } else if (hasCustomHeight && constrainedHeight !== height2) {
+        warnOnce("Modal", `Height (${height2}px) is too small. Modal requires at least ${MIN_CONTENT_HEIGHT}px for content plus header/footer space (total: ${minModalHeight}px). Height will be adjusted to ${constrainedHeight}px.`);
+      }
+      if (Number.isNaN(width3)) {
+        warnOnce("Modal", "Width is NaN and will not be set. This is likely a bug in your code.");
+      } else if (hasCustomWidth && constrainedWidth !== width3) {
+        warnOnce("Modal", `Width (${width3}px) is below minimum (${MIN_MODAL_WIDTH}px) and will be adjusted to ${constrainedWidth}px.`);
+      }
+    }
+    return {
+      footerRef,
+      headerRef,
+      footerHeight,
+      hasCustomHeight,
+      hasCustomWidth,
+      dialogCustomStyles: {
+        ...hasCustomWidth && { [custom_css_properties_default.modalCustomWidth]: `${constrainedWidth}px` },
+        ...hasCustomHeight && { [custom_css_properties_default.modalCustomHeight]: `${constrainedHeight}px` }
+      }
+    };
+  }
+
+  // node_modules/@cloudscape-design/components/modal/analytics-metadata/styles.css.js
+  var styles_css_default100 = {
+    "header": "awsui_header_15dxs_1ns0c_5"
+  };
+
+  // node_modules/@cloudscape-design/components/modal/internal.js
+  function InternalModalAsFunnel(props) {
+    const { funnelProps, funnelSubmit, funnelNextOrSubmitAttempt } = useFunnel();
+    const { funnelStepProps } = useFunnelStep();
+    const { subStepRef, funnelSubStepProps } = useFunnelSubStep();
+    const onButtonClick = ({ variant }) => {
+      if (variant === "primary") {
+        funnelNextOrSubmitAttempt();
+        funnelSubmit();
+      }
+    };
+    return import_react239.default.createElement(InternalModal, { __funnelProps: funnelProps, __funnelStepProps: funnelStepProps, __subStepRef: subStepRef, __subStepFunnelProps: funnelSubStepProps, onButtonClick, ...props });
+  }
+  function InternalModal({ modalRoot, getModalRoot, removeModalRoot, ...rest }) {
+    return import_react239.default.createElement(
+      Portal,
+      { container: modalRoot, getContainer: getModalRoot, removeContainer: removeModalRoot },
+      import_react239.default.createElement(PortaledModal, { ...rest })
+    );
+  }
+  function PortaledModal({ size: size4, hideDismissButton = false, visible, header, children: children2, footer, disableContentPaddings, position: position5 = "center", onButtonClick = () => {
+  }, onDismiss, width: width3, height: height2, __internalRootRef, __injectAnalyticsComponentMetadata, __funnelProps, __funnelStepProps, __subStepRef, __subStepFunnelProps, referrerId, ...rest }) {
+    var _a213;
+    const instanceUniqueId = useUniqueId();
+    const headerId = `${rest.id || instanceUniqueId}-header`;
+    const lastMouseDownElementRef = (0, import_react239.useRef)(null);
+    const [breakpoint, breakpointsRef] = useContainerBreakpoints(["xs"]);
+    const i18n = useInternalI18n("modal");
+    const closeAriaLabel = i18n("closeAriaLabel", rest.closeAriaLabel);
+    const refObject = (0, import_react239.useRef)(null);
+    const mergedRef = useMergeRefs(breakpointsRef, refObject, __internalRootRef);
+    const dialogRef = (0, import_react239.useRef)(null);
+    const isRefresh = useVisualRefresh();
+    const baseProps = getBaseProps(rest);
+    const analyticsComponentMetadata = {
+      name: "awsui.Modal",
+      label: `.${styles_css_default100.header} h2`
+    };
+    const metadataAttribute = __injectAnalyticsComponentMetadata ? getAnalyticsMetadataAttribute({ component: analyticsComponentMetadata }) : {};
+    const loadStartTime = (0, import_react239.useRef)(0);
+    const loadCompleteTime = (0, import_react239.useRef)(0);
+    const componentLoadingCount = (0, import_react239.useRef)(0);
+    const performanceMetricLogged = (0, import_react239.useRef)(false);
+    (0, import_react239.useEffect)(() => {
+      return () => {
+        enableBodyScrolling();
+      };
+    }, []);
+    const resetModalPerformanceData = () => {
+      loadStartTime.current = performance.now();
+      loadCompleteTime.current = 0;
+      performanceMetricLogged.current = false;
+    };
+    const emitTimeToContentReadyInModal = (loadCompleteTime2) => {
+      var _a214;
+      if (componentLoadingCount.current === 0 && loadStartTime.current && loadStartTime.current !== 0 && !performanceMetricLogged.current) {
+        const timeToContentReadyInModal = loadCompleteTime2 - loadStartTime.current;
+        PerformanceMetrics.modalPerformanceData({
+          timeToContentReadyInModal,
+          instanceIdentifier: instanceUniqueId,
+          componentIdentifier: ((_a214 = headerTextRef.current) === null || _a214 === void 0 ? void 0 : _a214.textContent) || ""
+        });
+        performanceMetricLogged.current = true;
+      }
+    };
+    const MODAL_READY_TIMEOUT = 100;
+    (0, import_react239.useEffect)(() => {
+      if (visible) {
+        disableBodyScrolling();
+        resetModalPerformanceData();
+        setTimeout(() => {
+          emitTimeToContentReadyInModal(loadStartTime.current);
+        }, MODAL_READY_TIMEOUT);
+      } else {
+        enableBodyScrolling();
+      }
+    }, [visible]);
+    (0, import_react239.useEffect)(() => {
+      if (visible && refObject.current) {
+        refObject.current.scrollTop = 0;
+      }
+    }, [visible]);
+    const dismiss = (reason) => fireNonCancelableEvent(onDismiss, { reason });
+    const onOverlayMouseDown = (event3) => {
+      lastMouseDownElementRef.current = event3.target;
+      if (event3.target === refObject.current) {
+        event3.preventDefault();
+      }
+    };
+    const onOverlayClick = (event3) => {
+      const overlay = refObject.current;
+      const lastClicked = lastMouseDownElementRef.current;
+      if (event3.target === overlay && lastClicked === overlay) {
+        dismiss("overlay");
+      }
+    };
+    const onCloseButtonClick = () => dismiss("closeButton");
+    const escKeyHandler = (event3) => {
+      if (event3.keyCode === KeyCode2.escape) {
+        dismiss("keyboard");
+      }
+    };
+    const { ref: stickySentinelRef, isIntersecting: footerStuck } = useIntersectionObserver();
+    const headerTextRef = (0, import_react239.useRef)(null);
+    const headingTagRef = (0, import_react239.useRef)(null);
+    const { subStepRef } = useFunnelSubStep();
+    const hasHeader = header !== void 0 && header !== null && header !== false && header !== "";
+    const autoFocusTarget = hideDismissButton ? hasHeader ? headingTagRef : dialogRef : void 0;
+    const { footerRef, headerRef, hasCustomHeight, hasCustomWidth, dialogCustomStyles, footerHeight } = useModalDimensions({
+      height: height2,
+      width: width3,
+      hasFooter: !!footer
+    });
+    return import_react239.default.createElement(
+      FunnelNameSelectorContext.Provider,
+      { value: `.${styles_css_default99["header--text"]}` },
+      import_react239.default.createElement(
+        reset_contexts_for_modal_default,
+        null,
+        import_react239.default.createElement(
+          ModalContext.Provider,
+          { value: {
+            isInModal: true,
+            componentLoadingCount,
+            emitTimeToContentReadyInModal
+          } },
+          import_react239.default.createElement(
+            "div",
+            { ...baseProps, ...__funnelProps, ...__funnelStepProps, className: clsx_m_default(styles_css_default99.root, { [styles_css_default99.hidden]: !visible }, hideDismissButton && styles_css_default99["hide-dismiss-button"], baseProps.className, isRefresh && styles_css_default99.refresh), role: "dialog", "aria-labelledby": headerId, onMouseDown: onOverlayMouseDown, onClick: onOverlayClick, ref: mergedRef, style: footerHeight ? { scrollPaddingBottom: footerHeight } : void 0, "data-awsui-referrer-id": ((_a213 = subStepRef.current) === null || _a213 === void 0 ? void 0 : _a213.id) || referrerId },
+            import_react239.default.createElement(
+              focus_lock_default,
+              { disabled: !visible, autoFocus: true, restoreFocus: true, autoFocusTarget, className: clsx_m_default(styles_css_default99["focus-lock"], styles_css_default99[`position-${position5}`]) },
+              import_react239.default.createElement(
+                "div",
+                {
+                  className: clsx_m_default(styles_css_default99.dialog, !hasCustomWidth && styles_css_default99[size4], styles_css_default99[`breakpoint-${breakpoint}`], isRefresh && styles_css_default99.refresh, hasCustomWidth && styles_css_default99["custom-width"], hasCustomHeight && styles_css_default99["custom-height"]),
+                  ref: dialogRef,
+                  style: dialogCustomStyles,
+                  onKeyDown: escKeyHandler,
+                  // Keeps the dialog focusable so that clicking a non-focusable area inside it moves
+                  // focus to the dialog rather than the document body.
+                  tabIndex: -1,
+                  ...metadataAttribute
+                },
+                import_react239.default.createElement(
+                  "div",
+                  { className: clsx_m_default(styles_css_default99.container, hasCustomHeight && styles_css_default99["custom-height-container"]) },
+                  import_react239.default.createElement(
+                    "div",
+                    { ref: headerRef, className: clsx_m_default(styles_css_default99.header, styles_css_default100.header) },
+                    import_react239.default.createElement(
+                      InternalHeader,
+                      { variant: "h2", __disableActionsWrapping: true, __headingTagRef: headingTagRef, __headingTagTabIndex: -1, actions: hideDismissButton ? void 0 : import_react239.default.createElement(
+                        "div",
+                        { ...getAnalyticsMetadataAttribute({
+                          action: "dismiss"
+                        }) },
+                        import_react239.default.createElement(InternalButton, { ariaLabel: closeAriaLabel, className: styles_css_default99["dismiss-control"], variant: "modal-dismiss", iconName: "close", formAction: "none", onClick: onCloseButtonClick })
+                      ) },
+                      import_react239.default.createElement("span", { ref: headerTextRef, id: headerId, className: styles_css_default99["header--text"] }, header)
+                    )
+                  ),
+                  import_react239.default.createElement(
+                    BuiltInErrorBoundary,
+                    { wrapper: (content) => import_react239.default.createElement(InternalBox, { padding: { bottom: "m", horizontal: "l" } }, content) },
+                    import_react239.default.createElement(
+                      "div",
+                      { ref: __subStepRef, ...__subStepFunnelProps, className: clsx_m_default(styles_css_default99.content, { [styles_css_default99["no-paddings"]]: disableContentPaddings }, hasCustomHeight && styles_css_default99["custom-height-content"]), ...hasCustomHeight && {
+                        tabIndex: 0,
+                        role: "region",
+                        "aria-labelledby": headerId
+                      } },
+                      children2,
+                      import_react239.default.createElement("div", { ref: stickySentinelRef })
+                    ),
+                    footer && import_react239.default.createElement(
+                      ButtonContext.Provider,
+                      { value: { onClick: onButtonClick } },
+                      import_react239.default.createElement("div", { ref: footerRef, className: clsx_m_default(styles_css_default99.footer, (footerStuck || hasCustomHeight) && styles_css_default99["footer--rounded"]) }, footer)
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    );
+  }
+
+  // node_modules/@cloudscape-design/components/internal/context/collection-preferences-metadata-context.js
+  var import_react240 = __toESM(require_react());
+  var CollectionPreferencesMetadata = (0, import_react240.createContext)({});
 
   // node_modules/@cloudscape-design/components/column-layout/index.js
-  var import_react240 = __toESM(require_react());
+  var import_react241 = __toESM(require_react());
   function ColumnLayout2({ columns = 1, variant = "default", borders = "none", disableGutters = false, ...props }) {
     const baseComponentProps = useBaseComponent("ColumnLayout", {
       props: { borders, columns, disableGutters, minColumnWidth: props.minColumnWidth, variant }
     });
     const externalProps = getExternalProps(props);
-    return import_react240.default.createElement(ColumnLayout, { columns, variant, borders, disableGutters, ...externalProps, ...baseComponentProps });
+    return import_react241.default.createElement(ColumnLayout, { columns, variant, borders, disableGutters, ...externalProps, ...baseComponentProps });
   }
   applyDisplayName(ColumnLayout2, "ColumnLayout");
 
   // node_modules/@cloudscape-design/components/container/index.js
-  var import_react241 = __toESM(require_react());
-  var Container = import_react241.default.forwardRef(({ variant = "default", disableHeaderPaddings = false, disableContentPaddings = false, fitHeight = false, ...props }, ref) => {
+  var import_react242 = __toESM(require_react());
+  var Container = import_react242.default.forwardRef(({ variant = "default", disableHeaderPaddings = false, disableContentPaddings = false, fitHeight = false, ...props }, ref) => {
     const analyticsMetadata = getAnalyticsMetadataProps(props);
     const baseComponentProps = useBaseComponent("Container", {
       props: {
@@ -332732,37 +333378,37 @@ ${isHandDrawn ? "" : `
       name: "awsui.Container",
       label: { root: "self" }
     };
-    return import_react241.default.createElement(
+    return import_react242.default.createElement(
       AnalyticsFunnelSubStep,
       { subStepIdentifier: analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.instanceIdentifier, subStepErrorContext: analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.errorContext },
-      import_react241.default.createElement(InternalContainerAsSubstep, { ref, variant, disableContentPaddings, disableHeaderPaddings, fitHeight, ...props, ...externalProps, ...baseComponentProps, ...getAnalyticsMetadataAttribute({ component: analyticsComponentMetadata }) })
+      import_react242.default.createElement(InternalContainerAsSubstep, { ref, variant, disableContentPaddings, disableHeaderPaddings, fitHeight, ...props, ...externalProps, ...baseComponentProps, ...getAnalyticsMetadataAttribute({ component: analyticsComponentMetadata }) })
     );
   });
   applyDisplayName(Container, "Container");
   var container_default = Container;
 
   // node_modules/@cloudscape-design/components/content-layout/index.js
-  var import_react245 = __toESM(require_react());
+  var import_react246 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/content-layout/internal.js
-  var import_react244 = __toESM(require_react());
+  var import_react245 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/hooks/use-dynamic-overlap/index.js
-  var import_react242 = __toESM(require_react());
   var import_react243 = __toESM(require_react());
+  var import_react244 = __toESM(require_react());
   function useDynamicOverlap(props) {
     var _a213;
     const disabled = (_a213 = props === null || props === void 0 ? void 0 : props.disabled) !== null && _a213 !== void 0 ? _a213 : false;
-    const setDynamicOverlapHeight = (0, import_react242.useContext)(DynamicOverlapContext);
-    const overlapElementRef = (0, import_react243.useRef)(null);
-    const getElement = (0, import_react243.useCallback)(() => overlapElementRef.current, [overlapElementRef]);
-    const updateState = (0, import_react243.useCallback)((entry) => {
+    const setDynamicOverlapHeight = (0, import_react243.useContext)(DynamicOverlapContext);
+    const overlapElementRef = (0, import_react244.useRef)(null);
+    const getElement = (0, import_react244.useCallback)(() => overlapElementRef.current, [overlapElementRef]);
+    const updateState = (0, import_react244.useCallback)((entry) => {
       if (!disabled) {
         setDynamicOverlapHeight(entry.contentBoxHeight);
       }
     }, [disabled, setDynamicOverlapHeight]);
     useResizeObserver(getElement, updateState);
-    (0, import_react242.useLayoutEffect)(function handleDynamicOverlapHeight() {
+    (0, import_react243.useLayoutEffect)(function handleDynamicOverlapHeight() {
       return () => {
         if (!disabled) {
           setDynamicOverlapHeight(0);
@@ -332773,7 +333419,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/content-layout/styles.css.js
-  var styles_css_default99 = {
+  var styles_css_default101 = {
     "layout": "awsui_layout_5gtk3_9ykox_9",
     "background": "awsui_background_5gtk3_9ykox_23",
     "is-overlap-disabled": "awsui_is-overlap-disabled_5gtk3_9ykox_28",
@@ -332791,7 +333437,7 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/content-layout/test-classes/styles.css.js
-  var styles_css_default100 = {
+  var styles_css_default102 = {
     "header": "awsui_header_64tge_1scxg_5",
     "secondary-header": "awsui_secondary-header_64tge_1scxg_9",
     "notifications": "awsui_notifications_64tge_1scxg_13",
@@ -332801,7 +333447,7 @@ ${isHandDrawn ? "" : `
   // node_modules/@cloudscape-design/components/content-layout/internal.js
   var halfGeckoMaxCssLength = ((1 << 30) - 1) / 120;
   function InternalContentLayout({ children: children2, disableOverlap, header, headerVariant = "default", headerBackgroundStyle, __internalRootRef, maxContentWidth = Number.MAX_VALUE, breadcrumbs, notifications: notifications2, defaultPadding, secondaryHeader, ...rest }) {
-    const mainRef = (0, import_react244.useRef)(null);
+    const mainRef = (0, import_react245.useRef)(null);
     const mergedRef = useMergeRefs(mainRef, __internalRootRef);
     const baseProps = getBaseProps(rest);
     const isVisualRefresh = useVisualRefresh();
@@ -332809,39 +333455,39 @@ ${isHandDrawn ? "" : `
     const overlapElement = useDynamicOverlap();
     const isOverlapDisabled = !children2 || disableOverlap;
     const contentHeaderClassName = headerVariant === "high-contrast" && isVisualRefresh ? highContrastHeaderClassName : "";
-    return import_react244.default.createElement(
+    return import_react245.default.createElement(
       "div",
-      { ...baseProps, className: clsx_m_default(baseProps.className, styles_css_default99.layout, {
-        [styles_css_default99["is-overlap-disabled"]]: isOverlapDisabled,
-        [styles_css_default99["is-visual-refresh"]]: isVisualRefresh,
-        [styles_css_default99["has-header"]]: !!header,
-        [styles_css_default99["default-padding"]]: !!defaultPadding,
-        [styles_css_default99["has-notifications"]]: !!notifications2
+      { ...baseProps, className: clsx_m_default(baseProps.className, styles_css_default101.layout, {
+        [styles_css_default101["is-overlap-disabled"]]: isOverlapDisabled,
+        [styles_css_default101["is-visual-refresh"]]: isVisualRefresh,
+        [styles_css_default101["has-header"]]: !!header,
+        [styles_css_default101["default-padding"]]: !!defaultPadding,
+        [styles_css_default101["has-notifications"]]: !!notifications2
       }), style: {
         [custom_css_properties_default.contentLayoutMaxContentWidth]: maxContentWidth < Number.MAX_VALUE ? `${maxContentWidth}px` : `${halfGeckoMaxCssLength}px`
       }, ref: mergedRef },
-      import_react244.default.createElement("div", { className: clsx_m_default(styles_css_default99.background, { [styles_css_default99["has-default-background"]]: !headerBackgroundStyle }, contentHeaderClassName), ref: overlapElement }, headerBackgroundStyle && import_react244.default.createElement("div", { className: styles_css_default99["header-background"], style: {
+      import_react245.default.createElement("div", { className: clsx_m_default(styles_css_default101.background, { [styles_css_default101["has-default-background"]]: !headerBackgroundStyle }, contentHeaderClassName), ref: overlapElement }, headerBackgroundStyle && import_react245.default.createElement("div", { className: styles_css_default101["header-background"], style: {
         background: typeof headerBackgroundStyle === "function" ? headerBackgroundStyle(mode) : headerBackgroundStyle
       } })),
-      notifications2 && import_react244.default.createElement("div", { className: clsx_m_default(styles_css_default99.notifications, styles_css_default100.notifications, contentHeaderClassName) }, notifications2),
-      breadcrumbs && import_react244.default.createElement("div", { className: clsx_m_default(styles_css_default99.breadcrumbs, styles_css_default100.breadcrumbs, contentHeaderClassName) }, breadcrumbs),
-      header && !secondaryHeader && import_react244.default.createElement("div", { className: clsx_m_default(styles_css_default99["header-wrapper"], styles_css_default100.header, contentHeaderClassName, {
-        [styles_css_default99["with-divider"]]: headerVariant === "divider"
+      notifications2 && import_react245.default.createElement("div", { className: clsx_m_default(styles_css_default101.notifications, styles_css_default102.notifications, contentHeaderClassName) }, notifications2),
+      breadcrumbs && import_react245.default.createElement("div", { className: clsx_m_default(styles_css_default101.breadcrumbs, styles_css_default102.breadcrumbs, contentHeaderClassName) }, breadcrumbs),
+      header && !secondaryHeader && import_react245.default.createElement("div", { className: clsx_m_default(styles_css_default101["header-wrapper"], styles_css_default102.header, contentHeaderClassName, {
+        [styles_css_default101["with-divider"]]: headerVariant === "divider"
       }) }, header),
-      header && secondaryHeader && import_react244.default.createElement(
+      header && secondaryHeader && import_react245.default.createElement(
         "div",
-        { className: clsx_m_default(styles_css_default99["header-wrapper"], {
-          [styles_css_default99["with-divider"]]: headerVariant === "divider"
+        { className: clsx_m_default(styles_css_default101["header-wrapper"], {
+          [styles_css_default101["with-divider"]]: headerVariant === "divider"
         }) },
-        import_react244.default.createElement(
+        import_react245.default.createElement(
           internal_default15,
           { gridDefinition: [{ colspan: { default: 12, xs: 9 } }, { colspan: { default: 12, xs: 3 } }] },
-          import_react244.default.createElement("div", { className: clsx_m_default(styles_css_default100.header, contentHeaderClassName) }, header),
-          import_react244.default.createElement("div", { className: styles_css_default100["secondary-header"] }, secondaryHeader)
+          import_react245.default.createElement("div", { className: clsx_m_default(styles_css_default102.header, contentHeaderClassName) }, header),
+          import_react245.default.createElement("div", { className: styles_css_default102["secondary-header"] }, secondaryHeader)
         )
       ),
-      import_react244.default.createElement("div", { className: clsx_m_default(styles_css_default99.content, {
-        [styles_css_default99["with-divider"]]: headerVariant === "divider"
+      import_react245.default.createElement("div", { className: clsx_m_default(styles_css_default101.content, {
+        [styles_css_default101["with-divider"]]: headerVariant === "divider"
       }) }, children2)
     );
   }
@@ -332851,12 +333497,12 @@ ${isHandDrawn ? "" : `
     const baseComponentProps = useBaseComponent("ContentLayout", {
       props: { disableOverlap: props.disableOverlap }
     });
-    return import_react245.default.createElement(InternalContentLayout, { ...props, ...baseComponentProps });
+    return import_react246.default.createElement(InternalContentLayout, { ...props, ...baseComponentProps });
   }
   applyDisplayName(ContentLayout, "ContentLayout");
 
   // node_modules/@cloudscape-design/components/expandable-section/index.js
-  var import_react246 = __toESM(require_react());
+  var import_react247 = __toESM(require_react());
   function ExpandableSection({ variant = "default", ...props }) {
     const analyticsMetadata = getAnalyticsMetadataProps(props);
     const baseComponentProps = useBaseComponent("ExpandableSection", {
@@ -332870,18 +333516,18 @@ ${isHandDrawn ? "" : `
         hasHeaderActions: Boolean(props.headerActions)
       }
     }, analyticsMetadata);
-    return import_react246.default.createElement(InternalExpandableSection, { variant, ...props, ...baseComponentProps, __injectAnalyticsComponentMetadata: true });
+    return import_react247.default.createElement(InternalExpandableSection, { variant, ...props, ...baseComponentProps, __injectAnalyticsComponentMetadata: true });
   }
   applyDisplayName(ExpandableSection, "ExpandableSection");
 
   // node_modules/@cloudscape-design/components/internal/hooks/use-throttle-callback/index.js
-  var import_react247 = __toESM(require_react());
+  var import_react248 = __toESM(require_react());
   function useThrottleCallback(func, delay2, deps) {
-    return (0, import_react247.useMemo)(() => throttle(func, delay2), deps);
+    return (0, import_react248.useMemo)(() => throttle(func, delay2), deps);
   }
 
   // node_modules/@cloudscape-design/components/form-field/index.js
-  var import_react248 = __toESM(require_react());
+  var import_react249 = __toESM(require_react());
   function FormField({ stretch = false, ...props }) {
     const analyticsMetadata = getAnalyticsMetadataProps(props);
     const baseComponentProps = useBaseComponent("FormField", {
@@ -332893,7 +333539,7 @@ ${isHandDrawn ? "" : `
         hasErrorContext: Boolean(analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.errorContext)
       }
     }, analyticsMetadata);
-    return import_react248.default.createElement(InternalFormField, { stretch, ...props, __hideLabel: false, __analyticsMetadata: analyticsMetadata, ...baseComponentProps, ...getAnalyticsMetadataAttribute({
+    return import_react249.default.createElement(InternalFormField, { stretch, ...props, __hideLabel: false, __analyticsMetadata: analyticsMetadata, ...baseComponentProps, ...getAnalyticsMetadataAttribute({
       component: {
         name: "awsui.FormField",
         label: `.${styles_css_default85.label}`
@@ -332903,35 +333549,86 @@ ${isHandDrawn ? "" : `
   applyDisplayName(FormField, "FormField");
 
   // node_modules/@cloudscape-design/components/grid/index.js
-  var import_react249 = __toESM(require_react());
+  var import_react250 = __toESM(require_react());
   function Grid({ gridDefinition = [], disableGutters = false, children: children2, ...restProps }) {
     const baseComponentProps = useBaseComponent("Grid", {
       props: { disableGutters }
     });
     const baseProps = getBaseProps(restProps);
     const [breakpoint, ref] = useContainerBreakpoints(void 0);
-    return import_react249.default.createElement(internal_default15, { ...baseProps, ...baseComponentProps, ref, __breakpoint: breakpoint, gridDefinition, disableGutters }, children2);
+    return import_react250.default.createElement(internal_default15, { ...baseProps, ...baseComponentProps, ref, __breakpoint: breakpoint, gridDefinition, disableGutters }, children2);
   }
   applyDisplayName(Grid, "Grid");
 
   // node_modules/@cloudscape-design/components/header/index.js
-  var import_react250 = __toESM(require_react());
+  var import_react251 = __toESM(require_react());
   function Header2({ variant = "h2", ...props }) {
     const baseComponentProps = useBaseComponent("Header", {
       props: { headingTagOverride: props.headingTagOverride, variant }
     });
     const tabIndex = variant === "h1" ? -1 : void 0;
-    return import_react250.default.createElement(InternalHeader, { __headingTagTabIndex: tabIndex, variant, ...props, ...baseComponentProps });
+    return import_react251.default.createElement(InternalHeader, { __headingTagTabIndex: tabIndex, variant, ...props, ...baseComponentProps });
   }
   applyDisplayName(Header2, "Header");
 
+  // node_modules/@cloudscape-design/components/modal/index.js
+  var import_react252 = __toESM(require_react());
+  function ModalWithAnalyticsFunnel({ analyticsMetadata, baseComponentProps, size: size4 = "medium", hideDismissButton, ...props }) {
+    const modalId = useUniqueId();
+    const dataAttributes = {
+      [DATA_ATTR_MODAL_ID]: modalId
+    };
+    return import_react252.default.createElement(
+      AnalyticsFunnel,
+      { mounted: props.visible, funnelIdentifier: analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.instanceIdentifier, funnelFlowType: analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.flowType, funnelErrorContext: analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.errorContext, funnelResourceType: analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.resourceType, funnelType: "modal", optionalStepNumbers: [], totalFunnelSteps: 1, funnelNameSelectors: () => {
+        var _a213;
+        return [
+          `[${DATA_ATTR_MODAL_ID}="${(_a213 = window === null || window === void 0 ? void 0 : window.CSS) === null || _a213 === void 0 ? void 0 : _a213.escape(modalId)}"] .${styles_css_default99["header--text"]}`
+        ];
+      } },
+      import_react252.default.createElement(
+        AnalyticsFunnelStep,
+        { mounted: props.visible, stepIdentifier: analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.instanceIdentifier, stepErrorContext: analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.errorContext, stepNumber: 1 },
+        import_react252.default.createElement(
+          AnalyticsFunnelSubStep,
+          { subStepIdentifier: analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.instanceIdentifier, subStepErrorContext: analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.errorContext },
+          import_react252.default.createElement(InternalModalAsFunnel, { size: size4, hideDismissButton, ...props, ...baseComponentProps, ...dataAttributes, __injectAnalyticsComponentMetadata: true })
+        )
+      )
+    );
+  }
+  function Modal({ size: size4 = "medium", position: position5 = "center", hideDismissButton = false, width: width3, height: height2, ...props }) {
+    const { isInFunnel } = useFunnel();
+    const analyticsMetadata = getAnalyticsMetadataProps(props);
+    const baseComponentProps = useBaseComponent("Modal", {
+      props: {
+        size: size4,
+        position: position5,
+        hideDismissButton,
+        disableContentPaddings: props.disableContentPaddings,
+        flowType: analyticsMetadata.flowType,
+        width: width3,
+        height: height2
+      },
+      metadata: {
+        hasResourceType: Boolean(analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.resourceType),
+        hasInstanceIdentifier: Boolean(analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.instanceIdentifier)
+      }
+    }, analyticsMetadata);
+    if (!isInFunnel) {
+      return import_react252.default.createElement(ModalWithAnalyticsFunnel, { analyticsMetadata, baseComponentProps, size: size4, position: position5, hideDismissButton, width: width3, height: height2, ...props });
+    }
+    return import_react252.default.createElement(InternalModal, { size: size4, position: position5, hideDismissButton, width: width3, height: height2, ...props, ...baseComponentProps, __injectAnalyticsComponentMetadata: true });
+  }
+  applyDisplayName(Modal, "Modal");
+
   // node_modules/@cloudscape-design/components/table/internal.js
-  var import_react291 = __toESM(require_react());
+  var import_react293 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/hooks/use-scroll-sync/index.js
-  var import_react251 = __toESM(require_react());
+  var import_react253 = __toESM(require_react());
   function useScrollSync(refs) {
-    const activeElement = (0, import_react251.useRef)(null);
+    const activeElement = (0, import_react253.useRef)(null);
     return (event3) => {
       const targetElement = event3.currentTarget;
       if (targetElement && (activeElement.current === null || activeElement.current === targetElement)) {
@@ -332952,25 +333649,25 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/internal/hooks/use-table-interaction-metrics/index.js
-  var import_react252 = __toESM(require_react());
+  var import_react254 = __toESM(require_react());
   var USER_ACTION_TIME_LIMIT = 1e3;
   function useTableInteractionMetrics({ elementRef, items, itemCount, instanceIdentifier, getComponentIdentifier, getComponentConfiguration, loading = false, interactionMetadata }) {
     const taskInteractionId = useRandomId();
     const tableInteractionAttributes = useDOMAttribute(elementRef, "data-analytics-task-interaction-id", taskInteractionId);
     const { isInFunnel } = useFunnel();
-    const lastUserAction = (0, import_react252.useRef)(null);
-    const capturedUserAction = (0, import_react252.useRef)(null);
-    const loadingStartTime = (0, import_react252.useRef)(null);
-    const isMountedRef = (0, import_react252.useRef)(true);
-    const metadata = (0, import_react252.useRef)({ itemCount, getComponentIdentifier, getComponentConfiguration, interactionMetadata });
+    const lastUserAction = (0, import_react254.useRef)(null);
+    const capturedUserAction = (0, import_react254.useRef)(null);
+    const loadingStartTime = (0, import_react254.useRef)(null);
+    const isMountedRef = (0, import_react254.useRef)(true);
+    const metadata = (0, import_react254.useRef)({ itemCount, getComponentIdentifier, getComponentConfiguration, interactionMetadata });
     metadata.current = { itemCount, getComponentIdentifier, getComponentConfiguration, interactionMetadata };
-    (0, import_react252.useEffect)(() => {
+    (0, import_react254.useEffect)(() => {
       isMountedRef.current = true;
       return () => {
         isMountedRef.current = false;
       };
     }, []);
-    (0, import_react252.useEffect)(() => {
+    (0, import_react254.useEffect)(() => {
       if (isInFunnel) {
         return;
       }
@@ -332980,7 +333677,7 @@ ${isHandDrawn ? "" : `
         componentConfiguration: metadata.current.getComponentConfiguration()
       });
     }, [taskInteractionId, isInFunnel]);
-    (0, import_react252.useEffect)(() => {
+    (0, import_react254.useEffect)(() => {
       if (loading) {
         loadingStartTime.current = performance.now();
         if (lastUserAction.current && lastUserAction.current.time > performance.now() - USER_ACTION_TIME_LIMIT) {
@@ -333030,29 +333727,29 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table-root/context.js
-  var import_react253 = __toESM(require_react());
+  var import_react255 = __toESM(require_react());
   var defaultTableContext = {
     isGrid: false,
     gridTemplateColumns: void 0
   };
-  var TableContext = (0, import_react253.createContext)(defaultTableContext);
+  var TableContext = (0, import_react255.createContext)(defaultTableContext);
   var TableContextProvider = TableContext.Provider;
   function useTableContext() {
-    return (0, import_react253.useContext)(TableContext);
+    return (0, import_react255.useContext)(TableContext);
   }
 
   // node_modules/@cloudscape-design/components/table/body-cell/index.js
-  var import_react263 = __toESM(require_react());
+  var import_react265 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/body-cell/disabled-inline-editor.js
-  var import_react261 = __toESM(require_react());
+  var import_react263 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/body-cell/click-away.js
-  var import_react254 = __toESM(require_react());
+  var import_react256 = __toESM(require_react());
   function useClickAway(onClick) {
-    const awayRef = (0, import_react254.useRef)(null);
+    const awayRef = (0, import_react256.useRef)(null);
     const onClickStable = useStableCallback(onClick);
-    (0, import_react254.useEffect)(() => {
+    (0, import_react256.useEffect)(() => {
       function handleClick(event3) {
         if (!nodeBelongs2(awayRef.current, event3.target)) {
           onClickStable();
@@ -333065,13 +333762,13 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/body-cell/td-element.js
-  var import_react260 = __toESM(require_react());
+  var import_react262 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/expand-toggle-button/index.js
-  var import_react255 = __toESM(require_react());
+  var import_react257 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/expand-toggle-button/styles.css.js
-  var styles_css_default101 = {
+  var styles_css_default103 = {
     "expand-toggle-icon": "awsui_expand-toggle-icon_1xe88_1iwhb_13",
     "expand-toggle-icon-expanded": "awsui_expand-toggle-icon-expanded_1xe88_1iwhb_34",
     "expand-toggle": "awsui_expand-toggle_1xe88_1iwhb_13",
@@ -333080,19 +333777,19 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/internal/components/expand-toggle-button/index.js
   function ExpandToggleButton({ isExpanded, onExpandableItemToggle, expandButtonLabel, collapseButtonLabel, customIcon, expandToggleIcon, className, disableFocusHighlight }) {
-    const buttonRef = (0, import_react255.useRef)(null);
+    const buttonRef = (0, import_react257.useRef)(null);
     const { tabIndex } = useSingleTabStopNavigation(buttonRef);
-    return import_react255.default.createElement("button", { type: "button", ref: buttonRef, tabIndex, "aria-label": isExpanded ? collapseButtonLabel : expandButtonLabel, "aria-expanded": isExpanded, className: clsx_m_default(styles_css_default101["expand-toggle"], disableFocusHighlight && styles_css_default101["disable-focus-highlight"], className), onClick: onExpandableItemToggle, "data-awsui-motion-trigger": "hover", "data-awsui-motion-target": "" }, customIcon !== null && customIcon !== void 0 ? customIcon : import_react255.default.createElement(CustomizableIcon, { customIcon: expandToggleIcon === null || expandToggleIcon === void 0 ? void 0 : expandToggleIcon({ expanded: !!isExpanded }), size: isThemeActive(Theme13.OneTheme) ? "x-small" : "small", fallback: {
+    return import_react257.default.createElement("button", { type: "button", ref: buttonRef, tabIndex, "aria-label": isExpanded ? collapseButtonLabel : expandButtonLabel, "aria-expanded": isExpanded, className: clsx_m_default(styles_css_default103["expand-toggle"], disableFocusHighlight && styles_css_default103["disable-focus-highlight"], className), onClick: onExpandableItemToggle, "data-awsui-motion-trigger": "hover", "data-awsui-motion-target": "" }, customIcon !== null && customIcon !== void 0 ? customIcon : import_react257.default.createElement(CustomizableIcon, { customIcon: expandToggleIcon === null || expandToggleIcon === void 0 ? void 0 : expandToggleIcon({ expanded: !!isExpanded }), size: isThemeActive(Theme13.OneTheme) ? "x-small" : "small", fallback: {
       name: isThemeActive(Theme13.OneTheme) ? "angle-down" : "caret-down-filled",
-      className: clsx_m_default(styles_css_default101["expand-toggle-icon"], isExpanded && styles_css_default101["expand-toggle-icon-expanded"])
+      className: clsx_m_default(styles_css_default103["expand-toggle-icon"], isExpanded && styles_css_default103["expand-toggle-icon-expanded"])
     } }));
   }
 
   // node_modules/@cloudscape-design/components/table-body-cell/internal.js
-  var import_react256 = __toESM(require_react());
+  var import_react258 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/body-cell/styles.css.js
-  var styles_css_default102 = {
+  var styles_css_default104 = {
     "expandable-toggle-wrapper": "awsui_expandable-toggle-wrapper_c6tup_w3lpq_9",
     "body-cell": "awsui_body-cell_c6tup_w3lpq_16",
     "body-cell-content": "awsui_body-cell-content_c6tup_w3lpq_24",
@@ -333143,13 +333840,13 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/table-body-cell/styles.css.js
-  var styles_css_default103 = {
+  var styles_css_default105 = {
     "cell": "awsui_cell_2seex_1ytip_5",
     "cell-grid": "awsui_cell-grid_2seex_1ytip_33"
   };
 
   // node_modules/@cloudscape-design/components/table-body-cell/internal.js
-  var InternalTableBodyCell = import_react256.default.forwardRef((props, ref) => {
+  var InternalTableBodyCell = import_react258.default.forwardRef((props, ref) => {
     var _a213;
     const { tag, style: style3, wrapLines, disablePaddings, colSpan, nativeAttributes, tabIndex, onClick, onFocus, onBlur, beforeContent, children: children2 } = props;
     const { className, ...restBaseProps } = getBaseProps(props);
@@ -333166,24 +333863,24 @@ ${isHandDrawn ? "" : `
       ...isGrid && colSpan ? { "aria-colspan": colSpan } : void 0
     };
     const Element4 = tag;
-    return import_react256.default.createElement(
+    return import_react258.default.createElement(
       Element4,
       { ref, ...restBaseProps, style: gridColumnStyle ? { ...style3, ...gridColumnStyle } : style3, colSpan: isGrid ? void 0 : colSpan, className: clsx_m_default(
-        styles_css_default102["body-cell"],
+        styles_css_default104["body-cell"],
         className,
-        styles_css_default103.cell,
-        isGrid && styles_css_default103["cell-grid"],
+        styles_css_default105.cell,
+        isGrid && styles_css_default105["cell-grid"],
         // Gated on runtime VR mode: this substrate is shared with the existing Table, which still supports
         // runtime classic visual mode (non-VR). Atomic tables render VR-only, so useVisualRefresh() is true there.
-        isVisualRefresh && styles_css_default102["is-visual-refresh"]
+        isVisualRefresh && styles_css_default104["is-visual-refresh"]
       ), onClick, onFocus, onBlur, ...mergedNativeAttributes, tabIndex },
       beforeContent,
-      import_react256.default.createElement("div", { className: clsx_m_default(styles_css_default102["body-cell-content"], wrapLines && styles_css_default102["body-cell-wrap"], !disablePaddings && styles_css_default102["with-paddings"]) }, children2)
+      import_react258.default.createElement("div", { className: clsx_m_default(styles_css_default104["body-cell-content"], wrapLines && styles_css_default104["body-cell-wrap"], !disablePaddings && styles_css_default104["with-paddings"]) }, children2)
     );
   });
 
   // node_modules/@cloudscape-design/components/table/sticky-columns/use-sticky-columns.js
-  var import_react257 = __toESM(require_react());
+  var import_react259 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/sticky-columns/utils.js
   function isCellStatesEqual(s1, s22) {
@@ -333226,10 +333923,10 @@ ${isHandDrawn ? "" : `
   var MINIMUM_SCROLLABLE_SPACE2 = 148;
   var MINIMUM_SCROLLABLE_SPACE_WHILE_STUCK = MINIMUM_SCROLLABLE_SPACE2 - 24;
   function useStickyColumns({ visibleColumns, stickyColumnsFirst, stickyColumnsLast }) {
-    const store2 = (0, import_react257.useMemo)(() => new StickyColumnsStore(), []);
-    const wrapperRef = (0, import_react257.useRef)(null);
-    const tableRef = (0, import_react257.useRef)(null);
-    const cellsRef = (0, import_react257.useRef)(/* @__PURE__ */ new Map());
+    const store2 = (0, import_react259.useMemo)(() => new StickyColumnsStore(), []);
+    const wrapperRef = (0, import_react259.useRef)(null);
+    const tableRef = (0, import_react259.useRef)(null);
+    const cellsRef = (0, import_react259.useRef)(/* @__PURE__ */ new Map());
     const hasStickyColumns = stickyColumnsFirst + stickyColumnsLast > 0;
     const updateStickyStyles = useStableCallback(() => {
       if (wrapperRef.current && tableRef.current) {
@@ -333245,7 +333942,7 @@ ${isHandDrawn ? "" : `
     });
     useResizeObserver(wrapperRef, updateStickyStyles);
     useResizeObserver(tableRef, updateStickyStyles);
-    (0, import_react257.useEffect)(() => {
+    (0, import_react259.useEffect)(() => {
       if (wrapperRef.current && tableRef.current) {
         store2.updateCellStyles({
           wrapper: wrapperRef.current,
@@ -333257,7 +333954,7 @@ ${isHandDrawn ? "" : `
         });
       }
     }, [store2, stickyColumnsFirst, stickyColumnsLast, visibleColumns]);
-    (0, import_react257.useEffect)(() => {
+    (0, import_react259.useEffect)(() => {
       if (!hasStickyColumns) {
         return;
       }
@@ -333274,7 +333971,7 @@ ${isHandDrawn ? "" : `
       const unsubscribe = store2.subscribe(selector2, (newState2, prevState) => updateWrapperStyles(selector2(newState2), selector2(prevState)));
       return unsubscribe;
     }, [store2, hasStickyColumns]);
-    const setWrapper = (0, import_react257.useCallback)((node2) => {
+    const setWrapper = (0, import_react259.useCallback)((node2) => {
       if (wrapperRef.current) {
         wrapperRef.current.removeEventListener("scroll", updateStickyStyles);
       }
@@ -333283,10 +333980,10 @@ ${isHandDrawn ? "" : `
       }
       wrapperRef.current = node2;
     }, [hasStickyColumns, updateStickyStyles]);
-    const setTable = (0, import_react257.useCallback)((node2) => {
+    const setTable = (0, import_react259.useCallback)((node2) => {
       tableRef.current = node2;
     }, []);
-    const setCell = (0, import_react257.useCallback)((columnId, node2) => {
+    const setCell = (0, import_react259.useCallback)((columnId, node2) => {
       if (node2) {
         cellsRef.current.set(columnId, node2);
       } else {
@@ -333320,8 +334017,8 @@ ${isHandDrawn ? "" : `
   function useStickyCellStyles({ stickyColumns, columnId, getClassName, boundaryColumnId }) {
     var _a213, _b, _c;
     const setCell = stickyColumns.refs.cell;
-    const unsubscribeRef = (0, import_react257.useRef)(null);
-    const refCallback = (0, import_react257.useCallback)(
+    const unsubscribeRef = (0, import_react259.useRef)(null);
+    const refCallback = (0, import_react259.useCallback)(
       (cellElement) => {
         if (unsubscribeRef.current) {
           unsubscribeRef.current();
@@ -333554,8 +334251,8 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/table-role/grid-navigation.js
-  var import_react258 = __toESM(require_react());
-  var import_react259 = __toESM(require_react());
+  var import_react260 = __toESM(require_react());
+  var import_react261 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/table-role/utils.js
   function getClosestCell(element3) {
@@ -333695,10 +334392,10 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/table/table-role/grid-navigation.js
   function GridNavigationProvider({ keyboardNavigation, pageSize, getTable, children: children2 }) {
-    const navigationAPI = (0, import_react258.useRef)(null);
-    const gridNavigation = (0, import_react259.useMemo)(() => new GridNavigationProcessor(navigationAPI), []);
+    const navigationAPI = (0, import_react260.useRef)(null);
+    const gridNavigation = (0, import_react261.useMemo)(() => new GridNavigationProcessor(navigationAPI), []);
     const getTableStable = useStableCallback(getTable);
-    (0, import_react259.useEffect)(() => {
+    (0, import_react261.useEffect)(() => {
       if (keyboardNavigation) {
         const table = getTableStable();
         if (table) {
@@ -333707,15 +334404,15 @@ ${isHandDrawn ? "" : `
         }
       }
     }, [keyboardNavigation, gridNavigation, getTableStable]);
-    (0, import_react259.useEffect)(() => {
+    (0, import_react261.useEffect)(() => {
       gridNavigation.update({ pageSize });
     }, [gridNavigation, pageSize]);
-    (0, import_react259.useEffect)(() => {
+    (0, import_react261.useEffect)(() => {
       if (keyboardNavigation) {
         gridNavigation.refresh();
       }
     });
-    return import_react258.default.createElement(SingleTabStopNavigationProvider, { ref: navigationAPI, navigationActive: keyboardNavigation, getNextFocusTarget: gridNavigation.getNextFocusTarget, isElementSuppressed: gridNavigation.isElementSuppressed, onRegisterFocusable: gridNavigation.onRegisterFocusable, onUnregisterActive: gridNavigation.onUnregisterActive }, children2);
+    return import_react260.default.createElement(SingleTabStopNavigationProvider, { ref: navigationAPI, navigationActive: keyboardNavigation, getNextFocusTarget: gridNavigation.getNextFocusTarget, isElementSuppressed: gridNavigation.isElementSuppressed, onRegisterFocusable: gridNavigation.onRegisterFocusable, onUnregisterActive: gridNavigation.onUnregisterActive }, children2);
   }
   var GridNavigationProcessor = class {
     constructor(navigationAPI) {
@@ -333927,12 +334624,12 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/table/test-classes/styles.css.js
-  var styles_css_default104 = {
+  var styles_css_default106 = {
     "body-cell-counter": "awsui_body-cell-counter_10jtt_16x1t_5"
   };
 
   // node_modules/@cloudscape-design/components/table/body-cell/td-element.js
-  var TableTdElement = import_react260.default.forwardRef(({ children: children2, wrapLines, isRowHeader, isSelected, isNextSelected, isPrevSelected, nativeAttributes, onClick, onFocus, onBlur, isEvenRow, stripedRows, isSelection, hasSelection, hasFooter, columnId, colIndex, stickyState, tableRole, level, isExpandable, isExpanded, onExpandableItemToggle, expandButtonLabel, collapseButtonLabel, verticalAlign, resizableColumns, resizableStyle, isEditable, isEditing, isEditingDisabled, hasSuccessIcon, tableVariant, counter: counter2, ...rest }, ref) => {
+  var TableTdElement = import_react262.default.forwardRef(({ children: children2, wrapLines, isRowHeader, isSelected, isNextSelected, isPrevSelected, nativeAttributes, onClick, onFocus, onBlur, isEvenRow, stripedRows, isSelection, hasSelection, hasFooter, columnId, colIndex, stickyState, tableRole, level, isExpandable, isExpanded, onExpandableItemToggle, expandButtonLabel, collapseButtonLabel, verticalAlign, resizableColumns, resizableStyle, isEditable, isEditing, isEditingDisabled, hasSuccessIcon, tableVariant, counter: counter2, ...rest }, ref) => {
     const tag = isRowHeader ? "th" : "td";
     resizableStyle = resizableColumns ? {} : resizableStyle;
     const cellNativeAttributes = {
@@ -333942,26 +334639,26 @@ ${isHandDrawn ? "" : `
     const stickyStyles = useStickyCellStyles({
       stickyColumns: stickyState,
       columnId,
-      getClassName: (props) => getStickyClassNames(styles_css_default102, props)
+      getClassName: (props) => getStickyClassNames(styles_css_default104, props)
     });
-    const cellRefObject = (0, import_react260.useRef)(null);
+    const cellRefObject = (0, import_react262.useRef)(null);
     const mergedRef = useMergeRefs(stickyStyles.ref, ref, cellRefObject);
     const { tabIndex: cellTabIndex } = useSingleTabStopNavigation(cellRefObject);
     const tableIcons = useInternalComponentIcons("table");
     const isEditingActive = isEditing && !isEditingDisabled;
-    return import_react260.default.createElement(
+    return import_react262.default.createElement(
       InternalTableBodyCell,
-      { ref: mergedRef, tag, style: { ...resizableStyle, ...stickyStyles.style }, className: clsx_m_default(isSelected && styles_css_default102["body-cell-selected"], isNextSelected && styles_css_default102["body-cell-next-selected"], isPrevSelected && styles_css_default102["body-cell-prev-selected"], !isEvenRow && stripedRows && styles_css_default102["body-cell-shaded"], stripedRows && styles_css_default102["has-striped-rows"], isSelection && styles_css_default96["selection-control"], hasSelection && styles_css_default102["has-selection"], hasFooter && styles_css_default102["has-footer"], resizableColumns && styles_css_default102["resizable-columns"], verticalAlign === "top" && styles_css_default102["body-cell-align-top"], isEditable && styles_css_default102["body-cell-editable"], isEditing && !isEditingDisabled && styles_css_default102["body-cell-edit-active"], isEditing && isEditingDisabled && styles_css_default102["body-cell-edit-disabled-popover"], hasSuccessIcon && styles_css_default102["body-cell-has-success"], level !== void 0 && !isEditingActive && styles_css_default102["body-cell-expandable"], level !== void 0 && !isEditingActive && styles_css_default102[`expandable-level-${getLevelClassSuffix(level)}`], tableVariant && styles_css_default102[`table-variant-${tableVariant}`], stickyStyles.className), wrapLines, ...copyAnalyticsMetadataAttribute(rest), nativeAttributes: cellNativeAttributes, tabIndex: cellTabIndex === -1 ? void 0 : cellTabIndex, onClick, onFocus, onBlur, beforeContent: level !== void 0 && isExpandable && !isEditingActive ? import_react260.default.createElement(
+      { ref: mergedRef, tag, style: { ...resizableStyle, ...stickyStyles.style }, className: clsx_m_default(isSelected && styles_css_default104["body-cell-selected"], isNextSelected && styles_css_default104["body-cell-next-selected"], isPrevSelected && styles_css_default104["body-cell-prev-selected"], !isEvenRow && stripedRows && styles_css_default104["body-cell-shaded"], stripedRows && styles_css_default104["has-striped-rows"], isSelection && styles_css_default96["selection-control"], hasSelection && styles_css_default104["has-selection"], hasFooter && styles_css_default104["has-footer"], resizableColumns && styles_css_default104["resizable-columns"], verticalAlign === "top" && styles_css_default104["body-cell-align-top"], isEditable && styles_css_default104["body-cell-editable"], isEditing && !isEditingDisabled && styles_css_default104["body-cell-edit-active"], isEditing && isEditingDisabled && styles_css_default104["body-cell-edit-disabled-popover"], hasSuccessIcon && styles_css_default104["body-cell-has-success"], level !== void 0 && !isEditingActive && styles_css_default104["body-cell-expandable"], level !== void 0 && !isEditingActive && styles_css_default104[`expandable-level-${getLevelClassSuffix(level)}`], tableVariant && styles_css_default104[`table-variant-${tableVariant}`], stickyStyles.className), wrapLines, ...copyAnalyticsMetadataAttribute(rest), nativeAttributes: cellNativeAttributes, tabIndex: cellTabIndex === -1 ? void 0 : cellTabIndex, onClick, onFocus, onBlur, beforeContent: level !== void 0 && isExpandable && !isEditingActive ? import_react262.default.createElement(
         "div",
-        { className: styles_css_default102["expandable-toggle-wrapper"] },
-        import_react260.default.createElement(ExpandToggleButton, { isExpanded, onExpandableItemToggle, expandButtonLabel, collapseButtonLabel, expandToggleIcon: tableIcons === null || tableIcons === void 0 ? void 0 : tableIcons.expandToggle })
+        { className: styles_css_default104["expandable-toggle-wrapper"] },
+        import_react262.default.createElement(ExpandToggleButton, { isExpanded, onExpandableItemToggle, expandButtonLabel, collapseButtonLabel, expandToggleIcon: tableIcons === null || tableIcons === void 0 ? void 0 : tableIcons.expandToggle })
       ) : null },
       children2,
-      counter2 ? import_react260.default.createElement(
+      counter2 ? import_react262.default.createElement(
         "div",
-        { className: styles_css_default102["body-cell-counter"] },
-        import_react260.default.createElement("span", null, " "),
-        import_react260.default.createElement("span", { className: styles_css_default104["body-cell-counter"] }, counter2)
+        { className: styles_css_default104["body-cell-counter"] },
+        import_react262.default.createElement("span", null, " "),
+        import_react262.default.createElement("span", { className: styles_css_default106["body-cell-counter"] }, counter2)
       ) : null
     );
   });
@@ -333978,9 +334675,9 @@ ${isHandDrawn ? "" : `
         onEditEnd(true);
       }
     });
-    const iconRef = (0, import_react261.useRef)(null);
-    const buttonRef = (0, import_react261.useRef)(null);
-    const portalRef = (0, import_react261.useRef)(null);
+    const iconRef = (0, import_react263.useRef)(null);
+    const buttonRef = (0, import_react263.useRef)(null);
+    const portalRef = (0, import_react263.useRef)(null);
     function handleEscape(event3) {
       if (event3.key === "Escape") {
         onEditEnd(true);
@@ -333994,45 +334691,45 @@ ${isHandDrawn ? "" : `
     const { targetProps, descriptionEl } = useHiddenDescription(editDisabledReason);
     const portalClasses = usePortalModeClasses(portalRef);
     const { tabIndex } = useSingleTabStopNavigation(buttonRef);
-    return import_react261.default.createElement(
+    return import_react263.default.createElement(
       TableTdElement,
       { ...rest, nativeAttributes: { "data-inline-editing-active": isEditing.toString() }, isEditing, isEditingDisabled: true, onClick: !isEditing && !isExpandableColumn ? onClick : void 0, ref: !isExpandableColumn ? clickAwayRef : void 0 },
       column2.cell(item),
-      import_react261.default.createElement(
+      import_react263.default.createElement(
         "div",
-        { className: styles_css_default102["body-cell-editor-wrapper"] },
-        import_react261.default.createElement(
+        { className: styles_css_default104["body-cell-editor-wrapper"] },
+        import_react263.default.createElement(
           "div",
           { ref: isExpandableColumn ? clickAwayRef : void 0 },
-          import_react261.default.createElement(
+          import_react263.default.createElement(
             "button",
-            { ref: buttonRef, tabIndex, className: clsx_m_default(styles_css_default102["body-cell-editor"], styles_css_default102["body-cell-editor-disabled"], isExpandableColumn && styles_css_default102["body-cell-editor-focusable"]), onClick: !isEditing && isExpandableColumn ? onClick : void 0, "aria-label": (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.activateEditLabel) === null || _a213 === void 0 ? void 0 : _a213.call(ariaLabels, column2, item), "aria-haspopup": "dialog", "aria-disabled": "true", onKeyDown: handleEscape, ...targetProps },
-            import_react261.default.createElement(
+            { ref: buttonRef, tabIndex, className: clsx_m_default(styles_css_default104["body-cell-editor"], styles_css_default104["body-cell-editor-disabled"], isExpandableColumn && styles_css_default104["body-cell-editor-focusable"]), onClick: !isEditing && isExpandableColumn ? onClick : void 0, "aria-label": (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.activateEditLabel) === null || _a213 === void 0 ? void 0 : _a213.call(ariaLabels, column2, item), "aria-haspopup": "dialog", "aria-disabled": "true", onKeyDown: handleEscape, ...targetProps },
+            import_react263.default.createElement(
               "span",
-              { className: styles_css_default102["body-cell-editor-icon"] },
-              import_react261.default.createElement(internal_default, { name: "lock-private", variant: "normal", __internalRootRef: iconRef })
+              { className: styles_css_default104["body-cell-editor-icon"] },
+              import_react263.default.createElement(internal_default, { name: "lock-private", variant: "normal", __internalRootRef: iconRef })
             ),
             descriptionEl
           )
         )
       ),
-      isEditing && import_react261.default.createElement(
+      isEditing && import_react263.default.createElement(
         "span",
         { ref: portalRef },
-        import_react261.default.createElement(
+        import_react263.default.createElement(
           Portal,
           null,
-          import_react261.default.createElement(
+          import_react263.default.createElement(
             "span",
             { className: portalClasses },
-            import_react261.default.createElement(
+            import_react263.default.createElement(
               PopoverContainer,
-              { size: "medium", fixedWidth: false, position: "top", trackRef: iconRef, arrow: (position5) => import_react261.default.createElement(arrow_default, { position: position5 }), renderWithPortal: true, zIndex: 7e3 },
-              import_react261.default.createElement(
+              { size: "medium", fixedWidth: false, position: "top", trackRef: iconRef, arrow: (position5) => import_react263.default.createElement(arrow_default, { position: position5 }), renderWithPortal: true, zIndex: 7e3 },
+              import_react263.default.createElement(
                 body_default,
                 { dismissButton: false, dismissAriaLabel: void 0, header: null, onDismiss: () => {
                 }, overflowVisible: "both" },
-                import_react261.default.createElement(internal_default2, { tagName: "span" }, editDisabledReason)
+                import_react263.default.createElement(internal_default2, { tagName: "span" }, editDisabledReason)
               )
             )
           )
@@ -334042,14 +334739,14 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/body-cell/inline-editor.js
-  var import_react262 = __toESM(require_react());
+  var import_react264 = __toESM(require_react());
   var noop12 = () => void 0;
   function InlineEditor({ ariaLabels, item, column: column2, onEditEnd, submitEdit, __onRender }) {
     var _a213, _b, _c, _d;
-    const [currentEditLoading, setCurrentEditLoading] = (0, import_react262.useState)(false);
-    const [currentEditValue, setCurrentEditValue] = (0, import_react262.useState)();
+    const [currentEditLoading, setCurrentEditLoading] = (0, import_react264.useState)(false);
+    const [currentEditValue, setCurrentEditValue] = (0, import_react264.useState)();
     const i18n = useInternalI18n("table");
-    const focusLockRef = (0, import_react262.useRef)(null);
+    const focusLockRef = (0, import_react264.useRef)(null);
     function finishEdit({ cancelled = false, refocusCell = true } = {}) {
       if (!cancelled) {
         setCurrentEditValue(void 0);
@@ -334089,7 +334786,7 @@ ${isHandDrawn ? "" : `
       }
     }
     const clickAwayRef = useClickAway(() => onCancel({ reFocusEditedCell: false }));
-    (0, import_react262.useEffect)(() => {
+    (0, import_react264.useEffect)(() => {
       if (__onRender) {
         const timer4 = setTimeout(__onRender, 1);
         return () => clearTimeout(timer4);
@@ -334102,32 +334799,32 @@ ${isHandDrawn ? "" : `
       submitValue: handleSubmit
     };
     const FormElement = disableNativeForm ? "div" : "form";
-    return import_react262.default.createElement(
+    return import_react264.default.createElement(
       focus_lock_default,
       { restoreFocus: true, ref: focusLockRef },
-      import_react262.default.createElement(
+      import_react264.default.createElement(
         "div",
         { role: "dialog", ref: clickAwayRef, "aria-label": (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.activateEditLabel) === null || _a213 === void 0 ? void 0 : _a213.call(ariaLabels, column2, item), onKeyDown: handleEscape },
-        import_react262.default.createElement(
+        import_react264.default.createElement(
           FormElement,
           { onSubmit: disableNativeForm ? void 0 : onFormSubmit },
-          import_react262.default.createElement(
+          import_react264.default.createElement(
             InternalFormField,
             { stretch: true, label: ariaLabel, constraintText, __hideLabel: true, __disableGutters: true, i18nStrings: { errorIconAriaLabel }, errorText: validation(item, currentEditValue) },
-            import_react262.default.createElement(
+            import_react264.default.createElement(
               "div",
-              { className: styles_css_default102["body-cell-editor-row"] },
-              import_react262.default.createElement("div", { className: styles_css_default102["body-cell-editor-row-editor"] }, editingCell(item, cellContext)),
-              import_react262.default.createElement(
+              { className: styles_css_default104["body-cell-editor-row"] },
+              import_react264.default.createElement("div", { className: styles_css_default104["body-cell-editor-row-editor"] }, editingCell(item, cellContext)),
+              import_react264.default.createElement(
                 "span",
-                { className: styles_css_default102["body-cell-editor-controls"] },
-                import_react262.default.createElement(
+                { className: styles_css_default104["body-cell-editor-controls"] },
+                import_react264.default.createElement(
                   internal_default5,
                   { direction: "horizontal", size: "xxs" },
-                  !currentEditLoading ? import_react262.default.createElement(internal_default4, { ariaLabel: (_b = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.cancelEditLabel) === null || _b === void 0 ? void 0 : _b.call(ariaLabels, column2), formAction: "none", iconName: "close", variant: "inline-icon", onClick: () => onCancel() }) : null,
-                  import_react262.default.createElement(internal_default4, { ariaLabel: (_c = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.submitEditLabel) === null || _c === void 0 ? void 0 : _c.call(ariaLabels, column2), formAction: disableNativeForm ? "none" : "submit", onClick: disableNativeForm ? handleSubmit : void 0, iconName: "check", variant: "inline-icon", loading: currentEditLoading })
+                  !currentEditLoading ? import_react264.default.createElement(internal_default4, { ariaLabel: (_b = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.cancelEditLabel) === null || _b === void 0 ? void 0 : _b.call(ariaLabels, column2), formAction: "none", iconName: "close", variant: "inline-icon", onClick: () => onCancel() }) : null,
+                  import_react264.default.createElement(internal_default4, { ariaLabel: (_c = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.submitEditLabel) === null || _c === void 0 ? void 0 : _c.call(ariaLabels, column2), formAction: disableNativeForm ? "none" : "submit", onClick: disableNativeForm ? handleSubmit : void 0, iconName: "check", variant: "inline-icon", loading: currentEditLoading })
                 ),
-                import_react262.default.createElement(internal_default2, { tagName: "span", hidden: true }, currentEditLoading ? i18n("ariaLabels.submittingEditText", (_d = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.submittingEditText) === null || _d === void 0 ? void 0 : _d.call(ariaLabels, column2)) : "")
+                import_react264.default.createElement(internal_default2, { tagName: "span", hidden: true }, currentEditLoading ? i18n("ariaLabels.submittingEditText", (_d = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.submittingEditText) === null || _d === void 0 ? void 0 : _d.call(ariaLabels, column2)) : "")
               )
             )
           )
@@ -334143,23 +334840,23 @@ ${isHandDrawn ? "" : `
   function TableCellEditable({ item, column: column2, isEditing, onEditStart, onEditEnd, submitEdit, ariaLabels, successfulEdit = false, ...rest }) {
     var _a213, _b, _c;
     const i18n = useInternalI18n("table");
-    const editActivateRef = (0, import_react263.useRef)(null);
+    const editActivateRef = (0, import_react265.useRef)(null);
     const tdNativeAttributes = {
       "data-inline-editing-active": isEditing.toString()
     };
-    const isFocusMoveNeededRef = (0, import_react263.useRef)(false);
+    const isFocusMoveNeededRef = (0, import_react265.useRef)(false);
     const isExpandableColumn = rest.level !== void 0;
-    (0, import_react263.useEffect)(() => {
+    (0, import_react265.useEffect)(() => {
       if (!isEditing && editActivateRef.current && isFocusMoveNeededRef.current) {
         isFocusMoveNeededRef.current = false;
         editActivateRef.current.focus();
       }
     }, [isEditing]);
-    const [hasFocus, setHasFocus] = (0, import_react263.useState)(false);
+    const [hasFocus, setHasFocus] = (0, import_react265.useState)(false);
     const prevSuccessfulEdit = usePrevious(successfulEdit);
     const prevHasFocus = usePrevious(hasFocus);
-    const [showSuccessIcon, setShowSuccessIcon] = (0, import_react263.useState)(false);
-    (0, import_react263.useEffect)(() => {
+    const [showSuccessIcon, setShowSuccessIcon] = (0, import_react265.useState)(false);
+    (0, import_react265.useEffect)(() => {
       if (successfulEdit && prevSuccessfulEdit && !hasFocus && prevHasFocus) {
         setShowSuccessIcon(false);
       }
@@ -334168,36 +334865,36 @@ ${isHandDrawn ? "" : `
       }
     }, [hasFocus, successfulEdit, prevHasFocus, prevSuccessfulEdit]);
     const { tabIndex: editActivateTabIndex } = useSingleTabStopNavigation(editActivateRef);
-    return import_react263.default.createElement(TableTdElement, { ...rest, nativeAttributes: tdNativeAttributes, isEditing, hasSuccessIcon: showSuccessIcon && hasFocus, onClick: !isEditing && !isExpandableColumn ? onEditStart : void 0, onFocus: () => setHasFocus(true), onBlur: () => setHasFocus(false) }, isEditing && column2.editConfig ? import_react263.default.createElement(InlineEditor, { ariaLabels, column: column2, item, onEditEnd: (options2) => {
+    return import_react265.default.createElement(TableTdElement, { ...rest, nativeAttributes: tdNativeAttributes, isEditing, hasSuccessIcon: showSuccessIcon && hasFocus, onClick: !isEditing && !isExpandableColumn ? onEditStart : void 0, onFocus: () => setHasFocus(true), onBlur: () => setHasFocus(false) }, isEditing && column2.editConfig ? import_react265.default.createElement(InlineEditor, { ariaLabels, column: column2, item, onEditEnd: (options2) => {
       setShowSuccessIcon(false);
       isFocusMoveNeededRef.current = options2.refocusCell;
       onEditEnd(options2.cancelled);
-    }, submitEdit: submitEdit !== null && submitEdit !== void 0 ? submitEdit : submitHandlerFallback }) : import_react263.default.createElement(
-      import_react263.default.Fragment,
+    }, submitEdit: submitEdit !== null && submitEdit !== void 0 ? submitEdit : submitHandlerFallback }) : import_react265.default.createElement(
+      import_react265.default.Fragment,
       null,
       column2.cell(item),
-      showSuccessIcon && hasFocus && import_react263.default.createElement(
-        import_react263.default.Fragment,
+      showSuccessIcon && hasFocus && import_react265.default.createElement(
+        import_react265.default.Fragment,
         null,
-        import_react263.default.createElement(
+        import_react265.default.createElement(
           "span",
-          { className: styles_css_default102["body-cell-success"], onMouseDown: (e3) => {
+          { className: styles_css_default104["body-cell-success"], onMouseDown: (e3) => {
             e3.preventDefault();
           } },
-          import_react263.default.createElement(internal_default, { name: "status-positive", variant: "success", ariaLabel: (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.successfulEditLabel) === null || _a213 === void 0 ? void 0 : _a213.call(ariaLabels, column2) })
+          import_react265.default.createElement(internal_default, { name: "status-positive", variant: "success", ariaLabel: (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.successfulEditLabel) === null || _a213 === void 0 ? void 0 : _a213.call(ariaLabels, column2) })
         ),
-        import_react263.default.createElement(internal_default2, { tagName: "span", hidden: true }, i18n("ariaLabels.successfulEditLabel", (_b = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.successfulEditLabel) === null || _b === void 0 ? void 0 : _b.call(ariaLabels, column2)))
+        import_react265.default.createElement(internal_default2, { tagName: "span", hidden: true }, i18n("ariaLabels.successfulEditLabel", (_b = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.successfulEditLabel) === null || _b === void 0 ? void 0 : _b.call(ariaLabels, column2)))
       ),
-      import_react263.default.createElement(
+      import_react265.default.createElement(
         "div",
-        { className: styles_css_default102["body-cell-editor-wrapper"] },
-        import_react263.default.createElement(
+        { className: styles_css_default104["body-cell-editor-wrapper"] },
+        import_react265.default.createElement(
           "button",
-          { className: clsx_m_default(styles_css_default102["body-cell-editor"], isExpandableColumn && styles_css_default102["body-cell-editor-focusable"]), "aria-label": (_c = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.activateEditLabel) === null || _c === void 0 ? void 0 : _c.call(ariaLabels, column2, item), ref: editActivateRef, onClick: !isEditing && isExpandableColumn ? onEditStart : void 0, tabIndex: editActivateTabIndex },
-          import_react263.default.createElement(
+          { className: clsx_m_default(styles_css_default104["body-cell-editor"], isExpandableColumn && styles_css_default104["body-cell-editor-focusable"]), "aria-label": (_c = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.activateEditLabel) === null || _c === void 0 ? void 0 : _c.call(ariaLabels, column2, item), ref: editActivateRef, onClick: !isEditing && isExpandableColumn ? onEditStart : void 0, tabIndex: editActivateTabIndex },
+          import_react265.default.createElement(
             "span",
-            { className: styles_css_default102["body-cell-editor-icon"] },
-            import_react263.default.createElement(internal_default, { name: "edit" })
+            { className: styles_css_default104["body-cell-editor-icon"] },
+            import_react265.default.createElement(internal_default, { name: "edit" })
           )
         )
       )
@@ -334207,39 +334904,39 @@ ${isHandDrawn ? "" : `
     var _a213, _b;
     const editDisabledReason = (_b = (_a213 = props.column.editConfig) === null || _a213 === void 0 ? void 0 : _a213.disabledReason) === null || _b === void 0 ? void 0 : _b.call(_a213, props.item);
     if (editDisabledReason) {
-      return import_react263.default.createElement(DisabledInlineEditor, { editDisabledReason, ...props });
+      return import_react265.default.createElement(DisabledInlineEditor, { editDisabledReason, ...props });
     }
     if (props.isEditable || props.isEditing) {
-      return import_react263.default.createElement(TableCellEditable, { ...props });
+      return import_react265.default.createElement(TableCellEditable, { ...props });
     }
     const { column: column2, item } = props;
-    return import_react263.default.createElement(TableTdElement, { ...props, isEditable: false }, column2.cell(item));
+    return import_react265.default.createElement(TableTdElement, { ...props, isEditable: false }, column2.cell(item));
   }
 
   // node_modules/@cloudscape-design/components/table/clear-sort.js
-  var import_react264 = __toESM(require_react());
+  var import_react266 = __toESM(require_react());
   function ClearSortButton({ multiColumnSort, i18nStrings, onClearSort }) {
     var _a213;
     const i18n = useInternalI18n("table");
-    return import_react264.default.createElement(internal_default4, { variant: "inline-link", formAction: "none", onClick: () => {
+    return import_react266.default.createElement(internal_default4, { variant: "inline-link", formAction: "none", onClick: () => {
       fireNonCancelableEvent(multiColumnSort.onChange, { sortingColumns: [] });
       onClearSort === null || onClearSort === void 0 ? void 0 : onClearSort();
     } }, (_a213 = i18n("i18nStrings.clearSort", i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.clearSort)) !== null && _a213 !== void 0 ? _a213 : "");
   }
 
   // node_modules/@cloudscape-design/components/table/column-groups/col-group.js
-  var import_react267 = __toESM(require_react());
+  var import_react269 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/use-column-widths.js
-  var import_react266 = __toESM(require_react());
+  var import_react268 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/sticky-header/use-cells-resize-observer.js
-  var import_react265 = __toESM(require_react());
+  var import_react267 = __toESM(require_react());
   function useCellsResizeObserver(getCells, onResize) {
     const stableOnResize = useStableCallback(onResize);
-    const observerRef = (0, import_react265.useRef)(null);
-    const observedCellsRef = (0, import_react265.useRef)([]);
-    (0, import_react265.useLayoutEffect)(() => {
+    const observerRef = (0, import_react267.useRef)(null);
+    const observedCellsRef = (0, import_react267.useRef)([]);
+    (0, import_react267.useLayoutEffect)(() => {
       if (typeof ResizeObserver === "undefined") {
         return;
       }
@@ -334256,7 +334953,7 @@ ${isHandDrawn ? "" : `
       cells.filter((cell) => !observedCells.includes(cell)).forEach((cell) => observer2.observe(cell));
       observedCellsRef.current = cells;
     });
-    (0, import_react265.useEffect)(() => {
+    (0, import_react267.useEffect)(() => {
       return () => {
         var _a213;
         (_a213 = observerRef.current) === null || _a213 === void 0 ? void 0 : _a213.disconnect();
@@ -334337,7 +335034,7 @@ ${isHandDrawn ? "" : `
     newWidths.set(columnId, newWidth);
     return newWidths;
   }
-  var WidthsContext = (0, import_react266.createContext)({
+  var WidthsContext = (0, import_react268.createContext)({
     getColumnStyles: () => ({}),
     columnWidths: /* @__PURE__ */ new Map(),
     getColumnMinWidth: () => DEFAULT_COLUMN_WIDTH,
@@ -334351,14 +335048,14 @@ ${isHandDrawn ? "" : `
     }
   });
   function ColumnWidthsProvider({ visibleColumns, resizableColumns, containerRef, groupColumnMap, children: children2 }) {
-    const visibleColumnsRef = (0, import_react266.useRef)(null);
-    const containerWidthRef = (0, import_react266.useRef)(0);
-    const [columnWidths, setColumnWidths] = (0, import_react266.useState)(null);
-    const cellsRef = (0, import_react266.useRef)(/* @__PURE__ */ new Map());
-    const stickyCellsRef = (0, import_react266.useRef)(/* @__PURE__ */ new Map());
-    const colsRef = (0, import_react266.useRef)(/* @__PURE__ */ new Map());
-    const stickyColsRef = (0, import_react266.useRef)(/* @__PURE__ */ new Map());
-    const hasColElements = (0, import_react266.useRef)(false);
+    const visibleColumnsRef = (0, import_react268.useRef)(null);
+    const containerWidthRef = (0, import_react268.useRef)(0);
+    const [columnWidths, setColumnWidths] = (0, import_react268.useState)(null);
+    const cellsRef = (0, import_react268.useRef)(/* @__PURE__ */ new Map());
+    const stickyCellsRef = (0, import_react268.useRef)(/* @__PURE__ */ new Map());
+    const colsRef = (0, import_react268.useRef)(/* @__PURE__ */ new Map());
+    const stickyColsRef = (0, import_react268.useRef)(/* @__PURE__ */ new Map());
+    const hasColElements = (0, import_react268.useRef)(false);
     const getCell = (columnId) => {
       var _a213;
       return (_a213 = cellsRef.current.get(columnId)) !== null && _a213 !== void 0 ? _a213 : null;
@@ -334458,7 +335155,7 @@ ${isHandDrawn ? "" : `
       containerWidthRef.current = containerWidth;
       requestAnimationFrame(() => updateColumnWidths());
     });
-    (0, import_react266.useEffect)(() => {
+    (0, import_react268.useEffect)(() => {
       updateColumnWidths();
       if (!resizableColumns) {
         return;
@@ -334482,7 +335179,7 @@ ${isHandDrawn ? "" : `
       }
       visibleColumnsRef.current = visibleColumns.map((column2) => column2.id);
     }, [columnWidths, resizableColumns, visibleColumns, updateColumnWidths]);
-    (0, import_react266.useEffect)(() => {
+    (0, import_react268.useEffect)(() => {
       if (!resizableColumns) {
         return;
       }
@@ -334510,7 +335207,7 @@ ${isHandDrawn ? "" : `
       const currentColumnWidth = columnWidths.get(rightmostColumn) || DEFAULT_COLUMN_WIDTH;
       updateColumn(rightmostColumn, currentColumnWidth + delta);
     }
-    return import_react266.default.createElement(WidthsContext.Provider, { value: {
+    return import_react268.default.createElement(WidthsContext.Provider, { value: {
       getColumnStyles,
       columnWidths: columnWidths !== null && columnWidths !== void 0 ? columnWidths : /* @__PURE__ */ new Map(),
       getColumnMinWidth,
@@ -334521,22 +335218,22 @@ ${isHandDrawn ? "" : `
     } }, children2);
   }
   function useColumnWidths() {
-    return (0, import_react266.useContext)(WidthsContext);
+    return (0, import_react268.useContext)(WidthsContext);
   }
 
   // node_modules/@cloudscape-design/components/table/column-groups/col-group.js
   function TableColGroup({ visibleColumnDefinitions, hasSelection, sticky = false, selectionColumnId: selectionColumnId2 }) {
     const { getColumnStyles, setCol } = useColumnWidths();
-    return import_react267.default.createElement(
+    return import_react269.default.createElement(
       "colgroup",
       null,
-      hasSelection && import_react267.default.createElement("col", { style: sticky ? { width: getColumnStyles(true, selectionColumnId2).width } : void 0, ref: (node2) => setCol(sticky, selectionColumnId2, node2) }),
+      hasSelection && import_react269.default.createElement("col", { style: sticky ? { width: getColumnStyles(true, selectionColumnId2).width } : void 0, ref: (node2) => setCol(sticky, selectionColumnId2, node2) }),
       visibleColumnDefinitions.map((column2, colIndex) => {
         const columnId = getColumnKey(column2, colIndex);
         if (sticky) {
-          return import_react267.default.createElement("col", { key: String(columnId), style: { width: getColumnStyles(true, columnId).width }, ref: (node2) => setCol(true, columnId, node2) });
+          return import_react269.default.createElement("col", { key: String(columnId), style: { width: getColumnStyles(true, columnId).width }, ref: (node2) => setCol(true, columnId, node2) });
         }
-        return import_react267.default.createElement("col", { key: columnId, "data-column-id": String(columnId), ref: (node2) => setCol(false, columnId, node2) });
+        return import_react269.default.createElement("col", { key: columnId, "data-column-id": String(columnId), ref: (node2) => setCol(false, columnId, node2) });
       })
     );
   }
@@ -334808,7 +335505,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/multi-column-sort/live-announcement.js
-  var import_react268 = __toESM(require_react());
+  var import_react270 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/multi-column-sort/utils.js
   function getSortIndex(sortingColumns, column2) {
@@ -334857,7 +335554,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/analytics-metadata/styles.css.js
-  var styles_css_default105 = {
+  var styles_css_default107 = {
     "header-cell-text": "awsui_header-cell-text_dpuyq_1id1o_5"
   };
 
@@ -334868,7 +335565,7 @@ ${isHandDrawn ? "" : `
     if (!container2 || (column2 === null || column2 === void 0 ? void 0 : column2.id) === void 0) {
       return void 0;
     }
-    const selector2 = `[data-focus-id=${CSS.escape(`header-${column2.id}`)}] .${styles_css_default105["header-cell-text"]}`;
+    const selector2 = `[data-focus-id=${CSS.escape(`header-${column2.id}`)}] .${styles_css_default107["header-cell-text"]}`;
     const headerText = container2.querySelector(selector2);
     return ((_a213 = headerText === null || headerText === void 0 ? void 0 : headerText.textContent) === null || _a213 === void 0 ? void 0 : _a213.trim()) || void 0;
   }
@@ -334876,15 +335573,15 @@ ${isHandDrawn ? "" : `
     var _a213, _b;
     const i18n = useInternalI18n("table");
     const locale3 = useLocale();
-    const listFormatter = (0, import_react268.useMemo)(() => new Intl.ListFormat(locale3 !== null && locale3 !== void 0 ? locale3 : void 0, { type: "unit" }), [locale3]);
+    const listFormatter = (0, import_react270.useMemo)(() => new Intl.ListFormat(locale3 !== null && locale3 !== void 0 ? locale3 : void 0, { type: "unit" }), [locale3]);
     const sortAscending = (_a213 = i18n("ariaLabels.sortAscending", ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.sortAscending)) !== null && _a213 !== void 0 ? _a213 : "";
     const sortDescending = (_b = i18n("ariaLabels.sortDescending", ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.sortDescending)) !== null && _b !== void 0 ? _b : "";
     const renderSortColumn = ({ columnLabel, isDescending }) => `${columnLabel} ${isDescending ? sortDescending : sortAscending}`.trim();
     const renderSortOrder = i18n("ariaLabels.liveAnnouncementSortOrder", ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.liveAnnouncementSortOrder, formatSortOrder);
     const sortCleared = i18n("ariaLabels.liveAnnouncementSortCleared", ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.liveAnnouncementSortCleared);
-    const [announcement, setAnnouncement] = (0, import_react268.useState)("");
-    const isFirstRender = (0, import_react268.useRef)(true);
-    (0, import_react268.useEffect)(() => {
+    const [announcement, setAnnouncement] = (0, import_react270.useState)("");
+    const isFirstRender = (0, import_react270.useRef)(true);
+    (0, import_react270.useEffect)(() => {
       if (isFirstRender.current) {
         isFirstRender.current = false;
         return;
@@ -334902,13 +335599,13 @@ ${isHandDrawn ? "" : `
     if (!announcement) {
       return null;
     }
-    return import_react268.default.createElement(internal_default2, { hidden: true, tagName: "span" }, announcement);
+    return import_react270.default.createElement(internal_default2, { hidden: true, tagName: "span" }, announcement);
   }
 
   // node_modules/@cloudscape-design/components/table/no-data-cell.js
-  var import_react269 = __toESM(require_react());
+  var import_react271 = __toESM(require_react());
   function NoDataCell({ totalColumnsCount, hasFooter, loading, loadingText, empty: empty3, tableRef, containerRef }) {
-    const cellContentRef = (0, import_react269.useRef)(null);
+    const cellContentRef = (0, import_react271.useRef)(null);
     useResizeObserver(containerRef, ({ contentBoxWidth: containerInlineSize }) => {
       if (tableRef.current && cellContentRef.current) {
         const tablePaddingInlineStart = parseFloat(getComputedStyle(tableRef.current).paddingInlineStart) || 0;
@@ -334917,22 +335614,22 @@ ${isHandDrawn ? "" : `
         cellContentRef.current.style.inlineSize = Math.floor(inlineSize) + "px";
       }
     });
-    return import_react269.default.createElement(
+    return import_react271.default.createElement(
       "td",
       { colSpan: totalColumnsCount, className: clsx_m_default(styles_css_default96["cell-merged"], hasFooter && styles_css_default96["has-footer"]) },
-      import_react269.default.createElement("div", { ref: cellContentRef, className: styles_css_default96["cell-merged-content"], "data-awsui-table-suppress-navigation": true }, loading ? import_react269.default.createElement(
+      import_react271.default.createElement("div", { ref: cellContentRef, className: styles_css_default96["cell-merged-content"], "data-awsui-table-suppress-navigation": true }, loading ? import_react271.default.createElement(
         StatusIndicator,
         { type: "loading", className: styles_css_default96.loading, wrapText: true },
-        import_react269.default.createElement(internal_default2, { tagName: "span" }, loadingText)
-      ) : import_react269.default.createElement("div", { className: styles_css_default96.empty }, empty3))
+        import_react271.default.createElement(internal_default2, { tagName: "span" }, loadingText)
+      ) : import_react271.default.createElement("div", { className: styles_css_default96.empty }, empty3))
     );
   }
 
   // node_modules/@cloudscape-design/components/table/progressive-loading/items-loader.js
-  var import_react270 = __toESM(require_react());
+  var import_react272 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/progressive-loading/styles.css.js
-  var styles_css_default106 = {
+  var styles_css_default108 = {
     "items-loader": "awsui_items-loader_115pt_16l07_5"
   };
 
@@ -334940,18 +335637,18 @@ ${isHandDrawn ? "" : `
   function ItemsLoader({ item, trackBy, children: children2 }) {
     let parentTrackId = item && trackBy ? applyTrackBy(trackBy, item) : void 0;
     parentTrackId = typeof parentTrackId === "string" ? parentTrackId : void 0;
-    return import_react270.default.createElement("div", { "data-root": item ? "false" : "true", "data-parentrow": parentTrackId, className: styles_css_default106["items-loader"] }, children2);
+    return import_react272.default.createElement("div", { "data-root": item ? "false" : "true", "data-parentrow": parentTrackId, className: styles_css_default108["items-loader"] }, children2);
   }
   function getLoaderContent({ item, loadingStatus, renderLoaderPending, renderLoaderLoading, renderLoaderError, renderLoaderEmpty }) {
     let content = null;
     if (loadingStatus === "pending" && renderLoaderPending) {
       content = renderLoaderPending({ item });
     } else if (loadingStatus === "loading" && renderLoaderLoading) {
-      content = import_react270.default.createElement(internal_default2, { tagName: "span" }, renderLoaderLoading({ item }));
+      content = import_react272.default.createElement(internal_default2, { tagName: "span" }, renderLoaderLoading({ item }));
     } else if (loadingStatus === "error" && renderLoaderError) {
-      content = import_react270.default.createElement(internal_default2, { tagName: "span" }, renderLoaderError({ item }));
+      content = import_react272.default.createElement(internal_default2, { tagName: "span" }, renderLoaderError({ item }));
     } else if (loadingStatus === "finished" && renderLoaderEmpty && item) {
-      content = import_react270.default.createElement(internal_default2, { tagName: "span" }, renderLoaderEmpty({ item }));
+      content = import_react272.default.createElement(internal_default2, { tagName: "span" }, renderLoaderEmpty({ item }));
     } else {
       warnOnce("Table", "Must define `renderLoaderPending`, `renderLoaderLoading`, `renderLoaderError`, or `renderLoaderEmpty` when using corresponding loading status.");
     }
@@ -334959,13 +335656,13 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/progressive-loading/loader-cell.js
-  var import_react271 = __toESM(require_react());
+  var import_react273 = __toESM(require_react());
   function TableLoaderCell({ item, trackBy, counter: counter2, children: children2, ...props }) {
-    return props.isRowHeader ? import_react271.default.createElement(
+    return props.isRowHeader ? import_react273.default.createElement(
       TableTdElement,
       { ...props, counter: counter2, isEditable: false, isEditing: false },
-      import_react271.default.createElement(ItemsLoader, { item, trackBy }, children2)
-    ) : import_react271.default.createElement(TableTdElement, { ...props, isEditable: false, isEditing: false }, null);
+      import_react273.default.createElement(ItemsLoader, { item, trackBy }, children2)
+    ) : import_react273.default.createElement(TableTdElement, { ...props, isEditable: false, isEditing: false }, null);
   }
 
   // node_modules/@cloudscape-design/components/table/progressive-loading/progressive-loading-utils.js
@@ -335007,10 +335704,10 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/resizer/index.js
-  var import_react272 = __toESM(require_react());
+  var import_react274 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/resizer/styles.css.js
-  var styles_css_default107 = {
+  var styles_css_default109 = {
     "resize-active": "awsui_resize-active_x7peu_6aabd_9",
     "resize-active-with-focus": "awsui_resize-active-with-focus_x7peu_6aabd_9",
     "resizer-wrapper": "awsui_resizer-wrapper_x7peu_6aabd_14",
@@ -335048,7 +335745,7 @@ ${isHandDrawn ? "" : `
       return null;
     }
     const allHeaders = tableRoot.querySelectorAll(`thead th`);
-    const tracker = tableRoot.querySelector(`.${styles_css_default107.tracker}`);
+    const tracker = tableRoot.querySelector(`.${styles_css_default109.tracker}`);
     if (!tracker) {
       return null;
     }
@@ -335069,28 +335766,28 @@ ${isHandDrawn ? "" : `
   var AUTO_GROW_INTERVAL = 10;
   var AUTO_GROW_INCREMENT = 5;
   function Divider({ className, position: position5, isGrouped }) {
-    return import_react272.default.createElement("span", { className: clsx_m_default(styles_css_default107.divider, position5 && position5 !== "default" && styles_css_default107[`divider-position-${position5}`], isGrouped && styles_css_default107["divider-grouped"], className) });
+    return import_react274.default.createElement("span", { className: clsx_m_default(styles_css_default109.divider, position5 && position5 !== "default" && styles_css_default109[`divider-position-${position5}`], isGrouped && styles_css_default109["divider-grouped"], className) });
   }
   function Resizer({ onWidthUpdate, onWidthUpdateCommit, ariaLabelledby, minWidth = DEFAULT_COLUMN_WIDTH, tabIndex, showFocusRing, focusId, roleDescription, tooltipText, isBorderless, isLast, isGrouped, dividerPosition }) {
     onWidthUpdate = useStableCallback(onWidthUpdate);
     onWidthUpdateCommit = useStableCallback(onWidthUpdateCommit);
     const isVisualRefresh = useVisualRefresh();
     const separatorId = useUniqueId();
-    const positioningWrapperRef = (0, import_react272.useRef)(null);
-    const resizerToggleRef = (0, import_react272.useRef)(null);
-    const resizerSeparatorRef = (0, import_react272.useRef)(null);
-    const [isPointerDown, setIsPointerDown] = (0, import_react272.useState)(false);
-    const [isDragging, setIsDragging] = (0, import_react272.useState)(false);
-    const [showUapButtons, setShowUapButtons] = (0, import_react272.useState)(false);
-    const [resizerObscured, setResizerObscured] = (0, import_react272.useState)(false);
-    const [isKeyboardDragging, setIsKeyboardDragging] = (0, import_react272.useState)(false);
-    const autoGrowTimeout = (0, import_react272.useRef)();
-    const [resizerHasFocus, setResizerHasFocus] = (0, import_react272.useState)(false);
-    const [headerCellWidth, setHeaderCellWidth] = (0, import_react272.useState)(0);
-    (0, import_react272.useEffect)(() => {
+    const positioningWrapperRef = (0, import_react274.useRef)(null);
+    const resizerToggleRef = (0, import_react274.useRef)(null);
+    const resizerSeparatorRef = (0, import_react274.useRef)(null);
+    const [isPointerDown, setIsPointerDown] = (0, import_react274.useState)(false);
+    const [isDragging, setIsDragging] = (0, import_react274.useState)(false);
+    const [showUapButtons, setShowUapButtons] = (0, import_react274.useState)(false);
+    const [resizerObscured, setResizerObscured] = (0, import_react274.useState)(false);
+    const [isKeyboardDragging, setIsKeyboardDragging] = (0, import_react274.useState)(false);
+    const autoGrowTimeout = (0, import_react274.useRef)();
+    const [resizerHasFocus, setResizerHasFocus] = (0, import_react274.useState)(false);
+    const [headerCellWidth, setHeaderCellWidth] = (0, import_react274.useState)(0);
+    (0, import_react274.useEffect)(() => {
       setHeaderCellWidth(getHeaderWidth(resizerToggleRef.current));
     }, []);
-    const isObscured = (0, import_react272.useCallback)(() => {
+    const isObscured = (0, import_react274.useCallback)(() => {
       const elements2 = getResizerElements(resizerToggleRef.current);
       if (!elements2 || !positioningWrapperRef.current) {
         return false;
@@ -335117,12 +335814,12 @@ ${isHandDrawn ? "" : `
         Math.ceil(relativeInsetInlineEnd) < (isSticky ? 0 : scrollPaddingInlineEnd)
       );
     }, []);
-    const scrollIntoViewIfNeeded2 = (0, import_react272.useCallback)(() => {
+    const scrollIntoViewIfNeeded2 = (0, import_react274.useCallback)(() => {
       if (resizerSeparatorRef.current && isObscured()) {
         scrollElementIntoView(resizerSeparatorRef.current);
       }
     }, [isObscured]);
-    (0, import_react272.useEffect)(() => {
+    (0, import_react274.useEffect)(() => {
       if (!showUapButtons) {
         setResizerObscured(false);
         return;
@@ -335135,12 +335832,12 @@ ${isHandDrawn ? "" : `
       elements2.scrollParent.addEventListener("scroll", onScroll);
       return () => elements2.scrollParent.removeEventListener("scroll", onScroll);
     }, [isObscured, showUapButtons]);
-    (0, import_react272.useEffect)(() => {
+    (0, import_react274.useEffect)(() => {
       if (showUapButtons) {
         setResizerObscured(isObscured());
       }
     }, [headerCellWidth, isObscured, showUapButtons]);
-    const updateTrackerPosition = (0, import_react272.useCallback)((newOffset) => {
+    const updateTrackerPosition = (0, import_react274.useCallback)((newOffset) => {
       const elements2 = getResizerElements(resizerToggleRef.current);
       if (!elements2) {
         return;
@@ -335149,7 +335846,7 @@ ${isHandDrawn ? "" : `
       elements2.tracker.style.insetBlockStart = getLogicalBoundingClientRect(elements2.header).blockSize + "px";
       elements2.tracker.style.insetInlineStart = newOffset - scrollParentInsetInlineStart - 1 + "px";
     }, []);
-    const updateColumnWidth = (0, import_react272.useCallback)((newWidth) => {
+    const updateColumnWidth = (0, import_react274.useCallback)((newWidth) => {
       const elements2 = getResizerElements(resizerToggleRef.current);
       if (!elements2) {
         return;
@@ -335172,7 +335869,7 @@ ${isHandDrawn ? "" : `
         updateColumnWidth(newWidth);
       }
     }, RESIZE_THROTTLE, [updateColumnWidth]);
-    (0, import_react272.useEffect)(() => {
+    (0, import_react274.useEffect)(() => {
       var _a213, _b;
       const elements2 = getResizerElements(resizerToggleRef.current);
       const document2 = (_b = (_a213 = resizerToggleRef.current) === null || _a213 === void 0 ? void 0 : _a213.ownerDocument) !== null && _b !== void 0 ? _b : window.document;
@@ -335258,19 +335955,19 @@ ${isHandDrawn ? "" : `
       updateTrackerPosition(getLogicalBoundingClientRect(elements2.header).insetInlineEnd);
       const controller = new AbortController();
       if (isPointerDown) {
-        document2.body.classList.add(styles_css_default107["resize-active"]);
+        document2.body.classList.add(styles_css_default109["resize-active"]);
         document2.addEventListener("pointermove", onPointerMove, { signal: controller.signal });
         document2.addEventListener("pointerup", onPointerUp, { signal: controller.signal });
       } else if (resizerHasFocus) {
-        document2.body.classList.add(styles_css_default107["resize-active-with-focus"]);
+        document2.body.classList.add(styles_css_default109["resize-active-with-focus"]);
         elements2.header.addEventListener("keydown", onKeyDown, { signal: controller.signal });
       }
       if (isKeyboardDragging) {
-        document2.body.classList.add(styles_css_default107["resize-active"]);
+        document2.body.classList.add(styles_css_default109["resize-active"]);
       }
       return () => {
-        document2.body.classList.remove(styles_css_default107["resize-active"]);
-        document2.body.classList.remove(styles_css_default107["resize-active-with-focus"]);
+        document2.body.classList.remove(styles_css_default109["resize-active"]);
+        document2.body.classList.remove(styles_css_default109["resize-active-with-focus"]);
         controller.abort();
       };
     }, [
@@ -335284,26 +335981,26 @@ ${isHandDrawn ? "" : `
       updateColumnWidth,
       updateTrackerPosition
     ]);
-    (0, import_react272.useEffect)(() => {
+    (0, import_react274.useEffect)(() => {
       if (isDragging) {
         return () => clearTimeout(autoGrowTimeout.current);
       }
     }, [isDragging]);
     const { tabIndex: resizerTabIndex } = useSingleTabStopNavigation(resizerToggleRef, { tabIndex });
-    return import_react272.default.createElement(
+    return import_react274.default.createElement(
       "div",
       {
         // When the table is borderless (works in visual refresh tables only), the last resize handle must not
         // exceed table's edges, as it causes an unintended overflow otherwise.
-        className: clsx_m_default(styles_css_default107["resizer-wrapper"], isVisualRefresh && styles_css_default107["visual-refresh"], (!isVisualRefresh || isBorderless) && styles_css_default107["is-borderless"], isLast && styles_css_default107["is-last"]),
+        className: clsx_m_default(styles_css_default109["resizer-wrapper"], isVisualRefresh && styles_css_default109["visual-refresh"], (!isVisualRefresh || isBorderless) && styles_css_default109["is-borderless"], isLast && styles_css_default109["is-last"]),
         ref: positioningWrapperRef
       },
-      import_react272.default.createElement(
+      import_react274.default.createElement(
         DragHandleWrapper,
         { clickDragThreshold: 3, hideButtonsOnDrag: false, directions: {
           "inline-start": resizerObscured ? void 0 : headerCellWidth > minWidth ? "active" : "disabled",
           "inline-end": resizerObscured ? void 0 : "active"
-        }, triggerMode: "controlled", controlledShowButtons: showUapButtons && !resizerObscured, wrapperClassName: styles_css_default107["resizer-button-wrapper"], tooltipText, "data-obscured": resizerObscured, onDirectionClick: (direction2) => {
+        }, triggerMode: "controlled", controlledShowButtons: showUapButtons && !resizerObscured, wrapperClassName: styles_css_default109["resizer-button-wrapper"], tooltipText, "data-obscured": resizerObscured, onDirectionClick: (direction2) => {
           const elements2 = getResizerElements(resizerToggleRef.current);
           if (!elements2) {
             return;
@@ -335322,7 +336019,7 @@ ${isHandDrawn ? "" : `
             });
           }
         } },
-        import_react272.default.createElement("button", { type: "button", ref: resizerToggleRef, className: clsx_m_default(styles_css_default107.resizer, (resizerHasFocus || showFocusRing || isKeyboardDragging) && styles_css_default107["has-focus"]), onPointerDown: (event3) => {
+        import_react274.default.createElement("button", { type: "button", ref: resizerToggleRef, className: clsx_m_default(styles_css_default109.resizer, (resizerHasFocus || showFocusRing || isKeyboardDragging) && styles_css_default109["has-focus"]), onPointerDown: (event3) => {
           if (event3.pointerType === "mouse" && event3.button !== 0) {
             return;
           }
@@ -335345,7 +336042,7 @@ ${isHandDrawn ? "" : `
             return;
           }
         }, "aria-roledescription": roleDescription, "aria-labelledby": ariaLabelledby, tabIndex: resizerTabIndex, "data-focus-id": focusId }),
-        import_react272.default.createElement("span", { className: clsx_m_default(styles_css_default107["divider-interactive"], (isPointerDown || isDragging) && styles_css_default107["divider-active"], isGrouped && styles_css_default107["divider-grouped"], dividerPosition && dividerPosition !== "default" && styles_css_default107[`divider-position-${dividerPosition}`]), "data-awsui-table-suppress-navigation": true, ref: resizerSeparatorRef, id: separatorId, role: "slider", tabIndex: -1, "aria-labelledby": ariaLabelledby, "aria-hidden": !isKeyboardDragging, "aria-valuemin": minWidth, "aria-valuemax": Number.MAX_SAFE_INTEGER, "aria-valuenow": headerCellWidth, "data-focus-id": focusId, onBlur: (event3) => {
+        import_react274.default.createElement("span", { className: clsx_m_default(styles_css_default109["divider-interactive"], (isPointerDown || isDragging) && styles_css_default109["divider-active"], isGrouped && styles_css_default109["divider-grouped"], dividerPosition && dividerPosition !== "default" && styles_css_default109[`divider-position-${dividerPosition}`]), "data-awsui-table-suppress-navigation": true, ref: resizerSeparatorRef, id: separatorId, role: "slider", tabIndex: -1, "aria-labelledby": ariaLabelledby, "aria-hidden": !isKeyboardDragging, "aria-valuemin": minWidth, "aria-valuemax": Number.MAX_SAFE_INTEGER, "aria-valuenow": headerCellWidth, "data-focus-id": focusId, onBlur: (event3) => {
           setIsKeyboardDragging(false);
           if (event3.relatedTarget !== resizerToggleRef.current) {
             setResizerHasFocus(false);
@@ -335357,20 +336054,20 @@ ${isHandDrawn ? "" : `
     );
   }
   function ResizeTracker() {
-    return import_react272.default.createElement("span", { className: styles_css_default107.tracker });
+    return import_react274.default.createElement("span", { className: styles_css_default109.tracker });
   }
 
   // node_modules/@cloudscape-design/components/table/selection/selection-cell.js
-  var import_react275 = __toESM(require_react());
+  var import_react277 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/header-cell/th-element.js
-  var import_react274 = __toESM(require_react());
+  var import_react276 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table-header-cell/internal.js
-  var import_react273 = __toESM(require_react());
+  var import_react275 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/header-cell/styles.css.js
-  var styles_css_default108 = {
+  var styles_css_default110 = {
     "header-cell": "awsui_header-cell_1spae_1i6uv_9",
     "header-cell-fake-focus": "awsui_header-cell-fake-focus_1spae_1i6uv_43",
     "header-cell-group": "awsui_header-cell-group_1spae_1i6uv_64",
@@ -335413,7 +336110,7 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/table-header-cell/styles.css.js
-  var styles_css_default109 = {
+  var styles_css_default111 = {
     "header-cell": "awsui_header-cell_uzgsh_hgpoc_5",
     "no-divider": "awsui_no-divider_uzgsh_hgpoc_9",
     "disable-paddings": "awsui_disable-paddings_uzgsh_hgpoc_23",
@@ -335423,7 +336120,7 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/table-header-cell/internal.js
-  var InternalTableHeaderCell = import_react273.default.forwardRef((props, ref) => {
+  var InternalTableHeaderCell = import_react275.default.forwardRef((props, ref) => {
     const { ariaLabel, ariaLabelledby, ariaDescribedby, ariaSort, disablePaddings, style: style3, tabIndex, nativeAttributes, disableContentWrapper, disableDivider, children: children2 } = props;
     const { className, ...restBaseProps } = getBaseProps(props);
     const { isGrid } = useTableContext();
@@ -335437,20 +336134,20 @@ ${isHandDrawn ? "" : `
       ...ariaSort !== void 0 ? { "aria-sort": ariaSort } : void 0,
       ...isGrid ? { role: "columnheader" } : void 0
     };
-    return import_react273.default.createElement("th", { ref, ...restBaseProps, className: clsx_m_default(
-      styles_css_default108["header-cell"],
+    return import_react275.default.createElement("th", { ref, ...restBaseProps, className: clsx_m_default(
+      styles_css_default110["header-cell"],
       className,
-      styles_css_default109["header-cell"],
-      isGrid && styles_css_default109["header-cell-grid"],
+      styles_css_default111["header-cell"],
+      isGrid && styles_css_default111["header-cell-grid"],
       // Gated on runtime VR mode: this substrate is shared with the existing Table, which still supports
       // runtime classic visual mode (non-VR). Atomic tables render VR-only, so useVisualRefresh() is true there.
-      isVisualRefresh && styles_css_default108["is-visual-refresh"],
+      isVisualRefresh && styles_css_default110["is-visual-refresh"],
       // Own is-visual-refresh marker keys the first-column content-offset reset (VR only).
-      isVisualRefresh && styles_css_default109["is-visual-refresh"],
-      disablePaddings && styles_css_default109["disable-paddings"],
-      !disablePaddings && styles_css_default108["with-paddings"],
-      disableDivider && styles_css_default109["no-divider"]
-    ), style: style3, tabIndex, ...mergedNativeAttributes }, disableContentWrapper ? children2 : import_react273.default.createElement("div", { className: styles_css_default109["header-cell-content"] }, children2));
+      isVisualRefresh && styles_css_default111["is-visual-refresh"],
+      disablePaddings && styles_css_default111["disable-paddings"],
+      !disablePaddings && styles_css_default110["with-paddings"],
+      disableDivider && styles_css_default111["no-divider"]
+    ), style: style3, tabIndex, ...mergedNativeAttributes }, disableContentWrapper ? children2 : import_react275.default.createElement("div", { className: styles_css_default111["header-cell-content"] }, children2));
   });
 
   // node_modules/@cloudscape-design/components/table/header-cell/th-element.js
@@ -335458,10 +336155,10 @@ ${isHandDrawn ? "" : `
     const stickyStyles = useStickyCellStyles({
       stickyColumns: stickyState,
       columnId,
-      getClassName: (props2) => getStickyClassNames(styles_css_default108, props2),
+      getClassName: (props2) => getStickyClassNames(styles_css_default110, props2),
       boundaryColumnId: stickyBoundaryColumnId
     });
-    const cellRefObject = (0, import_react274.useRef)(null);
+    const cellRefObject = (0, import_react276.useRef)(null);
     const mergedRef = useMergeRefs(stickyStyles.ref, cellRef, cellRefObject);
     const { tabIndex: cellTabIndex } = useSingleTabStopNavigation(cellRefObject);
     const nativeAttributes = {
@@ -335475,43 +336172,43 @@ ${isHandDrawn ? "" : `
       scope: scope !== null && scope !== void 0 ? scope : "col",
       ...ariaLabel ? { "aria-label": ariaLabel } : {}
     };
-    return import_react274.default.createElement(InternalTableHeaderCell, { className: clsx_m_default(styles_css_default108[`header-cell-variant-${variant}`], sticky && styles_css_default108["header-cell-sticky"], resizable && styles_css_default108["header-cell-resizable"], stuck && styles_css_default108["header-cell-stuck"], stripedRows && styles_css_default108["has-striped-rows"], isSelection && clsx_m_default(styles_css_default96["selection-control"], styles_css_default96["selection-control-header"]), tableVariant && styles_css_default108[`table-variant-${tableVariant}`], scope === "colgroup" && styles_css_default108["header-cell-group"], {
-      [styles_css_default108["header-cell-fake-focus"]]: focusedComponent === `header-${String(columnId)}`,
-      [styles_css_default108["header-cell-sortable"]]: sortingStatus,
-      [styles_css_default108["header-cell-sorted"]]: sortingStatus === "ascending" || sortingStatus === "descending",
-      [styles_css_default108["header-cell-disabled"]]: sortingDisabled,
-      [styles_css_default108["header-cell-ascending"]]: sortingStatus === "ascending",
-      [styles_css_default108["header-cell-descending"]]: sortingStatus === "descending",
-      [styles_css_default108["header-cell-hidden"]]: hidden,
-      [styles_css_default108["header-cell-spans-rows"]]: (rowSpan !== null && rowSpan !== void 0 ? rowSpan : 1) > 1,
-      [styles_css_default108["header-cell-grouped"]]: !!columnGroupId
+    return import_react276.default.createElement(InternalTableHeaderCell, { className: clsx_m_default(styles_css_default110[`header-cell-variant-${variant}`], sticky && styles_css_default110["header-cell-sticky"], resizable && styles_css_default110["header-cell-resizable"], stuck && styles_css_default110["header-cell-stuck"], stripedRows && styles_css_default110["has-striped-rows"], isSelection && clsx_m_default(styles_css_default96["selection-control"], styles_css_default96["selection-control-header"]), tableVariant && styles_css_default110[`table-variant-${tableVariant}`], scope === "colgroup" && styles_css_default110["header-cell-group"], {
+      [styles_css_default110["header-cell-fake-focus"]]: focusedComponent === `header-${String(columnId)}`,
+      [styles_css_default110["header-cell-sortable"]]: sortingStatus,
+      [styles_css_default110["header-cell-sorted"]]: sortingStatus === "ascending" || sortingStatus === "descending",
+      [styles_css_default110["header-cell-disabled"]]: sortingDisabled,
+      [styles_css_default110["header-cell-ascending"]]: sortingStatus === "ascending",
+      [styles_css_default110["header-cell-descending"]]: sortingStatus === "descending",
+      [styles_css_default110["header-cell-hidden"]]: hidden,
+      [styles_css_default110["header-cell-spans-rows"]]: (rowSpan !== null && rowSpan !== void 0 ? rowSpan : 1) > 1,
+      [styles_css_default110["header-cell-grouped"]]: !!columnGroupId
     }, stickyStyles.className), style: { ...resizableStyle, ...stickyStyles.style }, ref: mergedRef, tabIndex: cellTabIndex === -1 ? void 0 : cellTabIndex, "data-focus-id": `header-${String(columnId)}`, "data-rightmost": isLast || void 0, "data-column-index": scope !== "colgroup" ? colIndex + 1 : void 0, "data-column-group-id": columnGroupId || void 0, ...copyAnalyticsMetadataAttribute(props), nativeAttributes, disableContentWrapper: true, disableDivider: true }, children2);
   }
 
   // node_modules/@cloudscape-design/components/table/selection/selection-cell.js
   function TableHeaderSelectionCell({ focusedComponent, singleSelectionHeaderAriaLabel, getSelectAllProps, onFocusMove, isGrouped, ...props }) {
     const selectAllProps = getSelectAllProps ? getSelectAllProps() : void 0;
-    return import_react275.default.createElement(
+    return import_react277.default.createElement(
       TableThElement,
       { ...props, isSelection: true, colIndex: 0, focusedComponent, ariaLabel: selectAllProps === null || selectAllProps === void 0 ? void 0 : selectAllProps.selectionGroupLabel, ...getAnalyticsMetadataAttribute({
         action: (selectAllProps === null || selectAllProps === void 0 ? void 0 : selectAllProps.checked) ? "deselectAll" : "selectAll"
       }) },
-      selectAllProps ? import_react275.default.createElement(SelectionControl, { onFocusDown: (event3) => {
+      selectAllProps ? import_react277.default.createElement(SelectionControl, { onFocusDown: (event3) => {
         onFocusMove(event3.target, -1, 1);
-      }, focusedComponent, ...selectAllProps, ...props.sticky ? { tabIndex: -1 } : {} }) : import_react275.default.createElement(ScreenreaderOnly, null, singleSelectionHeaderAriaLabel),
-      import_react275.default.createElement(Divider, { className: styles_css_default96["resize-divider"], isGrouped })
+      }, focusedComponent, ...selectAllProps, ...props.sticky ? { tabIndex: -1 } : {} }) : import_react277.default.createElement(ScreenreaderOnly, null, singleSelectionHeaderAriaLabel),
+      import_react277.default.createElement(Divider, { className: styles_css_default96["resize-divider"], isGrouped })
     );
   }
   function TableBodySelectionCell({ selectionControlProps, ...props }) {
-    return import_react275.default.createElement(TableTdElement, { ...props, isSelection: true, wrapLines: false, isEditable: false, isEditing: false, colIndex: 0 }, selectionControlProps ? import_react275.default.createElement(SelectionControl, { ...selectionControlProps, verticalAlign: props.verticalAlign }) : null);
+    return import_react277.default.createElement(TableTdElement, { ...props, isSelection: true, wrapLines: false, isEditable: false, isEditing: false, colIndex: 0 }, selectionControlProps ? import_react277.default.createElement(SelectionControl, { ...selectionControlProps, verticalAlign: props.verticalAlign }) : null);
   }
 
   // node_modules/@cloudscape-design/components/table/selection/use-group-selection.js
-  var import_react276 = __toESM(require_react());
+  var import_react278 = __toESM(require_react());
   function useGroupSelection({ ariaLabels, items, rootItems, selectedItems = [], totalItemsCount, trackBy, expandableRows, selectionType: selectionType2, getLoadingStatus, setLastUserAction }) {
     const selectionControlName = useUniqueId();
-    const [shiftPressed, setShiftPressed] = (0, import_react276.useState)(false);
-    const [lastClickedItem, setLastClickedItem] = (0, import_react276.useState)(null);
+    const [shiftPressed, setShiftPressed] = (0, import_react278.useState)(false);
+    const [lastClickedItem, setLastClickedItem] = (0, import_react278.useState)(null);
     if (selectionType2 !== "group") {
       return { isItemSelected: () => false };
     }
@@ -335598,13 +336295,13 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/skeleton-rows.js
-  var import_react278 = __toESM(require_react());
+  var import_react280 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/skeleton/internal.js
-  var import_react277 = __toESM(require_react());
+  var import_react279 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/skeleton/styles.css.js
-  var styles_css_default110 = {
+  var styles_css_default112 = {
     "root": "awsui_root_1qq5l_chyku_25",
     "inner": "awsui_inner_1qq5l_chyku_28",
     "skeleton-wave": "awsui_skeleton-wave_1qq5l_chyku_1",
@@ -335626,10 +336323,10 @@ ${isHandDrawn ? "" : `
   function InternalSkeleton({ variant, height: height2, width: width3, display, tagOverride, __internalRootRef, ...props }) {
     const baseProps = getBaseProps(props);
     const Tag = tagOverride;
-    return import_react277.default.createElement(
+    return import_react279.default.createElement(
       Tag,
-      { ...baseProps, className: clsx_m_default(baseProps.className, styles_css_default110.root, variant && styles_css_default110[`variant-${variant}`], display && styles_css_default110[`display-${display}`]), ref: __internalRootRef, style: width3 !== void 0 ? { inlineSize: width3 } : {}, "aria-hidden": "true" },
-      import_react277.default.createElement(Tag, { className: styles_css_default110.inner, style: height2 !== void 0 ? { blockSize: height2 } : {} })
+      { ...baseProps, className: clsx_m_default(baseProps.className, styles_css_default112.root, variant && styles_css_default112[`variant-${variant}`], display && styles_css_default112[`display-${display}`]), ref: __internalRootRef, style: width3 !== void 0 ? { inlineSize: width3 } : {}, "aria-hidden": "true" },
+      import_react279.default.createElement(Tag, { className: styles_css_default112.inner, style: height2 !== void 0 ? { blockSize: height2 } : {} })
     );
   }
 
@@ -335637,26 +336334,26 @@ ${isHandDrawn ? "" : `
   var noop13 = () => {
   };
   function SkeletonRows({ count: count2, totalColumnsCount, loadingText, hasSelection, hasFooter, stickyState, tableRole, ariaLabels, cellVerticalAlign, computedVariant, visibleColumnDefinitions, wrapLines, resizableColumns, colIndexOffset, renderCell }) {
-    return import_react278.default.createElement(
-      import_react278.default.Fragment,
+    return import_react280.default.createElement(
+      import_react280.default.Fragment,
       null,
-      import_react278.default.createElement(
+      import_react280.default.createElement(
         "tr",
         { "aria-hidden": "false" },
-        import_react278.default.createElement(
+        import_react280.default.createElement(
           "td",
           { colSpan: totalColumnsCount, className: styles_css_default96["skeleton-loading-cell"] },
-          import_react278.default.createElement(ScreenreaderOnly, null, loadingText)
+          import_react280.default.createElement(ScreenreaderOnly, null, loadingText)
         )
       ),
       Array.from({ length: count2 }, (_3, i4) => {
-        return import_react278.default.createElement(
+        return import_react280.default.createElement(
           "tr",
           { key: `skeleton-row-${i4}`, className: styles_css_default96.row, "aria-hidden": "true" },
-          hasSelection && import_react278.default.createElement("td", { className: styles_css_default96["selection-control"] }),
+          hasSelection && import_react280.default.createElement("td", { className: styles_css_default96["selection-control"] }),
           visibleColumnDefinitions.map((column2, colIndex) => {
             var _a213, _b;
-            return import_react278.default.createElement(TableBodyCell, { key: `skeleton-${getColumnKey(column2, colIndex)}`, isSelected: false, isPrevSelected: false, isNextSelected: false, hasSelection, hasFooter, stickyState, tableRole, resizableStyle: {
+            return import_react280.default.createElement(TableBodyCell, { key: `skeleton-${getColumnKey(column2, colIndex)}`, isSelected: false, isPrevSelected: false, isNextSelected: false, hasSelection, hasFooter, stickyState, tableRole, resizableStyle: {
               width: column2.width,
               minWidth: column2.minWidth,
               maxWidth: column2.maxWidth
@@ -335664,7 +336361,7 @@ ${isHandDrawn ? "" : `
               ...column2,
               cell: () => {
                 const customSkeleton = renderCell === null || renderCell === void 0 ? void 0 : renderCell(column2);
-                return customSkeleton === void 0 ? import_react278.default.createElement(InternalSkeleton, { variant: "dynamic", tagOverride: "span" }) : customSkeleton;
+                return customSkeleton === void 0 ? import_react280.default.createElement(InternalSkeleton, { variant: "dynamic", tagOverride: "span" }) : customSkeleton;
               }
             }, item: {}, wrapLines, isEditable: false, isEditing: false, isRowHeader: column2.isRowHeader, resizableColumns, onEditStart: noop13, onEditEnd: noop13, columnId: (_a213 = column2.id) !== null && _a213 !== void 0 ? _a213 : colIndex, colIndex: colIndex + colIndexOffset, verticalAlign: (_b = column2.verticalAlign) !== null && _b !== void 0 ? _b : cellVerticalAlign, tableVariant: computedVariant });
           })
@@ -335674,20 +336371,20 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/sticky-header.js
-  var import_react284 = __toESM(require_react());
+  var import_react286 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/sticky-header/use-sticky-header-copy.js
-  var import_react279 = __toESM(require_react());
+  var import_react281 = __toESM(require_react());
   function useStickyHeaderCopy({ tableRef, theadRef, secondaryTheadRef, secondaryTableRef, tableWrapperRef }) {
     const isMobile = useMobile();
-    const hideHeaderUnderCopy = (0, import_react279.useCallback)(() => {
+    const hideHeaderUnderCopy = (0, import_react281.useCallback)(() => {
       var _a213;
       if (tableRef.current && theadRef.current && secondaryTheadRef.current && secondaryTableRef.current && tableWrapperRef.current) {
         const thead = (_a213 = theadRef.current.closest("thead")) !== null && _a213 !== void 0 ? _a213 : theadRef.current;
         tableWrapperRef.current.style.marginBlockStart = `-${thead.getBoundingClientRect().height}px`;
       }
     }, [theadRef, secondaryTheadRef, secondaryTableRef, tableWrapperRef, tableRef]);
-    (0, import_react279.useLayoutEffect)(() => {
+    (0, import_react281.useLayoutEffect)(() => {
       hideHeaderUnderCopy();
     });
     useResizeObserver(theadRef, hideHeaderUnderCopy);
@@ -335709,7 +336406,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/thead.js
-  var import_react283 = __toESM(require_react());
+  var import_react285 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/column-groups/split-utils.js
   function getGroupColumnIds(columnGroupsLayout, groupId) {
@@ -335745,10 +336442,10 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/header-cell/index.js
-  var import_react281 = __toESM(require_react());
+  var import_react283 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/header-cell/sort-menu.js
-  var import_react280 = __toESM(require_react());
+  var import_react282 = __toESM(require_react());
   function SortMenu({ inSort, isSortedAscending, isSortedDescending, i18nStrings, ariaLabel, ariaDescribedby, onAction }) {
     var _a213, _b, _c, _d, _e2, _f, _g;
     const i18n = useInternalI18n("table");
@@ -335791,7 +336488,7 @@ ${isHandDrawn ? "" : `
         ]
       }
     ];
-    return import_react280.default.createElement(internal_default9, { items, variant: "icon", compactTrigger: true, expandToViewport: true, ariaLabel: (_g = i18n("ariaLabels.sortMenuTriggerLabel", ariaLabel)) !== null && _g !== void 0 ? _g : "", ariaDescribedby, onItemClick: ({ detail }) => onAction(detail.id) });
+    return import_react282.default.createElement(internal_default9, { items, variant: "icon", compactTrigger: true, expandToViewport: true, ariaLabel: (_g = i18n("ariaLabels.sortMenuTriggerLabel", ariaLabel)) !== null && _g !== void 0 ? _g : "", ariaDescribedby, onItemClick: ({ detail }) => onAction(detail.id) });
   }
 
   // node_modules/@cloudscape-design/components/table/header-cell/utils.js
@@ -335900,34 +336597,34 @@ ${isHandDrawn ? "" : `
     };
     const headerId = useUniqueId("table-header-");
     const icons2 = useInternalComponentIcons("table");
-    const clickableHeaderRef = (0, import_react281.useRef)(null);
+    const clickableHeaderRef = (0, import_react283.useRef)(null);
     const { tabIndex: clickableHeaderTabIndex } = useSingleTabStopNavigation(clickableHeaderRef, { tabIndex });
-    const cellRefObject = (0, import_react281.useRef)(null);
+    const cellRefObject = (0, import_react283.useRef)(null);
     const cellRefCombined = useMergeRefs(cellRef, cellRefObject);
     useResizeObserver(hasDynamicContent ? cellRefObject : () => null, (entry) => {
       updateColumn(columnId, entry.borderBoxWidth);
     });
-    return import_react281.default.createElement(
+    return import_react283.default.createElement(
       TableThElement,
       { resizableStyle, cellRef: cellRefCombined, sortingStatus, sortingDisabled, suppressAriaSort, focusedComponent, stuck, sticky, resizable: resizableColumns, hidden, stripedRows, colIndex, columnId, stickyState, tableRole, variant, tableVariant, colSpan, rowSpan, columnGroupId, isLast, ...sortingDisabled ? {} : getAnalyticsMetadataAttribute({
         action: "sort",
         detail: {
           position: `${colIndex + 1}`,
           columnId: column2.id ? `${column2.id}` : "",
-          label: `.${styles_css_default105["header-cell-text"]}`,
+          label: `.${styles_css_default107["header-cell-text"]}`,
           sortingDescending: `${!descending4}`
         }
       }) },
-      import_react281.default.createElement(
+      import_react283.default.createElement(
         "div",
-        { className: clsx_m_default(styles_css_default108["header-cell-main"], hasSortMenu && styles_css_default108["header-cell-main-with-menu"]) },
-        import_react281.default.createElement(
+        { className: clsx_m_default(styles_css_default110["header-cell-main"], hasSortMenu && styles_css_default110["header-cell-main-with-menu"]) },
+        import_react283.default.createElement(
           "div",
-          { ref: clickableHeaderRef, "data-focus-id": `sorting-control-${String(columnId)}`, className: clsx_m_default(styles_css_default108["header-cell-content"], {
-            [styles_css_default108["header-cell-fake-focus"]]: focusedComponent === `sorting-control-${String(columnId)}`,
-            [styles_css_default108["header-cell-content-expandable"]]: isExpandable,
-            [styles_css_default108["header-cell-content-multi-sorted"]]: showPriorityBadge,
-            [styles_css_default108["header-cell-content-with-menu"]]: hasSortMenu
+          { ref: clickableHeaderRef, "data-focus-id": `sorting-control-${String(columnId)}`, className: clsx_m_default(styles_css_default110["header-cell-content"], {
+            [styles_css_default110["header-cell-fake-focus"]]: focusedComponent === `sorting-control-${String(columnId)}`,
+            [styles_css_default110["header-cell-content-expandable"]]: isExpandable,
+            [styles_css_default110["header-cell-content-multi-sorted"]]: showPriorityBadge,
+            [styles_css_default110["header-cell-content-with-menu"]]: hasSortMenu
           }), "aria-label": column2.ariaLabel ? column2.ariaLabel({
             sorted,
             descending: sorted && descending4,
@@ -335946,30 +336643,30 @@ ${isHandDrawn ? "" : `
               }
             }
           } : {} },
-          import_react281.default.createElement(
+          import_react283.default.createElement(
             "div",
-            { className: clsx_m_default(styles_css_default108["header-cell-text"], styles_css_default105["header-cell-text"], wrapLines && styles_css_default108["header-cell-text-wrap"]), id: headerId },
+            { className: clsx_m_default(styles_css_default110["header-cell-text"], styles_css_default107["header-cell-text"], wrapLines && styles_css_default110["header-cell-text-wrap"]), id: headerId },
             column2.header,
-            isEditable ? import_react281.default.createElement(
+            isEditable ? import_react283.default.createElement(
               "span",
-              { className: styles_css_default108["edit-icon"] },
-              import_react281.default.createElement(internal_default, { name: "edit", ariaLabel: i18n("columnDefinitions.editConfig.editIconAriaLabel", (_a213 = column2.editConfig) === null || _a213 === void 0 ? void 0 : _a213.editIconAriaLabel) })
+              { className: styles_css_default110["edit-icon"] },
+              import_react283.default.createElement(internal_default, { name: "edit", ariaLabel: i18n("columnDefinitions.editConfig.editIconAriaLabel", (_a213 = column2.editConfig) === null || _a213 === void 0 ? void 0 : _a213.editIconAriaLabel) })
             ) : null
           ),
-          sortAccessibleText && import_react281.default.createElement(ScreenreaderOnly, null, sortAccessibleText),
-          sortingStatus && import_react281.default.createElement(
+          sortAccessibleText && import_react283.default.createElement(ScreenreaderOnly, null, sortAccessibleText),
+          sortingStatus && import_react283.default.createElement(
             "span",
-            { className: styles_css_default108["sorting-icon"] },
-            showPriorityBadge && import_react281.default.createElement("span", { className: styles_css_default108["sort-priority-badge"], "aria-hidden": "true" }, multiSortIndex),
-            import_react281.default.createElement(CustomizableIcon, { customIcon: (_b = icons2 === null || icons2 === void 0 ? void 0 : icons2.sortingIndicator) === null || _b === void 0 ? void 0 : _b.call(icons2, { sortingState: sortingStatus }), fallback: {
+            { className: styles_css_default110["sorting-icon"] },
+            showPriorityBadge && import_react283.default.createElement("span", { className: styles_css_default110["sort-priority-badge"], "aria-hidden": "true" }, multiSortIndex),
+            import_react283.default.createElement(CustomizableIcon, { customIcon: (_b = icons2 === null || icons2 === void 0 ? void 0 : icons2.sortingIndicator) === null || _b === void 0 ? void 0 : _b.call(icons2, { sortingState: sortingStatus }), fallback: {
               name: getSortingIconName(sortingStatus),
               nativeAttributes: { "data-awsui-motion-target": "" }
             } })
           )
         ),
-        hasSortMenu && import_react281.default.createElement(SortMenu, { column: column2, inSort: inMultiSort, isSortedAscending: inMultiSort && !descending4, isSortedDescending: inMultiSort && descending4, i18nStrings, ariaLabel: ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.sortMenuTriggerLabel, ariaDescribedby: headerId, onAction: handleSortMenuAction })
+        hasSortMenu && import_react283.default.createElement(SortMenu, { column: column2, inSort: inMultiSort, isSortedAscending: inMultiSort && !descending4, isSortedDescending: inMultiSort && descending4, i18nStrings, ariaLabel: ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.sortMenuTriggerLabel, ariaDescribedby: headerId, onAction: handleSortMenuAction })
       ),
-      resizableColumns ? import_react281.default.createElement(Resizer, {
+      resizableColumns ? import_react283.default.createElement(Resizer, {
         tabIndex,
         focusId: `resize-control-${String(columnId)}`,
         showFocusRing: focusedComponent === `resize-control-${String(columnId)}`,
@@ -335985,12 +336682,12 @@ ${isHandDrawn ? "" : `
         isLast,
         isGrouped,
         dividerPosition: isLastChildOfGroup ? "top" : void 0
-      }) : import_react281.default.createElement(Divider, { className: styles_css_default108["resize-divider"], position: isLastChildOfGroup ? "top" : void 0, isGrouped })
+      }) : import_react283.default.createElement(Divider, { className: styles_css_default110["resize-divider"], position: isLastChildOfGroup ? "top" : void 0, isGrouped })
     );
   }
 
   // node_modules/@cloudscape-design/components/table/header-cell/group-header-cell.js
-  var import_react282 = __toESM(require_react());
+  var import_react284 = __toESM(require_react());
   function TableGroupHeaderCell({ group: group2, colspan, rowspan, colIndex, groupId, resizableColumns, resizableStyle, onResizeFinish, updateGroupWidth, childColumnIds, focusedComponent, tabIndex, sticky, hidden, stripedRows, stickyState, cellRef, tableRole, resizerRoleDescription, resizerTooltipText, variant, tableVariant, columnGroupId, stickyColumnId, stickyBoundaryColumnId, isLast, wrapLines }) {
     var _a213;
     const headerId = useUniqueId("table-group-header-");
@@ -336002,26 +336699,26 @@ ${isHandDrawn ? "" : `
       }
       return sum2 + (columnWidths.get(id38) || DEFAULT_COLUMN_WIDTH);
     }, 0);
-    const clickableHeaderRef = (0, import_react282.useRef)(null);
+    const clickableHeaderRef = (0, import_react284.useRef)(null);
     const { tabIndex: clickableHeaderTabIndex } = useSingleTabStopNavigation(clickableHeaderRef, { tabIndex });
-    return import_react282.default.createElement(
+    return import_react284.default.createElement(
       TableThElement,
       { resizableStyle, cellRef, focusedComponent, sticky, resizable: resizableColumns, hidden, stripedRows, colIndex, columnId: stickyColumnId !== null && stickyColumnId !== void 0 ? stickyColumnId : groupId, stickyBoundaryColumnId, stickyState, tableRole, variant, tableVariant, colSpan: colspan, rowSpan: rowspan, scope: "colgroup", isLast, columnGroupId },
-      import_react282.default.createElement(
+      import_react284.default.createElement(
         "div",
-        { ref: clickableHeaderRef, "data-focus-id": `group-header-${groupId}`, className: clsx_m_default(styles_css_default108["header-cell-content"], {
-          [styles_css_default108["header-cell-fake-focus"]]: focusedComponent === `group-header-${groupId}`
+        { ref: clickableHeaderRef, "data-focus-id": `group-header-${groupId}`, className: clsx_m_default(styles_css_default110["header-cell-content"], {
+          [styles_css_default110["header-cell-fake-focus"]]: focusedComponent === `group-header-${groupId}`
         }), "aria-label": (_a213 = group2.ariaLabel) === null || _a213 === void 0 ? void 0 : _a213.call(group2, { sorted: false, descending: false, disabled: true }), tabIndex: clickableHeaderTabIndex },
-        import_react282.default.createElement("div", { className: clsx_m_default(styles_css_default108["header-cell-text"], wrapLines && styles_css_default108["header-cell-text-wrap"]), id: headerId }, group2.header)
+        import_react284.default.createElement("div", { className: clsx_m_default(styles_css_default110["header-cell-text"], wrapLines && styles_css_default110["header-cell-text-wrap"]), id: headerId }, group2.header)
       ),
-      resizableColumns ? import_react282.default.createElement(Resizer, { tabIndex, focusId: `resize-group-${groupId}`, showFocusRing: focusedComponent === `resize-group-${groupId}`, onWidthUpdate: (newWidth) => updateGroupWidth(groupId, newWidth), onWidthUpdateCommit: onResizeFinish, ariaLabelledby: headerId, minWidth: groupMinWidth, roleDescription: resizerRoleDescription, tooltipText: resizerTooltipText, isBorderless: variant === "full-page" || variant === "embedded" || variant === "borderless", isLast, isGrouped: true, dividerPosition: columnGroupId ? "full" : "bottom" }) : import_react282.default.createElement(Divider, { position: columnGroupId ? "full" : "bottom", isGrouped: true })
+      resizableColumns ? import_react284.default.createElement(Resizer, { tabIndex, focusId: `resize-group-${groupId}`, showFocusRing: focusedComponent === `resize-group-${groupId}`, onWidthUpdate: (newWidth) => updateGroupWidth(groupId, newWidth), onWidthUpdateCommit: onResizeFinish, ariaLabelledby: headerId, minWidth: groupMinWidth, roleDescription: resizerRoleDescription, tooltipText: resizerTooltipText, isBorderless: variant === "full-page" || variant === "embedded" || variant === "borderless", isLast, isGrouped: true, dividerPosition: columnGroupId ? "full" : "bottom" }) : import_react284.default.createElement(Divider, { position: columnGroupId ? "full" : "bottom", isGrouped: true })
     );
   }
 
   // node_modules/@cloudscape-design/components/table/thead.js
-  var Thead = import_react283.default.forwardRef(({ selectionType: selectionType2, getSelectAllProps, columnDefinitions, columnGroupsLayout, sortingColumn, sortingDisabled, sortingDescending, multiColumnSort, i18nStrings, ariaLabels, resizableColumns, variant, tableVariant, wrapLines, onFocusMove, onSortingChange, onResizeFinish, singleSelectionHeaderAriaLabel, stripedRows, sticky = false, hidden = false, stuck = false, stickyState, stickyColumnsFirst, stickyColumnsLast, selectionColumnId: selectionColumnId2, focusedComponent, onFocusedComponentChange, tableRole, resizerRoleDescription, resizerTooltipText, isExpandable, setLastUserAction }, outerRef) => {
+  var Thead = import_react285.default.forwardRef(({ selectionType: selectionType2, getSelectAllProps, columnDefinitions, columnGroupsLayout, sortingColumn, sortingDisabled, sortingDescending, multiColumnSort, i18nStrings, ariaLabels, resizableColumns, variant, tableVariant, wrapLines, onFocusMove, onSortingChange, onResizeFinish, singleSelectionHeaderAriaLabel, stripedRows, sticky = false, hidden = false, stuck = false, stickyState, stickyColumnsFirst, stickyColumnsLast, selectionColumnId: selectionColumnId2, focusedComponent, onFocusedComponentChange, tableRole, resizerRoleDescription, resizerTooltipText, isExpandable, setLastUserAction }, outerRef) => {
     const { getColumnStyles, columnWidths, updateColumn, updateGroup, setCell } = useColumnWidths();
-    const columnWidthsRef = (0, import_react283.useRef)(columnWidths);
+    const columnWidthsRef = (0, import_react285.useRef)(columnWidths);
     columnWidthsRef.current = columnWidths;
     const handleSplitGroupResize = (columnIds, newWidth) => {
       const lastColumn = columnIds[columnIds.length - 1];
@@ -336053,16 +336750,16 @@ ${isHandDrawn ? "" : `
       onBlur: () => onFocusedComponentChange === null || onFocusedComponentChange === void 0 ? void 0 : onFocusedComponentChange(null)
     };
     if (!columnGroupsLayout || columnGroupsLayout.rows.length <= 1) {
-      return import_react283.default.createElement(
+      return import_react285.default.createElement(
         "thead",
         { className: clsx_m_default(!hidden && styles_css_default96["thead-active"]) },
-        import_react283.default.createElement(
+        import_react285.default.createElement(
           "tr",
           { ...focusMarkers.all, ref: outerRef, "aria-rowindex": 1, ...getTableHeaderRowRoleProps({ tableRole }), ...sharedTrProps },
-          selectionType2 ? import_react283.default.createElement(TableHeaderSelectionCell, { ...commonCellProps, focusedComponent, columnId: selectionColumnId2, cellRef: (node2) => setCell(sticky, selectionColumnId2, node2), getSelectAllProps, onFocusMove, singleSelectionHeaderAriaLabel }) : null,
+          selectionType2 ? import_react285.default.createElement(TableHeaderSelectionCell, { ...commonCellProps, focusedComponent, columnId: selectionColumnId2, cellRef: (node2) => setCell(sticky, selectionColumnId2, node2), getSelectAllProps, onFocusMove, singleSelectionHeaderAriaLabel }) : null,
           columnDefinitions.map((column2, colIndex) => {
             const columnId = getColumnKey(column2, colIndex);
-            return import_react283.default.createElement(TableHeaderCell, { ...commonCellProps, key: columnId, tabIndex: sticky ? -1 : 0, focusedComponent, column: column2, activeSortingColumn: sortingColumn, sortingDescending, sortingDisabled, multiColumnSort, i18nStrings, ariaLabels, wrapLines, colIndex: selectionType2 ? colIndex + 1 : colIndex, columnId, updateColumn, onResizeFinish: () => onResizeFinish(columnWidthsRef.current), resizableColumns, resizableStyle: getColumnStyles(sticky, columnId), onClick: (detail) => {
+            return import_react285.default.createElement(TableHeaderCell, { ...commonCellProps, key: columnId, tabIndex: sticky ? -1 : 0, focusedComponent, column: column2, activeSortingColumn: sortingColumn, sortingDescending, sortingDisabled, multiColumnSort, i18nStrings, ariaLabels, wrapLines, colIndex: selectionType2 ? colIndex + 1 : colIndex, columnId, updateColumn, onResizeFinish: () => onResizeFinish(columnWidthsRef.current), resizableColumns, resizableStyle: getColumnStyles(sticky, columnId), onClick: (detail) => {
               setLastUserAction("sorting");
               fireNonCancelableEvent(onSortingChange, detail);
             }, isEditable: !!column2.editConfig, cellRef: (node2) => setCell(sticky, columnId, node2), tableRole, resizerRoleDescription, resizerTooltipText, isExpandable: colIndex === 0 && isExpandable, hasDynamicContent: hidden && !resizableColumns && column2.hasDynamicContent, isLast: colIndex === columnDefinitions.length - 1 });
@@ -336071,10 +336768,10 @@ ${isHandDrawn ? "" : `
       );
     }
     const totalColumns = columnDefinitions.length;
-    return import_react283.default.createElement("thead", { className: clsx_m_default(!hidden && styles_css_default96["thead-active"]) }, columnGroupsLayout.rows.map((row, rowIndex) => import_react283.default.createElement(
+    return import_react285.default.createElement("thead", { className: clsx_m_default(!hidden && styles_css_default96["thead-active"]) }, columnGroupsLayout.rows.map((row, rowIndex) => import_react285.default.createElement(
       "tr",
       { key: rowIndex, ...rowIndex === 0 ? focusMarkers.all : {}, ref: rowIndex === 0 ? outerRef : void 0, "aria-rowindex": rowIndex + 1, "data-group-level": rowIndex, ...getTableHeaderRowRoleProps({ tableRole, rowIndex }), ...sharedTrProps },
-      selectionType2 && rowIndex === 0 ? import_react283.default.createElement(TableHeaderSelectionCell, { ...commonCellProps, focusedComponent, columnId: selectionColumnId2, cellRef: (node2) => setCell(sticky, selectionColumnId2, node2), getSelectAllProps, onFocusMove, singleSelectionHeaderAriaLabel, rowSpan: columnGroupsLayout.rows.length, isGrouped: true }) : null,
+      selectionType2 && rowIndex === 0 ? import_react285.default.createElement(TableHeaderSelectionCell, { ...commonCellProps, focusedComponent, columnId: selectionColumnId2, cellRef: (node2) => setCell(sticky, selectionColumnId2, node2), getSelectAllProps, onFocusMove, singleSelectionHeaderAriaLabel, rowSpan: columnGroupsLayout.rows.length, isGrouped: true }) : null,
       row.columns.map((col, colIndexInRow) => {
         var _a213, _b;
         const nextCol = row.columns[colIndexInRow + 1];
@@ -336120,14 +336817,14 @@ ${isHandDrawn ? "" : `
             const rightColIndex = col.colIndex + leftColspan;
             const rightGroupId = isSplitFirst ? `${col.id}__split` : col.id;
             const rightChildIds = childIds.slice(leftColspan);
-            return import_react283.default.createElement(
-              import_react283.default.Fragment,
+            return import_react285.default.createElement(
+              import_react285.default.Fragment,
               { key: col.cellKey },
-              import_react283.default.createElement(TableGroupHeaderCell, { ...sharedGroupCellProps, colspan: leftColspan, colIndex: selectionType2 ? leftColIndex + 1 : leftColIndex, groupId: leftGroupId, resizableStyle: void 0, updateGroupWidth: (_3, newWidth) => {
+              import_react285.default.createElement(TableGroupHeaderCell, { ...sharedGroupCellProps, colspan: leftColspan, colIndex: selectionType2 ? leftColIndex + 1 : leftColIndex, groupId: leftGroupId, resizableStyle: void 0, updateGroupWidth: (_3, newWidth) => {
                 handleSplitGroupResize(leftChildIds, newWidth);
               }, childColumnIds: leftChildIds, firstChildColumnId: leftChildIds[0], lastChildColumnId: leftChildIds[leftChildIds.length - 1], cellRef: isSplitFirst ? (node2) => setCell(sticky, col.cellKey, node2) : () => {
               }, isLast: false, stickyColumnId: isSplitFirst ? childIds[0] : void 0, stickyBoundaryColumnId: isSplitFirst ? leftChildIds[leftChildIds.length - 1] : void 0 }),
-              import_react283.default.createElement(TableGroupHeaderCell, { ...sharedGroupCellProps, colspan: rightColspan, colIndex: selectionType2 ? rightColIndex + 1 : rightColIndex, groupId: rightGroupId, resizableStyle: getColumnStyles(sticky, col.cellKey), updateGroupWidth: (_3, newWidth) => {
+              import_react285.default.createElement(TableGroupHeaderCell, { ...sharedGroupCellProps, colspan: rightColspan, colIndex: selectionType2 ? rightColIndex + 1 : rightColIndex, groupId: rightGroupId, resizableStyle: getColumnStyles(sticky, col.cellKey), updateGroupWidth: (_3, newWidth) => {
                 handleSplitGroupResize(rightChildIds, newWidth);
               }, childColumnIds: rightChildIds, firstChildColumnId: rightChildIds[0], lastChildColumnId: rightChildIds[rightChildIds.length - 1], cellRef: !isSplitFirst ? (node2) => setCell(sticky, col.cellKey, node2) : () => {
               }, resizerRoleDescription, resizerTooltipText, isLast: rightColIndex + rightColspan === totalColumns, stickyColumnId: !isSplitFirst ? childIds[childIds.length - 1] : void 0, stickyBoundaryColumnId: !isSplitFirst ? rightChildIds[0] : void 0 })
@@ -336139,14 +336836,14 @@ ${isHandDrawn ? "" : `
           const isAtStickyFirstBoundary = isFullyStickyFirst && col.colIndex + col.colSpan - 1 === stickyColumnsFirst - 1;
           const isAtStickyLastBoundary = isFullyStickyLast && col.colIndex === columnDefinitions.length - stickyColumnsLast;
           const fullyStickyBoundaryColumnId = isAtStickyFirstBoundary ? childIds[childIds.length - 1] : isAtStickyLastBoundary ? childIds[0] : void 0;
-          return import_react283.default.createElement(TableGroupHeaderCell, { ...sharedGroupCellProps, key: col.cellKey, colspan: col.colSpan, colIndex: selectionType2 ? col.colIndex + 1 : col.colIndex, groupId: col.id, resizableStyle: getColumnStyles(sticky, col.cellKey), updateGroupWidth: (groupId, newWidth) => {
+          return import_react285.default.createElement(TableGroupHeaderCell, { ...sharedGroupCellProps, key: col.cellKey, colspan: col.colSpan, colIndex: selectionType2 ? col.colIndex + 1 : col.colIndex, groupId: col.id, resizableStyle: getColumnStyles(sticky, col.cellKey), updateGroupWidth: (groupId, newWidth) => {
             updateGroup(groupId, newWidth);
           }, childColumnIds: childIds, firstChildColumnId: childIds[0], lastChildColumnId: childIds[childIds.length - 1], cellRef: (node2) => setCell(sticky, col.cellKey, node2), resizerRoleDescription, resizerTooltipText, isLast: col.colIndex + col.colSpan === totalColumns, stickyColumnId: fullyStickyColumnId, stickyBoundaryColumnId: fullyStickyBoundaryColumnId });
         } else {
           const column2 = col.columnDefinition;
           const columnId = col.id;
           const colIndex = col.colIndex;
-          return import_react283.default.createElement(TableHeaderCell, { ...commonCellProps, key: columnId, tabIndex: sticky ? -1 : 0, focusedComponent, column: column2, activeSortingColumn: sortingColumn, sortingDescending, sortingDisabled, multiColumnSort, i18nStrings, ariaLabels, wrapLines, colIndex: selectionType2 ? colIndex + 1 : colIndex, columnId, updateColumn, onResizeFinish: () => onResizeFinish(columnWidthsRef.current), resizableColumns, resizableStyle: getColumnStyles(sticky, columnId), onClick: (detail) => {
+          return import_react285.default.createElement(TableHeaderCell, { ...commonCellProps, key: columnId, tabIndex: sticky ? -1 : 0, focusedComponent, column: column2, activeSortingColumn: sortingColumn, sortingDescending, sortingDisabled, multiColumnSort, i18nStrings, ariaLabels, wrapLines, colIndex: selectionType2 ? colIndex + 1 : colIndex, columnId, updateColumn, onResizeFinish: () => onResizeFinish(columnWidthsRef.current), resizableColumns, resizableStyle: getColumnStyles(sticky, columnId), onClick: (detail) => {
             setLastUserAction("sorting");
             fireNonCancelableEvent(onSortingChange, detail);
           }, isEditable: !!column2.editConfig, cellRef: (node2) => {
@@ -336159,12 +336856,12 @@ ${isHandDrawn ? "" : `
   var thead_default = Thead;
 
   // node_modules/@cloudscape-design/components/table/sticky-header.js
-  var sticky_header_default = (0, import_react284.forwardRef)(StickyHeader);
+  var sticky_header_default = (0, import_react286.forwardRef)(StickyHeader);
   function StickyHeader({ variant, theadProps, wrapperRef, theadRef, secondaryWrapperRef, tableRef, onScroll, tableHasHeader, contentDensity, tableRole, hasGroupedColumns, columnDefinitions, hasSelection }, ref) {
-    const secondaryTheadRef = (0, import_react284.useRef)(null);
-    const secondaryTableRef = (0, import_react284.useRef)(null);
-    const { isStuck } = (0, import_react284.useContext)(StickyHeaderContext);
-    const [focusedComponent, setFocusedComponent] = (0, import_react284.useState)(null);
+    const secondaryTheadRef = (0, import_react286.useRef)(null);
+    const secondaryTableRef = (0, import_react286.useRef)(null);
+    const { isStuck } = (0, import_react286.useContext)(StickyHeaderContext);
+    const [focusedComponent, setFocusedComponent] = (0, import_react286.useState)(null);
     const { scrollToRow, scrollToTop } = useStickyHeaderCopy({
       tableRef,
       theadRef,
@@ -336172,12 +336869,12 @@ ${isHandDrawn ? "" : `
       secondaryTableRef,
       tableWrapperRef: wrapperRef
     });
-    (0, import_react284.useImperativeHandle)(ref, () => ({
+    (0, import_react286.useImperativeHandle)(ref, () => ({
       scrollToTop,
       scrollToRow,
       setFocus: setFocusedComponent
     }));
-    return import_react284.default.createElement(
+    return import_react286.default.createElement(
       "div",
       {
         className: clsx_m_default(styles_css_default96["header-secondary"], styles_css_default96[`variant-${variant}`], {
@@ -336190,23 +336887,23 @@ ${isHandDrawn ? "" : `
         ref: secondaryWrapperRef,
         onScroll
       },
-      import_react284.default.createElement(
+      import_react286.default.createElement(
         "table",
         { className: clsx_m_default(styles_css_default96.table, styles_css_default96["table-layout-fixed"], hasGroupedColumns && styles_css_default96["has-grouped-header"], contentDensity === "compact" && getVisualContextClassname("compact-table")), ref: secondaryTableRef, ...getTableRoleProps({ tableRole }) },
-        hasGroupedColumns && columnDefinitions && import_react284.default.createElement(TableColGroup, { visibleColumnDefinitions: columnDefinitions, hasSelection: !!hasSelection, sticky: true, selectionColumnId: theadProps.selectionColumnId }),
-        import_react284.default.createElement(thead_default, { ref: secondaryTheadRef, sticky: true, stuck: isStuck, focusedComponent, ...theadProps })
+        hasGroupedColumns && columnDefinitions && import_react286.default.createElement(TableColGroup, { visibleColumnDefinitions: columnDefinitions, hasSelection: !!hasSelection, sticky: true, selectionColumnId: theadProps.selectionColumnId }),
+        import_react286.default.createElement(thead_default, { ref: secondaryTheadRef, sticky: true, stuck: isStuck, focusedComponent, ...theadProps })
       )
     );
   }
 
   // node_modules/@cloudscape-design/components/table/sticky-scrollbar/sticky-scrollbar.js
-  var import_react286 = __toESM(require_react());
+  var import_react288 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/sticky-scrollbar/use-sticky-scrollbar.js
-  var import_react285 = __toESM(require_react());
+  var import_react287 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/sticky-scrollbar/styles.css.js
-  var styles_css_default111 = {
+  var styles_css_default113 = {
     "sticky-scrollbar": "awsui_sticky-scrollbar_faqt8_1vm15_9",
     "sticky-scrollbar-content": "awsui_sticky-scrollbar-content_faqt8_1vm15_21",
     "sticky-scrollbar-visible": "awsui_sticky-scrollbar-visible_faqt8_1vm15_24",
@@ -336225,16 +336922,16 @@ ${isHandDrawn ? "" : `
     const scrollbarHeight = browserScrollbarSize().height;
     const areaIsScrollable = tableInlineSize > wrapperInlineSize;
     if (!areaIsScrollable) {
-      scrollbarEl.classList.remove(styles_css_default111["sticky-scrollbar-visible"]);
+      scrollbarEl.classList.remove(styles_css_default113["sticky-scrollbar-visible"]);
     } else {
-      if (!scrollbarEl.classList.contains(styles_css_default111["sticky-scrollbar-visible"])) {
+      if (!scrollbarEl.classList.contains(styles_css_default113["sticky-scrollbar-visible"])) {
         requestAnimationFrame(() => {
           scrollbarEl.scrollLeft = wrapperEl.scrollLeft;
         });
       }
-      scrollbarEl.classList.add(styles_css_default111["sticky-scrollbar-visible"]);
+      scrollbarEl.classList.add(styles_css_default113["sticky-scrollbar-visible"]);
       if (!scrollbarHeight) {
-        scrollbarEl.classList.add(styles_css_default111["sticky-scrollbar-native-invisible"]);
+        scrollbarEl.classList.add(styles_css_default113["sticky-scrollbar-native-invisible"]);
       }
     }
     if (scrollbarHeight && scrollbarEl && scrollbarContentEl) {
@@ -336250,14 +336947,14 @@ ${isHandDrawn ? "" : `
     }
   };
   function useStickyScrollbar(scrollbarRef, scrollbarContentRef, tableRef, wrapperRef, offsetScrollbar) {
-    const [inScrollableContainer, setInScrollableContainer] = (0, import_react285.useState)(false);
+    const [inScrollableContainer, setInScrollableContainer] = (0, import_react287.useState)(false);
     const wrapperEl = wrapperRef.current;
-    (0, import_react285.useEffect)(() => {
+    (0, import_react287.useEffect)(() => {
       if (wrapperEl) {
         setInScrollableContainer(!!getContainingBlock(wrapperEl) || !!getOverflowParents(wrapperEl)[0]);
       }
     }, [wrapperEl]);
-    (0, import_react285.useEffect)(() => {
+    (0, import_react287.useEffect)(() => {
       if (wrapperRef.current && tableRef.current && typeof ResizeObserver !== "undefined") {
         const observer2 = new ResizeObserver(() => {
           if (scrollbarContentRef.current) {
@@ -336271,7 +336968,7 @@ ${isHandDrawn ? "" : `
         };
       }
     }, [scrollbarContentRef, scrollbarRef, tableRef, wrapperRef, inScrollableContainer, offsetScrollbar]);
-    (0, import_react285.useEffect)(() => {
+    (0, import_react287.useEffect)(() => {
       const resizeHandler = () => {
         updatePosition(tableRef.current, wrapperRef.current, scrollbarRef.current, scrollbarContentRef.current, inScrollableContainer);
       };
@@ -336284,29 +336981,29 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/sticky-scrollbar/sticky-scrollbar.js
-  var sticky_scrollbar_default = (0, import_react286.forwardRef)(StickyScrollbar);
+  var sticky_scrollbar_default = (0, import_react288.forwardRef)(StickyScrollbar);
   function StickyScrollbar({ wrapperRef, tableRef, onScroll, hasStickyColumns }, ref) {
     const isVisualRefresh = useVisualRefresh();
-    const scrollbarRef = import_react286.default.useRef(null);
-    const scrollbarContentRef = import_react286.default.useRef(null);
+    const scrollbarRef = import_react288.default.useRef(null);
+    const scrollbarContentRef = import_react288.default.useRef(null);
     const mergedRef = useMergeRefs(ref, scrollbarRef);
     const offsetScrollbar = hasStickyColumns || browserScrollbarSize().height === 0;
     useStickyScrollbar(scrollbarRef, scrollbarContentRef, tableRef, wrapperRef, offsetScrollbar);
     const { ref: stickyDetectionRef, isIntersecting: isStickyDetectionVisible } = useIntersectionObserver();
-    return import_react286.default.createElement(
-      import_react286.default.Fragment,
+    return import_react288.default.createElement(
+      import_react288.default.Fragment,
       null,
-      import_react286.default.createElement(
+      import_react288.default.createElement(
         "div",
-        { ref: mergedRef, className: clsx_m_default(styles_css_default111["sticky-scrollbar"], offsetScrollbar && styles_css_default111["sticky-scrollbar-offset"], isVisualRefresh && styles_css_default111["is-visual-refresh"]), onScroll, "data-stuck": !isStickyDetectionVisible },
-        import_react286.default.createElement("div", { ref: scrollbarContentRef, className: styles_css_default111["sticky-scrollbar-content"] })
+        { ref: mergedRef, className: clsx_m_default(styles_css_default113["sticky-scrollbar"], offsetScrollbar && styles_css_default113["sticky-scrollbar-offset"], isVisualRefresh && styles_css_default113["is-visual-refresh"]), onScroll, "data-stuck": !isStickyDetectionVisible },
+        import_react288.default.createElement("div", { ref: scrollbarContentRef, className: styles_css_default113["sticky-scrollbar-content"] })
       ),
-      import_react286.default.createElement("div", { ref: stickyDetectionRef, style: { position: "absolute", right: 0, bottom: 0, left: 0, height: 1 } })
+      import_react288.default.createElement("div", { ref: stickyDetectionRef, style: { position: "absolute", right: 0, bottom: 0, left: 0, height: 1 } })
     );
   }
 
   // node_modules/@cloudscape-design/components/table/use-auto-skeleton-rows.js
-  var import_react287 = __toESM(require_react());
+  var import_react289 = __toESM(require_react());
   var AUTO_SKELETON_VIEWPORT_BUFFER = 16;
   var SKELETON_ROW_SELECTOR = 'tr[aria-hidden="true"]';
   function getDocumentViewportBottom() {
@@ -336334,9 +337031,9 @@ ${isHandDrawn ? "" : `
   function useAutoSkeletonRows({ enabled, maxRows, minRows, tableBodyRef, tableRootRef, tableWrapperRef }) {
     const maxRowsValue = maxRows === void 0 ? void 0 : Math.max(1, maxRows);
     const minRowsValue = Math.min(Math.max(1, minRows !== null && minRows !== void 0 ? minRows : 1), maxRowsValue !== null && maxRowsValue !== void 0 ? maxRowsValue : Number.POSITIVE_INFINITY);
-    const [rows, setRows] = (0, import_react287.useState)(minRowsValue);
-    const rowHeightRef = (0, import_react287.useRef)();
-    const updateRows = (0, import_react287.useCallback)(() => {
+    const [rows, setRows] = (0, import_react289.useState)(minRowsValue);
+    const rowHeightRef = (0, import_react289.useRef)();
+    const updateRows = (0, import_react289.useCallback)(() => {
       var _a213, _b, _c, _d;
       if (!enabled) {
         return;
@@ -336362,8 +337059,8 @@ ${isHandDrawn ? "" : `
       });
       setRows((currentRows) => currentRows === nextRows ? currentRows : nextRows);
     }, [enabled, maxRowsValue, minRowsValue, tableBodyRef, tableRootRef, tableWrapperRef]);
-    (0, import_react287.useLayoutEffect)(updateRows, [updateRows]);
-    (0, import_react287.useLayoutEffect)(() => {
+    (0, import_react289.useLayoutEffect)(updateRows, [updateRows]);
+    (0, import_react289.useLayoutEffect)(() => {
       const tableWrapper = tableWrapperRef.current;
       const rowHeight = rowHeightRef.current;
       if (!enabled || rows <= minRowsValue || !tableWrapper || !rowHeight) {
@@ -336381,7 +337078,7 @@ ${isHandDrawn ? "" : `
       });
       setRows((currentRows) => currentRows - rowsToRemove);
     }, [enabled, rows, minRowsValue, tableWrapperRef]);
-    (0, import_react287.useLayoutEffect)(() => {
+    (0, import_react289.useLayoutEffect)(() => {
       if (!enabled || typeof ResizeObserver === "undefined") {
         return void 0;
       }
@@ -336404,16 +337101,16 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/use-cell-editing.js
-  var import_react288 = __toESM(require_react());
+  var import_react290 = __toESM(require_react());
   function useCellEditing({ onCancel, onSubmit }) {
-    const [currentEditCell, setCurrentEditCell] = (0, import_react288.useState)(null);
-    const [lastSuccessfulEditCell, setLastSuccessfulEditCell] = (0, import_react288.useState)(null);
-    const [currentEditLoading, setCurrentEditLoading] = (0, import_react288.useState)(false);
+    const [currentEditCell, setCurrentEditCell] = (0, import_react290.useState)(null);
+    const [lastSuccessfulEditCell, setLastSuccessfulEditCell] = (0, import_react290.useState)(null);
+    const [currentEditLoading, setCurrentEditLoading] = (0, import_react290.useState)(false);
     const startEdit = (cellId) => {
       setLastSuccessfulEditCell(null);
       setCurrentEditCell(cellId);
     };
-    const cancelEdit = (0, import_react288.useCallback)(() => setCurrentEditCell(null), []);
+    const cancelEdit = (0, import_react290.useCallback)(() => setCurrentEditCell(null), []);
     const completeEdit = (cellId, editCancelled) => {
       const eventCancelled = fireCancelableEvent(onCancel, {});
       if (!eventCancelled) {
@@ -336445,14 +337142,14 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/use-prevent-sticky-click-scroll.js
-  var import_react289 = __toESM(require_react());
+  var import_react291 = __toESM(require_react());
   var _ScrollLock_timeoutId;
   var _ScrollLock_scrollLeft;
   var _ScrollLock_active;
-  var stickyCellSelector = `.${styles_css_default102["sticky-cell"]}`;
+  var stickyCellSelector = `.${styles_css_default104["sticky-cell"]}`;
   var scrollLockTimeout = 50;
   function usePreventStickyClickScroll(wrapperRefObject) {
-    (0, import_react289.useEffect)(() => {
+    (0, import_react291.useEffect)(() => {
       if (wrapperRefObject.current) {
         const wrapperEl = wrapperRefObject.current;
         const scrollLock = new ScrollLock();
@@ -336528,7 +337225,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/use-table-focus-navigation.js
-  var import_react290 = __toESM(require_react());
+  var import_react292 = __toESM(require_react());
   function iterateTableCells(table, func) {
     table.querySelectorAll("tr").forEach((row, rowIndex) => {
       row.querySelectorAll("td").forEach((cell, cellIndex) => {
@@ -336537,7 +337234,7 @@ ${isHandDrawn ? "" : `
     });
   }
   function useTableFocusNavigation({ enableKeyboardNavigation, selectionType: selectionType2, tableRoot, columnDefinitions, numRows }) {
-    const focusableColumns = (0, import_react290.useMemo)(() => {
+    const focusableColumns = (0, import_react292.useMemo)(() => {
       const cols = columnDefinitions.map((column2) => !!column2.editConfig);
       if (selectionType2) {
         cols.unshift(false);
@@ -336546,7 +337243,7 @@ ${isHandDrawn ? "" : `
     }, [columnDefinitions, selectionType2]);
     const maxColumnIndex = focusableColumns.length - 1;
     const minColumnIndex = selectionType2 ? 1 : 0;
-    const focusCell = (0, import_react290.useCallback)((rowIndex, columnIndex) => {
+    const focusCell = (0, import_react292.useCallback)((rowIndex, columnIndex) => {
       if (tableRoot === null || tableRoot === void 0 ? void 0 : tableRoot.current) {
         iterateTableCells(tableRoot.current, (cell, rIndex, cIndex) => {
           var _a213;
@@ -336560,7 +337257,7 @@ ${isHandDrawn ? "" : `
         });
       }
     }, [tableRoot]);
-    const shiftFocus = (0, import_react290.useCallback)((vertical, horizontal) => {
+    const shiftFocus = (0, import_react292.useCallback)((vertical, horizontal) => {
       var _a213;
       const focusedCell = (_a213 = tableRoot.current) === null || _a213 === void 0 ? void 0 : _a213.querySelector("td:focus-within");
       if (!focusedCell) {
@@ -336585,7 +337282,7 @@ ${isHandDrawn ? "" : `
         focusCell(newRowIndex, newColumnIndex);
       }
     }, [focusCell, focusableColumns, maxColumnIndex, minColumnIndex, numRows, tableRoot]);
-    const handleArrowKeyEvents = (0, import_react290.useCallback)((event3) => {
+    const handleArrowKeyEvents = (0, import_react292.useCallback)((event3) => {
       var _a213, _b;
       const abort = !!((_a213 = tableRoot.current) === null || _a213 === void 0 ? void 0 : _a213.querySelector('[data-inline-editing-active = "true"]')) || !((_b = document.activeElement) === null || _b === void 0 ? void 0 : _b.closest("[data-inline-editing-active]"));
       if (abort) {
@@ -336613,7 +337310,7 @@ ${isHandDrawn ? "" : `
           return;
       }
     }, [shiftFocus, tableRoot]);
-    (0, import_react290.useEffect)(() => {
+    (0, import_react292.useEffect)(() => {
       if (!tableRoot.current || enableKeyboardNavigation) {
         return;
       }
@@ -336628,15 +337325,15 @@ ${isHandDrawn ? "" : `
   var GRID_NAVIGATION_PAGE_SIZE = 10;
   var SELECTION_COLUMN_WIDTH = 54;
   var selectionColumnId = /* @__PURE__ */ Symbol("selection-column-id");
-  var InternalTableAsSubstep = import_react291.default.forwardRef((props, ref) => {
+  var InternalTableAsSubstep = import_react293.default.forwardRef((props, ref) => {
     const { funnelSubStepProps } = useFunnelSubStep();
     const tableProps = {
       ...props,
       __funnelSubStepProps: funnelSubStepProps
     };
-    return import_react291.default.createElement(InternalTable, { ...tableProps, ref });
+    return import_react293.default.createElement(InternalTable, { ...tableProps, ref });
   });
-  var InternalTable = import_react291.default.forwardRef(({ header, footer, empty: empty3, filter: filter8, pagination, preferences, items, columnDefinitions, groupDefinitions, trackBy, loading, loadingText, skeleton, selectionType: externalSelectionType, selectedItems, isItemDisabled, ariaLabels, onSelectionChange, onSortingChange, sortingColumn, sortingDescending, sortingDisabled, multiColumnSort, i18nStrings, visibleColumns, stickyHeader, stickyHeaderVerticalOffset, onRowClick, onRowContextMenu, wrapLines, stripedRows, contentDensity, submitEdit, onEditCancel, resizableColumns, onColumnWidthsChange, variant, __internalRootRef, totalItemsCount, firstIndex, renderAriaLive, stickyColumns, columnDisplay, enableKeyboardNavigation, expandableRows: externalExpandableRows, getLoadingStatus, renderLoaderPending, renderLoaderLoading, renderLoaderError, renderLoaderEmpty, renderLoaderCounter, cellVerticalAlign, __funnelSubStepProps, ...rest }, ref) => {
+  var InternalTable = import_react293.default.forwardRef(({ header, footer, empty: empty3, filter: filter8, pagination, preferences, items, columnDefinitions, groupDefinitions, trackBy, loading, loadingText, skeleton, selectionType: externalSelectionType, selectedItems, isItemDisabled, ariaLabels, onSelectionChange, onSortingChange, sortingColumn, sortingDescending, sortingDisabled, multiColumnSort, i18nStrings, visibleColumns, stickyHeader, stickyHeaderVerticalOffset, onRowClick, onRowContextMenu, wrapLines, stripedRows, contentDensity, submitEdit, onEditCancel, resizableColumns, onColumnWidthsChange, variant, __internalRootRef, totalItemsCount, firstIndex, renderAriaLive, stickyColumns, columnDisplay, enableKeyboardNavigation, expandableRows: externalExpandableRows, getLoadingStatus, renderLoaderPending, renderLoaderLoading, renderLoaderError, renderLoaderEmpty, renderLoaderCounter, cellVerticalAlign, __funnelSubStepProps, ...rest }, ref) => {
     var _a213, _b, _c, _d, _e2, _f;
     if (externalExpandableRows && enableKeyboardNavigation === void 0) {
       enableKeyboardNavigation = true;
@@ -336657,19 +337354,19 @@ ${isHandDrawn ? "" : `
     const { allRows } = useProgressiveLoadingProps({ getLoadingStatus, expandableRows });
     const selectionType2 = expandableRows.hasGroupSelection ? "group" : externalSelectionType;
     const [containerWidth, wrapperMeasureRef] = useContainerQuery((rect2) => rect2.borderBoxWidth);
-    const wrapperMeasureRefObject = (0, import_react291.useRef)(null);
+    const wrapperMeasureRefObject = (0, import_react293.useRef)(null);
     const wrapperMeasureMergedRef = useMergeRefs(wrapperMeasureRef, wrapperMeasureRefObject);
     const [tableWidth, tableMeasureRef] = useContainerQuery((rect2) => rect2.borderBoxWidth);
-    const tableRefObject = (0, import_react291.useRef)(null);
-    const secondaryWrapperRef = import_react291.default.useRef(null);
-    const theadRef = (0, import_react291.useRef)(null);
-    const stickyHeaderRef = import_react291.default.useRef(null);
-    const scrollbarRef = import_react291.default.useRef(null);
+    const tableRefObject = (0, import_react293.useRef)(null);
+    const secondaryWrapperRef = import_react293.default.useRef(null);
+    const theadRef = (0, import_react293.useRef)(null);
+    const stickyHeaderRef = import_react293.default.useRef(null);
+    const scrollbarRef = import_react293.default.useRef(null);
     const { cancelEdit, ...cellEditing } = useCellEditing({ onCancel: onEditCancel, onSubmit: submitEdit });
-    const paginationRef = (0, import_react291.useRef)({});
-    const filterRef = (0, import_react291.useRef)({});
-    const preferencesRef = (0, import_react291.useRef)({});
-    const headerRef = (0, import_react291.useRef)({});
+    const paginationRef = (0, import_react293.useRef)({});
+    const filterRef = (0, import_react293.useRef)({});
+    const preferencesRef = (0, import_react293.useRef)({});
+    const headerRef = (0, import_react293.useRef)({});
     const getHeaderText = () => {
       var _a214, _b2, _c2, _d2;
       return (_c2 = (_b2 = (_a214 = toolsHeaderPerformanceMarkRef.current) === null || _a214 === void 0 ? void 0 : _a214.querySelector(`.${styles_css_default82["heading-text"]}`)) === null || _b2 === void 0 ? void 0 : _b2.innerText) !== null && _c2 !== void 0 ? _c2 : (_d2 = toolsHeaderPerformanceMarkRef.current) === null || _d2 === void 0 ? void 0 : _d2.innerText;
@@ -336741,20 +337438,20 @@ ${isHandDrawn ? "" : `
       getComponentConfiguration,
       interactionMetadata
     });
-    (0, import_react291.useImperativeHandle)(ref, () => {
+    (0, import_react293.useImperativeHandle)(ref, () => {
       var _a214;
       return {
         scrollToTop: ((_a214 = stickyHeaderRef.current) === null || _a214 === void 0 ? void 0 : _a214.scrollToTop) || (() => void 0),
         cancelEdit
       };
     }, [cancelEdit]);
-    const tableRootRefObject = (0, import_react291.useRef)(null);
-    const tableBodyRef = (0, import_react291.useRef)(null);
-    const wrapperRefObject = (0, import_react291.useRef)(null);
+    const tableRootRefObject = (0, import_react293.useRef)(null);
+    const tableBodyRef = (0, import_react293.useRef)(null);
+    const wrapperRefObject = (0, import_react293.useRef)(null);
     const handleScroll = useScrollSync([wrapperRefObject, scrollbarRef, secondaryWrapperRef]);
     const { moveFocusDown, moveFocusUp, moveFocus } = useSelectionFocusMove(selectionType2, allItems.length);
     const { onRowClickHandler, onRowContextMenuHandler } = useRowEvents({ onRowClick, onRowContextMenu });
-    const visibleColumnDefinitions = (0, import_react291.useMemo)(() => getVisibleColumnDefinitions({ columnDefinitions, columnDisplay, visibleColumns }), [columnDefinitions, columnDisplay, visibleColumns]);
+    const visibleColumnDefinitions = (0, import_react293.useMemo)(() => getVisibleColumnDefinitions({ columnDefinitions, columnDisplay, visibleColumns }), [columnDefinitions, columnDisplay, visibleColumns]);
     const visibleColumnIds = visibleColumnDefinitions.map((col, idx) => getColumnKey(col, idx).toString());
     const { groupColumnMap, ...columnGroupsLayout } = useColumnGroups(columnDefinitions, visibleColumnIds, groupDefinitions, columnDisplay);
     const selectionProps = {
@@ -336806,13 +337503,13 @@ ${isHandDrawn ? "" : `
     const hasSelection = !!selectionType2;
     const hasFooterPagination = isMobile && variant === "full-page" && !!pagination;
     const hasFooter = !!footer || hasFooterPagination;
-    const headerIdRef = (0, import_react291.useRef)(void 0);
+    const headerIdRef = (0, import_react293.useRef)(void 0);
     const isLabelledByHeader = !(ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.tableLabel) && !!header;
     const ariaLabelledby = isLabelledByHeader && headerIdRef.current ? headerIdRef.current : void 0;
-    const setHeaderRef = (0, import_react291.useCallback)((id38) => {
+    const setHeaderRef = (0, import_react293.useCallback)((id38) => {
       headerIdRef.current = id38;
     }, []);
-    const { visibleColumnWidthsWithSelection, visibleColumnIdsWithSelection } = (0, import_react291.useMemo)(() => {
+    const { visibleColumnWidthsWithSelection, visibleColumnIdsWithSelection } = (0, import_react293.useMemo)(() => {
       const widths = [];
       const ids2 = [];
       if (hasSelection) {
@@ -336909,72 +337606,72 @@ ${isHandDrawn ? "" : `
       columnDefinitions: visibleColumnDefinitions,
       numRows: allRows === null || allRows === void 0 ? void 0 : allRows.length
     });
-    const toolsHeaderPerformanceMarkRef = (0, import_react291.useRef)(null);
+    const toolsHeaderPerformanceMarkRef = (0, import_react293.useRef)(null);
     const [toolsHeaderHeight, toolsHeaderWrapperMeasureRef] = useContainerQuery((rect2) => rect2.borderBoxHeight);
     const toolsHeaderWrapper = useMergeRefs(toolsHeaderPerformanceMarkRef, toolsHeaderWrapperMeasureRef);
     const colIndexOffset = selectionType2 ? 1 : 0;
     const totalColumnsCount = visibleColumnDefinitions.length + colIndexOffset;
     const headerRowCount = (columnGroupsLayout === null || columnGroupsLayout === void 0 ? void 0 : columnGroupsLayout.rows.length) || 1;
-    const tableContent = import_react291.default.createElement(
+    const tableContent = import_react293.default.createElement(
       LinkDefaultVariantContext.Provider,
       { value: { defaultVariant: "primary" } },
-      import_react291.default.createElement(
+      import_react293.default.createElement(
         TableComponentsContextProvider,
         { value: { paginationRef, filterRef, preferencesRef, headerRef } },
-        import_react291.default.createElement(
+        import_react293.default.createElement(
           ColumnWidthsProvider,
           { visibleColumns: visibleColumnWidthsWithSelection, resizableColumns, containerRef: wrapperMeasureRefObject, groupColumnMap },
-          import_react291.default.createElement(
+          import_react293.default.createElement(
             internal_default14,
-            { ...baseProps, ...tableInteractionAttributes, __internalRootRef: tableRootRef, className: clsx_m_default(baseProps.className, styles_css_default96.root), __funnelSubStepProps, __fullPage: variant === "full-page", header: import_react291.default.createElement(
-              import_react291.default.Fragment,
+            { ...baseProps, ...tableInteractionAttributes, __internalRootRef: tableRootRef, className: clsx_m_default(baseProps.className, styles_css_default96.root), __funnelSubStepProps, __fullPage: variant === "full-page", header: import_react293.default.createElement(
+              import_react293.default.Fragment,
               null,
-              hasHeader && import_react291.default.createElement(
+              hasHeader && import_react293.default.createElement(
                 "div",
                 null,
-                import_react291.default.createElement(
+                import_react293.default.createElement(
                   "div",
                   { ref: toolsHeaderWrapper, className: clsx_m_default(styles_css_default96["header-controls"], styles_css_default96[`variant-${computedVariant}`]) },
-                  import_react291.default.createElement(
+                  import_react293.default.createElement(
                     CollectionLabelContext.Provider,
                     { value: { assignId: setHeaderRef } },
-                    import_react291.default.createElement(ToolsHeader, { header, filter: filter8, clearSort: hasActiveMultiSort && multiColumnSort ? import_react291.default.createElement(ClearSortButton, { multiColumnSort, i18nStrings, onClearSort: focusFirstSortableColumn }) : void 0, pagination, preferences, setLastUserAction })
+                    import_react293.default.createElement(ToolsHeader, { header, filter: filter8, clearSort: hasActiveMultiSort && multiColumnSort ? import_react293.default.createElement(ClearSortButton, { multiColumnSort, i18nStrings, onClearSort: focusFirstSortableColumn }) : void 0, pagination, preferences, setLastUserAction })
                   )
                 )
               ),
-              stickyHeader && import_react291.default.createElement(sticky_header_default, { ref: stickyHeaderRef, variant: computedVariant, theadProps, wrapperRef: wrapperRefObject, theadRef, secondaryWrapperRef, tableRef: tableRefObject, onScroll: handleScroll, tableHasHeader: hasHeader, contentDensity, tableRole, hasGroupedColumns: !!columnGroupsLayout && columnGroupsLayout.rows.length > 1, columnDefinitions: visibleColumnDefinitions, hasSelection })
-            ), disableHeaderPaddings: true, disableContentPaddings: true, disableFooterPaddings: true, variant: toContainerVariant(computedVariant), __disableFooterDivider: true, __disableStickyMobile: false, footer: hasFooter ? import_react291.default.createElement(
+              stickyHeader && import_react293.default.createElement(sticky_header_default, { ref: stickyHeaderRef, variant: computedVariant, theadProps, wrapperRef: wrapperRefObject, theadRef, secondaryWrapperRef, tableRef: tableRefObject, onScroll: handleScroll, tableHasHeader: hasHeader, contentDensity, tableRole, hasGroupedColumns: !!columnGroupsLayout && columnGroupsLayout.rows.length > 1, columnDefinitions: visibleColumnDefinitions, hasSelection })
+            ), disableHeaderPaddings: true, disableContentPaddings: true, disableFooterPaddings: true, variant: toContainerVariant(computedVariant), __disableFooterDivider: true, __disableStickyMobile: false, footer: hasFooter ? import_react293.default.createElement(
               "div",
               { className: clsx_m_default(styles_css_default96["footer-wrapper"], styles_css_default96[`variant-${computedVariant}`]) },
-              import_react291.default.createElement(
+              import_react293.default.createElement(
                 "div",
                 { className: clsx_m_default(styles_css_default96.footer, hasFooterPagination && styles_css_default96["footer-with-pagination"]) },
-                footer && import_react291.default.createElement("span", null, footer),
-                hasFooterPagination && import_react291.default.createElement("div", { className: styles_css_default96["footer-pagination"] }, pagination)
+                footer && import_react293.default.createElement("span", null, footer),
+                hasFooterPagination && import_react293.default.createElement("div", { className: styles_css_default96["footer-pagination"] }, pagination)
               )
             ) : null, __stickyHeader: stickyHeader, __mobileStickyOffset: toolsHeaderHeight !== null && toolsHeaderHeight !== void 0 ? toolsHeaderHeight : 0, __stickyOffset: stickyHeaderVerticalOffset, ...focusMarkers.root },
-            import_react291.default.createElement(
+            import_react293.default.createElement(
               "div",
               { ref: wrapperRef, className: clsx_m_default(styles_css_default96.wrapper, styles_css_default96[`variant-${computedVariant}`], {
                 [styles_css_default96["has-footer"]]: hasFooter,
                 [styles_css_default96["has-header"]]: hasHeader
               }), style: stickyState.style.wrapper, onScroll: handleScroll, ...wrapperProps },
-              import_react291.default.createElement("div", { className: styles_css_default96["wrapper-content-measure"], ref: wrapperMeasureMergedRef }),
-              !!renderAriaLive && !!firstIndex && !loading && import_react291.default.createElement(
+              import_react293.default.createElement("div", { className: styles_css_default96["wrapper-content-measure"], ref: wrapperMeasureMergedRef }),
+              !!renderAriaLive && !!firstIndex && !loading && import_react293.default.createElement(
                 internal_default2,
                 { hidden: true, tagName: "span" },
-                import_react291.default.createElement("span", null, renderAriaLive({
+                import_react293.default.createElement("span", null, renderAriaLive({
                   firstIndex,
                   lastIndex: firstIndex + items.length - 1,
                   visibleItemsCount: allItems.length,
                   totalItemsCount
                 }))
               ),
-              (multiColumnSort === null || multiColumnSort === void 0 ? void 0 : multiColumnSort.sortingColumns) && import_react291.default.createElement(SortLiveAnnouncement, { sortingColumns: multiColumnSort.sortingColumns, columnDefinitions, ariaLabels, containerRef: tableRefObject }),
-              import_react291.default.createElement(
+              (multiColumnSort === null || multiColumnSort === void 0 ? void 0 : multiColumnSort.sortingColumns) && import_react293.default.createElement(SortLiveAnnouncement, { sortingColumns: multiColumnSort.sortingColumns, columnDefinitions, ariaLabels, containerRef: tableRefObject }),
+              import_react293.default.createElement(
                 GridNavigationProvider,
                 { keyboardNavigation: !!enableKeyboardNavigation, pageSize: GRID_NAVIGATION_PAGE_SIZE, getTable: () => tableRefObject.current },
-                import_react291.default.createElement(
+                import_react293.default.createElement(
                   "table",
                   { ...performanceMarkAttributes, ref: tableRef, className: clsx_m_default(styles_css_default96.table, resizableColumns && styles_css_default96["table-layout-fixed"], columnGroupsLayout && columnGroupsLayout.rows.length > 1 && styles_css_default96["has-grouped-header"], contentDensity === "compact" && getVisualContextClassname("compact-table")), ...getTableRoleProps({
                     tableRole,
@@ -336984,18 +337681,18 @@ ${isHandDrawn ? "" : `
                     ariaLabel: ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.tableLabel,
                     ariaLabelledby
                   }) },
-                  resizableColumns && columnGroupsLayout && columnGroupsLayout.rows.length > 1 && import_react291.default.createElement(TableColGroup, { visibleColumnDefinitions, hasSelection, selectionColumnId }),
-                  import_react291.default.createElement(thead_default, { ref: theadRef, hidden: stickyHeader, onFocusedComponentChange: (focusId) => {
+                  resizableColumns && columnGroupsLayout && columnGroupsLayout.rows.length > 1 && import_react293.default.createElement(TableColGroup, { visibleColumnDefinitions, hasSelection, selectionColumnId }),
+                  import_react293.default.createElement(thead_default, { ref: theadRef, hidden: stickyHeader, onFocusedComponentChange: (focusId) => {
                     var _a214;
                     return (_a214 = stickyHeaderRef.current) === null || _a214 === void 0 ? void 0 : _a214.setFocus(focusId);
                   }, ...theadProps }),
-                  import_react291.default.createElement(
+                  import_react293.default.createElement(
                     "tbody",
                     { ref: tableBodyRef },
-                    skeleton && allItems.length === 0 && loading ? import_react291.default.createElement(SkeletonRows, { count: skeletonRowsCount, totalColumnsCount, loadingText, hasSelection, hasFooter, stickyState, tableRole, ariaLabels, cellVerticalAlign, computedVariant, visibleColumnDefinitions, wrapLines, resizableColumns, colIndexOffset, renderCell: skeleton === null || skeleton === void 0 ? void 0 : skeleton.renderCell }) : allItems.length === 0 || loading && !skeleton ? import_react291.default.createElement(
+                    skeleton && allItems.length === 0 && loading ? import_react293.default.createElement(SkeletonRows, { count: skeletonRowsCount, totalColumnsCount, loadingText, hasSelection, hasFooter, stickyState, tableRole, ariaLabels, cellVerticalAlign, computedVariant, visibleColumnDefinitions, wrapLines, resizableColumns, colIndexOffset, renderCell: skeleton === null || skeleton === void 0 ? void 0 : skeleton.renderCell }) : allItems.length === 0 || loading && !skeleton ? import_react293.default.createElement(
                       "tr",
                       null,
-                      import_react291.default.createElement(NoDataCell, { totalColumnsCount, hasFooter, loading, loadingText, empty: empty3, tableRef: tableRefObject, containerRef: wrapperMeasureRefObject })
+                      import_react293.default.createElement(NoDataCell, { totalColumnsCount, hasFooter, loading, loadingText, empty: empty3, tableRef: tableRefObject, containerRef: wrapperMeasureRefObject })
                     ) : allRows.map((row, rowIndex) => {
                       const rowExpandableProps = row.type === "data" ? expandableRows.getExpandableItemProps(row.item) : void 0;
                       const rowRoleProps = getTableRowRoleProps({
@@ -337020,7 +337717,7 @@ ${isHandDrawn ? "" : `
                       };
                       if (row.type === "data") {
                         const rowId = `${getTableItemKey(row.item)}`;
-                        return import_react291.default.createElement(
+                        return import_react293.default.createElement(
                           "tr",
                           { key: rowId, className: clsx_m_default(styles_css_default96.row, sharedCellProps.isSelected && styles_css_default96["row-selected"]), ...focusMarkers.item, ...rowRoleProps, onFocus: ({ currentTarget }) => {
                             var _a214;
@@ -337028,7 +337725,7 @@ ${isHandDrawn ? "" : `
                               (_a214 = stickyHeaderRef.current) === null || _a214 === void 0 ? void 0 : _a214.scrollToRow(currentTarget);
                             }
                           }, onClick: onRowClickHandler && onRowClickHandler.bind(null, rowIndex, row.item), onContextMenu: onRowContextMenuHandler && onRowContextMenuHandler.bind(null, rowIndex, row.item) },
-                          selection2.getItemSelectionProps && import_react291.default.createElement(TableBodySelectionCell, { ...sharedCellProps, columnId: selectionColumnId, selectionControlProps: {
+                          selection2.getItemSelectionProps && import_react293.default.createElement(TableBodySelectionCell, { ...sharedCellProps, columnId: selectionColumnId, selectionControlProps: {
                             ...selection2.getItemSelectionProps(row.item),
                             onFocusDown: moveFocusDown,
                             onFocusUp: moveFocusUp,
@@ -337061,7 +337758,7 @@ ${isHandDrawn ? "" : `
                                 }
                               }
                             };
-                            return import_react291.default.createElement(TableBodyCell, { key: colId, ...sharedCellProps, resizableStyle: {
+                            return import_react293.default.createElement(TableBodyCell, { key: colId, ...sharedCellProps, resizableStyle: {
                               width: column2.width,
                               minWidth: column2.minWidth,
                               maxWidth: column2.maxWidth
@@ -337084,23 +337781,23 @@ ${isHandDrawn ? "" : `
                         loadingStatus: row.status,
                         selected: !!(rowSelection === null || rowSelection === void 0 ? void 0 : rowSelection.checked)
                       });
-                      return loaderContent && import_react291.default.createElement(
+                      return loaderContent && import_react293.default.createElement(
                         "tr",
                         { key: (row.item ? getTableItemKey(row.item) : "root-" + rowIndex) + "-" + row.from, className: styles_css_default96.row, ...rowRoleProps },
-                        selectionType2 ? import_react291.default.createElement(TableBodySelectionCell, { ...sharedCellProps, columnId: selectionColumnId, verticalAlign: cellVerticalAlign, tableVariant: computedVariant, selectionControlProps: selectionType2 === "group" ? loaderSelectionProps : void 0, isSelected: selectionType2 === "group" && !!(loaderSelectionProps === null || loaderSelectionProps === void 0 ? void 0 : loaderSelectionProps.checked) }) : null,
+                        selectionType2 ? import_react293.default.createElement(TableBodySelectionCell, { ...sharedCellProps, columnId: selectionColumnId, verticalAlign: cellVerticalAlign, tableVariant: computedVariant, selectionControlProps: selectionType2 === "group" ? loaderSelectionProps : void 0, isSelected: selectionType2 === "group" && !!(loaderSelectionProps === null || loaderSelectionProps === void 0 ? void 0 : loaderSelectionProps.checked) }) : null,
                         visibleColumnDefinitions.map((column2, colIndex) => {
                           var _a214;
-                          return import_react291.default.createElement(TableLoaderCell, { key: getColumnKey(column2, colIndex), ...sharedCellProps, wrapLines: false, columnId: (_a214 = column2.id) !== null && _a214 !== void 0 ? _a214 : colIndex, colIndex: colIndex + colIndexOffset, isSelected: selectionType2 === "group" && !!(loaderSelectionProps === null || loaderSelectionProps === void 0 ? void 0 : loaderSelectionProps.checked), isRowHeader: colIndex === 0, level: row.level, item: row.item, trackBy, counter: loaderCounter }, loaderContent);
+                          return import_react293.default.createElement(TableLoaderCell, { key: getColumnKey(column2, colIndex), ...sharedCellProps, wrapLines: false, columnId: (_a214 = column2.id) !== null && _a214 !== void 0 ? _a214 : colIndex, colIndex: colIndex + colIndexOffset, isSelected: selectionType2 === "group" && !!(loaderSelectionProps === null || loaderSelectionProps === void 0 ? void 0 : loaderSelectionProps.checked), isRowHeader: colIndex === 0, level: row.level, item: row.item, trackBy, counter: loaderCounter }, loaderContent);
                         })
                       );
                     }),
-                    loading && skeleton && allItems.length > 0 && skeletonRowsCount - allItems.length > 0 && import_react291.default.createElement(SkeletonRows, { count: skeletonRowsCount - allItems.length, totalColumnsCount, loadingText, hasSelection, hasFooter, stickyState, tableRole, ariaLabels, cellVerticalAlign, computedVariant, visibleColumnDefinitions, wrapLines, resizableColumns, colIndexOffset, renderCell: skeleton === null || skeleton === void 0 ? void 0 : skeleton.renderCell })
+                    loading && skeleton && allItems.length > 0 && skeletonRowsCount - allItems.length > 0 && import_react293.default.createElement(SkeletonRows, { count: skeletonRowsCount - allItems.length, totalColumnsCount, loadingText, hasSelection, hasFooter, stickyState, tableRole, ariaLabels, cellVerticalAlign, computedVariant, visibleColumnDefinitions, wrapLines, resizableColumns, colIndexOffset, renderCell: skeleton === null || skeleton === void 0 ? void 0 : skeleton.renderCell })
                   )
                 )
               ),
-              resizableColumns && import_react291.default.createElement(ResizeTracker, null)
+              resizableColumns && import_react293.default.createElement(ResizeTracker, null)
             ),
-            import_react291.default.createElement(sticky_scrollbar_default, { ref: scrollbarRef, wrapperRef: wrapperRefObject, tableRef: tableRefObject, onScroll: handleScroll, hasStickyColumns })
+            import_react293.default.createElement(sticky_scrollbar_default, { ref: scrollbarRef, wrapperRef: wrapperRefObject, tableRef: tableRefObject, onScroll: handleScroll, hasStickyColumns })
           )
         )
       )
@@ -337109,19 +337806,19 @@ ${isHandDrawn ? "" : `
       // Reset the shared cell contexts to known defaults: the extracted cell substrate reads column
       // layout and row variant from context, so the existing Table pins them here (it drives its own
       // selection/striping paint directly, not via the atomic row-variant context).
-      import_react291.default.createElement(TableContextProvider, { value: defaultTableContext }, tableContent)
+      import_react293.default.createElement(TableContextProvider, { value: defaultTableContext }, tableContent)
     );
   });
   var internal_default17 = InternalTable;
 
   // node_modules/@cloudscape-design/components/side-navigation/index.js
-  var import_react294 = __toESM(require_react());
+  var import_react296 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/side-navigation/implementation.js
-  var import_react293 = __toESM(require_react());
+  var import_react295 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/side-navigation/parts.js
-  var import_react292 = __toESM(require_react());
+  var import_react294 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/side-navigation/util.js
   function hasActiveLink(items, activeHref) {
@@ -337210,13 +337907,13 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/side-navigation/analytics-metadata/styles.css.js
-  var styles_css_default112 = {
+  var styles_css_default114 = {
     "header-link-text": "awsui_header-link-text_eymn4_rug8v_5",
     "link-text": "awsui_link-text_eymn4_rug8v_6"
   };
 
   // node_modules/@cloudscape-design/components/side-navigation/styles.css.js
-  var styles_css_default113 = {
+  var styles_css_default115 = {
     "root": "awsui_root_l0dv0_ocrma_10",
     "with-toolbar": "awsui_with-toolbar_l0dv0_ocrma_44",
     "header": "awsui_header_l0dv0_ocrma_48",
@@ -337285,7 +337982,7 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/side-navigation/test-classes/styles.css.js
-  var styles_css_default114 = {
+  var styles_css_default116 = {
     "info": "awsui_info_1fhsi_16fog_5",
     "item-icon": "awsui_item-icon_1fhsi_16fog_9"
   };
@@ -337293,7 +337990,7 @@ ${isHandDrawn ? "" : `
   // node_modules/@cloudscape-design/components/side-navigation/parts.js
   function Header3({ definition, activeHref, fireFollow, collapsed }) {
     checkSafeUrl("SideNavigation", definition.href);
-    const onClick = (0, import_react292.useCallback)((event3) => {
+    const onClick = (0, import_react294.useCallback)((event3) => {
       if (isPlainLeftClick(event3)) {
         fireFollow(definition, event3);
       }
@@ -337301,30 +337998,30 @@ ${isHandDrawn ? "" : `
     const clickActionAnalyticsMetadata = {
       action: "click",
       detail: {
-        label: `.${styles_css_default112["header-link-text"]}`,
+        label: `.${styles_css_default114["header-link-text"]}`,
         external: "false",
         href: definition.href,
         position: "header"
       }
     };
-    return import_react292.default.createElement(
-      import_react292.default.Fragment,
+    return import_react294.default.createElement(
+      import_react294.default.Fragment,
       null,
-      !collapsed && import_react292.default.createElement(
+      !collapsed && import_react294.default.createElement(
         "h2",
-        { className: styles_css_default113.header },
-        import_react292.default.createElement(
+        { className: styles_css_default115.header },
+        import_react294.default.createElement(
           "a",
-          { href: definition.href, className: clsx_m_default(styles_css_default113["header-link"], { [styles_css_default113["header-link--has-logo"]]: !!definition.logo }), "aria-current": definition.href === activeHref ? "page" : void 0, onClick, ...getAnalyticsMetadataAttribute(clickActionAnalyticsMetadata) },
-          definition.logo && (definition.logo.svg ? import_react292.default.createElement("span", { className: clsx_m_default(styles_css_default113["header-logo"], {
-            [styles_css_default113["header-logo--stretched"]]: !definition.text
-          }) }, definition.logo.svg) : import_react292.default.createElement("img", { className: clsx_m_default(styles_css_default113["header-logo"], {
-            [styles_css_default113["header-logo--stretched"]]: !definition.text
+          { href: definition.href, className: clsx_m_default(styles_css_default115["header-link"], { [styles_css_default115["header-link--has-logo"]]: !!definition.logo }), "aria-current": definition.href === activeHref ? "page" : void 0, onClick, ...getAnalyticsMetadataAttribute(clickActionAnalyticsMetadata) },
+          definition.logo && (definition.logo.svg ? import_react294.default.createElement("span", { className: clsx_m_default(styles_css_default115["header-logo"], {
+            [styles_css_default115["header-logo--stretched"]]: !definition.text
+          }) }, definition.logo.svg) : import_react294.default.createElement("img", { className: clsx_m_default(styles_css_default115["header-logo"], {
+            [styles_css_default115["header-logo--stretched"]]: !definition.text
           }), src: definition.logo.src, alt: definition.logo.alt })),
-          import_react292.default.createElement("span", { className: clsx_m_default(styles_css_default113["header-link-text"], styles_css_default112["header-link-text"]) }, definition.text)
+          import_react294.default.createElement("span", { className: clsx_m_default(styles_css_default115["header-link-text"], styles_css_default114["header-link-text"]) }, definition.text)
         )
       ),
-      !collapsed && import_react292.default.createElement(Divider2, { isPresentational: true, variant: "header" })
+      !collapsed && import_react294.default.createElement(Divider2, { isPresentational: true, variant: "header" })
     );
   }
   function NavigationItemsList({ items, variant, activeHref, fireChange, fireFollow, position: position5 = "", collapsed, withIcons, ariaLabel, activeTooltip, setActiveTooltip }) {
@@ -337341,10 +338038,10 @@ ${isHandDrawn ? "" : `
       function pushDivider() {
         lists.push({
           listVariant: variant,
-          element: import_react292.default.createElement(
+          element: import_react294.default.createElement(
             "div",
-            { "data-itemid": `item-${itemid}`, className: clsx_m_default(collapsed && styles_css_default113["list-item--group"]) },
-            import_react292.default.createElement(Divider2, { variant: "default", collapsed })
+            { "data-itemid": `item-${itemid}`, className: clsx_m_default(collapsed && styles_css_default115["list-item--group"]) },
+            import_react294.default.createElement(Divider2, { variant: "default", collapsed })
           )
         });
         currentListIndex = lists.push({
@@ -337362,50 +338059,50 @@ ${isHandDrawn ? "" : `
         }
         case "link": {
           (_a213 = lists[currentListIndex].items) === null || _a213 === void 0 ? void 0 : _a213.push({
-            element: import_react292.default.createElement(
+            element: import_react294.default.createElement(
               "li",
-              { key: index2, "data-itemid": `item-${itemid}`, className: clsx_m_default(styles_css_default113["list-item"], collapsed && styles_css_default113["list-item--collapsed"]) },
-              import_react292.default.createElement(Link2, { definition: item, activeHref, fireChange, fireFollow, position: itemPosition, collapsed, activeTooltip, setActiveTooltip })
+              { key: index2, "data-itemid": `item-${itemid}`, className: clsx_m_default(styles_css_default115["list-item"], collapsed && styles_css_default115["list-item--collapsed"]) },
+              import_react294.default.createElement(Link2, { definition: item, activeHref, fireChange, fireFollow, position: itemPosition, collapsed, activeTooltip, setActiveTooltip })
             )
           });
           return;
         }
         case "section": {
           (_b = lists[currentListIndex].items) === null || _b === void 0 ? void 0 : _b.push({
-            element: import_react292.default.createElement(
+            element: import_react294.default.createElement(
               "li",
-              { key: index2, "data-itemid": `item-${itemid}`, className: clsx_m_default(styles_css_default113["list-item"], collapsed && styles_css_default113["list-item--collapsed"], collapsed && styles_css_default113["list-item--group"]) },
-              import_react292.default.createElement(Section2, { definition: item, activeHref, variant, fireChange, fireFollow, position: itemPosition, collapsed, withIcons, activeTooltip, setActiveTooltip })
+              { key: index2, "data-itemid": `item-${itemid}`, className: clsx_m_default(styles_css_default115["list-item"], collapsed && styles_css_default115["list-item--collapsed"], collapsed && styles_css_default115["list-item--group"]) },
+              import_react294.default.createElement(Section2, { definition: item, activeHref, variant, fireChange, fireFollow, position: itemPosition, collapsed, withIcons, activeTooltip, setActiveTooltip })
             )
           });
           return;
         }
         case "section-group": {
           (_c = lists[currentListIndex].items) === null || _c === void 0 ? void 0 : _c.push({
-            element: import_react292.default.createElement(
+            element: import_react294.default.createElement(
               "li",
-              { key: index2, "data-itemid": `item-${itemid}`, className: clsx_m_default(styles_css_default113["list-item"], collapsed && styles_css_default113["list-item--collapsed"], collapsed && styles_css_default113["list-item--group"]) },
-              import_react292.default.createElement(SectionGroup, { definition: item, activeHref, fireChange, fireFollow, position: itemPosition, collapsed, withIcons, activeTooltip, setActiveTooltip })
+              { key: index2, "data-itemid": `item-${itemid}`, className: clsx_m_default(styles_css_default115["list-item"], collapsed && styles_css_default115["list-item--collapsed"], collapsed && styles_css_default115["list-item--group"]) },
+              import_react294.default.createElement(SectionGroup, { definition: item, activeHref, fireChange, fireFollow, position: itemPosition, collapsed, withIcons, activeTooltip, setActiveTooltip })
             )
           });
           return;
         }
         case "link-group": {
           (_d = lists[currentListIndex].items) === null || _d === void 0 ? void 0 : _d.push({
-            element: import_react292.default.createElement(
+            element: import_react294.default.createElement(
               "li",
-              { key: index2, "data-itemid": `item-${itemid}`, className: clsx_m_default(styles_css_default113["list-item"], collapsed && styles_css_default113["list-item--collapsed"], collapsed && styles_css_default113["list-item--group"]) },
-              import_react292.default.createElement(LinkGroup, { definition: item, activeHref, fireChange, fireFollow, position: itemPosition, collapsed, withIcons, activeTooltip, setActiveTooltip })
+              { key: index2, "data-itemid": `item-${itemid}`, className: clsx_m_default(styles_css_default115["list-item"], collapsed && styles_css_default115["list-item--collapsed"], collapsed && styles_css_default115["list-item--group"]) },
+              import_react294.default.createElement(LinkGroup, { definition: item, activeHref, fireChange, fireFollow, position: itemPosition, collapsed, withIcons, activeTooltip, setActiveTooltip })
             )
           });
           return;
         }
         case "expandable-link-group": {
           (_e2 = lists[currentListIndex].items) === null || _e2 === void 0 ? void 0 : _e2.push({
-            element: import_react292.default.createElement(
+            element: import_react294.default.createElement(
               "li",
-              { key: index2, "data-itemid": `item-${itemid}`, className: clsx_m_default(styles_css_default113["list-item"], collapsed && styles_css_default113["list-item--collapsed"], collapsed && styles_css_default113["list-item--group"]) },
-              import_react292.default.createElement(ExpandableLinkGroup, { definition: item, activeHref, fireChange, fireFollow, variant, position: itemPosition, collapsed, withIcons, activeTooltip, setActiveTooltip })
+              { key: index2, "data-itemid": `item-${itemid}`, className: clsx_m_default(styles_css_default115["list-item"], collapsed && styles_css_default115["list-item--collapsed"], collapsed && styles_css_default115["list-item--group"]) },
+              import_react294.default.createElement(ExpandableLinkGroup, { definition: item, activeHref, fireChange, fireFollow, variant, position: itemPosition, collapsed, withIcons, activeTooltip, setActiveTooltip })
             )
           });
           return;
@@ -337420,33 +338117,33 @@ ${isHandDrawn ? "" : `
       const nextVisible = lists.slice(index2 + 1).find((l4) => !l4.items || l4.items.length > 0);
       return (!prevVisible || prevVisible.items !== void 0 && prevVisible.items.length > 0) && nextVisible !== void 0 && (nextVisible.items === void 0 || nextVisible.items.length > 0);
     }) : lists;
-    return import_react292.default.createElement(import_react292.default.Fragment, null, filteredLists.map((list, index2) => {
+    return import_react294.default.createElement(import_react294.default.Fragment, null, filteredLists.map((list, index2) => {
       if (!list.items || list.items.length === 0) {
-        return import_react292.default.createElement("div", { key: `hr-${index2}`, className: clsx_m_default(styles_css_default113.list, styles_css_default113[`list-variant-${variant}`], {
-          [styles_css_default113["list-variant-root--first"]]: list.listVariant === "root" && index2 === 0,
-          [styles_css_default113[`list-variant-${list.listVariant}--collapsed`]]: collapsed,
-          [styles_css_default113["list--with-icons"]]: withIcons
+        return import_react294.default.createElement("div", { key: `hr-${index2}`, className: clsx_m_default(styles_css_default115.list, styles_css_default115[`list-variant-${variant}`], {
+          [styles_css_default115["list-variant-root--first"]]: list.listVariant === "root" && index2 === 0,
+          [styles_css_default115[`list-variant-${list.listVariant}--collapsed`]]: collapsed,
+          [styles_css_default115["list--with-icons"]]: withIcons
         }) }, list.element);
       } else {
-        return import_react292.default.createElement("ul", { key: `list-${index2}`, className: clsx_m_default(styles_css_default113.list, styles_css_default113[`list-variant-${list.listVariant}`], {
-          [styles_css_default113["list-variant-root--first"]]: list.listVariant === "root" && index2 === 0,
-          [styles_css_default113[`list-variant-${list.listVariant}--collapsed`]]: collapsed,
-          [styles_css_default113["list--with-icons"]]: withIcons
+        return import_react294.default.createElement("ul", { key: `list-${index2}`, className: clsx_m_default(styles_css_default115.list, styles_css_default115[`list-variant-${list.listVariant}`], {
+          [styles_css_default115["list-variant-root--first"]]: list.listVariant === "root" && index2 === 0,
+          [styles_css_default115[`list-variant-${list.listVariant}--collapsed`]]: collapsed,
+          [styles_css_default115["list--with-icons"]]: withIcons
         }), "aria-label": ariaLabel }, list.items.map((item) => item.element));
       }
     }));
   }
   function Divider2({ variant = "default", isPresentational = false, collapsed }) {
-    return import_react292.default.createElement("hr", { className: clsx_m_default(styles_css_default113.divider, styles_css_default113[`divider-${variant}`], collapsed && styles_css_default113["divider--collapsed"]), role: isPresentational ? "presentation" : void 0 });
+    return import_react294.default.createElement("hr", { className: clsx_m_default(styles_css_default115.divider, styles_css_default115[`divider-${variant}`], collapsed && styles_css_default115["divider--collapsed"]), role: isPresentational ? "presentation" : void 0 });
   }
-  var ItemIcon = import_react292.default.forwardRef(function ItemIcon2({ icon: icon2, collapsed, className, ...rest }, ref) {
+  var ItemIcon = import_react294.default.forwardRef(function ItemIcon2({ icon: icon2, collapsed, className, ...rest }, ref) {
     if (!icon2) {
       return null;
     }
-    return import_react292.default.createElement("span", { ref, className: clsx_m_default(styles_css_default113["item-icon"], styles_css_default114["item-icon"], collapsed && styles_css_default113["item-icon--collapsed"], className), "data-awsui-motion-target": "", ...rest }, icon2);
+    return import_react294.default.createElement("span", { ref, className: clsx_m_default(styles_css_default115["item-icon"], styles_css_default116["item-icon"], collapsed && styles_css_default115["item-icon--collapsed"], className), "data-awsui-motion-target": "", ...rest }, icon2);
   });
   function useCollapsedTooltip({ label, position: position5, activeTooltip, setActiveTooltip }) {
-    const triggerRef = (0, import_react292.useRef)(null);
+    const triggerRef = (0, import_react294.useRef)(null);
     const id38 = position5 !== null && position5 !== void 0 ? position5 : "";
     const show2 = activeTooltip === id38;
     const claim = () => setActiveTooltip === null || setActiveTooltip === void 0 ? void 0 : setActiveTooltip(id38);
@@ -337461,14 +338158,14 @@ ${isHandDrawn ? "" : `
       onMouseEnter: claim,
       onMouseLeave: release
     };
-    const tooltip = show2 ? import_react292.default.createElement(InternalTooltip, { getTrack: () => triggerRef.current, content: label, position: "right", onEscape: release }) : null;
+    const tooltip = show2 ? import_react294.default.createElement(InternalTooltip, { getTrack: () => triggerRef.current, content: label, position: "right", onEscape: release }) : null;
     return { triggerRef, triggerProps, tooltip };
   }
   function Link2({ definition, activeHref, fireFollow, position: position5, collapsed, activeTooltip, setActiveTooltip }) {
     checkSafeUrl("SideNavigation", definition.href);
     const isActive = definition.href === activeHref;
     const i18n = useInternalI18n("link");
-    const linkRef = (0, import_react292.useRef)(null);
+    const linkRef = (0, import_react294.useRef)(null);
     const collapsedTooltip = useCollapsedTooltip({
       label: definition.text,
       position: position5,
@@ -337476,18 +338173,18 @@ ${isHandDrawn ? "" : `
       setActiveTooltip
     });
     const isIconLess = !definition.icon;
-    (0, import_react292.useEffect)(() => {
+    (0, import_react294.useEffect)(() => {
       if (linkRef.current) {
         linkRef.current.inert = !!(collapsed && isIconLess);
       }
     }, [collapsed, isIconLess]);
-    const mergedRef = (0, import_react292.useCallback)((node2) => {
+    const mergedRef = (0, import_react294.useCallback)((node2) => {
       linkRef.current = node2;
       if (collapsed) {
         collapsedTooltip.triggerRef.current = node2;
       }
     }, [collapsed, collapsedTooltip.triggerRef]);
-    const onClick = (0, import_react292.useCallback)((event3) => {
+    const onClick = (0, import_react294.useCallback)((event3) => {
       if (isPlainLeftClick(event3)) {
         fireFollow(definition, event3);
       }
@@ -337495,7 +338192,7 @@ ${isHandDrawn ? "" : `
     const clickActionAnalyticsMetadata = {
       action: "click",
       detail: {
-        label: `.${styles_css_default112["link-text"]}`,
+        label: `.${styles_css_default114["link-text"]}`,
         external: `${!!definition.external}`,
         href: definition.href,
         position: position5
@@ -337503,50 +338200,50 @@ ${isHandDrawn ? "" : `
     };
     const renderedExternalIconAriaLabel = i18n("externalIconAriaLabel", definition.externalIconAriaLabel);
     const showInfo = !collapsed && definition.info;
-    const internalLink = import_react292.default.createElement(
+    const internalLink = import_react294.default.createElement(
       "a",
-      { ref: mergedRef, href: definition.href, className: clsx_m_default(styles_css_default113.link, {
-        [styles_css_default113["link-active"]]: isActive,
-        [styles_css_default113["link--collapsed"]]: collapsed
+      { ref: mergedRef, href: definition.href, className: clsx_m_default(styles_css_default115.link, {
+        [styles_css_default115["link-active"]]: isActive,
+        [styles_css_default115["link--collapsed"]]: collapsed
       }), target: definition.external ? "_blank" : void 0, rel: definition.external ? "noopener noreferrer" : void 0, "aria-current": definition.href === activeHref ? "page" : void 0, "aria-label": collapsed ? definition.text : void 0, ...definition.external || definition.icon ? { "data-awsui-motion-trigger": "hover" } : {}, onClick, ...collapsed ? collapsedTooltip.triggerProps : {}, ...getAnalyticsMetadataAttribute(clickActionAnalyticsMetadata) },
-      import_react292.default.createElement(ItemIcon, { icon: definition.icon, collapsed, "aria-hidden": collapsed ? true : void 0 }),
-      import_react292.default.createElement(
+      import_react294.default.createElement(ItemIcon, { icon: definition.icon, collapsed, "aria-hidden": collapsed ? true : void 0 }),
+      import_react294.default.createElement(
         "span",
-        { className: clsx_m_default(styles_css_default113["link-text-wrapper"], collapsed && styles_css_default113["link-text-wrapper--collapsed"]), "aria-hidden": collapsed ? true : void 0 },
-        import_react292.default.createElement(
+        { className: clsx_m_default(styles_css_default115["link-text-wrapper"], collapsed && styles_css_default115["link-text-wrapper--collapsed"]), "aria-hidden": collapsed ? true : void 0 },
+        import_react294.default.createElement(
           "span",
-          { className: clsx_m_default(styles_css_default113["link-text-wrapper-content"]) },
-          import_react292.default.createElement("span", { className: styles_css_default112["link-text"] }, definition.text),
-          definition.external && import_react292.default.createElement(
+          { className: clsx_m_default(styles_css_default115["link-text-wrapper-content"]) },
+          import_react294.default.createElement("span", { className: styles_css_default114["link-text"] }, definition.text),
+          definition.external && import_react294.default.createElement(
             "span",
             { "aria-label": renderedExternalIconAriaLabel, role: renderedExternalIconAriaLabel ? "img" : void 0 },
-            import_react292.default.createElement(internal_default, { name: "external", className: styles_css_default113["external-icon"], nativeAttributes: { "data-awsui-motion-target": "" } })
+            import_react294.default.createElement(internal_default, { name: "external", className: styles_css_default115["external-icon"], nativeAttributes: { "data-awsui-motion-target": "" } })
           )
         )
       ),
       collapsed && collapsedTooltip.tooltip
     );
-    return showInfo ? import_react292.default.createElement(
+    return showInfo ? import_react294.default.createElement(
       "div",
-      { className: styles_css_default113["list-item--link-with-info"] },
+      { className: styles_css_default115["list-item--link-with-info"] },
       internalLink,
-      import_react292.default.createElement("span", { className: clsx_m_default(styles_css_default113.info, styles_css_default114.info) }, definition.info)
+      import_react294.default.createElement("span", { className: clsx_m_default(styles_css_default115.info, styles_css_default116.info) }, definition.info)
     ) : internalLink;
   }
   function Section2({ definition, activeHref, fireFollow, fireChange, variant, position: position5, collapsed, withIcons, activeTooltip, setActiveTooltip }) {
     var _a213;
-    const [expanded, setExpanded] = (0, import_react292.useState)((_a213 = definition.defaultExpanded) !== null && _a213 !== void 0 ? _a213 : true);
+    const [expanded, setExpanded] = (0, import_react294.useState)((_a213 = definition.defaultExpanded) !== null && _a213 !== void 0 ? _a213 : true);
     const isVisualRefresh = useVisualRefresh();
-    const sectionRef = (0, import_react292.useRef)(null);
-    const onExpandedChange = (0, import_react292.useCallback)((e3) => {
+    const sectionRef = (0, import_react294.useRef)(null);
+    const onExpandedChange = (0, import_react294.useCallback)((e3) => {
       fireChange(definition, e3.detail.expanded);
       setExpanded(e3.detail.expanded);
     }, [definition, fireChange]);
-    (0, import_react292.useEffect)(() => {
+    (0, import_react294.useEffect)(() => {
       var _a214;
       setExpanded((_a214 = definition.defaultExpanded) !== null && _a214 !== void 0 ? _a214 : true);
     }, [definition]);
-    (0, import_react292.useEffect)(() => {
+    (0, import_react294.useEffect)(() => {
       const el = sectionRef.current;
       if (el) {
         el.inert = false;
@@ -337557,90 +338254,90 @@ ${isHandDrawn ? "" : `
       }
     }, [collapsed]);
     const isInSectionGroup = variant === "section-group";
-    return import_react292.default.createElement(
+    return import_react294.default.createElement(
       InternalExpandableSection,
-      { variant: "footer", expanded: collapsed ? true : expanded, onChange: onExpandedChange, disableContentPaddings: true, __internalRootRef: sectionRef, className: clsx_m_default(styles_css_default113.section, isInSectionGroup && styles_css_default113["section--no-ident"], withIcons && styles_css_default113["section--expand-icon-end"], withIcons && !collapsed && definition.info && styles_css_default113["section--expand-icon-end-with-info"], isVisualRefresh && styles_css_default113.refresh, collapsed && styles_css_default113["section--collapsed"]), headerText: import_react292.default.createElement("span", { className: clsx_m_default(styles_css_default113["section-header"], styles_css_default113["label-text"], collapsed && styles_css_default113["label-text--collapsed"]), "aria-hidden": collapsed ? true : void 0 }, definition.text), __expandIconPosition: withIcons ? "end" : "start", __headerEndInfo: !collapsed && definition.info ? import_react292.default.createElement("span", { className: clsx_m_default(styles_css_default113.info, styles_css_default114.info) }, definition.info) : void 0 },
-      import_react292.default.createElement(NavigationItemsList, { variant: "section", items: definition.items, fireFollow, fireChange, activeHref, position: position5, collapsed, withIcons, ariaLabel: collapsed ? definition.text : void 0, activeTooltip, setActiveTooltip })
+      { variant: "footer", expanded: collapsed ? true : expanded, onChange: onExpandedChange, disableContentPaddings: true, __internalRootRef: sectionRef, className: clsx_m_default(styles_css_default115.section, isInSectionGroup && styles_css_default115["section--no-ident"], withIcons && styles_css_default115["section--expand-icon-end"], withIcons && !collapsed && definition.info && styles_css_default115["section--expand-icon-end-with-info"], isVisualRefresh && styles_css_default115.refresh, collapsed && styles_css_default115["section--collapsed"]), headerText: import_react294.default.createElement("span", { className: clsx_m_default(styles_css_default115["section-header"], styles_css_default115["label-text"], collapsed && styles_css_default115["label-text--collapsed"]), "aria-hidden": collapsed ? true : void 0 }, definition.text), __expandIconPosition: withIcons ? "end" : "start", __headerEndInfo: !collapsed && definition.info ? import_react294.default.createElement("span", { className: clsx_m_default(styles_css_default115.info, styles_css_default116.info) }, definition.info) : void 0 },
+      import_react294.default.createElement(NavigationItemsList, { variant: "section", items: definition.items, fireFollow, fireChange, activeHref, position: position5, collapsed, withIcons, ariaLabel: collapsed ? definition.text : void 0, activeTooltip, setActiveTooltip })
     );
   }
   function SectionGroup({ definition, activeHref, fireFollow, fireChange, position: position5, collapsed, withIcons, activeTooltip, setActiveTooltip }) {
     const isOneTheme = useOneTheme();
-    const sectionGroupRef = (0, import_react292.useRef)(null);
-    (0, import_react292.useEffect)(() => {
+    const sectionGroupRef = (0, import_react294.useRef)(null);
+    (0, import_react294.useEffect)(() => {
       if (sectionGroupRef.current) {
         sectionGroupRef.current.inert = false;
       }
     }, [collapsed]);
     const showInfo = !collapsed && definition.info;
-    const title2 = import_react292.default.createElement(
+    const title2 = import_react294.default.createElement(
       InternalBox,
-      { className: clsx_m_default(styles_css_default113["section-group-title"], collapsed && styles_css_default113["section-group-title--collapsed"]), variant: "h3", fontSize: isOneTheme ? "heading-s" : void 0 },
-      import_react292.default.createElement("span", { className: clsx_m_default(styles_css_default113["label-text"], collapsed && styles_css_default113["label-text--collapsed"]), "aria-hidden": collapsed ? true : void 0 }, definition.title)
+      { className: clsx_m_default(styles_css_default115["section-group-title"], collapsed && styles_css_default115["section-group-title--collapsed"]), variant: "h3", fontSize: isOneTheme ? "heading-s" : void 0 },
+      import_react294.default.createElement("span", { className: clsx_m_default(styles_css_default115["label-text"], collapsed && styles_css_default115["label-text--collapsed"]), "aria-hidden": collapsed ? true : void 0 }, definition.title)
     );
-    return import_react292.default.createElement(
+    return import_react294.default.createElement(
       "div",
-      { ref: sectionGroupRef, className: styles_css_default113["section-group"] },
-      definition.info ? import_react292.default.createElement(
+      { ref: sectionGroupRef, className: styles_css_default115["section-group"] },
+      definition.info ? import_react294.default.createElement(
         "div",
-        { className: styles_css_default113["list-item--link-with-info"] },
+        { className: styles_css_default115["list-item--link-with-info"] },
         title2,
-        showInfo && import_react292.default.createElement("span", { className: clsx_m_default(styles_css_default113.info, styles_css_default114.info) }, definition.info)
+        showInfo && import_react294.default.createElement("span", { className: clsx_m_default(styles_css_default115.info, styles_css_default116.info) }, definition.info)
       ) : title2,
-      import_react292.default.createElement(NavigationItemsList, { variant: "section-group", items: definition.items, fireFollow, fireChange, activeHref, position: position5, collapsed, withIcons, ariaLabel: collapsed ? definition.title : void 0, activeTooltip, setActiveTooltip })
+      import_react294.default.createElement(NavigationItemsList, { variant: "section-group", items: definition.items, fireFollow, fireChange, activeHref, position: position5, collapsed, withIcons, ariaLabel: collapsed ? definition.title : void 0, activeTooltip, setActiveTooltip })
     );
   }
   function LinkGroup({ definition, activeHref, fireFollow, fireChange, position: position5, collapsed, withIcons, activeTooltip, setActiveTooltip }) {
     checkSafeUrl("SideNavigation", definition.href);
-    const childrenRef = (0, import_react292.useRef)(null);
+    const childrenRef = (0, import_react294.useRef)(null);
     const isOneTheme = useOneTheme();
-    (0, import_react292.useEffect)(() => {
+    (0, import_react294.useEffect)(() => {
       if (childrenRef.current) {
         childrenRef.current.inert = !!collapsed;
       }
     }, [collapsed]);
-    return import_react292.default.createElement(
-      import_react292.default.Fragment,
+    return import_react294.default.createElement(
+      import_react294.default.Fragment,
       null,
-      import_react292.default.createElement(Link2, { definition: {
+      import_react294.default.createElement(Link2, { definition: {
         type: "link",
         href: definition.href,
         text: definition.text,
         info: definition.info,
         icon: definition.icon
       }, fireFollow: (_3, event3) => fireFollow(definition, event3), fireChange, activeHref, position: position5, collapsed, activeTooltip, setActiveTooltip }),
-      import_react292.default.createElement(Transition4, { in: !collapsed, disabled: !isOneTheme }, (transitionState, transitionEventsRef, motionDisabled) => {
+      import_react294.default.createElement(Transition4, { in: !collapsed, disabled: !isOneTheme }, (transitionState, transitionEventsRef, motionDisabled) => {
         const childrenSettled = !collapsed && (motionDisabled || transitionState === "entered");
-        return import_react292.default.createElement(
+        return import_react294.default.createElement(
           "div",
-          { ref: transitionEventsRef, className: clsx_m_default(styles_css_default113["link-group-children"], collapsed && styles_css_default113["link-group-children--collapsed"]) },
-          import_react292.default.createElement(
+          { ref: transitionEventsRef, className: clsx_m_default(styles_css_default115["link-group-children"], collapsed && styles_css_default115["link-group-children--collapsed"]) },
+          import_react294.default.createElement(
             "div",
-            { ref: childrenRef, className: clsx_m_default(styles_css_default113["link-group-children-inner"], !collapsed && styles_css_default113["link-group-children-inner--expanded"], childrenSettled && styles_css_default113["link-group-children-inner--settled"]) },
-            import_react292.default.createElement(NavigationItemsList, { variant: "link-group", items: definition.items, fireFollow, fireChange, activeHref, position: position5, collapsed, withIcons, ariaLabel: collapsed ? definition.text : void 0, activeTooltip, setActiveTooltip })
+            { ref: childrenRef, className: clsx_m_default(styles_css_default115["link-group-children-inner"], !collapsed && styles_css_default115["link-group-children-inner--expanded"], childrenSettled && styles_css_default115["link-group-children-inner--settled"]) },
+            import_react294.default.createElement(NavigationItemsList, { variant: "link-group", items: definition.items, fireFollow, fireChange, activeHref, position: position5, collapsed, withIcons, ariaLabel: collapsed ? definition.text : void 0, activeTooltip, setActiveTooltip })
           )
         );
       })
     );
   }
   function ExpandableLinkGroup({ definition, fireFollow, fireChange, activeHref, variant, position: position5, collapsed, withIcons, activeTooltip, setActiveTooltip }) {
-    const containsActiveLink = (0, import_react292.useMemo)(() => {
+    const containsActiveLink = (0, import_react294.useMemo)(() => {
       return activeHref ? hasActiveLink(definition.items, activeHref) : false;
     }, [activeHref, definition.items]);
-    const [expanded, setExpanded] = (0, import_react292.useState)(() => {
+    const [expanded, setExpanded] = (0, import_react294.useState)(() => {
       var _a213;
       return (_a213 = definition.defaultExpanded) !== null && _a213 !== void 0 ? _a213 : definition.href === activeHref || containsActiveLink;
     });
-    const [userExpanded, setUserExpanded] = (0, import_react292.useState)();
-    (0, import_react292.useEffect)(() => setUserExpanded(void 0), [definition]);
-    (0, import_react292.useEffect)(() => {
+    const [userExpanded, setUserExpanded] = (0, import_react294.useState)();
+    (0, import_react294.useEffect)(() => setUserExpanded(void 0), [definition]);
+    (0, import_react294.useEffect)(() => {
       setExpanded(definition.href === activeHref || containsActiveLink);
     }, [definition.href, containsActiveLink, activeHref]);
-    (0, import_react292.useEffect)(() => {
+    (0, import_react294.useEffect)(() => {
       if (definition.defaultExpanded !== void 0) {
         setExpanded(definition.defaultExpanded);
       }
     }, [definition]);
-    const onExpandedChange = (0, import_react292.useCallback)((e3) => {
+    const onExpandedChange = (0, import_react294.useCallback)((e3) => {
       fireChange(definition, e3.detail.expanded);
       setUserExpanded(e3.detail.expanded);
     }, [definition, fireChange]);
@@ -337651,16 +338348,16 @@ ${isHandDrawn ? "" : `
         fireChange(definition, true);
       }
     };
-    return import_react292.default.createElement(
+    return import_react294.default.createElement(
       InternalExpandableSection,
-      { className: clsx_m_default(styles_css_default113["expandable-link-group"], variant === "section-group" && styles_css_default113["expandable-link-group--no-ident"], withIcons && styles_css_default113["expandable-link-group--expand-icon-end"], definition.href === activeHref && styles_css_default113["expandable-link-group--active"], collapsed && styles_css_default113["expandable-link-group--collapsed"]), variant: "navigation", expanded: collapsed ? false : userExpanded !== null && userExpanded !== void 0 ? userExpanded : expanded, onChange: onExpandedChange, disableContentPaddings: true, __disableHeaderPaddings: true, __expandIconPosition: withIcons ? "end" : "start", __hideExpandIcon: !!collapsed, headerAriaLabel: definition.info ? definition.text : void 0, headerText: import_react292.default.createElement(Link2, { definition: {
+      { className: clsx_m_default(styles_css_default115["expandable-link-group"], variant === "section-group" && styles_css_default115["expandable-link-group--no-ident"], withIcons && styles_css_default115["expandable-link-group--expand-icon-end"], definition.href === activeHref && styles_css_default115["expandable-link-group--active"], collapsed && styles_css_default115["expandable-link-group--collapsed"]), variant: "navigation", expanded: collapsed ? false : userExpanded !== null && userExpanded !== void 0 ? userExpanded : expanded, onChange: onExpandedChange, disableContentPaddings: true, __disableHeaderPaddings: true, __expandIconPosition: withIcons ? "end" : "start", __hideExpandIcon: !!collapsed, headerAriaLabel: definition.info ? definition.text : void 0, headerText: import_react294.default.createElement(Link2, { definition: {
         type: "link",
         href: definition.href,
         text: definition.text,
         info: definition.info,
         icon: definition.icon
       }, fireFollow: onHeaderFollow, fireChange, activeHref, position: position5, collapsed, activeTooltip, setActiveTooltip }) },
-      import_react292.default.createElement(NavigationItemsList, { variant: "expandable-link-group", items: definition.items, fireFollow, fireChange, activeHref, position: position5, collapsed, withIcons, activeTooltip, setActiveTooltip })
+      import_react294.default.createElement(NavigationItemsList, { variant: "expandable-link-group", items: definition.items, fireFollow, fireChange, activeHref, position: position5, collapsed, withIcons, activeTooltip, setActiveTooltip })
     );
   }
 
@@ -337668,29 +338365,29 @@ ${isHandDrawn ? "" : `
   function SideNavigationImplementation({ header, itemsControl, activeHref, items = [], onFollow, onChange, collapsed = false, __internalRootRef, ...props }) {
     const baseProps = getBaseProps(props);
     const isToolbar = useAppLayoutToolbarDesignEnabled();
-    const parentMap = (0, import_react293.useMemo)(() => generateExpandableItemsMapping(items), [items]);
-    const withIcons = (0, import_react293.useMemo)(() => hasNavigationIcons(items), [items]);
-    const [activeTooltip, setActiveTooltip] = (0, import_react293.useState)(null);
-    const listContainerRef = (0, import_react293.useRef)(null);
+    const parentMap = (0, import_react295.useMemo)(() => generateExpandableItemsMapping(items), [items]);
+    const withIcons = (0, import_react295.useMemo)(() => hasNavigationIcons(items), [items]);
+    const [activeTooltip, setActiveTooltip] = (0, import_react295.useState)(null);
+    const listContainerRef = (0, import_react295.useRef)(null);
     if (isDevelopment2) {
-      (0, import_react293.useEffect)(() => checkDuplicateHrefs(items), [items]);
-      (0, import_react293.useEffect)(() => checkCollapsedIconSupport(items, collapsed), [items, collapsed]);
+      (0, import_react295.useEffect)(() => checkDuplicateHrefs(items), [items]);
+      (0, import_react295.useEffect)(() => checkCollapsedIconSupport(items, collapsed), [items, collapsed]);
     }
-    const onChangeHandler = (0, import_react293.useCallback)((item, expanded) => {
+    const onChangeHandler = (0, import_react295.useCallback)((item, expanded) => {
       fireNonCancelableEvent(onChange, { item, expanded, expandableParents: parentMap.get(item) });
     }, [onChange, parentMap]);
-    const onFollowHandler = (0, import_react293.useCallback)((item, sourceEvent) => {
+    const onFollowHandler = (0, import_react295.useCallback)((item, sourceEvent) => {
       fireCancelableEvent(onFollow, item, sourceEvent);
     }, [onFollow]);
-    return import_react293.default.createElement(
+    return import_react295.default.createElement(
       "div",
-      { ...baseProps, className: clsx_m_default(styles_css_default113.root, baseProps.className, isToolbar && styles_css_default113["with-toolbar"], collapsed && styles_css_default113["root--collapsed"]), ref: __internalRootRef },
-      header && import_react293.default.createElement(Header3, { definition: header, activeHref, fireChange: onChangeHandler, fireFollow: onFollowHandler, collapsed }),
-      !collapsed && itemsControl && import_react293.default.createElement("div", { className: styles_css_default113["items-control"] }, itemsControl),
-      items && import_react293.default.createElement(
+      { ...baseProps, className: clsx_m_default(styles_css_default115.root, baseProps.className, isToolbar && styles_css_default115["with-toolbar"], collapsed && styles_css_default115["root--collapsed"]), ref: __internalRootRef },
+      header && import_react295.default.createElement(Header3, { definition: header, activeHref, fireChange: onChangeHandler, fireFollow: onFollowHandler, collapsed }),
+      !collapsed && itemsControl && import_react295.default.createElement("div", { className: styles_css_default115["items-control"] }, itemsControl),
+      items && import_react295.default.createElement(
         "div",
-        { ref: listContainerRef, className: styles_css_default113["list-container"] },
-        import_react293.default.createElement(NavigationItemsList, { variant: "root", items, fireFollow: onFollowHandler, fireChange: onChangeHandler, activeHref, collapsed, withIcons, activeTooltip, setActiveTooltip })
+        { ref: listContainerRef, className: styles_css_default115["list-container"] },
+        import_react295.default.createElement(NavigationItemsList, { variant: "root", items, fireFollow: onFollowHandler, fireChange: onChangeHandler, activeHref, collapsed, withIcons, activeTooltip, setActiveTooltip })
       )
     );
   }
@@ -337706,38 +338403,38 @@ ${isHandDrawn ? "" : `
     });
     const componentAnalyticMetadata = {
       name: "awsui.SideNavigation",
-      label: `.${styles_css_default112["header-link-text"]}`,
+      label: `.${styles_css_default114["header-link-text"]}`,
       properties: {
         activeHref: props.activeHref || ""
       }
     };
-    return import_react294.default.createElement(InternalSideNavigation, { ...props, ...internalProps, items, collapsed, ...getAnalyticsMetadataAttribute({ component: componentAnalyticMetadata }) });
+    return import_react296.default.createElement(InternalSideNavigation, { ...props, ...internalProps, items, collapsed, ...getAnalyticsMetadataAttribute({ component: componentAnalyticMetadata }) });
   }
   applyDisplayName(SideNavigation, "SideNavigation");
 
   // node_modules/@cloudscape-design/components/space-between/index.js
-  var import_react295 = __toESM(require_react());
+  var import_react297 = __toESM(require_react());
   function SpaceBetween({ direction: direction2 = "vertical", ...props }) {
     const baseComponentProps = useBaseComponent("SpaceBetween", {
       props: { alignItems: props.alignItems, direction: direction2, size: props.size }
     });
-    return import_react295.default.createElement(internal_default5, { direction: direction2, ...props, ...baseComponentProps });
+    return import_react297.default.createElement(internal_default5, { direction: direction2, ...props, ...baseComponentProps });
   }
   applyDisplayName(SpaceBetween, "SpaceBetween");
 
   // node_modules/@cloudscape-design/components/status-indicator/index.js
-  var import_react296 = __toESM(require_react());
+  var import_react298 = __toESM(require_react());
   function StatusIndicator2({ type: type3 = "success", wrapText: wrapText3 = true, ...props }) {
     const baseComponentProps = useBaseComponent("StatusIndicator", {
       props: { colorOverride: props.colorOverride, type: type3, wrapText: wrapText3 }
     });
-    return import_react296.default.createElement(StatusIndicator, { type: type3, wrapText: wrapText3, ...props, ...baseComponentProps });
+    return import_react298.default.createElement(StatusIndicator, { type: type3, wrapText: wrapText3, ...props, ...baseComponentProps });
   }
   applyDisplayName(StatusIndicator2, "StatusIndicator");
 
   // node_modules/@cloudscape-design/components/table/index.js
-  var import_react297 = __toESM(require_react());
-  var Table = import_react297.default.forwardRef(({ items = [], selectedItems = [], variant = "container", contentDensity = "comfortable", cellVerticalAlign = "middle", firstIndex = 1, ...props }, ref) => {
+  var import_react299 = __toESM(require_react());
+  var Table = import_react299.default.forwardRef(({ items = [], selectedItems = [], variant = "container", contentDensity = "comfortable", cellVerticalAlign = "middle", firstIndex = 1, ...props }, ref) => {
     var _a213, _b, _c, _d, _e2, _f, _g, _h, _j, _k, _l;
     const analyticsMetadata = getAnalyticsMetadataProps(props);
     const hasHiddenColumns = props.visibleColumns && props.visibleColumns.length < props.columnDefinitions.length || ((_a213 = props.columnDisplay) === null || _a213 === void 0 ? void 0 : _a213.some((col) => col.type !== "group" && !col.visible));
@@ -337822,19 +338519,19 @@ ${isHandDrawn ? "" : `
       tableHasStickyColumns: hasStickyColumns
     };
     if (variant === "borderless" || variant === "embedded") {
-      return import_react297.default.createElement(
+      return import_react299.default.createElement(
         CollectionPreferencesMetadata.Provider,
         { value: collectionPreferencesMetadata },
-        import_react297.default.createElement(internal_default17, { ...tableProps })
+        import_react299.default.createElement(internal_default17, { ...tableProps })
       );
     }
-    return import_react297.default.createElement(
+    return import_react299.default.createElement(
       CollectionPreferencesMetadata.Provider,
       { value: collectionPreferencesMetadata },
-      import_react297.default.createElement(
+      import_react299.default.createElement(
         AnalyticsFunnelSubStep,
         null,
-        import_react297.default.createElement(InternalTableAsSubstep, { ...tableProps })
+        import_react299.default.createElement(InternalTableAsSubstep, { ...tableProps })
       )
     );
   });
@@ -337842,16 +338539,16 @@ ${isHandDrawn ? "" : `
   var table_default = Table;
 
   // node_modules/@cloudscape-design/components/top-navigation/index.js
-  var import_react308 = __toESM(require_react());
+  var import_react310 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/top-navigation/internal.js
-  var import_react307 = __toESM(require_react());
+  var import_react309 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/menu-dropdown/index.js
-  var import_react298 = __toESM(require_react());
+  var import_react300 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/menu-dropdown/styles.css.js
-  var styles_css_default115 = {
+  var styles_css_default117 = {
     "button": "awsui_button_m5h9f_v7yak_9",
     "expanded": "awsui_expanded_m5h9f_v7yak_61",
     "offset-right-none": "awsui_offset-right-none_m5h9f_v7yak_72",
@@ -337862,70 +338559,70 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/internal/components/menu-dropdown/index.js
-  var ButtonTrigger = import_react298.default.forwardRef(({ testUtilsClass, iconName, iconUrl, iconAlt, iconSvg, badge, ariaLabel, offsetRight, disabled, expanded, children: children2, onClick }, ref) => {
+  var ButtonTrigger = import_react300.default.forwardRef(({ testUtilsClass, iconName, iconUrl, iconAlt, iconSvg, badge, ariaLabel, offsetRight, disabled, expanded, children: children2, onClick }, ref) => {
     const hasIcon = iconName || iconUrl || iconSvg;
-    return import_react298.default.createElement(
+    return import_react300.default.createElement(
       "button",
-      { ref, type: "button", className: clsx_m_default(styles_css_default115.button, styles_css_default115[`offset-right-${offsetRight}`], testUtilsClass, {
-        [styles_css_default115.expanded]: expanded
+      { ref, type: "button", className: clsx_m_default(styles_css_default117.button, styles_css_default117[`offset-right-${offsetRight}`], testUtilsClass, {
+        [styles_css_default117.expanded]: expanded
       }), "aria-label": ariaLabel, "aria-expanded": !!expanded, "aria-haspopup": true, disabled, onClick: (event3) => {
         event3.preventDefault();
         onClick === null || onClick === void 0 ? void 0 : onClick();
       }, "data-awsui-motion-trigger": "hover", "data-awsui-motion-target": "" },
-      hasIcon && import_react298.default.createElement(internal_default, { className: styles_css_default115.icon, name: iconName, url: iconUrl, alt: iconAlt, svg: iconSvg, badge }),
-      children2 && import_react298.default.createElement("span", { className: styles_css_default115.text }, children2),
-      children2 && import_react298.default.createElement(internal_default, { name: "caret-down-filled", className: spinWhenOpen(styles_css_default32, "rotate", !!expanded) })
+      hasIcon && import_react300.default.createElement(internal_default, { className: styles_css_default117.icon, name: iconName, url: iconUrl, alt: iconAlt, svg: iconSvg, badge }),
+      children2 && import_react300.default.createElement("span", { className: styles_css_default117.text }, children2),
+      children2 && import_react300.default.createElement(internal_default, { name: "caret-down-filled", className: spinWhenOpen(styles_css_default32, "rotate", !!expanded) })
     );
   });
   var MenuDropdown = ({ iconName, iconUrl, iconAlt, iconSvg, badge, offsetRight, children: children2, ...props }) => {
     const baseProps = getBaseProps(props);
     const dropdownTrigger = ({ triggerRef, ariaLabel, isOpen, testUtilsClass, disabled, onClick }) => {
-      return import_react298.default.createElement(ButtonTrigger, { testUtilsClass, ref: triggerRef, disabled, expanded: isOpen, iconName, iconUrl, iconAlt, iconSvg, badge, ariaLabel, offsetRight, onClick }, children2);
+      return import_react300.default.createElement(ButtonTrigger, { testUtilsClass, ref: triggerRef, disabled, expanded: isOpen, iconName, iconUrl, iconAlt, iconSvg, badge, ariaLabel, offsetRight, onClick }, children2);
     };
-    return import_react298.default.createElement(internal_default9, { ...baseProps, ...props, variant: "navigation", customTriggerBuilder: dropdownTrigger, preferCenter: true });
+    return import_react300.default.createElement(internal_default9, { ...baseProps, ...props, variant: "navigation", customTriggerBuilder: dropdownTrigger, preferCenter: true });
   };
   applyDisplayName(MenuDropdown, "MenuDropdown");
   var menu_dropdown_default = MenuDropdown;
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/overflow-menu/index.js
-  var import_react304 = __toESM(require_react());
+  var import_react306 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/overflow-menu/router.js
-  var import_react299 = __toESM(require_react());
+  var import_react301 = __toESM(require_react());
   var defaultCtx = { state: { view: "utilities", data: null }, setState: () => {
   } };
-  var ViewContext = (0, import_react299.createContext)(defaultCtx);
+  var ViewContext = (0, import_react301.createContext)(defaultCtx);
   var useNavigate = () => {
-    const { setState } = (0, import_react299.useContext)(ViewContext);
+    const { setState } = (0, import_react301.useContext)(ViewContext);
     const navigate = (view, data6) => {
       setState({ view, data: data6 });
     };
     return navigate;
   };
   var Route = ({ view, element: element3 }) => {
-    const { state: state5 } = (0, import_react299.useContext)(ViewContext);
+    const { state: state5 } = (0, import_react301.useContext)(ViewContext);
     if (view === state5.view) {
       if (typeof element3 === "function") {
         return element3(state5.data);
       }
-      return import_react299.default.createElement(import_react299.default.Fragment, null, element3);
+      return import_react301.default.createElement(import_react301.default.Fragment, null, element3);
     }
     return null;
   };
   var Router = ({ children: children2 }) => {
-    const [state5, setState] = (0, import_react299.useState)({ view: "utilities", data: null });
-    return import_react299.default.createElement(ViewContext.Provider, { value: { state: state5, setState } }, children2);
+    const [state5, setState] = (0, import_react301.useState)({ view: "utilities", data: null });
+    return import_react301.default.createElement(ViewContext.Provider, { value: { state: state5, setState } }, children2);
   };
   var router_default = Router;
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/overflow-menu/views/submenu.js
-  var import_react302 = __toESM(require_react());
+  var import_react304 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/overflow-menu/header.js
-  var import_react300 = __toESM(require_react());
+  var import_react302 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/top-navigation/styles.css.js
-  var styles_css_default116 = {
+  var styles_css_default118 = {
     "top-navigation": "awsui_top-navigation_k5dlb_xs2bn_9",
     "padding-box": "awsui_padding-box_k5dlb_xs2bn_42",
     "medium": "awsui_medium_k5dlb_xs2bn_52",
@@ -337977,62 +338674,62 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/overflow-menu/header.js
   var Header4 = ({ children: children2, secondaryText, backIconAriaLabel, dismissIconAriaLabel, onBack, onClose }) => {
-    return import_react300.default.createElement(
+    return import_react302.default.createElement(
       "div",
-      { className: styles_css_default116["overflow-menu-header"] },
-      onBack && import_react300.default.createElement(
+      { className: styles_css_default118["overflow-menu-header"] },
+      onBack && import_react302.default.createElement(
         internal_default4,
         {
           // Used for test-utils, which require the selectable element to have a classname.
-          className: styles_css_default116["overflow-menu-back-button"],
+          className: styles_css_default118["overflow-menu-back-button"],
           ariaLabel: backIconAriaLabel,
           iconName: "angle-left",
           variant: "icon",
           onClick: () => onBack()
         }
       ),
-      import_react300.default.createElement(
+      import_react302.default.createElement(
         "h2",
-        { className: styles_css_default116["overflow-menu-header-text"] },
-        import_react300.default.createElement("div", { className: styles_css_default116["overflow-menu-header-text--title"] }, children2),
-        secondaryText && import_react300.default.createElement("div", { className: styles_css_default116["overflow-menu-header-text--secondary"] }, secondaryText)
+        { className: styles_css_default118["overflow-menu-header-text"] },
+        import_react302.default.createElement("div", { className: styles_css_default118["overflow-menu-header-text--title"] }, children2),
+        secondaryText && import_react302.default.createElement("div", { className: styles_css_default118["overflow-menu-header-text--secondary"] }, secondaryText)
       ),
-      import_react300.default.createElement(internal_default4, { className: styles_css_default116["overflow-menu-dismiss-button"], ariaLabel: dismissIconAriaLabel, iconName: "close", variant: "icon", onClick: () => onClose && onClose() })
+      import_react302.default.createElement(internal_default4, { className: styles_css_default118["overflow-menu-dismiss-button"], ariaLabel: dismissIconAriaLabel, iconName: "close", variant: "icon", onClick: () => onClose && onClose() })
     );
   };
   var header_default = Header4;
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/overflow-menu/menu-item.js
-  var import_react301 = __toESM(require_react());
+  var import_react303 = __toESM(require_react());
   var ListItem = ({ children: children2, startIcon, endIcon }) => {
-    return import_react301.default.createElement(
-      import_react301.default.Fragment,
+    return import_react303.default.createElement(
+      import_react303.default.Fragment,
       null,
-      startIcon && import_react301.default.createElement("span", { className: styles_css_default116["overflow-menu-list-item-icon"] }, startIcon),
-      import_react301.default.createElement("span", { className: styles_css_default116["overflow-menu-list-item-text"] }, children2),
+      startIcon && import_react303.default.createElement("span", { className: styles_css_default118["overflow-menu-list-item-icon"] }, startIcon),
+      import_react303.default.createElement("span", { className: styles_css_default118["overflow-menu-list-item-text"] }, children2),
       endIcon && endIcon
     );
   };
-  var LinkItem = (0, import_react301.forwardRef)(({ children: children2, external, href, target, rel: rel2, lang, startIcon, endIcon, onClick, context, testId }, ref) => {
+  var LinkItem = (0, import_react303.forwardRef)(({ children: children2, external, href, target, rel: rel2, lang, startIcon, endIcon, onClick, context, testId }, ref) => {
     const anchorTarget = target !== null && target !== void 0 ? target : external ? "_blank" : void 0;
     const anchorRel = rel2 !== null && rel2 !== void 0 ? rel2 : anchorTarget === "_blank" ? "noopener noreferrer" : void 0;
     const role = !href ? "button" : void 0;
-    return import_react301.default.createElement(
+    return import_react303.default.createElement(
       "a",
-      { ref, onClick, className: clsx_m_default(styles_css_default116["overflow-menu-control"], styles_css_default116["overflow-menu-control-link"], context && styles_css_default116[`overflow-menu-control-${context}`]), role, tabIndex: 0, href, target: anchorTarget, rel: anchorRel, lang, "data-awsui-motion-trigger": "hover", ...testId ? { "data-testid": testId } : {} },
-      import_react301.default.createElement(ListItem, { startIcon, endIcon }, children2)
+      { ref, onClick, className: clsx_m_default(styles_css_default118["overflow-menu-control"], styles_css_default118["overflow-menu-control-link"], context && styles_css_default118[`overflow-menu-control-${context}`]), role, tabIndex: 0, href, target: anchorTarget, rel: anchorRel, lang, "data-awsui-motion-trigger": "hover", ...testId ? { "data-testid": testId } : {} },
+      import_react303.default.createElement(ListItem, { startIcon, endIcon }, children2)
     );
   });
-  var ButtonItem = (0, import_react301.forwardRef)(({ children: children2, startIcon, endIcon, onClick, testId }, ref) => {
-    return import_react301.default.createElement(
+  var ButtonItem = (0, import_react303.forwardRef)(({ children: children2, startIcon, endIcon, onClick, testId }, ref) => {
+    return import_react303.default.createElement(
       "button",
-      { ref, className: styles_css_default116["overflow-menu-control"], onClick, "data-awsui-motion-trigger": "hover", ...typeof testId === "string" ? { "data-testid": testId } : {} },
-      import_react301.default.createElement(ListItem, { startIcon, endIcon }, children2)
+      { ref, className: styles_css_default118["overflow-menu-control"], onClick, "data-awsui-motion-trigger": "hover", ...typeof testId === "string" ? { "data-testid": testId } : {} },
+      import_react303.default.createElement(ListItem, { startIcon, endIcon }, children2)
     );
   });
-  var NavigationItem = (0, import_react301.forwardRef)(({ startIcon, children: children2, index: index2, testId, ...definition }, ref) => {
+  var NavigationItem = (0, import_react303.forwardRef)(({ startIcon, children: children2, index: index2, testId, ...definition }, ref) => {
     const navigate = useNavigate();
-    return import_react301.default.createElement(ButtonItem, { ref, startIcon, endIcon: import_react301.default.createElement(internal_default, { name: "angle-right", nativeAttributes: { "data-awsui-motion-target": "" } }), testId, onClick: () => navigate("dropdown-menu", {
+    return import_react303.default.createElement(ButtonItem, { ref, startIcon, endIcon: import_react303.default.createElement(internal_default, { name: "angle-right", nativeAttributes: { "data-awsui-motion-target": "" } }), testId, onClick: () => navigate("dropdown-menu", {
       definition,
       headerText: definition.text || definition.title,
       headerSecondaryText: definition.description,
@@ -338040,34 +338737,34 @@ ${isHandDrawn ? "" : `
     }) }, children2);
   });
   var ExpandableItem = ({ children: children2, onItemClick, ...definition }) => {
-    const [expanded, setExpanded] = (0, import_react301.useState)(false);
+    const [expanded, setExpanded] = (0, import_react303.useState)(false);
     const headerId = useUniqueId("overflow-menu-item");
-    return import_react301.default.createElement(
-      import_react301.default.Fragment,
+    return import_react303.default.createElement(
+      import_react303.default.Fragment,
       null,
-      import_react301.default.createElement(
+      import_react303.default.createElement(
         "button",
-        { className: clsx_m_default(styles_css_default116["overflow-menu-control"], styles_css_default116["overflow-menu-control-expandable-menu-trigger"]), onClick: () => setExpanded((value3) => !value3), "aria-expanded": expanded, "data-awsui-motion-trigger": "hover" },
-        import_react301.default.createElement(
+        { className: clsx_m_default(styles_css_default118["overflow-menu-control"], styles_css_default118["overflow-menu-control-expandable-menu-trigger"]), onClick: () => setExpanded((value3) => !value3), "aria-expanded": expanded, "data-awsui-motion-trigger": "hover" },
+        import_react303.default.createElement(
           ListItem,
-          { endIcon: import_react301.default.createElement(
+          { endIcon: import_react303.default.createElement(
             "span",
-            { className: spinWhenOpen(styles_css_default116, "icon", expanded) },
-            import_react301.default.createElement(internal_default, { name: "caret-down-filled", nativeAttributes: { "data-awsui-motion-target": "" } })
+            { className: spinWhenOpen(styles_css_default118, "icon", expanded) },
+            import_react303.default.createElement(internal_default, { name: "caret-down-filled", nativeAttributes: { "data-awsui-motion-target": "" } })
           ) },
-          import_react301.default.createElement("span", { id: headerId }, children2)
+          import_react303.default.createElement("span", { id: headerId }, children2)
         )
       ),
-      expanded && import_react301.default.createElement("ul", { className: clsx_m_default(styles_css_default116["overflow-menu-list"], styles_css_default116["overflow-menu-list-submenu"]), "aria-labelledby": headerId }, definition.items.map((item, index2) => {
+      expanded && import_react303.default.createElement("ul", { className: clsx_m_default(styles_css_default118["overflow-menu-list"], styles_css_default118["overflow-menu-list-submenu"]), "aria-labelledby": headerId }, definition.items.map((item, index2) => {
         const isGroup2 = typeof item.items !== "undefined";
-        return import_react301.default.createElement("li", { key: index2, className: clsx_m_default(styles_css_default116[`overflow-menu-list-item`], styles_css_default116[`overflow-menu-list-item-dropdown-menu`]) }, dropdownComponentFactory(item, isGroup2, onItemClick));
+        return import_react303.default.createElement("li", { key: index2, className: clsx_m_default(styles_css_default118[`overflow-menu-list-item`], styles_css_default118[`overflow-menu-list-item-dropdown-menu`]) }, dropdownComponentFactory(item, isGroup2, onItemClick));
       }))
     );
   };
   function utilityComponentFactory(utility, index2, ref) {
     const label = utility.text || utility.title;
     const hasIcon = !!utility.iconName || !!utility.iconUrl || !!utility.iconAlt || !!utility.iconSvg;
-    const startIcon = hasIcon && import_react301.default.createElement(internal_default, { name: utility.iconName, url: utility.iconUrl, alt: utility.iconAlt, svg: utility.iconSvg });
+    const startIcon = hasIcon && import_react303.default.createElement(internal_default, { name: utility.iconName, url: utility.iconUrl, alt: utility.iconAlt, svg: utility.iconSvg });
     switch (utility.type) {
       case "button": {
         const handleClick = (event3) => {
@@ -338078,28 +338775,28 @@ ${isHandDrawn ? "" : `
           fireCancelableEvent(utility.onClick, {}, event3);
           (_a213 = utility.onClose) === null || _a213 === void 0 ? void 0 : _a213.call(utility);
         };
-        const content = import_react301.default.createElement(
-          import_react301.default.Fragment,
+        const content = import_react303.default.createElement(
+          import_react303.default.Fragment,
           null,
           label,
-          utility.external && import_react301.default.createElement(
-            import_react301.default.Fragment,
+          utility.external && import_react303.default.createElement(
+            import_react303.default.Fragment,
             null,
             " ",
-            import_react301.default.createElement(
+            import_react303.default.createElement(
               "span",
               { "aria-label": utility.externalIconAriaLabel, role: utility.externalIconAriaLabel ? "img" : void 0 },
-              import_react301.default.createElement(internal_default, { name: "external", size: "normal" })
+              import_react303.default.createElement(internal_default, { name: "external", size: "normal" })
             )
           )
         );
         if (!utility.href) {
-          return import_react301.default.createElement(ButtonItem, { ref, startIcon, onClick: handleClick, testId: `__${index2}` }, content);
+          return import_react303.default.createElement(ButtonItem, { ref, startIcon, onClick: handleClick, testId: `__${index2}` }, content);
         }
-        return import_react301.default.createElement(LinkItem, { ref, startIcon, href: utility.href, external: utility.external, target: utility.target, rel: utility.rel, testId: `__${index2}`, onClick: handleClick }, content);
+        return import_react303.default.createElement(LinkItem, { ref, startIcon, href: utility.href, external: utility.external, target: utility.target, rel: utility.rel, testId: `__${index2}`, onClick: handleClick }, content);
       }
       case "menu-dropdown": {
-        return import_react301.default.createElement(NavigationItem, { ref, startIcon, index: index2, ...utility, testId: `__${index2}` }, label);
+        return import_react303.default.createElement(NavigationItem, { ref, startIcon, index: index2, ...utility, testId: `__${index2}` }, label);
       }
     }
   }
@@ -338107,47 +338804,47 @@ ${isHandDrawn ? "" : `
     const label = item.text;
     const hasIcon = !!item.iconName || !!item.iconUrl || !!item.iconAlt || !!item.iconSvg;
     const isLink = isLinkItem(item);
-    const startIcon = hasIcon && import_react301.default.createElement(internal_default, { name: item.iconName, url: item.iconUrl, alt: item.iconAlt, svg: item.iconSvg });
+    const startIcon = hasIcon && import_react303.default.createElement(internal_default, { name: item.iconName, url: item.iconUrl, alt: item.iconAlt, svg: item.iconSvg });
     if (expandable) {
-      return import_react301.default.createElement(ExpandableItem, { ...item, onItemClick }, label);
+      return import_react303.default.createElement(ExpandableItem, { ...item, onItemClick }, label);
     }
-    return import_react301.default.createElement(
+    return import_react303.default.createElement(
       LinkItem,
       { startIcon, href: isLink ? item.href : void 0, external: isLink ? item.external : void 0, lang: item.lang, context: "dropdown-menu", testId: item.id, onClick: (event3) => onItemClick(event3, item) },
       label,
-      isLink && item.external && import_react301.default.createElement(
-        import_react301.default.Fragment,
+      isLink && item.external && import_react303.default.createElement(
+        import_react303.default.Fragment,
         null,
         " ",
-        import_react301.default.createElement(
+        import_react303.default.createElement(
           "span",
           { "aria-label": item.externalIconAriaLabel, role: item.externalIconAriaLabel ? "img" : void 0 },
-          import_react301.default.createElement(internal_default, { name: "external", size: "normal" })
+          import_react303.default.createElement(internal_default, { name: "external", size: "normal" })
         )
       )
     );
   }
-  var UtilityMenuItem = (0, import_react301.forwardRef)(({ index: index2, ...props }, ref) => {
-    return import_react301.default.createElement("li", { className: clsx_m_default(styles_css_default116[`overflow-menu-list-item`], styles_css_default116[`overflow-menu-list-item-utility`]) }, utilityComponentFactory(props, index2, ref));
+  var UtilityMenuItem = (0, import_react303.forwardRef)(({ index: index2, ...props }, ref) => {
+    return import_react303.default.createElement("li", { className: clsx_m_default(styles_css_default118[`overflow-menu-list-item`], styles_css_default118[`overflow-menu-list-item-utility`]) }, utilityComponentFactory(props, index2, ref));
   });
   var SubmenuItem = (props) => {
     const expandable = typeof props.items !== "undefined";
-    return import_react301.default.createElement("li", { className: clsx_m_default(styles_css_default116[`overflow-menu-list-item`], styles_css_default116[`overflow-menu-list-item-submenu`], expandable && styles_css_default116[`overflow-menu-list-item-expandable`]) }, dropdownComponentFactory(props, expandable, props.onClick));
+    return import_react303.default.createElement("li", { className: clsx_m_default(styles_css_default118[`overflow-menu-list-item`], styles_css_default118[`overflow-menu-list-item-submenu`], expandable && styles_css_default118[`overflow-menu-list-item-expandable`]) }, dropdownComponentFactory(props, expandable, props.onClick));
   };
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/overflow-menu/views/submenu.js
   var SubmenuView = ({ onClose, utilityIndex, headerText, headerSecondaryText, dismissIconAriaLabel, backIconAriaLabel, definition }) => {
     const navigate = useNavigate();
     const headerId = useUniqueId("overflow-menu-header");
-    return import_react302.default.createElement(
+    return import_react304.default.createElement(
       focus_lock_default,
       { autoFocus: true },
-      import_react302.default.createElement(
+      import_react304.default.createElement(
         header_default,
         { secondaryText: headerSecondaryText, dismissIconAriaLabel, backIconAriaLabel, onClose, onBack: () => navigate("utilities", { utilityIndex }) },
-        import_react302.default.createElement("span", { id: headerId }, headerText)
+        import_react304.default.createElement("span", { id: headerId }, headerText)
       ),
-      import_react302.default.createElement("ul", { className: clsx_m_default(styles_css_default116["overflow-menu-list"], styles_css_default116["overflow-menu-list-submenu"]), "aria-labelledby": headerId }, definition.items.map((item, index2) => import_react302.default.createElement(SubmenuItem, { key: index2, ...item, onClick: (event3, item2) => {
+      import_react304.default.createElement("ul", { className: clsx_m_default(styles_css_default118["overflow-menu-list"], styles_css_default118["overflow-menu-list-submenu"]), "aria-labelledby": headerId }, definition.items.map((item, index2) => import_react304.default.createElement(SubmenuItem, { key: index2, ...item, onClick: (event3, item2) => {
         if (item2.href && isPlainLeftClick(event3)) {
           fireCancelableEvent(definition.onItemFollow, { id: item2.id, href: item2.href, external: item2.external }, event3);
         }
@@ -338159,25 +338856,25 @@ ${isHandDrawn ? "" : `
   var submenu_default = SubmenuView;
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/overflow-menu/views/utilities.js
-  var import_react303 = __toESM(require_react());
+  var import_react305 = __toESM(require_react());
   var UtilitiesView = ({ headerText, dismissIconAriaLabel, onClose, items = [], focusIndex }) => {
     const headerId = useUniqueId("overflow-menu-header");
-    const ref = (0, import_react303.useRef)(null);
-    (0, import_react303.useEffect)(() => {
+    const ref = (0, import_react305.useRef)(null);
+    (0, import_react305.useEffect)(() => {
       var _a213;
       if (typeof focusIndex === "number") {
         (_a213 = ref.current) === null || _a213 === void 0 ? void 0 : _a213.focus();
       }
     }, [focusIndex]);
-    return import_react303.default.createElement(
+    return import_react305.default.createElement(
       focus_lock_default,
       { autoFocus: true },
-      import_react303.default.createElement(
+      import_react305.default.createElement(
         header_default,
         { dismissIconAriaLabel, onClose },
-        import_react303.default.createElement("span", { id: headerId }, headerText)
+        import_react305.default.createElement("span", { id: headerId }, headerText)
       ),
-      import_react303.default.createElement("ul", { className: styles_css_default116["overflow-menu-list"], "aria-labelledby": headerId }, items.map((utility, index2) => import_react303.default.createElement(UtilityMenuItem, { key: index2, index: index2, ref: index2 === focusIndex ? ref : void 0, onClose, ...utility })))
+      import_react305.default.createElement("ul", { className: styles_css_default118["overflow-menu-list"], "aria-labelledby": headerId }, items.map((utility, index2) => import_react305.default.createElement(UtilityMenuItem, { key: index2, index: index2, ref: index2 === focusIndex ? ref : void 0, onClose, ...utility })))
     );
   };
   var utilities_default = UtilitiesView;
@@ -338187,25 +338884,25 @@ ${isHandDrawn ? "" : `
     const i18n = useInternalI18n("top-navigation");
     const renderedDismissIconAriaLabel = i18n("i18nStrings.overflowMenuDismissIconAriaLabel", dismissIconAriaLabel);
     const renderedBackIconAriaLabel = i18n("i18nStrings.overflowMenuBackIconAriaLabel", backIconAriaLabel);
-    return import_react304.default.createElement(
+    return import_react306.default.createElement(
       "div",
-      { className: styles_css_default116["overflow-menu"], onKeyUp: (event3) => {
+      { className: styles_css_default118["overflow-menu"], onKeyUp: (event3) => {
         if (event3.key === "Escape") {
           onClose === null || onClose === void 0 ? void 0 : onClose();
         }
       } },
-      import_react304.default.createElement(
+      import_react306.default.createElement(
         router_default,
         null,
-        import_react304.default.createElement(Route, { view: "utilities", element: (data6) => import_react304.default.createElement(utilities_default, { headerText: i18n("i18nStrings.overflowMenuTitleText", headerText), items, focusIndex: data6 === null || data6 === void 0 ? void 0 : data6.utilityIndex, dismissIconAriaLabel: renderedDismissIconAriaLabel, backIconAriaLabel: renderedBackIconAriaLabel, onClose }) }),
-        import_react304.default.createElement(Route, { view: "dropdown-menu", element: (data6) => import_react304.default.createElement(submenu_default, { headerText: data6 === null || data6 === void 0 ? void 0 : data6.headerText, headerSecondaryText: data6 === null || data6 === void 0 ? void 0 : data6.headerSecondaryText, dismissIconAriaLabel: renderedDismissIconAriaLabel, backIconAriaLabel: renderedBackIconAriaLabel, definition: data6 === null || data6 === void 0 ? void 0 : data6.definition, utilityIndex: data6 === null || data6 === void 0 ? void 0 : data6.utilityIndex, onClose }) })
+        import_react306.default.createElement(Route, { view: "utilities", element: (data6) => import_react306.default.createElement(utilities_default, { headerText: i18n("i18nStrings.overflowMenuTitleText", headerText), items, focusIndex: data6 === null || data6 === void 0 ? void 0 : data6.utilityIndex, dismissIconAriaLabel: renderedDismissIconAriaLabel, backIconAriaLabel: renderedBackIconAriaLabel, onClose }) }),
+        import_react306.default.createElement(Route, { view: "dropdown-menu", element: (data6) => import_react306.default.createElement(submenu_default, { headerText: data6 === null || data6 === void 0 ? void 0 : data6.headerText, headerSecondaryText: data6 === null || data6 === void 0 ? void 0 : data6.headerSecondaryText, dismissIconAriaLabel: renderedDismissIconAriaLabel, backIconAriaLabel: renderedBackIconAriaLabel, definition: data6 === null || data6 === void 0 ? void 0 : data6.definition, utilityIndex: data6 === null || data6 === void 0 ? void 0 : data6.utilityIndex, onClose }) })
       )
     );
   };
   var overflow_menu_default = OverflowMenu2;
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/utility.js
-  var import_react305 = __toESM(require_react());
+  var import_react307 = __toESM(require_react());
   function Utility({ hideText, definition, offsetRight }) {
     var _a213;
     const hasIcon = !!definition.iconName || !!definition.iconUrl || !!definition.iconAlt || !!definition.iconSvg;
@@ -338215,37 +338912,37 @@ ${isHandDrawn ? "" : `
       ariaLabel = definition.ariaLabel ? definition.ariaLabel : joinStrings(definition.text, definition.externalIconAriaLabel);
       checkSafeUrl("TopNavigation", definition.href);
       if (definition.variant === "primary-button") {
-        return import_react305.default.createElement(
+        return import_react307.default.createElement(
           "span",
-          { className: styles_css_default116[`offset-right-${offsetRight}`] },
-          import_react305.default.createElement(InternalButton, { variant: "primary", href: definition.href, target: definition.external ? "_blank" : void 0, onClick: definition.onClick, onFollow: definition.onFollow, ariaLabel, iconName: definition.iconName, iconUrl: definition.iconUrl, iconAlt: definition.iconAlt, iconSvg: definition.iconSvg }, shouldHideText ? null : import_react305.default.createElement(
-            import_react305.default.Fragment,
+          { className: styles_css_default118[`offset-right-${offsetRight}`] },
+          import_react307.default.createElement(InternalButton, { variant: "primary", href: definition.href, target: definition.external ? "_blank" : void 0, onClick: definition.onClick, onFollow: definition.onFollow, ariaLabel, iconName: definition.iconName, iconUrl: definition.iconUrl, iconAlt: definition.iconAlt, iconSvg: definition.iconSvg }, shouldHideText ? null : import_react307.default.createElement(
+            import_react307.default.Fragment,
             null,
             definition.text,
-            definition.external && import_react305.default.createElement(
-              import_react305.default.Fragment,
+            definition.external && import_react307.default.createElement(
+              import_react307.default.Fragment,
               null,
               " ",
-              import_react305.default.createElement(
+              import_react307.default.createElement(
                 "span",
-                { className: clsx_m_default(styles_css_default116["utility-button-external-icon"], styles_css_default116[`offset-right-${offsetRight}`]), "aria-label": definition.externalIconAriaLabel, role: definition.externalIconAriaLabel ? "img" : void 0 },
-                import_react305.default.createElement(internal_default, { name: "external" })
+                { className: clsx_m_default(styles_css_default118["utility-button-external-icon"], styles_css_default118[`offset-right-${offsetRight}`]), "aria-label": definition.externalIconAriaLabel, role: definition.externalIconAriaLabel ? "img" : void 0 },
+                import_react307.default.createElement(internal_default, { name: "external" })
               )
             )
           ))
         );
       } else {
-        return import_react305.default.createElement(
+        return import_react307.default.createElement(
           "span",
-          { className: styles_css_default116[`offset-right-${offsetRight}`] },
-          import_react305.default.createElement(
+          { className: styles_css_default118[`offset-right-${offsetRight}`] },
+          import_react307.default.createElement(
             internal_default7,
             { variant: "top-navigation", href: definition.href, target: definition.target, rel: definition.rel, external: definition.external, onFollow: (evt) => {
               fireCancelableEvent(definition.onFollow, { href: definition.href, target: definition.target, external: definition.external }, evt);
               fireCancelableEvent(definition.onClick, { href: definition.href, target: definition.target, external: definition.external }, evt);
             }, ariaLabel },
-            hasIcon && import_react305.default.createElement(internal_default, { name: definition.iconName, url: definition.iconUrl, alt: definition.iconAlt, svg: definition.iconSvg, badge: definition.badge }),
-            !shouldHideText && definition.text && import_react305.default.createElement("span", { className: hasIcon ? styles_css_default116["utility-link-icon"] : void 0 }, definition.text)
+            hasIcon && import_react307.default.createElement(internal_default, { name: definition.iconName, url: definition.iconUrl, alt: definition.iconAlt, svg: definition.iconSvg, badge: definition.badge }),
+            !shouldHideText && definition.text && import_react307.default.createElement("span", { className: hasIcon ? styles_css_default118["utility-link-icon"] : void 0 }, definition.text)
           )
         );
       }
@@ -338253,7 +338950,7 @@ ${isHandDrawn ? "" : `
       const title2 = definition.title || definition.text;
       const shouldShowTitle = shouldHideText || !definition.text;
       checkSafeUrlRecursively(definition.items);
-      return import_react305.default.createElement(menu_dropdown_default, { ...definition, title: shouldShowTitle ? title2 : "", ariaLabel, offsetRight }, !shouldHideText && definition.text);
+      return import_react307.default.createElement(menu_dropdown_default, { ...definition, title: shouldShowTitle ? title2 : "", ariaLabel, offsetRight }, !shouldHideText && definition.text);
     }
     return null;
   }
@@ -338270,24 +338967,24 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/top-navigation/use-top-navigation.js
-  var import_react306 = __toESM(require_react());
+  var import_react308 = __toESM(require_react());
   var RESPONSIVENESS_BUFFER = 20;
   function useTopNavigation({ identity: identity10, search, utilities }) {
-    const mainRef = (0, import_react306.useRef)(null);
-    const virtualRef = (0, import_react306.useRef)(null);
+    const mainRef = (0, import_react308.useRef)(null);
+    const virtualRef = (0, import_react308.useRef)(null);
     const [breakpoint, breakpointRef] = useContainerBreakpoints(["xxs", "s"]);
     const hasSearch = !!search;
     const hasTitleWithLogo = !!identity10 && !!identity10.logo && !!identity10.title;
-    const responsiveStates = (0, import_react306.useMemo)(() => {
+    const responsiveStates = (0, import_react308.useMemo)(() => {
       return generateResponsiveStateKeys(utilities, hasSearch, hasTitleWithLogo);
     }, [utilities, hasSearch, hasTitleWithLogo]);
-    const [responsiveState, setResponsiveState] = (0, import_react306.useState)();
-    const recalculateFit = (0, import_react306.useCallback)(() => {
+    const [responsiveState, setResponsiveState] = (0, import_react308.useState)();
+    const recalculateFit = (0, import_react308.useCallback)(() => {
       if (!(mainRef === null || mainRef === void 0 ? void 0 : mainRef.current) || !virtualRef.current) {
         setResponsiveState(responsiveStates[0]);
         return;
       }
-      const availableWidth = getContentBoxWidth(mainRef.current.querySelector(`.${styles_css_default116["padding-box"]}`));
+      const availableWidth = getContentBoxWidth(mainRef.current.querySelector(`.${styles_css_default118["padding-box"]}`));
       if (availableWidth === 0) {
         setResponsiveState(responsiveStates[0]);
         return;
@@ -338296,11 +338993,11 @@ ${isHandDrawn ? "" : `
         hasSearch,
         availableWidth,
         // Get widths from the hidden top navigation
-        fullIdentityWidth: getOptionalElementWidth(virtualRef.current, `.${styles_css_default116.identity}`),
-        titleWidth: getOptionalElementWidth(virtualRef.current, `.${styles_css_default116.title}`),
-        searchSlotWidth: getOptionalElementWidth(virtualRef.current, `.${styles_css_default116.search}`),
+        fullIdentityWidth: getOptionalElementWidth(virtualRef.current, `.${styles_css_default118.identity}`),
+        titleWidth: getOptionalElementWidth(virtualRef.current, `.${styles_css_default118.title}`),
+        searchSlotWidth: getOptionalElementWidth(virtualRef.current, `.${styles_css_default118.search}`),
         searchUtilityWidth: getOptionalElementWidth(virtualRef.current, '[data-utility-special="search"]'),
-        utilitiesLeftPadding: parseFloat(getComputedStyle(virtualRef.current.querySelector(`.${styles_css_default116.utilities}`)).paddingLeft || "0px"),
+        utilitiesLeftPadding: parseFloat(getComputedStyle(virtualRef.current.querySelector(`.${styles_css_default118.utilities}`)).paddingLeft || "0px"),
         utilityWithLabelWidths: Array.prototype.slice.call(virtualRef.current.querySelectorAll(`[data-utility-hide="false"]`)).map((element3) => element3.getBoundingClientRect().width),
         utilityWithoutLabelWidths: Array.prototype.slice.call(virtualRef.current.querySelectorAll(`[data-utility-hide="true"]`)).map((element3) => element3.getBoundingClientRect().width),
         menuTriggerUtilityWidth: getOptionalElementWidth(virtualRef.current, '[data-utility-special="menu-trigger"]')
@@ -338310,21 +339007,21 @@ ${isHandDrawn ? "" : `
     const [, containerQueryRef] = useContainerQuery(() => {
       recalculateFit();
     }, [recalculateFit]);
-    const onVirtualMount = (0, import_react306.useCallback)((element3) => {
+    const onVirtualMount = (0, import_react308.useCallback)((element3) => {
       virtualRef.current = element3;
       recalculateFit();
     }, [recalculateFit]);
-    const [isSearchMinimized, setSearchMinimized] = (0, import_react306.useState)(true);
+    const [isSearchMinimized, setSearchMinimized] = (0, import_react308.useState)(true);
     const isSearchExpanded = !isSearchMinimized && hasSearch && (responsiveState === null || responsiveState === void 0 ? void 0 : responsiveState.hideSearch);
-    (0, import_react306.useEffect)(() => {
+    (0, import_react308.useEffect)(() => {
       if (!(responsiveState === null || responsiveState === void 0 ? void 0 : responsiveState.hideSearch)) {
         setSearchMinimized(true);
       }
     }, [responsiveState]);
-    (0, import_react306.useEffect)(() => {
+    (0, import_react308.useEffect)(() => {
       var _a213, _b;
       if (isSearchExpanded) {
-        (_b = (_a213 = mainRef === null || mainRef === void 0 ? void 0 : mainRef.current) === null || _a213 === void 0 ? void 0 : _a213.querySelector(`.${styles_css_default116.search} input`)) === null || _b === void 0 ? void 0 : _b.focus();
+        (_b = (_a213 = mainRef === null || mainRef === void 0 ? void 0 : mainRef.current) === null || _a213 === void 0 ? void 0 : _a213.querySelector(`.${styles_css_default118.search} input`)) === null || _b === void 0 ? void 0 : _b.focus();
       }
     }, [isSearchExpanded, mainRef]);
     const mergedMainRef = useMergeRefs(mainRef, containerQueryRef, breakpointRef);
@@ -338393,19 +339090,19 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/top-navigation/test-classes/styles.css.js
-  var styles_css_default117 = {
+  var styles_css_default119 = {
     "custom-content": "awsui_custom-content_1oq04_rbts3_5"
   };
 
   // node_modules/@cloudscape-design/components/top-navigation/internal.js
   function wrapWithVisualContext(content, visualContext) {
-    return visualContext === "none" ? content : import_react307.default.createElement(VisualContext, { contextName: visualContext }, content);
+    return visualContext === "none" ? content : import_react309.default.createElement(VisualContext, { contextName: visualContext }, content);
   }
   function InternalTopNavigation({ __internalRootRef, children: children2, visualContext, ...restProps }) {
     if (children2 !== void 0) {
-      return import_react307.default.createElement(CustomContentTopNavigation, { __internalRootRef, visualContext, ...restProps }, children2);
+      return import_react309.default.createElement(CustomContentTopNavigation, { __internalRootRef, visualContext, ...restProps }, children2);
     }
-    return import_react307.default.createElement(StructuredTopNavigation, { __internalRootRef, visualContext, ...restProps });
+    return import_react309.default.createElement(StructuredTopNavigation, { __internalRootRef, visualContext, ...restProps });
   }
   function CustomContentTopNavigation({ __internalRootRef, children: children2, visualContext, ...restProps }) {
     const baseProps = getBaseProps(restProps);
@@ -338413,10 +339110,10 @@ ${isHandDrawn ? "" : `
     if (identity10 || search || utilities && utilities.length > 0) {
       warnOnce("TopNavigation", "When children is set, the structured props (identity, search, and utilities) are ignored");
     }
-    return import_react307.default.createElement("div", { ...baseProps, ref: __internalRootRef }, wrapWithVisualContext(import_react307.default.createElement(
+    return import_react309.default.createElement("div", { ...baseProps, ref: __internalRootRef }, wrapWithVisualContext(import_react309.default.createElement(
       "header",
-      { className: styles_css_default116["top-navigation"] },
-      import_react307.default.createElement("div", { className: styles_css_default117["custom-content"] }, children2)
+      { className: styles_css_default118["top-navigation"] },
+      import_react309.default.createElement("div", { className: styles_css_default119["custom-content"] }, children2)
     ), visualContext));
   }
   function StructuredTopNavigation({ __internalRootRef, identity: identity10, i18nStrings, utilities, search, visualContext, ...restProps }) {
@@ -338425,14 +339122,14 @@ ${isHandDrawn ? "" : `
     }
     const baseProps = getBaseProps(restProps);
     const { mainRef, virtualRef, breakpoint, responsiveState, isSearchExpanded, onSearchUtilityClick } = useTopNavigation({ identity: identity10, search, utilities });
-    const [overflowMenuOpen, setOverflowMenuOpen] = (0, import_react307.useState)(false);
-    const overflowMenuTriggerRef = (0, import_react307.useRef)(null);
+    const [overflowMenuOpen, setOverflowMenuOpen] = (0, import_react309.useState)(false);
+    const overflowMenuTriggerRef = (0, import_react309.useRef)(null);
     const isNarrowViewport = breakpoint === "default";
     const isMediumViewport = breakpoint === "xxs";
     const isLargeViewport = breakpoint === "s";
     const i18n = useInternalI18n("top-navigation");
     const menuTriggerVisible = !isSearchExpanded && responsiveState.hideUtilities;
-    (0, import_react307.useEffect)(() => {
+    (0, import_react309.useEffect)(() => {
       setOverflowMenuOpen(false);
     }, [menuTriggerVisible]);
     useEffectOnUpdate2(() => {
@@ -338457,44 +339154,44 @@ ${isHandDrawn ? "" : `
       const showSearchUtility = isVirtual || search && responsiveState.hideSearch;
       const showUtilities = isVirtual || !isSearchExpanded;
       const showMenuTrigger = isVirtual || menuTriggerVisible;
-      return import_react307.default.createElement(
+      return import_react309.default.createElement(
         Wrapper,
-        { ref: isVirtual ? virtualRef : mainRef, "aria-hidden": isVirtual ? true : void 0, className: clsx_m_default(styles_css_default116["top-navigation"], {
-          [styles_css_default116.virtual]: isVirtual,
-          [styles_css_default116.hidden]: isVirtual,
-          [styles_css_default116.narrow]: isNarrowViewport,
-          [styles_css_default116.medium]: isMediumViewport
+        { ref: isVirtual ? virtualRef : mainRef, "aria-hidden": isVirtual ? true : void 0, className: clsx_m_default(styles_css_default118["top-navigation"], {
+          [styles_css_default118.virtual]: isVirtual,
+          [styles_css_default118.hidden]: isVirtual,
+          [styles_css_default118.narrow]: isNarrowViewport,
+          [styles_css_default118.medium]: isMediumViewport
         }) },
-        import_react307.default.createElement(
+        import_react309.default.createElement(
           "div",
-          { className: styles_css_default116["padding-box"] },
-          showIdentity && identity10 && import_react307.default.createElement(
+          { className: styles_css_default118["padding-box"] },
+          showIdentity && identity10 && import_react309.default.createElement(
             "div",
-            { className: clsx_m_default(styles_css_default116.identity, !identity10.logo && styles_css_default116["no-logo"]) },
-            import_react307.default.createElement(
+            { className: clsx_m_default(styles_css_default118.identity, !identity10.logo && styles_css_default118["no-logo"]) },
+            import_react309.default.createElement(
               "a",
-              { className: styles_css_default116["identity-link"], href: identity10.href, onClick: onIdentityClick },
-              identity10.logo && import_react307.default.createElement("img", { role: "img", src: identity10.logo.src, alt: identity10.logo.alt, className: clsx_m_default(styles_css_default116.logo, {
-                [styles_css_default116.narrow]: isNarrowViewport
+              { className: styles_css_default118["identity-link"], href: identity10.href, onClick: onIdentityClick },
+              identity10.logo && import_react309.default.createElement("img", { role: "img", src: identity10.logo.src, alt: identity10.logo.alt, className: clsx_m_default(styles_css_default118.logo, {
+                [styles_css_default118.narrow]: isNarrowViewport
               }) }),
-              showTitle && import_react307.default.createElement("span", { className: styles_css_default116.title }, identity10.title)
+              showTitle && import_react309.default.createElement("span", { className: styles_css_default118.title }, identity10.title)
             )
           ),
-          showSearchSlot && import_react307.default.createElement(
+          showSearchSlot && import_react309.default.createElement(
             "div",
-            { className: styles_css_default116.inputs },
-            import_react307.default.createElement("div", { className: clsx_m_default(styles_css_default116.search, !isVirtual && isSearchExpanded && styles_css_default116["search-expanded"]) }, search)
+            { className: styles_css_default118.inputs },
+            import_react309.default.createElement("div", { className: clsx_m_default(styles_css_default118.search, !isVirtual && isSearchExpanded && styles_css_default118["search-expanded"]) }, search)
           ),
-          import_react307.default.createElement(
+          import_react309.default.createElement(
             "div",
-            { className: styles_css_default116.utilities },
-            showSearchUtility && import_react307.default.createElement(
+            { className: styles_css_default118.utilities },
+            showSearchUtility && import_react309.default.createElement(
               "div",
-              { className: clsx_m_default(styles_css_default116["utility-wrapper"], styles_css_default116["utility-type-button"], styles_css_default116["utility-type-button-link"], {
-                [styles_css_default116.narrow]: isNarrowViewport,
-                [styles_css_default116.medium]: isMediumViewport
+              { className: clsx_m_default(styles_css_default118["utility-wrapper"], styles_css_default118["utility-type-button"], styles_css_default118["utility-type-button-link"], {
+                [styles_css_default118.narrow]: isNarrowViewport,
+                [styles_css_default118.medium]: isMediumViewport
               }), "data-utility-special": "search" },
-              import_react307.default.createElement(Utility, { hideText: true, definition: {
+              import_react309.default.createElement(Utility, { hideText: true, definition: {
                 type: "button",
                 iconName: isSearchExpanded ? "close" : "search",
                 ariaLabel: isSearchExpanded ? i18n("i18nStrings.searchDismissIconAriaLabel", i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.searchDismissIconAriaLabel) : i18n("i18nStrings.searchIconAriaLabel", i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.searchIconAriaLabel),
@@ -338506,13 +339203,13 @@ ${isHandDrawn ? "" : `
               const hideText = !!responsiveState.hideUtilityText;
               const isLast = (isVirtual || !showMenuTrigger) && i4 === utilities.length - 1;
               const offsetRight = isLast && isLargeViewport ? "xxl" : isLast ? "l" : void 0;
-              return import_react307.default.createElement(
+              return import_react309.default.createElement(
                 "div",
-                { key: i4, className: clsx_m_default(styles_css_default116["utility-wrapper"], styles_css_default116[`utility-type-${utility.type}`], utility.type === "button" && styles_css_default116[`utility-type-button-${(_a213 = utility.variant) !== null && _a213 !== void 0 ? _a213 : "link"}`], {
-                  [styles_css_default116.narrow]: isNarrowViewport,
-                  [styles_css_default116.medium]: isMediumViewport
+                { key: i4, className: clsx_m_default(styles_css_default118["utility-wrapper"], styles_css_default118[`utility-type-${utility.type}`], utility.type === "button" && styles_css_default118[`utility-type-button-${(_a213 = utility.variant) !== null && _a213 !== void 0 ? _a213 : "link"}`], {
+                  [styles_css_default118.narrow]: isNarrowViewport,
+                  [styles_css_default118.medium]: isMediumViewport
                 }), "data-utility-index": i4, "data-utility-hide": `${hideText}` },
-                import_react307.default.createElement(Utility, { hideText, definition: utility, offsetRight })
+                import_react309.default.createElement(Utility, { hideText, definition: utility, offsetRight })
               );
             }),
             isVirtual && utilities.map((utility, i4) => {
@@ -338520,45 +339217,45 @@ ${isHandDrawn ? "" : `
               const hideText = !responsiveState.hideUtilityText;
               const isLast = !showMenuTrigger && i4 === utilities.length - 1;
               const offsetRight = isLast && isLargeViewport ? "xxl" : isLast ? "l" : void 0;
-              return import_react307.default.createElement(
+              return import_react309.default.createElement(
                 "div",
-                { key: i4, className: clsx_m_default(styles_css_default116["utility-wrapper"], styles_css_default116[`utility-type-${utility.type}`], utility.type === "button" && styles_css_default116[`utility-type-button-${(_a213 = utility.variant) !== null && _a213 !== void 0 ? _a213 : "link"}`], {
-                  [styles_css_default116.narrow]: isNarrowViewport,
-                  [styles_css_default116.medium]: isMediumViewport
+                { key: i4, className: clsx_m_default(styles_css_default118["utility-wrapper"], styles_css_default118[`utility-type-${utility.type}`], utility.type === "button" && styles_css_default118[`utility-type-button-${(_a213 = utility.variant) !== null && _a213 !== void 0 ? _a213 : "link"}`], {
+                  [styles_css_default118.narrow]: isNarrowViewport,
+                  [styles_css_default118.medium]: isMediumViewport
                 }), "data-utility-index": i4, "data-utility-hide": `${hideText}` },
-                import_react307.default.createElement(Utility, { hideText, definition: utility, offsetRight })
+                import_react309.default.createElement(Utility, { hideText, definition: utility, offsetRight })
               );
             }),
-            showMenuTrigger && import_react307.default.createElement(
+            showMenuTrigger && import_react309.default.createElement(
               "div",
-              { className: clsx_m_default(styles_css_default116["utility-wrapper"], styles_css_default116["utility-type-menu-dropdown"], {
-                [styles_css_default116.narrow]: isNarrowViewport,
-                [styles_css_default116.medium]: isMediumViewport
+              { className: clsx_m_default(styles_css_default118["utility-wrapper"], styles_css_default118["utility-type-menu-dropdown"], {
+                [styles_css_default118.narrow]: isNarrowViewport,
+                [styles_css_default118.medium]: isMediumViewport
               }), "data-utility-special": "menu-trigger" },
-              import_react307.default.createElement(ButtonTrigger, { expanded: overflowMenuOpen, onClick: toggleOverflowMenu, offsetRight: "l", ref: !isVirtual ? overflowMenuTriggerRef : void 0 }, i18n("i18nStrings.overflowMenuTriggerText", i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.overflowMenuTriggerText))
+              import_react309.default.createElement(ButtonTrigger, { expanded: overflowMenuOpen, onClick: toggleOverflowMenu, offsetRight: "l", ref: !isVirtual ? overflowMenuTriggerRef : void 0 }, i18n("i18nStrings.overflowMenuTriggerText", i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.overflowMenuTriggerText))
             )
           )
         )
       );
     };
-    const structuredContent = import_react307.default.createElement(
-      import_react307.default.Fragment,
+    const structuredContent = import_react309.default.createElement(
+      import_react309.default.Fragment,
       null,
       content(true),
       content(false),
-      menuTriggerVisible && overflowMenuOpen && import_react307.default.createElement(
+      menuTriggerVisible && overflowMenuOpen && import_react309.default.createElement(
         "div",
-        { className: styles_css_default116["overflow-menu-drawer"] },
-        import_react307.default.createElement(overflow_menu_default, { headerText: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.overflowMenuTitleText, dismissIconAriaLabel: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.overflowMenuDismissIconAriaLabel, backIconAriaLabel: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.overflowMenuBackIconAriaLabel, items: utilities.filter((utility, i4) => (!responsiveState.hideUtilities || responsiveState.hideUtilities.indexOf(i4) !== -1) && !utility.disableUtilityCollapse), onClose: toggleOverflowMenu })
+        { className: styles_css_default118["overflow-menu-drawer"] },
+        import_react309.default.createElement(overflow_menu_default, { headerText: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.overflowMenuTitleText, dismissIconAriaLabel: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.overflowMenuDismissIconAriaLabel, backIconAriaLabel: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.overflowMenuBackIconAriaLabel, items: utilities.filter((utility, i4) => (!responsiveState.hideUtilities || responsiveState.hideUtilities.indexOf(i4) !== -1) && !utility.disableUtilityCollapse), onClose: toggleOverflowMenu })
       )
     );
-    return import_react307.default.createElement("div", { ...baseProps, ref: __internalRootRef }, wrapWithVisualContext(structuredContent, visualContext));
+    return import_react309.default.createElement("div", { ...baseProps, ref: __internalRootRef }, wrapWithVisualContext(structuredContent, visualContext));
   }
 
   // node_modules/@cloudscape-design/components/top-navigation/index.js
   function TopNavigation({ utilities = [], visualContext = "top-navigation", ...restProps }) {
     const baseComponentProps = useBaseComponent("TopNavigation");
-    return import_react308.default.createElement(InternalTopNavigation, { ...baseComponentProps, utilities, visualContext, ...restProps });
+    return import_react310.default.createElement(InternalTopNavigation, { ...baseComponentProps, utilities, visualContext, ...restProps });
   }
   applyDisplayName(TopNavigation, "TopNavigation");
 
@@ -338642,9 +339339,9 @@ ${isHandDrawn ? "" : `
     return lines.join("\n");
   }
   function MermaidRenderer({ code, id: id38 = "workflow-mermaid" }) {
-    const [svgContent, setSvgContent] = (0, import_react309.useState)("");
-    const [error3, setError] = (0, import_react309.useState)(null);
-    (0, import_react309.useEffect)(() => {
+    const [svgContent, setSvgContent] = (0, import_react311.useState)("");
+    const [error3, setError] = (0, import_react311.useState)(null);
+    (0, import_react311.useEffect)(() => {
       let isMounted = true;
       async function renderDiagram2() {
         try {
@@ -338690,46 +339387,48 @@ ${isHandDrawn ? "" : `
     );
   }
   function ControlPanelApp() {
-    const [state5, setState] = (0, import_react309.useState)(null);
-    const [activeTab, setActiveTab] = (0, import_react309.useState)("overview");
-    const [navOpen, setNavOpen] = (0, import_react309.useState)(true);
-    const [projProvider, setProjProvider] = (0, import_react309.useState)("github");
-    const [projRepo, setProjRepo] = (0, import_react309.useState)("");
-    const [projBranch, setProjBranch] = (0, import_react309.useState)("main");
-    const [projTrackerKey, setProjTrackerKey] = (0, import_react309.useState)("");
-    const [projStatusFilter, setProjStatusFilter] = (0, import_react309.useState)("Ready for Agent");
-    const [projRequiredLabels, setProjRequiredLabels] = (0, import_react309.useState)("");
-    const [projExcludedLabels, setProjExcludedLabels] = (0, import_react309.useState)("");
-    const [projCustomFields, setProjCustomFields] = (0, import_react309.useState)("");
-    const [projAssigneeFilter, setProjAssigneeFilter] = (0, import_react309.useState)("any");
-    const [projJql, setProjJql] = (0, import_react309.useState)("");
-    const [projFeedback, setProjFeedback] = (0, import_react309.useState)("");
-    const [schedulerInterval, setSchedulerInterval] = (0, import_react309.useState)("60");
-    const [schedulerEnabled, setSchedulerEnabled] = (0, import_react309.useState)(false);
-    const [intakeRepo, setIntakeRepo] = (0, import_react309.useState)("");
-    const [intakeIssueNum, setIntakeIssueNum] = (0, import_react309.useState)("");
-    const [intakeTitle, setIntakeTitle] = (0, import_react309.useState)("");
-    const [intakeType, setIntakeType] = (0, import_react309.useState)("");
-    const [intakeBody, setIntakeBody] = (0, import_react309.useState)("");
-    const [intakeFeedback, setIntakeFeedback] = (0, import_react309.useState)("");
-    const [selectedWf, setSelectedWf] = (0, import_react309.useState)("feature");
-    const [currentWfObj, setCurrentWfObj] = (0, import_react309.useState)(null);
-    const [wfJson, setWfJson] = (0, import_react309.useState)("");
-    const [wfCommit, setWfCommit] = (0, import_react309.useState)(false);
-    const [wfStatus, setWfStatus] = (0, import_react309.useState)("");
-    const [ctrlAutonomy, setCtrlAutonomy] = (0, import_react309.useState)("gated");
-    const [ctrlRate, setCtrlRate] = (0, import_react309.useState)("10");
-    const [ctrlBudget, setCtrlBudget] = (0, import_react309.useState)("25");
-    const [ctrlConcurrent, setCtrlConcurrent] = (0, import_react309.useState)("3");
-    const [ctrlStallMinutes, setCtrlStallMinutes] = (0, import_react309.useState)("30");
-    const [ctrlKill, setCtrlKill] = (0, import_react309.useState)(false);
-    const [controlsFeedback, setControlsFeedback] = (0, import_react309.useState)("");
-    const [humanReplies, setHumanReplies] = (0, import_react309.useState)({});
-    const [deploySha, setDeploySha] = (0, import_react309.useState)("");
-    const [deployErrorRate, setDeployErrorRate] = (0, import_react309.useState)("0.2");
-    const [deployMaxRate, setDeployMaxRate] = (0, import_react309.useState)("1.0");
-    const [deployFeedback, setDeployFeedback] = (0, import_react309.useState)("");
-    const loadDashboard = (0, import_react309.useCallback)(async () => {
+    const [state5, setState] = (0, import_react311.useState)(null);
+    const [activeTab, setActiveTab] = (0, import_react311.useState)("overview");
+    const [navOpen, setNavOpen] = (0, import_react311.useState)(true);
+    const [projProvider, setProjProvider] = (0, import_react311.useState)("github");
+    const [projRepo, setProjRepo] = (0, import_react311.useState)("");
+    const [projBranch, setProjBranch] = (0, import_react311.useState)("main");
+    const [projTrackerKey, setProjTrackerKey] = (0, import_react311.useState)("");
+    const [projStatusFilter, setProjStatusFilter] = (0, import_react311.useState)("Ready for Agent");
+    const [projRequiredLabels, setProjRequiredLabels] = (0, import_react311.useState)("");
+    const [projExcludedLabels, setProjExcludedLabels] = (0, import_react311.useState)("");
+    const [projCustomFields, setProjCustomFields] = (0, import_react311.useState)("");
+    const [projAssigneeFilter, setProjAssigneeFilter] = (0, import_react311.useState)("any");
+    const [projJql, setProjJql] = (0, import_react311.useState)("");
+    const [projFeedback, setProjFeedback] = (0, import_react311.useState)("");
+    const [schedulerInterval, setSchedulerInterval] = (0, import_react311.useState)("60");
+    const [schedulerEnabled, setSchedulerEnabled] = (0, import_react311.useState)(false);
+    const [intakeRepo, setIntakeRepo] = (0, import_react311.useState)("");
+    const [intakeIssueNum, setIntakeIssueNum] = (0, import_react311.useState)("");
+    const [intakeTitle, setIntakeTitle] = (0, import_react311.useState)("");
+    const [intakeType, setIntakeType] = (0, import_react311.useState)("");
+    const [intakeBody, setIntakeBody] = (0, import_react311.useState)("");
+    const [intakeFeedback, setIntakeFeedback] = (0, import_react311.useState)("");
+    const [selectedWf, setSelectedWf] = (0, import_react311.useState)("feature");
+    const [currentWfObj, setCurrentWfObj] = (0, import_react311.useState)(null);
+    const [wfJson, setWfJson] = (0, import_react311.useState)("");
+    const [wfCommit, setWfCommit] = (0, import_react311.useState)(false);
+    const [wfStatus, setWfStatus] = (0, import_react311.useState)("");
+    const [ctrlAutonomy, setCtrlAutonomy] = (0, import_react311.useState)("gated");
+    const [ctrlRate, setCtrlRate] = (0, import_react311.useState)("10");
+    const [ctrlBudget, setCtrlBudget] = (0, import_react311.useState)("25");
+    const [ctrlConcurrent, setCtrlConcurrent] = (0, import_react311.useState)("3");
+    const [ctrlStallMinutes, setCtrlStallMinutes] = (0, import_react311.useState)("30");
+    const [ctrlKill, setCtrlKill] = (0, import_react311.useState)(false);
+    const [controlsFeedback, setControlsFeedback] = (0, import_react311.useState)("");
+    const [humanReplies, setHumanReplies] = (0, import_react311.useState)({});
+    const [previewModalOpen, setPreviewModalOpen] = (0, import_react311.useState)(false);
+    const [previewDoc, setPreviewDoc] = (0, import_react311.useState)({ title: "", path: "", content: "", loading: false, error: null });
+    const [deploySha, setDeploySha] = (0, import_react311.useState)("");
+    const [deployErrorRate, setDeployErrorRate] = (0, import_react311.useState)("0.2");
+    const [deployMaxRate, setDeployMaxRate] = (0, import_react311.useState)("1.0");
+    const [deployFeedback, setDeployFeedback] = (0, import_react311.useState)("");
+    const loadDashboard = (0, import_react311.useCallback)(async () => {
       const res = await fetch("/api/dashboard");
       const data6 = await res.json();
       setState(data6);
@@ -338752,7 +339451,7 @@ ${isHandDrawn ? "" : `
         setWfJson(JSON.stringify(wf, null, 2));
       }
     }, [selectedWf]);
-    (0, import_react309.useEffect)(() => {
+    (0, import_react311.useEffect)(() => {
       loadDashboard();
     }, [loadDashboard]);
     const handleSelectWorkflow = (wfId) => {
@@ -338946,6 +339645,58 @@ ${isHandDrawn ? "" : `
         setHumanReplies((prev2) => ({ ...prev2, [key2]: "" }));
       }
       await loadDashboard();
+    };
+    const openFileInEditor = async (filePath, executionKey, line3) => {
+      try {
+        const res = await fetch("/api/files/open", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filePath, executionKey, line: line3 })
+        });
+        const data6 = await res.json();
+        if (!res.ok) {
+          setIntakeFeedback(`Failed to open in editor: ${data6.error || "Unknown error"}`);
+        } else {
+          setIntakeFeedback(`Opened in editor: ${filePath}`);
+        }
+      } catch (err) {
+        setIntakeFeedback(`Editor launcher error: ${err.message}`);
+      }
+    };
+    const openPreviewModal = async (filePath, executionKey, label) => {
+      setPreviewDoc({ title: label || filePath, path: filePath, content: "", loading: true, error: null });
+      setPreviewModalOpen(true);
+      try {
+        const q3 = new URLSearchParams({ path: filePath });
+        if (executionKey) q3.set("executionKey", executionKey);
+        const res = await fetch(`/api/files/content?${q3.toString()}`);
+        const data6 = await res.json();
+        if (!res.ok) {
+          setPreviewDoc({
+            title: label || filePath,
+            path: filePath,
+            content: "",
+            loading: false,
+            error: data6.error || "Failed to read file"
+          });
+        } else {
+          setPreviewDoc({
+            title: label || filePath,
+            path: filePath,
+            content: data6.content,
+            loading: false,
+            error: null
+          });
+        }
+      } catch (err) {
+        setPreviewDoc({
+          title: label || filePath,
+          path: filePath,
+          content: "",
+          loading: false,
+          error: err.message
+        });
+      }
     };
     const snoozeTaskAlarm = async (key2) => {
       await fetch("/api/tasks/" + encodeURIComponent(key2) + "/acknowledge", {
@@ -339192,1556 +339943,729 @@ ${isHandDrawn ? "" : `
           ]
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "awsui-app-layout", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-        app_layout_default,
-        {
-          navigationOpen: navOpen,
-          onNavigationChange: ({ detail }) => setNavOpen(detail.open),
-          navigation: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "awsui-side-navigation", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-            SideNavigation,
-            {
-              activeHref: `#${activeTab}`,
-              header: { href: "#", text: "Agentic Factory" },
-              items: NAV_ITEMS.map((item) => ({
-                type: "link",
-                text: item.text,
-                href: item.href,
-                info: item.id === "board" && (st2.needsHuman || []).length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "severity-medium", children: (st2.needsHuman || []).length }) : item.id === "overview" && stalledList.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "red", children: stalledList.length }) : void 0
-              })),
-              onFollow: (e3) => {
-                e3.preventDefault();
-                const target = e3.detail.href.replace("#", "");
-                if (target) setActiveTab(target);
-              }
-            }
-          ) }),
-          notifications: stalledList.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "stalled-alarm-banner", "data-testid": "stalled-alarm-banner", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-            alert_default,
-            {
-              type: "error",
-              dismissible: false,
-              header: `STALLED TASK ALARM \u2014 ${stalledList.length} TASK(S) IDLE BEYOND ${f2.limits?.stallThresholdMinutes || 30} MIN THRESHOLD`,
-              children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "xs", children: stalledList.map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                "div",
-                {
-                  "data-testid": `alarm-item-${item.issueNumber}`,
-                  style: {
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: "1rem",
-                    padding: "0.5rem",
-                    background: "rgba(127, 29, 29, 0.4)",
-                    borderRadius: "6px",
-                    border: "1px solid #ef4444"
-                  },
-                  children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "red", children: item.severity.toUpperCase() }),
-                      " ",
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: item.executionKey }),
-                      " \u2014 ",
-                      item.title,
-                      " [",
-                      item.type,
-                      "]",
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
-                        "Stage: ",
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: item.stage }),
-                        " \xB7 Idle for",
-                        " ",
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { children: [
-                          item.idleMinutes,
-                          "m"
-                        ] }),
-                        " \xB7 ",
-                        item.reason
-                      ] })
-                    ] }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { direction: "horizontal", size: "xs", children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                        button_default2,
-                        {
-                          variant: "primary",
-                          "data-testid": `alarm-act-btn-${item.issueNumber}`,
-                          onClick: () => dispatchTicketKey(item.executionKey, item.needsHuman),
-                          children: "Act Now (Approve & Resume)"
-                        }
-                      ),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                        button_default2,
-                        {
-                          variant: "normal",
-                          "data-testid": `alarm-snooze-btn-${item.issueNumber}`,
-                          onClick: () => snoozeTaskAlarm(item.executionKey),
-                          children: "Snooze Alarm"
-                        }
-                      )
-                    ] })
-                  ]
-                },
-                item.executionKey
-              )) })
-            }
-          ) }) : void 0,
-          content: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-            ContentLayout,
-            {
-              header: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                Header2,
-                {
-                  variant: "h1",
-                  info: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { direction: "horizontal", size: "xs", children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                      "span",
-                      {
-                        id: "factory-status-badge",
-                        className: `badge ${f2.killSwitch ? "red" : "green"}`,
-                        style: {
-                          padding: "0.2rem 0.6rem",
-                          borderRadius: "6px",
-                          fontWeight: 700,
-                          fontSize: "0.78rem",
-                          background: f2.killSwitch ? "#7f1d1d" : "#064e3b",
-                          color: "#fff"
-                        },
-                        children: f2.killSwitch ? "PAUSED (KILL SWITCH)" : `ACTIVE (${String(f2.autonomy).toUpperCase()})`
-                      }
-                    ),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                      "span",
-                      {
-                        id: "header-alarm-badge",
-                        "data-testid": "header-alarm-badge",
-                        style: {
-                          padding: "0.2rem 0.6rem",
-                          borderRadius: "6px",
-                          fontWeight: 700,
-                          fontSize: "0.78rem",
-                          background: stalledList.length > 0 ? "#991b1b" : "#065f46",
-                          color: "#fff"
-                        },
-                        children: stalledList.length > 0 ? `${stalledList.length} STALLED ALARM(S)` : "0 ALARMS"
-                      }
-                    ),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                      "span",
-                      {
-                        id: "header-human-badge",
-                        "data-testid": "header-human-badge",
-                        style: {
-                          padding: "0.2rem 0.6rem",
-                          borderRadius: "6px",
-                          fontWeight: 700,
-                          fontSize: "0.78rem",
-                          background: (st2.needsHuman || []).length > 0 ? "#b45309" : "#1e293b",
-                          color: (st2.needsHuman || []).length > 0 ? "#fef3c7" : "#94a3b8"
-                        },
-                        children: (st2.needsHuman || []).length > 0 ? `${st2.needsHuman.length} WAITING HUMAN` : "0 WAITING HUMAN"
-                      }
-                    ),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                      "span",
-                      {
-                        id: "scheduler-status-badge",
-                        "data-testid": "scheduler-status-badge",
-                        style: {
-                          padding: "0.2rem 0.6rem",
-                          borderRadius: "6px",
-                          fontWeight: 600,
-                          fontSize: "0.75rem",
-                          background: "#1e293b",
-                          color: "#93c5fd"
-                        },
-                        children: scheduler.enabled ? `CRON: ACTIVE (${scheduler.intervalSeconds}s \xB7 #${scheduler.pollCount})` : `CRON: MANUAL (#${scheduler.pollCount || 0})`
-                      }
-                    )
-                  ] }),
-                  children: [
-                    activeTab === "overview" && "Overview & Telemetry",
-                    activeTab === "board" && "Board & Needs Human Queue",
-                    activeTab === "workflows" && "Visual Workflows & Factory as Code",
-                    activeTab === "runtimes" && "Runtimes, Router & Circuit Breaker",
-                    activeTab === "agents" && "Agents Catalog & Locked Skills",
-                    activeTab === "controls" && "Operational Controls, Deploy & Long-Term Brain"
-                  ]
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "awsui-app-layout", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          app_layout_default,
+          {
+            navigationOpen: navOpen,
+            onNavigationChange: ({ detail }) => setNavOpen(detail.open),
+            navigation: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "awsui-side-navigation", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              SideNavigation,
+              {
+                activeHref: `#${activeTab}`,
+                header: { href: "#", text: "Agentic Factory" },
+                items: NAV_ITEMS.map((item) => ({
+                  type: "link",
+                  text: item.text,
+                  href: item.href,
+                  info: item.id === "board" && (st2.needsHuman || []).length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "severity-medium", children: (st2.needsHuman || []).length }) : item.id === "overview" && stalledList.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "red", children: stalledList.length }) : void 0
+                })),
+                onFollow: (e3) => {
+                  e3.preventDefault();
+                  const target = e3.detail.href.replace("#", "");
+                  if (target) setActiveTab(target);
                 }
-              ),
-              children: [
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { id: "tab-overview", style: { display: activeTab === "overview" ? "block" : "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "l", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ColumnLayout2, { columns: 4, variant: "text-grid", children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { "data-testid": "kpi-total-tickets", children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "awsui-key-label", children: "Total Tickets" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "h1", children: st2.totalTasks }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", "data-testid": "kpi-active-concurrency", children: [
-                        "Active: ",
-                        st2.activeTasksCount ?? st2.totalTasks - (st2.byStage?.done || 0),
-                        " / ",
-                        f2.limits?.maxConcurrentAgents ?? 3,
-                        " max agents"
-                      ] }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", "data-testid": "kpi-executing-agents", children: [
-                        "Executing: ",
-                        st2.executingAgentsCount ?? 0,
-                        " running"
-                      ] }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
-                        "Completed: ",
-                        st2.byStage?.done || 0
-                      ] })
-                    ] }) }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { "data-testid": "kpi-total-cost", children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "awsui-key-label", children: "Total Cost (USD)" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "h1", children: [
-                        "$",
-                        Number(st2.totalCostUsd || 0).toFixed(4)
-                      ] }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
-                        "Daily budget: $",
-                        f2.limits?.dailyBudgetUsd
-                      ] })
-                    ] }) }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { "data-testid": "kpi-tokens", children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "awsui-key-label", children: "Consumed Tokens" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "h1", children: Number(st2.tokens?.total || 0).toLocaleString() }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
-                        "In: ",
-                        Number(st2.tokens?.input || 0).toLocaleString(),
-                        " \xB7 Out:",
-                        " ",
-                        Number(st2.tokens?.output || 0).toLocaleString(),
-                        " \xB7 Cache:",
-                        " ",
-                        Number(st2.tokens?.cached || 0).toLocaleString()
-                      ] })
-                    ] }) }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { "data-testid": "kpi-first-round", children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "awsui-key-label", children: "First-Round PR Approval" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "h1", children: [
-                        st2.reviewMetrics?.firstRoundApprovalRate ?? 100,
-                        "%"
-                      ] }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
-                        "Avg review rounds: ",
-                        st2.reviewMetrics?.averageReviewRounds ?? 0,
-                        " (max",
-                        " ",
-                        f2.limits?.maxReviewRounds ?? 3,
-                        ")"
-                      ] })
-                    ] }) })
-                  ] }),
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { "data-testid": "kpi-needs-human", children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "awsui-key-label", children: "Needs Human Queue" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "h2", children: (st2.needsHuman || []).length }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "small", color: "text-body-secondary", children: "Human gates awaiting action" })
-                  ] }) }),
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                    container_default,
-                    {
-                      id: "live-execution-tower",
-                      "data-testid": "live-execution-tower",
-                      header: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                        Header2,
-                        {
-                          variant: "h2",
-                          description: "Real-time execution slots, active tasks with workspaces, and human intervention queue.",
-                          actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { direction: "horizontal", size: "xs", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { variant: "normal", onClick: () => setActiveTab("board"), children: "View Kanban Board" }) }),
-                          children: [
-                            "Control Tower \u2014 Live Executing Slots (",
-                            st2.executingAgentsCount ?? 0,
-                            " / ",
-                            f2.limits?.maxConcurrentAgents ?? 3,
-                            ")"
-                          ]
-                        }
-                      ),
-                      children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "m", children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "0.75rem" }, children: (st2.tasks || []).filter((t4) => t4.stage !== "done" && t4.stage !== "aborted" && t4.stage !== "merge" && t4.stage !== "triage" && t4.needs_human === 0).length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: "1rem", background: "#0b1320", borderRadius: "6px", border: "1px dashed #334155", color: "#94a3b8" }, children: [
-                          "\u26A1 No agents actively executing right now. Ready capacity: ",
-                          Math.max(0, (f2.limits?.maxConcurrentAgents ?? 3) - (st2.executingAgentsCount ?? 0)),
-                          " slot(s) free."
-                        ] }) : (st2.tasks || []).filter((t4) => t4.stage !== "done" && t4.stage !== "aborted" && t4.stage !== "merge" && t4.stage !== "triage" && t4.needs_human === 0).map((t4) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                          "div",
-                          {
-                            style: {
-                              padding: "0.75rem",
-                              background: "#0f172a",
-                              border: "1px solid #0284c7",
-                              borderRadius: "6px",
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: "0.4rem"
-                            },
-                            children: [
-                              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" }, children: [
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "blue", children: "EXECUTING" }),
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: "0.75rem", color: "#94a3b8" }, children: [
-                                  "Stage: ",
-                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: t4.stage })
-                                ] })
-                              ] }),
-                              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                                "a",
-                                {
-                                  id: `tower-ticket-link-${t4.issue_number}`,
-                                  href: getTicketExternalUrl(t4),
-                                  target: "_blank",
-                                  rel: "noreferrer",
-                                  style: { color: "#60a5fa", fontWeight: 700, textDecoration: "none", fontSize: "0.9rem" },
-                                  children: [
-                                    "#",
-                                    t4.issue_number,
-                                    " ",
-                                    t4.title,
-                                    " \u2197"
-                                  ]
-                                }
-                              ),
-                              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: "0.76rem", color: "#cbd5e1" }, children: [
-                                "Branch: ",
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: t4.branch_name || `factory/issue-${t4.issue_number}` })
-                              ] }),
-                              t4.workspace_path && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: "0.72rem", color: "#64748b", wordBreak: "break-all" }, children: [
-                                "Workspace: ",
-                                t4.workspace_path
-                              ] })
-                            ]
-                          },
-                          t4.execution_key
-                        )) }),
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: "1rem", flexWrap: "wrap", alignItems: "center", padding: "0.5rem 0", borderTop: "1px solid #1e293b" }, children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: "0.85rem", color: "#cbd5e1" }, children: [
-                            "\u{1F4E5} ",
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Triage Backlog Queue:" }),
-                            " ",
-                            (st2.tasks || []).filter((t4) => t4.stage === "triage" && t4.needs_human === 0).length,
-                            " ticket(s) waiting for available slots"
-                          ] }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: "0.85rem", color: "#cbd5e1" }, children: [
-                            "\u23F3 ",
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Awaiting PR Merge:" }),
-                            " ",
-                            (st2.tasks || []).filter((t4) => t4.stage === "merge").length,
-                            " ticket(s)"
-                          ] }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: "0.85rem", color: (st2.needsHuman || []).length > 0 ? "#f59e0b" : "#10b981", fontWeight: 600 }, children: [
-                            "\u{1F64B} ",
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Awaiting Human Input:" }),
-                            " ",
-                            (st2.needsHuman || []).length,
-                            " agent(s)"
-                          ] })
-                        ] })
-                      ] })
-                    }
-                  ),
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Grid, { gridDefinition: [{ colspan: 6 }, { colspan: 6 }], children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                      table_default,
-                      {
-                        header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Usage & Cost by Runtime" }),
-                        columnDefinitions: [
-                          { id: "rt", header: "Runtime", cell: (item) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: item.rt }) },
-                          { id: "events", header: "Events", cell: (item) => item.events },
-                          { id: "in", header: "Input Tokens", cell: (item) => item.inputTokens },
-                          { id: "out", header: "Output Tokens", cell: (item) => item.outputTokens },
-                          { id: "cache", header: "Cached", cell: (item) => item.cachedTokens },
-                          { id: "cost", header: "Cost (USD)", cell: (item) => `$${item.costUsd.toFixed(4)}` }
-                        ],
-                        items: Object.entries(st2.byRuntime || {}).map(([rt, d3]) => ({ rt, ...d3 })),
-                        empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { textAlign: "center", children: "No runtime telemetry events recorded yet" })
-                      }
-                    ),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                      table_default,
-                      {
-                        header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Usage & Cost by Model" }),
-                        columnDefinitions: [
-                          { id: "model", header: "Model", cell: (item) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: item.model }) },
-                          { id: "events", header: "Events", cell: (item) => item.events },
-                          { id: "in", header: "Input Tokens", cell: (item) => item.inputTokens },
-                          { id: "out", header: "Output Tokens", cell: (item) => item.outputTokens },
-                          { id: "cost", header: "Cost (USD)", cell: (item) => `$${item.costUsd.toFixed(4)}` }
-                        ],
-                        items: Object.entries(st2.byModel || {}).map(([model, d3]) => ({ model, ...d3 })),
-                        empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { textAlign: "center", children: "No model telemetry events recorded yet" })
-                      }
-                    )
-                  ] })
-                ] }) }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { id: "tab-board", style: { display: activeTab === "board" ? "block" : "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "l", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                    container_default,
-                    {
-                      header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                        Header2,
-                        {
-                          variant: "h2",
-                          description: "Monitor tickets from GitHub Issues, Jira, and Asana with custom pickup trigger combinations.",
-                          children: "Monitored Issue Trackers & Cron Poller"
-                        }
-                      ),
-                      children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "m", children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ColumnLayout2, { columns: 4, children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Tracker Provider", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                            "select",
-                            {
-                              id: "proj-provider-select",
-                              value: projProvider,
-                              onChange: (e3) => setProjProvider(e3.target.value),
-                              style: {
-                                width: "100%",
-                                padding: "0.45rem",
-                                background: "#0f172a",
-                                color: "#fff",
-                                border: "1px solid #334155",
-                                borderRadius: "4px"
-                              },
-                              children: [
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "github", children: "github (GitHub Issues)" }),
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "jira", children: "jira (Jira Cloud / Server)" }),
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "asana", children: "asana (Asana Tasks)" }),
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "linear", children: "linear (Linear Project Issues)" })
-                              ]
-                            }
-                          ) }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Target Repository (owner/repo)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                            "input",
-                            {
-                              type: "text",
-                              id: "proj-repo-input",
-                              value: projRepo,
-                              onChange: (e3) => setProjRepo(e3.target.value),
-                              placeholder: "brenoacker/my-existing-repo",
-                              style: {
-                                width: "100%",
-                                padding: "0.45rem",
-                                background: "#0f172a",
-                                color: "#fff",
-                                border: "1px solid #334155",
-                                borderRadius: "4px"
-                              }
-                            }
-                          ) }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Default Branch", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                            "input",
-                            {
-                              type: "text",
-                              id: "proj-branch-input",
-                              value: projBranch,
-                              onChange: (e3) => setProjBranch(e3.target.value),
-                              style: {
-                                width: "100%",
-                                padding: "0.45rem",
-                                background: "#0f172a",
-                                color: "#fff",
-                                border: "1px solid #334155",
-                                borderRadius: "4px"
-                              }
-                            }
-                          ) }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Target Status / Section Filter", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                            "input",
-                            {
-                              type: "text",
-                              id: "proj-status-filter-input",
-                              value: projStatusFilter,
-                              onChange: (e3) => setProjStatusFilter(e3.target.value),
-                              placeholder: "Ready for Agent",
-                              style: {
-                                width: "100%",
-                                padding: "0.45rem",
-                                background: "#0f172a",
-                                color: "#fff",
-                                border: "1px solid #334155",
-                                borderRadius: "4px"
-                              }
-                            }
-                          ) })
-                        ] }),
-                        (projProvider === "jira" || projProvider === "asana") && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ColumnLayout2, { columns: 2, children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                            FormField,
-                            {
-                              label: projProvider === "jira" ? "Jira Project Key (e.g. FAC)" : "Asana Project GID (e.g. 120055)",
-                              children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                                "input",
-                                {
-                                  type: "text",
-                                  id: "proj-tracker-key-input",
-                                  value: projTrackerKey,
-                                  onChange: (e3) => setProjTrackerKey(e3.target.value),
-                                  placeholder: projProvider === "jira" ? "FAC" : "120055",
-                                  style: {
-                                    width: "100%",
-                                    padding: "0.45rem",
-                                    background: "#0f172a",
-                                    color: "#fff",
-                                    border: "1px solid #334155",
-                                    borderRadius: "4px"
-                                  }
-                                }
-                              )
-                            }
-                          ),
-                          projProvider === "jira" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Custom Jira JQL Override (optional)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                            "input",
-                            {
-                              type: "text",
-                              id: "proj-jql-input",
-                              value: projJql,
-                              onChange: (e3) => setProjJql(e3.target.value),
-                              placeholder: 'project = "FAC" AND status = "Ready for Agent"',
-                              style: {
-                                width: "100%",
-                                padding: "0.45rem",
-                                background: "#0f172a",
-                                color: "#fff",
-                                border: "1px solid #334155",
-                                borderRadius: "4px"
-                              }
-                            }
-                          ) })
-                        ] }),
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ColumnLayout2, { columns: 4, children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Required Flags / Labels / Tags (AND)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                            "input",
-                            {
-                              type: "text",
-                              id: "proj-required-labels-input",
-                              value: projRequiredLabels,
-                              onChange: (e3) => setProjRequiredLabels(e3.target.value),
-                              placeholder: "agent-ready, approved",
-                              style: {
-                                width: "100%",
-                                padding: "0.45rem",
-                                background: "#0f172a",
-                                color: "#fff",
-                                border: "1px solid #334155",
-                                borderRadius: "4px"
-                              }
-                            }
-                          ) }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Excluded Blocker Flags / Labels", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                            "input",
-                            {
-                              type: "text",
-                              id: "proj-excluded-labels-input",
-                              value: projExcludedLabels,
-                              onChange: (e3) => setProjExcludedLabels(e3.target.value),
-                              placeholder: "blocked, manual-only",
-                              style: {
-                                width: "100%",
-                                padding: "0.45rem",
-                                background: "#0f172a",
-                                color: "#fff",
-                                border: "1px solid #334155",
-                                borderRadius: "4px"
-                              }
-                            }
-                          ) }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Required Custom Fields (key=value)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                            "input",
-                            {
-                              type: "text",
-                              id: "proj-custom-fields-input",
-                              value: projCustomFields,
-                              onChange: (e3) => setProjCustomFields(e3.target.value),
-                              placeholder: "AI_Allowed=true",
-                              style: {
-                                width: "100%",
-                                padding: "0.45rem",
-                                background: "#0f172a",
-                                color: "#fff",
-                                border: "1px solid #334155",
-                                borderRadius: "4px"
-                              }
-                            }
-                          ) }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Assignee Trigger Rule", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                            "input",
-                            {
-                              type: "text",
-                              id: "proj-assignee-filter-input",
-                              value: projAssigneeFilter,
-                              onChange: (e3) => setProjAssigneeFilter(e3.target.value),
-                              placeholder: "any or unassigned",
-                              style: {
-                                width: "100%",
-                                padding: "0.45rem",
-                                background: "#0f172a",
-                                color: "#fff",
-                                border: "1px solid #334155",
-                                borderRadius: "4px"
-                              }
-                            }
-                          ) })
-                        ] }),
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }, children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { variant: "primary", id: "proj-add-btn", onClick: addMonitoredProject, children: "Add Monitored Repository" }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { id: "sync-repos-btn", onClick: syncAllMonitoredProjects, children: "Sync Issues from All Monitored Repos" }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: "0.4rem", alignItems: "center" }, children: [
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { style: { fontSize: "0.82rem", color: "#9ba7b6" }, children: [
-                              "Cron Interval (s):",
-                              " ",
-                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                                "input",
-                                {
-                                  type: "number",
-                                  id: "scheduler-interval-input",
-                                  value: schedulerInterval,
-                                  onChange: (e3) => setSchedulerInterval(e3.target.value),
-                                  style: {
-                                    width: "75px",
-                                    padding: "0.3rem",
-                                    background: "#0f172a",
-                                    color: "#fff",
-                                    border: "1px solid #334155",
-                                    borderRadius: "4px"
-                                  }
-                                }
-                              )
-                            ] }),
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { id: "scheduler-run-btn", onClick: () => updateScheduler(true, true), children: "Save Interval & Run Cron" })
-                          ] }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { id: "proj-feedback", style: { fontSize: "0.85rem", color: "#93c5fd" }, children: projFeedback })
-                        ] }),
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { id: "projects-table", style: { width: "100%", borderCollapse: "collapse" }, children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { style: { borderBottom: "1px solid #2b3646", textAlign: "left" }, children: [
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Repository" }),
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Provider" }),
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Tracker Filter" }),
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Branch" }),
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Status" }),
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Last ETag / Sync" }),
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Actions" })
-                          ] }) }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: (state5?.projects || []).map((p3) => {
-                            const prov = (p3.provider || "github").toLowerCase();
-                            const etagKey = prov === "github" ? p3.repo : `${prov}:${p3.repo}`;
-                            const tc = p3.trackerConfig || {};
-                            const triggerParts = [];
-                            if (prov === "jira") {
-                              triggerParts.push(`Key: ${tc.projectKey || "-"}`);
-                              triggerParts.push(`Stage: ${tc.statusFilter || "Ready for Agent"}`);
-                            } else if (prov === "asana") {
-                              triggerParts.push(`GID: ${tc.projectGid || "-"}`);
-                              triggerParts.push(`Stage: ${tc.statusFilter || "Ready for Agent"}`);
-                            } else if (prov === "linear") {
-                              triggerParts.push(`Project: ${tc.projectKey || p3.repo}`);
-                              triggerParts.push(`Stage: ${tc.statusFilter || "Ready for Agent"}`);
-                            } else {
-                              triggerParts.push(tc.statusFilter ? `Stage: ${tc.statusFilter}` : "state=open");
-                            }
-                            if (Array.isArray(tc.requiredLabels) && tc.requiredLabels.length > 0) {
-                              triggerParts.push(`+Flags: [${tc.requiredLabels.join(", ")}]`);
-                            }
-                            if (Array.isArray(tc.excludedLabels) && tc.excludedLabels.length > 0) {
-                              triggerParts.push(`-Exclude: [${tc.excludedLabels.join(", ")}]`);
-                            }
-                            if (tc.requiredCustomFields && Object.keys(tc.requiredCustomFields).length > 0) {
-                              const cfStr = Object.entries(tc.requiredCustomFields).map(([k4, v3]) => `${k4}=${v3}`).join(", ");
-                              triggerParts.push(`+Fields: [${cfStr}]`);
-                            }
-                            if (tc.assigneeFilter && tc.assigneeFilter !== "any") {
-                              triggerParts.push(`Assignee: ${tc.assigneeFilter}`);
-                            }
-                            const filterDesc = triggerParts.join(" \xB7 ");
-                            return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                              "tr",
-                              {
-                                "data-testid": `project-row-${p3.repo}`,
-                                style: { borderBottom: "1px solid #1e293b" },
-                                children: [
-                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: p3.repo }) }),
-                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: prov === "jira" ? "blue" : prov === "asana" ? "red" : prov === "linear" ? "severity-medium" : "grey", children: prov.toUpperCase() }) }),
-                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: filterDesc }) }),
-                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: p3.defaultBranch || "main" }) }),
-                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusIndicator2, { type: p3.paused ? "stopped" : "success", children: p3.paused ? "PAUSED" : "MONITORING" }) }),
-                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: etagMap[etagKey] || etagMap[p3.repo] || "-" }) }),
-                                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { style: { padding: "0.5rem", display: "flex", gap: "0.4rem" }, children: [
-                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                                      "button",
-                                      {
-                                        "data-testid": `toggle-proj-${p3.repo}`,
-                                        onClick: () => toggleProjectPause(p3),
-                                        style: {
-                                          background: "#334155",
-                                          color: "#fff",
-                                          border: "none",
-                                          borderRadius: "4px",
-                                          padding: "0.3rem 0.65rem",
-                                          cursor: "pointer"
-                                        },
-                                        children: p3.paused ? "Resume" : "Pause"
-                                      }
-                                    ),
-                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                                      "button",
-                                      {
-                                        "data-testid": `remove-proj-${p3.repo}`,
-                                        onClick: () => removeProject(p3.repo),
-                                        style: {
-                                          background: "#dc2626",
-                                          color: "#fff",
-                                          border: "none",
-                                          borderRadius: "4px",
-                                          padding: "0.3rem 0.65rem",
-                                          cursor: "pointer"
-                                        },
-                                        children: "Remove"
-                                      }
-                                    )
-                                  ] })
-                                ]
-                              },
-                              `${prov}:${p3.repo}`
-                            );
-                          }) })
-                        ] })
-                      ] })
-                    }
-                  ),
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Ticket Intake & Automatic Classifier" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "m", children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ColumnLayout2, { columns: 4, children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Target Repository (owner/repo)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                        "input",
-                        {
-                          type: "text",
-                          id: "intake-repo",
-                          value: intakeRepo,
-                          onChange: (e3) => setIntakeRepo(e3.target.value),
-                          placeholder: "brenoacker/agentic-factory",
-                          style: {
-                            width: "100%",
-                            padding: "0.45rem",
-                            background: "#0f172a",
-                            color: "#fff",
-                            border: "1px solid #334155",
-                            borderRadius: "4px"
-                          }
-                        }
-                      ) }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Issue #", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                        "input",
-                        {
-                          type: "number",
-                          id: "intake-issue-number",
-                          value: intakeIssueNum,
-                          onChange: (e3) => setIntakeIssueNum(e3.target.value),
-                          placeholder: "101",
-                          style: {
-                            width: "100%",
-                            padding: "0.45rem",
-                            background: "#0f172a",
-                            color: "#fff",
-                            border: "1px solid #334155",
-                            borderRadius: "4px"
-                          }
-                        }
-                      ) }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Ticket Title", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                        "input",
-                        {
-                          type: "text",
-                          id: "intake-title",
-                          value: intakeTitle,
-                          onChange: (e3) => setIntakeTitle(e3.target.value),
-                          placeholder: "[feature] Add webhook signature check",
-                          style: {
-                            width: "100%",
-                            padding: "0.45rem",
-                            background: "#0f172a",
-                            color: "#fff",
-                            border: "1px solid #334155",
-                            borderRadius: "4px"
-                          }
-                        }
-                      ) }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Explicit Type (optional)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                        "select",
-                        {
-                          id: "intake-type",
-                          value: intakeType,
-                          onChange: (e3) => setIntakeType(e3.target.value),
-                          style: {
-                            width: "100%",
-                            padding: "0.45rem",
-                            background: "#0f172a",
-                            color: "#fff",
-                            border: "1px solid #334155",
-                            borderRadius: "4px"
-                          },
-                          children: [
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "", children: "Auto-detect from title/body" }),
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "feature", children: "feature" }),
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "bug", children: "bug" }),
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "investigation", children: "investigation" }),
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "discovery", children: "discovery" }),
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "chore", children: "chore" })
-                          ]
-                        }
-                      ) })
-                    ] }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Description / Context", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                      "input",
-                      {
-                        type: "text",
-                        id: "intake-body",
-                        value: intakeBody,
-                        onChange: (e3) => setIntakeBody(e3.target.value),
-                        placeholder: "Problem statement, steps to reproduce, or investigation question",
-                        style: {
-                          width: "100%",
-                          padding: "0.45rem",
-                          background: "#0f172a",
-                          color: "#fff",
-                          border: "1px solid #334155",
-                          borderRadius: "4px"
-                        }
-                      }
-                    ) }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: "1rem" }, children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { variant: "primary", id: "intake-submit-btn", onClick: submitTicketIntake, children: "Intake & Classify Ticket" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { id: "intake-feedback", style: { fontSize: "0.85rem", color: "#93c5fd" }, children: intakeFeedback })
-                    ] })
-                  ] }) }),
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Agents Waiting for Human Input & Clarification" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "waiting-human-screen", "data-testid": "waiting-human-screen", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "needs-human-list", children: (st2.needsHuman || []).length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { color: "text-body-secondary", children: "No agents currently waiting for human input or clarification." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "m", children: st2.needsHuman.map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                    "div",
-                    {
-                      "data-testid": `needs-human-card-${item.issueNumber}`,
-                      style: {
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "0.65rem",
-                        padding: "0.85rem",
-                        background: "#0f172a",
-                        borderRadius: "6px",
-                        border: "1px solid #f59e0b"
-                      },
-                      children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" }, children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "severity-medium", children: "WAITING FOR HUMAN" }),
-                            " ",
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                              "a",
-                              {
-                                id: `human-ticket-link-${item.issueNumber}`,
-                                "data-testid": `human-ticket-link-${item.issueNumber}`,
-                                href: getTicketExternalUrl(st2.tasks?.find((x6) => x6.execution_key === item.executionKey) || item),
-                                target: "_blank",
-                                rel: "noreferrer",
-                                style: { color: "#60a5fa", textDecoration: "underline", fontWeight: 700 },
-                                children: [
-                                  "#",
-                                  item.issueNumber,
-                                  " ",
-                                  item.title || item.executionKey,
-                                  " \u2197"
-                                ]
-                              }
-                            ),
-                            " ",
-                            "[",
-                            item.type,
-                            "] \u2014 Stage:",
-                            " ",
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "blue", children: item.stage })
-                          ] }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
-                            "Issue #",
-                            item.issueNumber
-                          ] })
-                        ] }),
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                          "div",
-                          {
-                            "data-testid": `human-question-${item.issueNumber}`,
-                            style: {
-                              padding: "0.5rem 0.75rem",
-                              background: "rgba(245, 158, 11, 0.12)",
-                              borderRadius: "4px",
-                              borderLeft: "4px solid #f59e0b",
-                              color: "#fef08a",
-                              fontSize: "0.9rem"
-                            },
-                            children: [
-                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "\u26A0\uFE0F Clarification Needed:" }),
-                              " ",
-                              item.question || "Agent requested human assistance to proceed"
-                            ]
-                          }
-                        ),
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: "0.75rem", alignItems: "flex-end" }, children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Operator Clarification / Missing Requirements", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                            "input",
-                            {
-                              type: "text",
-                              id: `human-reply-input-${item.issueNumber}`,
-                              "data-testid": `human-reply-input-${item.issueNumber}`,
-                              value: humanReplies[item.executionKey] || "",
-                              onChange: (e3) => setHumanReplies({
-                                ...humanReplies,
-                                [item.executionKey]: e3.target.value
-                              }),
-                              placeholder: "Type missing API specs, parameters, or clarification here...",
-                              style: {
-                                width: "100%",
-                                padding: "0.5rem",
-                                background: "#0c131f",
-                                color: "#fff",
-                                border: "1px solid #475569",
-                                borderRadius: "4px",
-                                fontSize: "0.9rem"
-                              }
-                            }
-                          ) }) }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { direction: "horizontal", size: "xs", children: [
-                            item.stage === "merge" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                              button_default2,
-                              {
-                                variant: "primary",
-                                id: `human-check-pr-btn-${item.issueNumber}`,
-                                "data-testid": `human-check-pr-btn-${item.issueNumber}`,
-                                onClick: () => checkTaskPr(item.executionKey),
-                                children: "Check PR Merge Status & Sync"
-                              }
-                            ) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                              button_default2,
-                              {
-                                variant: "primary",
-                                id: `human-reply-btn-${item.issueNumber}`,
-                                "data-testid": `human-reply-btn-${item.issueNumber}`,
-                                onClick: () => submitHumanReply(item.executionKey, humanReplies[item.executionKey]),
-                                children: "Send Reply & Resume Agent"
-                              }
-                            ),
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                              button_default2,
-                              {
-                                variant: "normal",
-                                id: `approve-btn-${item.issueNumber}`,
-                                "data-testid": `approve-btn-${item.issueNumber}`,
-                                onClick: () => dispatchTicketKey(item.executionKey, true),
-                                children: "1-Click Approve & Advance"
-                              }
-                            )
-                          ] })
-                        ] })
-                      ]
+              }
+            ) }),
+            notifications: stalledList.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "stalled-alarm-banner", "data-testid": "stalled-alarm-banner", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              alert_default,
+              {
+                type: "error",
+                dismissible: false,
+                header: `STALLED TASK ALARM \u2014 ${stalledList.length} TASK(S) IDLE BEYOND ${f2.limits?.stallThresholdMinutes || 30} MIN THRESHOLD`,
+                children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "xs", children: stalledList.map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                  "div",
+                  {
+                    "data-testid": `alarm-item-${item.issueNumber}`,
+                    style: {
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: "1rem",
+                      padding: "0.5rem",
+                      background: "rgba(127, 29, 29, 0.4)",
+                      borderRadius: "6px",
+                      border: "1px solid #ef4444"
                     },
-                    item.executionKey
-                  )) }) }) }) }),
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                    "div",
-                    {
-                      id: "kanban-board",
-                      style: {
-                        display: "grid",
-                        gap: "0.75rem",
-                        gridTemplateColumns: "repeat(auto-fit, minmax(195px, 1fr))"
-                      },
-                      children: STAGES.map((col) => {
-                        const items = (st2.tasks || []).filter((t4) => t4.stage === col);
-                        return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                          container_default,
-                          {
-                            header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h3", counter: `(${items.length})`, children: col }),
-                            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "xs", children: items.map((t4) => {
-                              const stalledInfo = stalledMap[t4.execution_key];
-                              return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                                "div",
-                                {
-                                  "data-testid": `task-card-${t4.issue_number}`,
-                                  style: {
-                                    padding: "0.65rem",
-                                    background: "#0f172a",
-                                    borderRadius: "6px",
-                                    border: stalledInfo ? "2px solid #ef4444" : "1px solid #2b3646",
-                                    fontSize: "0.82rem"
-                                  },
-                                  children: [
-                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                                      "a",
-                                      {
-                                        id: `kanban-ticket-link-${t4.issue_number}`,
-                                        "data-testid": `kanban-ticket-link-${t4.issue_number}`,
-                                        href: getTicketExternalUrl(t4),
-                                        target: "_blank",
-                                        rel: "noreferrer",
-                                        style: { color: "#93c5fd", textDecoration: "none" },
-                                        onMouseEnter: (e3) => e3.currentTarget.style.textDecoration = "underline",
-                                        onMouseLeave: (e3) => e3.currentTarget.style.textDecoration = "none",
-                                        children: [
-                                          "#",
-                                          t4.issue_number,
-                                          " ",
-                                          t4.title,
-                                          " \u2197"
-                                        ]
-                                      }
-                                    ) }),
-                                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                                      "div",
-                                      {
-                                        style: {
-                                          display: "flex",
-                                          gap: "0.35rem",
-                                          flexWrap: "wrap",
-                                          margin: "0.35rem 0"
-                                        },
-                                        children: [
-                                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                                            "span",
-                                            {
-                                              "data-testid": `task-repo-${t4.issue_number}`,
-                                              style: {
-                                                background: "#312e81",
-                                                color: "#e0e7ff",
-                                                padding: "0.1rem 0.45rem",
-                                                borderRadius: "4px",
-                                                fontSize: "0.72rem",
-                                                fontWeight: 600
-                                              },
-                                              children: t4.repo
-                                            }
-                                          ),
-                                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                                            "span",
-                                            {
-                                              "data-testid": `task-type-${t4.issue_number}`,
-                                              style: {
-                                                background: "#1e293b",
-                                                color: "#f8fafc",
-                                                padding: "0.1rem 0.45rem",
-                                                borderRadius: "4px",
-                                                fontSize: "0.72rem",
-                                                fontWeight: 600
-                                              },
-                                              children: t4.type
-                                            }
-                                          ),
-                                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                                            "span",
-                                            {
-                                              "data-testid": `task-stage-${t4.issue_number}`,
-                                              style: {
-                                                background: t4.needs_human ? "#78350f" : "#064e3b",
-                                                color: "#fff",
-                                                padding: "0.1rem 0.45rem",
-                                                borderRadius: "4px",
-                                                fontSize: "0.72rem",
-                                                fontWeight: 600
-                                              },
-                                              children: t4.stage
-                                            }
-                                          ),
-                                          stalledInfo && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                                            "span",
-                                            {
-                                              "data-testid": `task-stalled-badge-${t4.issue_number}`,
-                                              style: {
-                                                background: "#991b1b",
-                                                color: "#fff",
-                                                padding: "0.1rem 0.45rem",
-                                                borderRadius: "4px",
-                                                fontSize: "0.72rem",
-                                                fontWeight: 700
-                                              },
-                                              children: [
-                                                "STALLED (",
-                                                stalledInfo.idleMinutes,
-                                                "m)"
-                                              ]
-                                            }
-                                          )
-                                        ]
-                                      }
-                                    ),
-                                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { style: { color: "#9ba7b6" }, children: [
-                                      t4.runtime,
-                                      " / ",
-                                      t4.model,
-                                      " \xB7 $",
-                                      Number(t4.cost_usd || 0).toFixed(4)
-                                    ] }),
-                                    t4.branch_name && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: "0.72rem", color: "#9ba7b6", marginTop: "0.2rem" }, "data-testid": `task-branch-${t4.issue_number}`, children: [
-                                      "\u{1F33F} Branch: ",
-                                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { style: { color: "#38bdf8" }, children: t4.branch_name })
-                                    ] }),
-                                    t4.workspace_path && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: "0.68rem", color: "#64748b", marginTop: "0.1rem", wordBreak: "break-all" }, "data-testid": `task-ws-${t4.issue_number}`, children: [
-                                      "\u{1F4C1} Workspace: ",
-                                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: t4.workspace_path })
-                                    ] }),
-                                    t4.deliverable_url && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: "0.35rem", padding: "0.25rem 0.4rem", background: "#0f172a", borderRadius: "4px", border: "1px solid #1e293b" }, "data-testid": `task-deliverable-${t4.issue_number}`, children: [
-                                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: "0.72rem", fontWeight: 600, color: t4.deliverable_type === "pull_request" ? "#38bdf8" : "#a78bfa" }, children: t4.deliverable_type === "pull_request" ? "\u{1F517} Pull Request: " : "\u{1F4C4} Research Doc: " }),
-                                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                                        "a",
-                                        {
-                                          href: t4.deliverable_url.startsWith("http") ? t4.deliverable_url : `#`,
-                                          target: t4.deliverable_url.startsWith("http") ? "_blank" : "_self",
-                                          rel: "noreferrer",
-                                          style: { fontSize: "0.72rem", color: "#38bdf8", textDecoration: "underline" },
-                                          children: t4.deliverable_ref || t4.deliverable_url
-                                        }
-                                      )
-                                    ] }),
-                                    t4.stage === "merge" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                                      "div",
-                                      {
-                                        "data-testid": `pr-status-box-${t4.issue_number}`,
-                                        style: {
-                                          marginTop: "0.35rem",
-                                          padding: "0.35rem 0.5rem",
-                                          background: "#1e293b",
-                                          border: "1px solid #3b82f6",
-                                          borderRadius: "4px",
-                                          fontSize: "0.75rem",
-                                          color: "#93c5fd"
-                                        },
-                                        children: [
-                                          "\u23F3 ",
-                                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Awaiting GitHub Merge:" }),
-                                          " Pull Request is open. Awaiting review and merge on GitHub."
-                                        ]
-                                      }
-                                    ),
-                                    t4.stage !== "done" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: "0.45rem" }, children: t4.stage === "merge" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                                      button_default2,
-                                      {
-                                        variant: "primary",
-                                        id: `check-pr-btn-${t4.issue_number}`,
-                                        "data-testid": `check-pr-btn-${t4.issue_number}`,
-                                        onClick: () => checkTaskPr(t4.execution_key),
-                                        children: "Check PR Merge Status & Sync"
-                                      }
-                                    ) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                                      button_default2,
-                                      {
-                                        variant: "primary",
-                                        "data-testid": `dispatch-btn-${t4.issue_number}`,
-                                        onClick: () => dispatchTicketKey(t4.execution_key, t4.needs_human === 1),
-                                        children: t4.needs_human === 1 ? "Approve & Continue" : "Run Workflow"
-                                      }
-                                    ) })
-                                  ]
-                                },
-                                t4.execution_key
-                              );
-                            }) })
-                          },
-                          col
-                        );
-                      })
-                    }
-                  )
-                ] }) }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { id: "tab-workflows", style: { display: activeTab === "workflows" ? "block" : "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "l", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                    container_default,
-                    {
-                      header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                        Header2,
-                        {
-                          variant: "h2",
-                          description: "Interactive Mermaid visual flowchart and live stage editor. Modifying stages updates the diagram in real time.",
-                          children: "Visual Workflow Designer & Stage Flowchart"
-                        }
-                      ),
-                      children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "m", children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ColumnLayout2, { columns: 3, children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Active Workflow", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                            "select",
-                            {
-                              id: "wf-editor-select",
-                              value: selectedWf,
-                              onChange: (e3) => handleSelectWorkflow(e3.target.value),
-                              style: {
-                                width: "100%",
-                                padding: "0.45rem",
-                                background: "#0f172a",
-                                color: "#fff",
-                                border: "1px solid #334155",
-                                borderRadius: "4px"
-                              },
-                              children: [
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "feature", children: "feature (Feature Workflow)" }),
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "bug", children: "bug (Bug Fix Workflow)" }),
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "investigation", children: "investigation (Investigation Spike)" }),
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "discovery", children: "discovery (PRD Discovery Workflow)" }),
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "chore", children: "chore (Maintenance Chore)" })
-                              ]
-                            }
-                          ) }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Autonomy Level", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                            "select",
-                            {
-                              id: "wf-autonomy-select",
-                              value: currentWfObj?.autonomy || "gated",
-                              onChange: (e3) => updateWfAutonomy(e3.target.value),
-                              style: {
-                                width: "100%",
-                                padding: "0.45rem",
-                                background: "#0f172a",
-                                color: "#fff",
-                                border: "1px solid #334155",
-                                borderRadius: "4px"
-                              },
-                              children: [
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "manual", children: "manual (Every stage requires human run)" }),
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "triage", children: "triage (Auto-triage only)" }),
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "gated", children: "gated (Autonomous coding, pauses at human gates)" }),
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "auto-low", children: "auto-low (Auto-merge low impact on approval)" })
-                              ]
-                            }
-                          ) }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Review Rounds Limit", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                            "input",
-                            {
-                              type: "number",
-                              id: "wf-review-rounds-input",
-                              value: currentWfObj?.maxReviewRounds || 3,
-                              onChange: (e3) => {
-                                if (!currentWfObj) return;
-                                const next3 = structuredClone(currentWfObj);
-                                next3.maxReviewRounds = Number(e3.target.value);
-                                setCurrentWfObj(next3);
-                                setWfJson(JSON.stringify(next3, null, 2));
-                              },
-                              style: {
-                                width: "100%",
-                                padding: "0.45rem",
-                                background: "#0f172a",
-                                color: "#fff",
-                                border: "1px solid #334155",
-                                borderRadius: "4px"
-                              }
-                            }
-                          ) })
-                        ] }),
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { margin: { top: "s", bottom: "s" }, children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }, children: [
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "h3", children: "Visual Stage Flow (Mermaid Diagram)" }),
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { direction: "horizontal", size: "xs", children: [
-                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "severity-medium", children: "Amber = Human Gate" }),
-                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "blue", children: "Blue = Automated Stage" }),
-                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "green", children: "Green = Terminal Done" })
-                            ] })
+                    children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "red", children: item.severity.toUpperCase() }),
+                        " ",
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: item.executionKey }),
+                        " \u2014 ",
+                        item.title,
+                        " [",
+                        item.type,
+                        "]",
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                          "Stage: ",
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: item.stage }),
+                          " \xB7 Idle for",
+                          " ",
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { children: [
+                            item.idleMinutes,
+                            "m"
                           ] }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MermaidRenderer, { code: mermaidCode, id: selectedWf })
-                        ] }),
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h3", children: "Modify Stages & Gates" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "s", children: (currentWfObj?.stages || []).map((stg, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                          "div",
-                          {
-                            style: {
-                              padding: "0.75rem",
-                              background: "#0c131f",
-                              border: stg.humanApproval || stg.mode === "human" ? "1px solid #f59e0b" : "1px solid #1f2937",
-                              borderRadius: "6px",
-                              display: "grid",
-                              gridTemplateColumns: "120px 140px 180px 1fr auto",
-                              gap: "0.75rem",
-                              alignItems: "center"
-                            },
-                            children: [
-                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { style: { color: "#60a5fa" }, children: [
-                                "#",
-                                idx + 1,
-                                " ",
-                                stg.id
-                              ] }) }),
-                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { style: { fontSize: "0.8rem", color: "#9ba7b6" }, children: [
-                                "Agent:",
-                                " ",
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                                  "select",
-                                  {
-                                    value: stg.agent || "builder",
-                                    onChange: (e3) => updateStageField(idx, "agent", e3.target.value),
-                                    style: {
-                                      padding: "0.25rem",
-                                      background: "#161d26",
-                                      color: "#fff",
-                                      border: "1px solid #334155",
-                                      borderRadius: "4px"
-                                    },
-                                    children: KNOWN_AGENTS.map((ag) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: ag, children: ag }, ag))
-                                  }
-                                )
-                              ] }) }),
-                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { style: { display: "flex", gap: "0.4rem", alignItems: "center", fontSize: "0.8rem" }, children: [
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                                  "input",
-                                  {
-                                    type: "checkbox",
-                                    checked: Boolean(stg.humanApproval || stg.mode === "human"),
-                                    onChange: (e3) => updateStageField(idx, "humanApproval", e3.target.checked)
-                                  }
-                                ),
-                                "Human Gate Pause"
-                              ] }) }),
-                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { style: { color: "#94a3b8" }, children: [
-                                "Skills: ",
-                                (stg.skills || []).join(", ")
-                              ] }) }),
-                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: stg.humanApproval || stg.mode === "human" ? "severity-medium" : "blue", children: stg.humanApproval || stg.mode === "human" ? "HUMAN" : "AUTO" }) })
-                            ]
-                          },
-                          `${stg.id}-${idx}`
-                        )) }) }),
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExpandableSection, { defaultExpanded: true, headerText: "Advanced: Raw Workflow JSON Editor", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "s", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                          "textarea",
-                          {
-                            id: "wf-editor-json",
-                            rows: 8,
-                            value: wfJson,
-                            onChange: (e3) => {
-                              setWfJson(e3.target.value);
-                              try {
-                                const parsed = JSON.parse(e3.target.value);
-                                setCurrentWfObj(parsed);
-                              } catch {
-                              }
-                            },
-                            style: {
-                              width: "100%",
-                              padding: "0.6rem",
-                              background: "#0f172a",
-                              color: "#f8fafc",
-                              border: "1px solid #334155",
-                              borderRadius: "4px",
-                              fontFamily: "monospace"
-                            }
-                          }
-                        ) }) }),
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap" }, children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(button_default2, { variant: "primary", id: "wf-editor-save-btn", onClick: saveWorkflowFromEditor, children: [
-                            "Validate & Save Workflow to workflows/",
-                            selectedWf,
-                            ".yaml"
-                          ] }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { style: { display: "flex", gap: "0.4rem", alignItems: "center", fontSize: "0.85rem" }, children: [
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                              "input",
-                              {
-                                type: "checkbox",
-                                id: "wf-editor-commit-check",
-                                checked: wfCommit,
-                                onChange: (e3) => setWfCommit(e3.target.checked)
-                              }
-                            ),
-                            "Commit change to git directly"
-                          ] }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { id: "wf-editor-status", style: { fontSize: "0.85rem", color: "#93c5fd" }, children: wfStatus })
+                          " \xB7 ",
+                          item.reason
                         ] })
-                      ] })
-                    }
-                  ),
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "workflows-list", children: Object.values(state5?.workflows || {}).map((wf) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                    "div",
-                    {
-                      className: "card",
-                      "data-testid": `workflow-card-${wf.id}`,
-                      style: { marginBottom: "1rem" },
-                      children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                        container_default,
-                        {
-                          header: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Header2, { variant: "h2", description: wf.description, children: [
-                            "Workflow: ",
-                            wf.id,
-                            " (",
-                            wf.label,
-                            ") \u2014 Autonomy: ",
-                            wf.autonomy
-                          ] }),
-                          children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", gap: "0.6rem", flexWrap: "wrap", alignItems: "center" }, children: (wf.stages || []).map((s3) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                            "div",
-                            {
-                              style: {
-                                padding: "0.6rem 0.85rem",
-                                background: "#0f172a",
-                                border: s3.humanApproval || s3.mode === "human" ? "1px solid #f59e0b" : "1px solid #2b3646",
-                                borderRadius: "6px",
-                                fontSize: "0.82rem"
-                              },
-                              children: [
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: s3.id }),
-                                " (",
-                                s3.humanApproval || s3.mode === "human" ? "HUMAN" : "AUTO",
-                                ")",
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
-                                "Agent: ",
-                                s3.agent,
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
-                                "Skills: ",
-                                (s3.skills || []).join(", ")
-                              ]
-                            },
-                            s3.id
-                          )) })
-                        }
-                      )
-                    },
-                    wf.id
-                  )) })
-                ] }) }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { id: "tab-runtimes", style: { display: activeTab === "runtimes" ? "block" : "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Runtime Router & Circuit Breaker" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { id: "circuit-table", style: { width: "100%", borderCollapse: "collapse" }, children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { style: { borderBottom: "1px solid #2b3646", textAlign: "left" }, children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Runtime" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Status" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Remaining Quota" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Consecutive Failures" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Last Error" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Action" })
-                  ] }) }),
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: (state5?.runtimeHealth || []).map((r3) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                    "tr",
-                    {
-                      "data-testid": `circuit-row-${r3.runtime}`,
-                      style: { borderBottom: "1px solid #1e293b" },
-                      children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: r3.runtime }) }),
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusIndicator2, { type: r3.status === "closed" ? "success" : "error", children: r3.status.toUpperCase() }) }),
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: r3.quota_remaining }),
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: r3.consecutive_failures }),
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: r3.last_error_code || "-" }),
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                      ] }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { direction: "horizontal", size: "xs", children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
                           button_default2,
                           {
                             variant: "primary",
-                            "data-testid": `reset-circuit-${r3.runtime}`,
-                            onClick: () => resetCircuit(r3.runtime),
-                            children: "Reset Circuit Breaker"
+                            "data-testid": `alarm-act-btn-${item.issueNumber}`,
+                            onClick: () => dispatchTicketKey(item.executionKey, item.needsHuman),
+                            children: "Act Now (Approve & Resume)"
                           }
-                        ) })
-                      ]
-                    },
-                    r3.runtime
-                  )) })
-                ] }) }) }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { id: "tab-agents", style: { display: activeTab === "agents" ? "block" : "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "l", children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                    "div",
-                    {
-                      id: "agents-grid",
-                      style: {
-                        display: "grid",
-                        gap: "1rem",
-                        gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))"
-                      },
-                      children: (state5?.agents || []).map((a3) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "card", "data-testid": `agent-card-${a3.id}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h3", children: a3.name }), children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "small", color: "text-body-secondary", children: a3.responsibility }),
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { margin: { top: "xs" }, variant: "small", children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Skills:" }),
-                          " ",
-                          (a3.skills || []).join(", ")
+                        ),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                          button_default2,
+                          {
+                            variant: "normal",
+                            "data-testid": `alarm-snooze-btn-${item.issueNumber}`,
+                            onClick: () => snoozeTaskAlarm(item.executionKey),
+                            children: "Snooze Alarm"
+                          }
+                        )
+                      ] })
+                    ]
+                  },
+                  item.executionKey
+                )) })
+              }
+            ) }) : void 0,
+            content: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+              ContentLayout,
+              {
+                header: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                  Header2,
+                  {
+                    variant: "h1",
+                    info: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { direction: "horizontal", size: "xs", children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                        "span",
+                        {
+                          id: "factory-status-badge",
+                          className: `badge ${f2.killSwitch ? "red" : "green"}`,
+                          style: {
+                            padding: "0.2rem 0.6rem",
+                            borderRadius: "6px",
+                            fontWeight: 700,
+                            fontSize: "0.78rem",
+                            background: f2.killSwitch ? "#7f1d1d" : "#064e3b",
+                            color: "#fff"
+                          },
+                          children: f2.killSwitch ? "PAUSED (KILL SWITCH)" : `ACTIVE (${String(f2.autonomy).toUpperCase()})`
+                        }
+                      ),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                        "span",
+                        {
+                          id: "header-alarm-badge",
+                          "data-testid": "header-alarm-badge",
+                          style: {
+                            padding: "0.2rem 0.6rem",
+                            borderRadius: "6px",
+                            fontWeight: 700,
+                            fontSize: "0.78rem",
+                            background: stalledList.length > 0 ? "#991b1b" : "#065f46",
+                            color: "#fff"
+                          },
+                          children: stalledList.length > 0 ? `${stalledList.length} STALLED ALARM(S)` : "0 ALARMS"
+                        }
+                      ),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                        "span",
+                        {
+                          id: "header-human-badge",
+                          "data-testid": "header-human-badge",
+                          style: {
+                            padding: "0.2rem 0.6rem",
+                            borderRadius: "6px",
+                            fontWeight: 700,
+                            fontSize: "0.78rem",
+                            background: (st2.needsHuman || []).length > 0 ? "#b45309" : "#1e293b",
+                            color: (st2.needsHuman || []).length > 0 ? "#fef3c7" : "#94a3b8"
+                          },
+                          children: (st2.needsHuman || []).length > 0 ? `${st2.needsHuman.length} WAITING HUMAN` : "0 WAITING HUMAN"
+                        }
+                      ),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                        "span",
+                        {
+                          id: "scheduler-status-badge",
+                          "data-testid": "scheduler-status-badge",
+                          style: {
+                            padding: "0.2rem 0.6rem",
+                            borderRadius: "6px",
+                            fontWeight: 600,
+                            fontSize: "0.75rem",
+                            background: "#1e293b",
+                            color: "#93c5fd"
+                          },
+                          children: scheduler.enabled ? `CRON: ACTIVE (${scheduler.intervalSeconds}s \xB7 #${scheduler.pollCount})` : `CRON: MANUAL (#${scheduler.pollCount || 0})`
+                        }
+                      )
+                    ] }),
+                    children: [
+                      activeTab === "overview" && "Overview & Telemetry",
+                      activeTab === "board" && "Board & Needs Human Queue",
+                      activeTab === "workflows" && "Visual Workflows & Factory as Code",
+                      activeTab === "runtimes" && "Runtimes, Router & Circuit Breaker",
+                      activeTab === "agents" && "Agents Catalog & Locked Skills",
+                      activeTab === "controls" && "Operational Controls, Deploy & Long-Term Brain"
+                    ]
+                  }
+                ),
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { id: "tab-overview", style: { display: activeTab === "overview" ? "block" : "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "l", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ColumnLayout2, { columns: 4, variant: "text-grid", children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { "data-testid": "kpi-total-tickets", children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "awsui-key-label", children: "Total Tickets" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "h1", children: st2.totalTasks }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", "data-testid": "kpi-active-concurrency", children: [
+                          "Active: ",
+                          st2.activeTasksCount ?? st2.totalTasks - (st2.byStage?.done || 0),
+                          " / ",
+                          f2.limits?.maxConcurrentAgents ?? 3,
+                          " max agents"
+                        ] }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", "data-testid": "kpi-executing-agents", children: [
+                          "Executing: ",
+                          st2.executingAgentsCount ?? 0,
+                          " running"
+                        ] }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
+                          "Completed: ",
+                          st2.byStage?.done || 0
                         ] })
-                      ] }) }, a3.id))
-                    }
-                  ),
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Vendored & Locked Skills (skills.lock.json)" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { id: "skills-table", style: { width: "100%", borderCollapse: "collapse" }, children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { style: { borderBottom: "1px solid #2b3646", textAlign: "left" }, children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Skill" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Category" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Version" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "SHA-256" })
+                      ] }) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { "data-testid": "kpi-total-cost", children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "awsui-key-label", children: "Total Cost (USD)" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "h1", children: [
+                          "$",
+                          Number(st2.totalCostUsd || 0).toFixed(4)
+                        ] }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
+                          "Daily budget: $",
+                          f2.limits?.dailyBudgetUsd
+                        ] })
+                      ] }) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { "data-testid": "kpi-tokens", children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "awsui-key-label", children: "Consumed Tokens" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "h1", children: Number(st2.tokens?.total || 0).toLocaleString() }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
+                          "In: ",
+                          Number(st2.tokens?.input || 0).toLocaleString(),
+                          " \xB7 Out:",
+                          " ",
+                          Number(st2.tokens?.output || 0).toLocaleString(),
+                          " \xB7 Cache:",
+                          " ",
+                          Number(st2.tokens?.cached || 0).toLocaleString()
+                        ] })
+                      ] }) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { "data-testid": "kpi-first-round", children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "awsui-key-label", children: "First-Round PR Approval" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "h1", children: [
+                          st2.reviewMetrics?.firstRoundApprovalRate ?? 100,
+                          "%"
+                        ] }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
+                          "Avg review rounds: ",
+                          st2.reviewMetrics?.averageReviewRounds ?? 0,
+                          " (max",
+                          " ",
+                          f2.limits?.maxReviewRounds ?? 3,
+                          ")"
+                        ] })
+                      ] }) })
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { "data-testid": "kpi-needs-human", children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "awsui-key-label", children: "Needs Human Queue" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "h2", children: (st2.needsHuman || []).length }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "small", color: "text-body-secondary", children: "Human gates awaiting action" })
                     ] }) }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: (state5?.skills || []).map((s3) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                      "tr",
-                      {
-                        "data-testid": `skill-row-${s3.name}`,
-                        style: { borderBottom: "1px solid #1e293b" },
-                        children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: s3.name }) }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: s3.category }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "green", children: s3.version }) }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("code", { children: [
-                            String(s3.sha256 || "").slice(0, 16),
-                            "\u2026"
-                          ] }) })
-                        ]
-                      },
-                      s3.name
-                    )) })
-                  ] }) })
-                ] }) }),
-                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { id: "tab-controls", style: { display: activeTab === "controls" ? "block" : "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Grid, { gridDefinition: [{ colspan: 4 }, { colspan: 4 }, { colspan: 4 }], children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Operational Controls" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "s", children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Autonomy Mode", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                      "select",
-                      {
-                        id: "ctrl-autonomy",
-                        value: ctrlAutonomy,
-                        onChange: (e3) => setCtrlAutonomy(e3.target.value),
-                        style: {
-                          width: "100%",
-                          padding: "0.45rem",
-                          background: "#0f172a",
-                          color: "#fff",
-                          border: "1px solid #334155",
-                          borderRadius: "4px"
-                        },
-                        children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "manual", children: "manual" }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "triage", children: "triage" }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "gated", children: "gated" }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "auto-low", children: "auto-low" })
-                        ]
-                      }
-                    ) }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Hourly Task Limit", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                      "input",
-                      {
-                        type: "number",
-                        id: "ctrl-rate",
-                        value: ctrlRate,
-                        onChange: (e3) => setCtrlRate(e3.target.value),
-                        style: {
-                          width: "100%",
-                          padding: "0.45rem",
-                          background: "#0f172a",
-                          color: "#fff",
-                          border: "1px solid #334155",
-                          borderRadius: "4px"
-                        }
-                      }
-                    ) }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Daily Budget (USD)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                      "input",
-                      {
-                        type: "number",
-                        id: "ctrl-budget",
-                        step: "0.5",
-                        value: ctrlBudget,
-                        onChange: (e3) => setCtrlBudget(e3.target.value),
-                        style: {
-                          width: "100%",
-                          padding: "0.45rem",
-                          background: "#0f172a",
-                          color: "#fff",
-                          border: "1px solid #334155",
-                          borderRadius: "4px"
-                        }
-                      }
-                    ) }),
                     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                      FormField,
+                      container_default,
                       {
-                        label: "Max Concurrent Running Agents (1 to 10, default: 3)",
-                        description: "Bounds maximum active simultaneous agent tasks running across all monitored repos",
-                        children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                        id: "live-execution-tower",
+                        "data-testid": "live-execution-tower",
+                        header: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                          Header2,
+                          {
+                            variant: "h2",
+                            description: "Real-time execution slots, active tasks with workspaces, and human intervention queue.",
+                            actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { direction: "horizontal", size: "xs", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { variant: "normal", onClick: () => setActiveTab("board"), children: "View Kanban Board" }) }),
+                            children: [
+                              "Control Tower \u2014 Live Executing Slots (",
+                              st2.executingAgentsCount ?? 0,
+                              " / ",
+                              f2.limits?.maxConcurrentAgents ?? 3,
+                              ")"
+                            ]
+                          }
+                        ),
+                        children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "m", children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "0.75rem" }, children: (st2.tasks || []).filter((t4) => t4.stage !== "done" && t4.stage !== "aborted" && t4.stage !== "merge" && t4.stage !== "triage" && t4.needs_human === 0).length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: "1rem", background: "#0b1320", borderRadius: "6px", border: "1px dashed #334155", color: "#94a3b8" }, children: [
+                            "\u26A1 No agents actively executing right now. Ready capacity: ",
+                            Math.max(0, (f2.limits?.maxConcurrentAgents ?? 3) - (st2.executingAgentsCount ?? 0)),
+                            " slot(s) free."
+                          ] }) : (st2.tasks || []).filter((t4) => t4.stage !== "done" && t4.stage !== "aborted" && t4.stage !== "merge" && t4.stage !== "triage" && t4.needs_human === 0).map((t4) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                            "div",
+                            {
+                              style: {
+                                padding: "0.75rem",
+                                background: "#0f172a",
+                                border: "1px solid #0284c7",
+                                borderRadius: "6px",
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "0.4rem"
+                              },
+                              children: [
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" }, children: [
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "blue", children: "EXECUTING" }),
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: "0.75rem", color: "#94a3b8" }, children: [
+                                    "Stage: ",
+                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: t4.stage })
+                                  ] })
+                                ] }),
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                                  "a",
+                                  {
+                                    id: `tower-ticket-link-${t4.issue_number}`,
+                                    href: getTicketExternalUrl(t4),
+                                    target: "_blank",
+                                    rel: "noreferrer",
+                                    style: { color: "#60a5fa", fontWeight: 700, textDecoration: "none", fontSize: "0.9rem" },
+                                    children: [
+                                      "#",
+                                      t4.issue_number,
+                                      " ",
+                                      t4.title,
+                                      " \u2197"
+                                    ]
+                                  }
+                                ),
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: "0.76rem", color: "#cbd5e1" }, children: [
+                                  "Branch: ",
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: t4.branch_name || `factory/issue-${t4.issue_number}` })
+                                ] }),
+                                t4.workspace_path && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: "0.72rem", color: "#64748b", wordBreak: "break-all" }, children: [
+                                  "Workspace: ",
+                                  t4.workspace_path
+                                ] })
+                              ]
+                            },
+                            t4.execution_key
+                          )) }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: "1rem", flexWrap: "wrap", alignItems: "center", padding: "0.5rem 0", borderTop: "1px solid #1e293b" }, children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: "0.85rem", color: "#cbd5e1" }, children: [
+                              "\u{1F4E5} ",
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Triage Backlog Queue:" }),
+                              " ",
+                              (st2.tasks || []).filter((t4) => t4.stage === "triage" && t4.needs_human === 0).length,
+                              " ticket(s) waiting for available slots"
+                            ] }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: "0.85rem", color: "#cbd5e1" }, children: [
+                              "\u23F3 ",
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Awaiting PR Merge:" }),
+                              " ",
+                              (st2.tasks || []).filter((t4) => t4.stage === "merge").length,
+                              " ticket(s)"
+                            ] }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: "0.85rem", color: (st2.needsHuman || []).length > 0 ? "#f59e0b" : "#10b981", fontWeight: 600 }, children: [
+                              "\u{1F64B} ",
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Awaiting Human Input:" }),
+                              " ",
+                              (st2.needsHuman || []).length,
+                              " agent(s)"
+                            ] })
+                          ] })
+                        ] })
+                      }
+                    ),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Grid, { gridDefinition: [{ colspan: 6 }, { colspan: 6 }], children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                        table_default,
+                        {
+                          header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Usage & Cost by Runtime" }),
+                          columnDefinitions: [
+                            { id: "rt", header: "Runtime", cell: (item) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: item.rt }) },
+                            { id: "events", header: "Events", cell: (item) => item.events },
+                            { id: "in", header: "Input Tokens", cell: (item) => item.inputTokens },
+                            { id: "out", header: "Output Tokens", cell: (item) => item.outputTokens },
+                            { id: "cache", header: "Cached", cell: (item) => item.cachedTokens },
+                            { id: "cost", header: "Cost (USD)", cell: (item) => `$${item.costUsd.toFixed(4)}` }
+                          ],
+                          items: Object.entries(st2.byRuntime || {}).map(([rt, d3]) => ({ rt, ...d3 })),
+                          empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { textAlign: "center", children: "No runtime telemetry events recorded yet" })
+                        }
+                      ),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                        table_default,
+                        {
+                          header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Usage & Cost by Model" }),
+                          columnDefinitions: [
+                            { id: "model", header: "Model", cell: (item) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: item.model }) },
+                            { id: "events", header: "Events", cell: (item) => item.events },
+                            { id: "in", header: "Input Tokens", cell: (item) => item.inputTokens },
+                            { id: "out", header: "Output Tokens", cell: (item) => item.outputTokens },
+                            { id: "cost", header: "Cost (USD)", cell: (item) => `$${item.costUsd.toFixed(4)}` }
+                          ],
+                          items: Object.entries(st2.byModel || {}).map(([model, d3]) => ({ model, ...d3 })),
+                          empty: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { textAlign: "center", children: "No model telemetry events recorded yet" })
+                        }
+                      )
+                    ] })
+                  ] }) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { id: "tab-board", style: { display: activeTab === "board" ? "block" : "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "l", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                      container_default,
+                      {
+                        header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                          Header2,
+                          {
+                            variant: "h2",
+                            description: "Monitor tickets from GitHub Issues, Jira, and Asana with custom pickup trigger combinations.",
+                            children: "Monitored Issue Trackers & Cron Poller"
+                          }
+                        ),
+                        children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "m", children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ColumnLayout2, { columns: 4, children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Tracker Provider", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                              "select",
+                              {
+                                id: "proj-provider-select",
+                                value: projProvider,
+                                onChange: (e3) => setProjProvider(e3.target.value),
+                                style: {
+                                  width: "100%",
+                                  padding: "0.45rem",
+                                  background: "#0f172a",
+                                  color: "#fff",
+                                  border: "1px solid #334155",
+                                  borderRadius: "4px"
+                                },
+                                children: [
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "github", children: "github (GitHub Issues)" }),
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "jira", children: "jira (Jira Cloud / Server)" }),
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "asana", children: "asana (Asana Tasks)" }),
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "linear", children: "linear (Linear Project Issues)" })
+                                ]
+                              }
+                            ) }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Target Repository (owner/repo)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                              "input",
+                              {
+                                type: "text",
+                                id: "proj-repo-input",
+                                value: projRepo,
+                                onChange: (e3) => setProjRepo(e3.target.value),
+                                placeholder: "brenoacker/my-existing-repo",
+                                style: {
+                                  width: "100%",
+                                  padding: "0.45rem",
+                                  background: "#0f172a",
+                                  color: "#fff",
+                                  border: "1px solid #334155",
+                                  borderRadius: "4px"
+                                }
+                              }
+                            ) }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Default Branch", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                              "input",
+                              {
+                                type: "text",
+                                id: "proj-branch-input",
+                                value: projBranch,
+                                onChange: (e3) => setProjBranch(e3.target.value),
+                                style: {
+                                  width: "100%",
+                                  padding: "0.45rem",
+                                  background: "#0f172a",
+                                  color: "#fff",
+                                  border: "1px solid #334155",
+                                  borderRadius: "4px"
+                                }
+                              }
+                            ) }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Target Status / Section Filter", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                              "input",
+                              {
+                                type: "text",
+                                id: "proj-status-filter-input",
+                                value: projStatusFilter,
+                                onChange: (e3) => setProjStatusFilter(e3.target.value),
+                                placeholder: "Ready for Agent",
+                                style: {
+                                  width: "100%",
+                                  padding: "0.45rem",
+                                  background: "#0f172a",
+                                  color: "#fff",
+                                  border: "1px solid #334155",
+                                  borderRadius: "4px"
+                                }
+                              }
+                            ) })
+                          ] }),
+                          (projProvider === "jira" || projProvider === "asana") && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ColumnLayout2, { columns: 2, children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                              FormField,
+                              {
+                                label: projProvider === "jira" ? "Jira Project Key (e.g. FAC)" : "Asana Project GID (e.g. 120055)",
+                                children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                  "input",
+                                  {
+                                    type: "text",
+                                    id: "proj-tracker-key-input",
+                                    value: projTrackerKey,
+                                    onChange: (e3) => setProjTrackerKey(e3.target.value),
+                                    placeholder: projProvider === "jira" ? "FAC" : "120055",
+                                    style: {
+                                      width: "100%",
+                                      padding: "0.45rem",
+                                      background: "#0f172a",
+                                      color: "#fff",
+                                      border: "1px solid #334155",
+                                      borderRadius: "4px"
+                                    }
+                                  }
+                                )
+                              }
+                            ),
+                            projProvider === "jira" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Custom Jira JQL Override (optional)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                              "input",
+                              {
+                                type: "text",
+                                id: "proj-jql-input",
+                                value: projJql,
+                                onChange: (e3) => setProjJql(e3.target.value),
+                                placeholder: 'project = "FAC" AND status = "Ready for Agent"',
+                                style: {
+                                  width: "100%",
+                                  padding: "0.45rem",
+                                  background: "#0f172a",
+                                  color: "#fff",
+                                  border: "1px solid #334155",
+                                  borderRadius: "4px"
+                                }
+                              }
+                            ) })
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ColumnLayout2, { columns: 4, children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Required Flags / Labels / Tags (AND)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                              "input",
+                              {
+                                type: "text",
+                                id: "proj-required-labels-input",
+                                value: projRequiredLabels,
+                                onChange: (e3) => setProjRequiredLabels(e3.target.value),
+                                placeholder: "agent-ready, approved",
+                                style: {
+                                  width: "100%",
+                                  padding: "0.45rem",
+                                  background: "#0f172a",
+                                  color: "#fff",
+                                  border: "1px solid #334155",
+                                  borderRadius: "4px"
+                                }
+                              }
+                            ) }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Excluded Blocker Flags / Labels", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                              "input",
+                              {
+                                type: "text",
+                                id: "proj-excluded-labels-input",
+                                value: projExcludedLabels,
+                                onChange: (e3) => setProjExcludedLabels(e3.target.value),
+                                placeholder: "blocked, manual-only",
+                                style: {
+                                  width: "100%",
+                                  padding: "0.45rem",
+                                  background: "#0f172a",
+                                  color: "#fff",
+                                  border: "1px solid #334155",
+                                  borderRadius: "4px"
+                                }
+                              }
+                            ) }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Required Custom Fields (key=value)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                              "input",
+                              {
+                                type: "text",
+                                id: "proj-custom-fields-input",
+                                value: projCustomFields,
+                                onChange: (e3) => setProjCustomFields(e3.target.value),
+                                placeholder: "AI_Allowed=true",
+                                style: {
+                                  width: "100%",
+                                  padding: "0.45rem",
+                                  background: "#0f172a",
+                                  color: "#fff",
+                                  border: "1px solid #334155",
+                                  borderRadius: "4px"
+                                }
+                              }
+                            ) }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Assignee Trigger Rule", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                              "input",
+                              {
+                                type: "text",
+                                id: "proj-assignee-filter-input",
+                                value: projAssigneeFilter,
+                                onChange: (e3) => setProjAssigneeFilter(e3.target.value),
+                                placeholder: "any or unassigned",
+                                style: {
+                                  width: "100%",
+                                  padding: "0.45rem",
+                                  background: "#0f172a",
+                                  color: "#fff",
+                                  border: "1px solid #334155",
+                                  borderRadius: "4px"
+                                }
+                              }
+                            ) })
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }, children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { variant: "primary", id: "proj-add-btn", onClick: addMonitoredProject, children: "Add Monitored Repository" }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { id: "sync-repos-btn", onClick: syncAllMonitoredProjects, children: "Sync Issues from All Monitored Repos" }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: "0.4rem", alignItems: "center" }, children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { style: { fontSize: "0.82rem", color: "#9ba7b6" }, children: [
+                                "Cron Interval (s):",
+                                " ",
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                  "input",
+                                  {
+                                    type: "number",
+                                    id: "scheduler-interval-input",
+                                    value: schedulerInterval,
+                                    onChange: (e3) => setSchedulerInterval(e3.target.value),
+                                    style: {
+                                      width: "75px",
+                                      padding: "0.3rem",
+                                      background: "#0f172a",
+                                      color: "#fff",
+                                      border: "1px solid #334155",
+                                      borderRadius: "4px"
+                                    }
+                                  }
+                                )
+                              ] }),
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { id: "scheduler-run-btn", onClick: () => updateScheduler(true, true), children: "Save Interval & Run Cron" })
+                            ] }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { id: "proj-feedback", style: { fontSize: "0.85rem", color: "#93c5fd" }, children: projFeedback })
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { id: "projects-table", style: { width: "100%", borderCollapse: "collapse" }, children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { style: { borderBottom: "1px solid #2b3646", textAlign: "left" }, children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Repository" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Provider" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Tracker Filter" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Branch" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Status" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Last ETag / Sync" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Actions" })
+                            ] }) }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: (state5?.projects || []).map((p3) => {
+                              const prov = (p3.provider || "github").toLowerCase();
+                              const etagKey = prov === "github" ? p3.repo : `${prov}:${p3.repo}`;
+                              const tc = p3.trackerConfig || {};
+                              const triggerParts = [];
+                              if (prov === "jira") {
+                                triggerParts.push(`Key: ${tc.projectKey || "-"}`);
+                                triggerParts.push(`Stage: ${tc.statusFilter || "Ready for Agent"}`);
+                              } else if (prov === "asana") {
+                                triggerParts.push(`GID: ${tc.projectGid || "-"}`);
+                                triggerParts.push(`Stage: ${tc.statusFilter || "Ready for Agent"}`);
+                              } else if (prov === "linear") {
+                                triggerParts.push(`Project: ${tc.projectKey || p3.repo}`);
+                                triggerParts.push(`Stage: ${tc.statusFilter || "Ready for Agent"}`);
+                              } else {
+                                triggerParts.push(tc.statusFilter ? `Stage: ${tc.statusFilter}` : "state=open");
+                              }
+                              if (Array.isArray(tc.requiredLabels) && tc.requiredLabels.length > 0) {
+                                triggerParts.push(`+Flags: [${tc.requiredLabels.join(", ")}]`);
+                              }
+                              if (Array.isArray(tc.excludedLabels) && tc.excludedLabels.length > 0) {
+                                triggerParts.push(`-Exclude: [${tc.excludedLabels.join(", ")}]`);
+                              }
+                              if (tc.requiredCustomFields && Object.keys(tc.requiredCustomFields).length > 0) {
+                                const cfStr = Object.entries(tc.requiredCustomFields).map(([k4, v3]) => `${k4}=${v3}`).join(", ");
+                                triggerParts.push(`+Fields: [${cfStr}]`);
+                              }
+                              if (tc.assigneeFilter && tc.assigneeFilter !== "any") {
+                                triggerParts.push(`Assignee: ${tc.assigneeFilter}`);
+                              }
+                              const filterDesc = triggerParts.join(" \xB7 ");
+                              return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                                "tr",
+                                {
+                                  "data-testid": `project-row-${p3.repo}`,
+                                  style: { borderBottom: "1px solid #1e293b" },
+                                  children: [
+                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: p3.repo }) }),
+                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: prov === "jira" ? "blue" : prov === "asana" ? "red" : prov === "linear" ? "severity-medium" : "grey", children: prov.toUpperCase() }) }),
+                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: filterDesc }) }),
+                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: p3.defaultBranch || "main" }) }),
+                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusIndicator2, { type: p3.paused ? "stopped" : "success", children: p3.paused ? "PAUSED" : "MONITORING" }) }),
+                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: etagMap[etagKey] || etagMap[p3.repo] || "-" }) }),
+                                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", { style: { padding: "0.5rem", display: "flex", gap: "0.4rem" }, children: [
+                                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                        "button",
+                                        {
+                                          "data-testid": `toggle-proj-${p3.repo}`,
+                                          onClick: () => toggleProjectPause(p3),
+                                          style: {
+                                            background: "#334155",
+                                            color: "#fff",
+                                            border: "none",
+                                            borderRadius: "4px",
+                                            padding: "0.3rem 0.65rem",
+                                            cursor: "pointer"
+                                          },
+                                          children: p3.paused ? "Resume" : "Pause"
+                                        }
+                                      ),
+                                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                        "button",
+                                        {
+                                          "data-testid": `remove-proj-${p3.repo}`,
+                                          onClick: () => removeProject(p3.repo),
+                                          style: {
+                                            background: "#dc2626",
+                                            color: "#fff",
+                                            border: "none",
+                                            borderRadius: "4px",
+                                            padding: "0.3rem 0.65rem",
+                                            cursor: "pointer"
+                                          },
+                                          children: "Remove"
+                                        }
+                                      )
+                                    ] })
+                                  ]
+                                },
+                                `${prov}:${p3.repo}`
+                              );
+                            }) })
+                          ] })
+                        ] })
+                      }
+                    ),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Ticket Intake & Automatic Classifier" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "m", children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ColumnLayout2, { columns: 4, children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Target Repository (owner/repo)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
                           "input",
                           {
-                            type: "number",
-                            id: "ctrl-concurrent",
-                            min: "1",
-                            max: "10",
-                            step: "1",
-                            value: ctrlConcurrent,
-                            onChange: (e3) => setCtrlConcurrent(e3.target.value),
+                            type: "text",
+                            id: "intake-repo",
+                            value: intakeRepo,
+                            onChange: (e3) => setIntakeRepo(e3.target.value),
+                            placeholder: "brenoacker/agentic-factory",
                             style: {
                               width: "100%",
                               padding: "0.45rem",
@@ -340751,153 +340675,1179 @@ ${isHandDrawn ? "" : `
                               borderRadius: "4px"
                             }
                           }
-                        )
-                      }
-                    ),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Stall Alarm Threshold (minutes)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                      "input",
-                      {
-                        type: "number",
-                        id: "ctrl-stall-minutes",
-                        value: ctrlStallMinutes,
-                        onChange: (e3) => setCtrlStallMinutes(e3.target.value),
-                        style: {
-                          width: "100%",
-                          padding: "0.45rem",
-                          background: "#0f172a",
-                          color: "#fff",
-                          border: "1px solid #334155",
-                          borderRadius: "4px"
-                        }
-                      }
-                    ) }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { style: { display: "flex", gap: "0.5rem", alignItems: "center" }, children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                        ) }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Issue #", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                          "input",
+                          {
+                            type: "number",
+                            id: "intake-issue-number",
+                            value: intakeIssueNum,
+                            onChange: (e3) => setIntakeIssueNum(e3.target.value),
+                            placeholder: "101",
+                            style: {
+                              width: "100%",
+                              padding: "0.45rem",
+                              background: "#0f172a",
+                              color: "#fff",
+                              border: "1px solid #334155",
+                              borderRadius: "4px"
+                            }
+                          }
+                        ) }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Ticket Title", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                          "input",
+                          {
+                            type: "text",
+                            id: "intake-title",
+                            value: intakeTitle,
+                            onChange: (e3) => setIntakeTitle(e3.target.value),
+                            placeholder: "[feature] Add webhook signature check",
+                            style: {
+                              width: "100%",
+                              padding: "0.45rem",
+                              background: "#0f172a",
+                              color: "#fff",
+                              border: "1px solid #334155",
+                              borderRadius: "4px"
+                            }
+                          }
+                        ) }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Explicit Type (optional)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                          "select",
+                          {
+                            id: "intake-type",
+                            value: intakeType,
+                            onChange: (e3) => setIntakeType(e3.target.value),
+                            style: {
+                              width: "100%",
+                              padding: "0.45rem",
+                              background: "#0f172a",
+                              color: "#fff",
+                              border: "1px solid #334155",
+                              borderRadius: "4px"
+                            },
+                            children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "", children: "Auto-detect from title/body" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "feature", children: "feature" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "bug", children: "bug" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "investigation", children: "investigation" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "discovery", children: "discovery" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "chore", children: "chore" })
+                            ]
+                          }
+                        ) })
+                      ] }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Description / Context", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
                         "input",
                         {
-                          type: "checkbox",
-                          id: "ctrl-kill",
-                          checked: ctrlKill,
-                          onChange: (e3) => setCtrlKill(e3.target.checked)
+                          type: "text",
+                          id: "intake-body",
+                          value: intakeBody,
+                          onChange: (e3) => setIntakeBody(e3.target.value),
+                          placeholder: "Problem statement, steps to reproduce, or investigation question",
+                          style: {
+                            width: "100%",
+                            padding: "0.45rem",
+                            background: "#0f172a",
+                            color: "#fff",
+                            border: "1px solid #334155",
+                            borderRadius: "4px"
+                          }
                         }
-                      ),
-                      "Global Kill Switch (Pause Factory)"
-                    ] }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { variant: "primary", id: "save-controls-btn", onClick: saveControls, children: "Save Controls to factory.yaml" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "controls-feedback", style: { fontSize: "0.85rem", color: "#93c5fd" }, children: controlsFeedback })
-                  ] }) }),
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Post-Deploy Gate & Automatic Rollback" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "s", children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Commit SHA", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                      "input",
-                      {
-                        type: "text",
-                        id: "deploy-sha",
-                        value: deploySha,
-                        onChange: (e3) => setDeploySha(e3.target.value),
-                        placeholder: "a1b2c3d",
-                        style: {
-                          width: "100%",
-                          padding: "0.45rem",
-                          background: "#0f172a",
-                          color: "#fff",
-                          border: "1px solid #334155",
-                          borderRadius: "4px"
-                        }
-                      }
-                    ) }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Error Rate (%)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                      "input",
-                      {
-                        type: "number",
-                        id: "deploy-error-rate",
-                        step: "0.1",
-                        value: deployErrorRate,
-                        onChange: (e3) => setDeployErrorRate(e3.target.value),
-                        style: {
-                          width: "100%",
-                          padding: "0.45rem",
-                          background: "#0f172a",
-                          color: "#fff",
-                          border: "1px solid #334155",
-                          borderRadius: "4px"
-                        }
-                      }
-                    ) }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Max Allowed (%)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                      "input",
-                      {
-                        type: "number",
-                        id: "deploy-max-rate",
-                        step: "0.1",
-                        value: deployMaxRate,
-                        onChange: (e3) => setDeployMaxRate(e3.target.value),
-                        style: {
-                          width: "100%",
-                          padding: "0.45rem",
-                          background: "#0f172a",
-                          color: "#fff",
-                          border: "1px solid #334155",
-                          borderRadius: "4px"
-                        }
-                      }
-                    ) }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { variant: "primary", id: "deploy-verify-btn", onClick: verifyDeploymentFromUi, children: "Verify Deployment" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "deploy-feedback", style: { fontSize: "0.85rem", color: "#93c5fd" }, children: deployFeedback }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "deployments-list", children: (state5?.deployments || []).map((d3) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                      ) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: "1rem" }, children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { variant: "primary", id: "intake-submit-btn", onClick: submitTicketIntake, children: "Intake & Classify Ticket" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { id: "intake-feedback", style: { fontSize: "0.85rem", color: "#93c5fd" }, children: intakeFeedback })
+                      ] })
+                    ] }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Agents Waiting for Human Input & Clarification" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "waiting-human-screen", "data-testid": "waiting-human-screen", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "needs-human-list", children: (st2.needsHuman || []).length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { color: "text-body-secondary", children: "No agents currently waiting for human input or clarification." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "m", children: st2.needsHuman.map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
                       "div",
                       {
-                        "data-testid": `deploy-card-${d3.commit_sha}`,
+                        "data-testid": `needs-human-card-${item.issueNumber}`,
                         style: {
-                          padding: "0.5rem",
-                          marginTop: "0.4rem",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "0.65rem",
+                          padding: "0.85rem",
                           background: "#0f172a",
-                          borderRadius: "4px",
-                          border: "1px solid #2b3646"
+                          borderRadius: "6px",
+                          border: "1px solid #f59e0b"
                         },
                         children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: d3.commit_sha }),
-                          " \u2014",
-                          " ",
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: d3.status === "healthy" ? "green" : "red", children: d3.status }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
-                            "Last good SHA: ",
-                            d3.last_good_sha || "-"
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" }, children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "severity-medium", children: "WAITING FOR HUMAN" }),
+                              " ",
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                                "a",
+                                {
+                                  id: `human-ticket-link-${item.issueNumber}`,
+                                  "data-testid": `human-ticket-link-${item.issueNumber}`,
+                                  href: getTicketExternalUrl(st2.tasks?.find((x6) => x6.execution_key === item.executionKey) || item),
+                                  target: "_blank",
+                                  rel: "noreferrer",
+                                  style: { color: "#60a5fa", textDecoration: "underline", fontWeight: 700 },
+                                  children: [
+                                    "#",
+                                    item.issueNumber,
+                                    " ",
+                                    item.title || item.executionKey,
+                                    " \u2197"
+                                  ]
+                                }
+                              ),
+                              " ",
+                              "[",
+                              item.type,
+                              "] \u2014 Stage:",
+                              " ",
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "blue", children: item.stage })
+                            ] }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
+                              "Issue #",
+                              item.issueNumber
+                            ] })
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                            "div",
+                            {
+                              "data-testid": `human-question-${item.issueNumber}`,
+                              style: {
+                                padding: "0.5rem 0.75rem",
+                                background: "rgba(245, 158, 11, 0.12)",
+                                borderRadius: "4px",
+                                borderLeft: "4px solid #f59e0b",
+                                color: "#fef08a",
+                                fontSize: "0.9rem"
+                              },
+                              children: [
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "\u26A0\uFE0F Clarification Needed:" }),
+                                " ",
+                                item.question || "Agent requested human assistance to proceed"
+                              ]
+                            }
+                          ),
+                          item.reviewFiles && item.reviewFiles.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                            "div",
+                            {
+                              id: `human-review-files-${item.issueNumber}`,
+                              "data-testid": `human-review-files-${item.issueNumber}`,
+                              style: {
+                                padding: "0.5rem 0.75rem",
+                                background: "rgba(30, 41, 59, 0.7)",
+                                borderRadius: "4px",
+                                border: "1px solid #334155"
+                              },
+                              children: [
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: "0.8rem", fontWeight: 600, color: "#38bdf8", marginBottom: "0.35rem" }, children: "Evaluation & Review Files:" }),
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "xs", children: item.reviewFiles.map((rf, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                                  "div",
+                                  {
+                                    style: {
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "space-between",
+                                      gap: "0.5rem",
+                                      fontSize: "0.82rem"
+                                    },
+                                    children: [
+                                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", wordBreak: "break-all" }, children: [
+                                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { color: "#94a3b8" }, children: [
+                                          "\u{1F4C4} ",
+                                          rf.label,
+                                          ":"
+                                        ] }),
+                                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                          "a",
+                                          {
+                                            id: `vscode-link-${item.issueNumber}-${idx}`,
+                                            "data-testid": `vscode-link-${item.issueNumber}`,
+                                            href: rf.vscodeUri || `vscode://file/${rf.resolvedPath}`,
+                                            title: "Open directly in VS Code / Keiro via vscode:// URI scheme",
+                                            style: { color: "#60a5fa", textDecoration: "underline" },
+                                            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: rf.path })
+                                          }
+                                        )
+                                      ] }),
+                                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { direction: "horizontal", size: "xs", children: [
+                                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                          button_default2,
+                                          {
+                                            variant: "normal",
+                                            id: `open-editor-btn-${item.issueNumber}`,
+                                            "data-testid": `open-editor-btn-${item.issueNumber}`,
+                                            onClick: () => openFileInEditor(rf.path, item.executionKey, rf.line),
+                                            children: "Open in Editor"
+                                          }
+                                        ),
+                                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                          button_default2,
+                                          {
+                                            variant: "normal",
+                                            id: `preview-doc-btn-${item.issueNumber}`,
+                                            "data-testid": `preview-doc-btn-${item.issueNumber}`,
+                                            onClick: () => openPreviewModal(rf.path, item.executionKey, rf.label || rf.path),
+                                            children: "Preview Document"
+                                          }
+                                        )
+                                      ] })
+                                    ]
+                                  },
+                                  rf.resolvedPath || idx
+                                )) })
+                              ]
+                            }
+                          ),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: "0.75rem", alignItems: "flex-end" }, children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Operator Clarification / Missing Requirements", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                              "input",
+                              {
+                                type: "text",
+                                id: `human-reply-input-${item.issueNumber}`,
+                                "data-testid": `human-reply-input-${item.issueNumber}`,
+                                value: humanReplies[item.executionKey] || "",
+                                onChange: (e3) => setHumanReplies({
+                                  ...humanReplies,
+                                  [item.executionKey]: e3.target.value
+                                }),
+                                placeholder: "Type missing API specs, parameters, or clarification here...",
+                                style: {
+                                  width: "100%",
+                                  padding: "0.5rem",
+                                  background: "#0c131f",
+                                  color: "#fff",
+                                  border: "1px solid #475569",
+                                  borderRadius: "4px",
+                                  fontSize: "0.9rem"
+                                }
+                              }
+                            ) }) }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { direction: "horizontal", size: "xs", children: [
+                              item.stage === "merge" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                button_default2,
+                                {
+                                  variant: "primary",
+                                  id: `human-check-pr-btn-${item.issueNumber}`,
+                                  "data-testid": `human-check-pr-btn-${item.issueNumber}`,
+                                  onClick: () => checkTaskPr(item.executionKey),
+                                  children: "Check PR Merge Status & Sync"
+                                }
+                              ) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                button_default2,
+                                {
+                                  variant: "primary",
+                                  id: `human-reply-btn-${item.issueNumber}`,
+                                  "data-testid": `human-reply-btn-${item.issueNumber}`,
+                                  onClick: () => submitHumanReply(item.executionKey, humanReplies[item.executionKey]),
+                                  children: "Send Reply & Resume Agent"
+                                }
+                              ),
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                button_default2,
+                                {
+                                  variant: "normal",
+                                  id: `approve-btn-${item.issueNumber}`,
+                                  "data-testid": `approve-btn-${item.issueNumber}`,
+                                  onClick: () => dispatchTicketKey(item.executionKey, true),
+                                  children: "1-Click Approve & Advance"
+                                }
+                              )
+                            ] })
                           ] })
                         ]
                       },
-                      `${d3.id}-${d3.commit_sha}`
+                      item.executionKey
+                    )) }) }) }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                      "div",
+                      {
+                        id: "kanban-board",
+                        style: {
+                          display: "grid",
+                          gap: "0.75rem",
+                          gridTemplateColumns: "repeat(auto-fit, minmax(195px, 1fr))"
+                        },
+                        children: STAGES.map((col) => {
+                          const items = (st2.tasks || []).filter((t4) => t4.stage === col);
+                          return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                            container_default,
+                            {
+                              header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h3", counter: `(${items.length})`, children: col }),
+                              children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "xs", children: items.map((t4) => {
+                                const stalledInfo = stalledMap[t4.execution_key];
+                                return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                                  "div",
+                                  {
+                                    "data-testid": `task-card-${t4.issue_number}`,
+                                    style: {
+                                      padding: "0.65rem",
+                                      background: "#0f172a",
+                                      borderRadius: "6px",
+                                      border: stalledInfo ? "2px solid #ef4444" : "1px solid #2b3646",
+                                      fontSize: "0.82rem"
+                                    },
+                                    children: [
+                                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                                        "a",
+                                        {
+                                          id: `kanban-ticket-link-${t4.issue_number}`,
+                                          "data-testid": `kanban-ticket-link-${t4.issue_number}`,
+                                          href: getTicketExternalUrl(t4),
+                                          target: "_blank",
+                                          rel: "noreferrer",
+                                          style: { color: "#93c5fd", textDecoration: "none" },
+                                          onMouseEnter: (e3) => e3.currentTarget.style.textDecoration = "underline",
+                                          onMouseLeave: (e3) => e3.currentTarget.style.textDecoration = "none",
+                                          children: [
+                                            "#",
+                                            t4.issue_number,
+                                            " ",
+                                            t4.title,
+                                            " \u2197"
+                                          ]
+                                        }
+                                      ) }),
+                                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                                        "div",
+                                        {
+                                          style: {
+                                            display: "flex",
+                                            gap: "0.35rem",
+                                            flexWrap: "wrap",
+                                            margin: "0.35rem 0"
+                                          },
+                                          children: [
+                                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                              "span",
+                                              {
+                                                "data-testid": `task-repo-${t4.issue_number}`,
+                                                style: {
+                                                  background: "#312e81",
+                                                  color: "#e0e7ff",
+                                                  padding: "0.1rem 0.45rem",
+                                                  borderRadius: "4px",
+                                                  fontSize: "0.72rem",
+                                                  fontWeight: 600
+                                                },
+                                                children: t4.repo
+                                              }
+                                            ),
+                                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                              "span",
+                                              {
+                                                "data-testid": `task-type-${t4.issue_number}`,
+                                                style: {
+                                                  background: "#1e293b",
+                                                  color: "#f8fafc",
+                                                  padding: "0.1rem 0.45rem",
+                                                  borderRadius: "4px",
+                                                  fontSize: "0.72rem",
+                                                  fontWeight: 600
+                                                },
+                                                children: t4.type
+                                              }
+                                            ),
+                                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                              "span",
+                                              {
+                                                "data-testid": `task-stage-${t4.issue_number}`,
+                                                style: {
+                                                  background: t4.needs_human ? "#78350f" : "#064e3b",
+                                                  color: "#fff",
+                                                  padding: "0.1rem 0.45rem",
+                                                  borderRadius: "4px",
+                                                  fontSize: "0.72rem",
+                                                  fontWeight: 600
+                                                },
+                                                children: t4.stage
+                                              }
+                                            ),
+                                            stalledInfo && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                                              "span",
+                                              {
+                                                "data-testid": `task-stalled-badge-${t4.issue_number}`,
+                                                style: {
+                                                  background: "#991b1b",
+                                                  color: "#fff",
+                                                  padding: "0.1rem 0.45rem",
+                                                  borderRadius: "4px",
+                                                  fontSize: "0.72rem",
+                                                  fontWeight: 700
+                                                },
+                                                children: [
+                                                  "STALLED (",
+                                                  stalledInfo.idleMinutes,
+                                                  "m)"
+                                                ]
+                                              }
+                                            )
+                                          ]
+                                        }
+                                      ),
+                                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { style: { color: "#9ba7b6" }, children: [
+                                        t4.runtime,
+                                        " / ",
+                                        t4.model,
+                                        " \xB7 $",
+                                        Number(t4.cost_usd || 0).toFixed(4)
+                                      ] }),
+                                      t4.branch_name && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: "0.72rem", color: "#9ba7b6", marginTop: "0.2rem" }, "data-testid": `task-branch-${t4.issue_number}`, children: [
+                                        "\u{1F33F} Branch: ",
+                                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { style: { color: "#38bdf8" }, children: t4.branch_name })
+                                      ] }),
+                                      t4.workspace_path && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: "0.68rem", color: "#64748b", marginTop: "0.1rem", wordBreak: "break-all" }, "data-testid": `task-ws-${t4.issue_number}`, children: [
+                                        "\u{1F4C1} Workspace: ",
+                                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: t4.workspace_path })
+                                      ] }),
+                                      t4.deliverable_url && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: "0.35rem", padding: "0.25rem 0.4rem", background: "#0f172a", borderRadius: "4px", border: "1px solid #1e293b" }, "data-testid": `task-deliverable-${t4.issue_number}`, children: [
+                                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: "0.72rem", fontWeight: 600, color: t4.deliverable_type === "pull_request" ? "#38bdf8" : "#a78bfa" }, children: t4.deliverable_type === "pull_request" ? "\u{1F517} Pull Request: " : "\u{1F4C4} Research Doc: " }),
+                                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                          "a",
+                                          {
+                                            href: t4.deliverable_url.startsWith("http") ? t4.deliverable_url : `#`,
+                                            target: t4.deliverable_url.startsWith("http") ? "_blank" : "_self",
+                                            rel: "noreferrer",
+                                            style: { fontSize: "0.72rem", color: "#38bdf8", textDecoration: "underline" },
+                                            children: t4.deliverable_ref || t4.deliverable_url
+                                          }
+                                        )
+                                      ] }),
+                                      t4.reviewFiles && t4.reviewFiles.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                                        "div",
+                                        {
+                                          "data-testid": `task-review-files-${t4.issue_number}`,
+                                          style: {
+                                            marginTop: "0.35rem",
+                                            padding: "0.25rem 0.4rem",
+                                            background: "#0f172a",
+                                            borderRadius: "4px",
+                                            border: "1px solid #1e293b"
+                                          },
+                                          children: [
+                                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: "0.72rem", fontWeight: 600, color: "#38bdf8", marginBottom: "0.2rem" }, children: "\u{1F4C4} Review Files:" }),
+                                            t4.reviewFiles.map((rf, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                                              "div",
+                                              {
+                                                style: {
+                                                  display: "flex",
+                                                  justifyContent: "space-between",
+                                                  alignItems: "center",
+                                                  gap: "0.3rem",
+                                                  marginTop: "0.15rem"
+                                                },
+                                                children: [
+                                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                                    "a",
+                                                    {
+                                                      href: rf.vscodeUri || `vscode://file/${rf.resolvedPath}`,
+                                                      "data-testid": `kanban-vscode-link-${t4.issue_number}`,
+                                                      title: "Open in VS Code",
+                                                      style: { fontSize: "0.72rem", color: "#60a5fa", textDecoration: "underline" },
+                                                      children: rf.label || rf.path
+                                                    }
+                                                  ),
+                                                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: "0.2rem" }, children: [
+                                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                                      "button",
+                                                      {
+                                                        id: `kanban-open-editor-${t4.issue_number}-${idx}`,
+                                                        "data-testid": `kanban-open-editor-${t4.issue_number}`,
+                                                        onClick: () => openFileInEditor(rf.path, t4.execution_key, rf.line),
+                                                        style: {
+                                                          fontSize: "0.65rem",
+                                                          padding: "1px 5px",
+                                                          background: "#1e293b",
+                                                          color: "#93c5fd",
+                                                          border: "1px solid #334155",
+                                                          borderRadius: "3px",
+                                                          cursor: "pointer"
+                                                        },
+                                                        children: "Editor"
+                                                      }
+                                                    ),
+                                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                                      "button",
+                                                      {
+                                                        id: `kanban-preview-btn-${t4.issue_number}-${idx}`,
+                                                        "data-testid": `kanban-preview-btn-${t4.issue_number}`,
+                                                        onClick: () => openPreviewModal(rf.path, t4.execution_key, rf.label || rf.path),
+                                                        style: {
+                                                          fontSize: "0.65rem",
+                                                          padding: "1px 5px",
+                                                          background: "#1e293b",
+                                                          color: "#a78bfa",
+                                                          border: "1px solid #334155",
+                                                          borderRadius: "3px",
+                                                          cursor: "pointer"
+                                                        },
+                                                        children: "Preview"
+                                                      }
+                                                    )
+                                                  ] })
+                                                ]
+                                              },
+                                              rf.resolvedPath || idx
+                                            ))
+                                          ]
+                                        }
+                                      ),
+                                      t4.stage === "merge" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                                        "div",
+                                        {
+                                          "data-testid": `pr-status-box-${t4.issue_number}`,
+                                          style: {
+                                            marginTop: "0.35rem",
+                                            padding: "0.35rem 0.5rem",
+                                            background: "#1e293b",
+                                            border: "1px solid #3b82f6",
+                                            borderRadius: "4px",
+                                            fontSize: "0.75rem",
+                                            color: "#93c5fd"
+                                          },
+                                          children: [
+                                            "\u23F3 ",
+                                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Awaiting GitHub Merge:" }),
+                                            " Pull Request is open. Awaiting review and merge on GitHub."
+                                          ]
+                                        }
+                                      ),
+                                      t4.stage !== "done" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: "0.45rem" }, children: t4.stage === "merge" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                        button_default2,
+                                        {
+                                          variant: "primary",
+                                          id: `check-pr-btn-${t4.issue_number}`,
+                                          "data-testid": `check-pr-btn-${t4.issue_number}`,
+                                          onClick: () => checkTaskPr(t4.execution_key),
+                                          children: "Check PR Merge Status & Sync"
+                                        }
+                                      ) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                        button_default2,
+                                        {
+                                          variant: "primary",
+                                          "data-testid": `dispatch-btn-${t4.issue_number}`,
+                                          onClick: () => dispatchTicketKey(t4.execution_key, t4.needs_human === 1),
+                                          children: t4.needs_human === 1 ? "Approve & Continue" : "Run Workflow"
+                                        }
+                                      ) })
+                                    ]
+                                  },
+                                  t4.execution_key
+                                );
+                              }) })
+                            },
+                            col
+                          );
+                        })
+                      }
+                    )
+                  ] }) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { id: "tab-workflows", style: { display: activeTab === "workflows" ? "block" : "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "l", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                      container_default,
+                      {
+                        header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                          Header2,
+                          {
+                            variant: "h2",
+                            description: "Interactive Mermaid visual flowchart and live stage editor. Modifying stages updates the diagram in real time.",
+                            children: "Visual Workflow Designer & Stage Flowchart"
+                          }
+                        ),
+                        children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "m", children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ColumnLayout2, { columns: 3, children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Active Workflow", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                              "select",
+                              {
+                                id: "wf-editor-select",
+                                value: selectedWf,
+                                onChange: (e3) => handleSelectWorkflow(e3.target.value),
+                                style: {
+                                  width: "100%",
+                                  padding: "0.45rem",
+                                  background: "#0f172a",
+                                  color: "#fff",
+                                  border: "1px solid #334155",
+                                  borderRadius: "4px"
+                                },
+                                children: [
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "feature", children: "feature (Feature Workflow)" }),
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "bug", children: "bug (Bug Fix Workflow)" }),
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "investigation", children: "investigation (Investigation Spike)" }),
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "discovery", children: "discovery (PRD Discovery Workflow)" }),
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "chore", children: "chore (Maintenance Chore)" })
+                                ]
+                              }
+                            ) }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Autonomy Level", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                              "select",
+                              {
+                                id: "wf-autonomy-select",
+                                value: currentWfObj?.autonomy || "gated",
+                                onChange: (e3) => updateWfAutonomy(e3.target.value),
+                                style: {
+                                  width: "100%",
+                                  padding: "0.45rem",
+                                  background: "#0f172a",
+                                  color: "#fff",
+                                  border: "1px solid #334155",
+                                  borderRadius: "4px"
+                                },
+                                children: [
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "manual", children: "manual (Every stage requires human run)" }),
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "triage", children: "triage (Auto-triage only)" }),
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "gated", children: "gated (Autonomous coding, pauses at human gates)" }),
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "auto-low", children: "auto-low (Auto-merge low impact on approval)" })
+                                ]
+                              }
+                            ) }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Review Rounds Limit", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                              "input",
+                              {
+                                type: "number",
+                                id: "wf-review-rounds-input",
+                                value: currentWfObj?.maxReviewRounds || 3,
+                                onChange: (e3) => {
+                                  if (!currentWfObj) return;
+                                  const next3 = structuredClone(currentWfObj);
+                                  next3.maxReviewRounds = Number(e3.target.value);
+                                  setCurrentWfObj(next3);
+                                  setWfJson(JSON.stringify(next3, null, 2));
+                                },
+                                style: {
+                                  width: "100%",
+                                  padding: "0.45rem",
+                                  background: "#0f172a",
+                                  color: "#fff",
+                                  border: "1px solid #334155",
+                                  borderRadius: "4px"
+                                }
+                              }
+                            ) })
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { margin: { top: "s", bottom: "s" }, children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }, children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "h3", children: "Visual Stage Flow (Mermaid Diagram)" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { direction: "horizontal", size: "xs", children: [
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "severity-medium", children: "Amber = Human Gate" }),
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "blue", children: "Blue = Automated Stage" }),
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "green", children: "Green = Terminal Done" })
+                              ] })
+                            ] }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MermaidRenderer, { code: mermaidCode, id: selectedWf })
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h3", children: "Modify Stages & Gates" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "s", children: (currentWfObj?.stages || []).map((stg, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                            "div",
+                            {
+                              style: {
+                                padding: "0.75rem",
+                                background: "#0c131f",
+                                border: stg.humanApproval || stg.mode === "human" ? "1px solid #f59e0b" : "1px solid #1f2937",
+                                borderRadius: "6px",
+                                display: "grid",
+                                gridTemplateColumns: "120px 140px 180px 1fr auto",
+                                gap: "0.75rem",
+                                alignItems: "center"
+                              },
+                              children: [
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { style: { color: "#60a5fa" }, children: [
+                                  "#",
+                                  idx + 1,
+                                  " ",
+                                  stg.id
+                                ] }) }),
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { style: { fontSize: "0.8rem", color: "#9ba7b6" }, children: [
+                                  "Agent:",
+                                  " ",
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                    "select",
+                                    {
+                                      value: stg.agent || "builder",
+                                      onChange: (e3) => updateStageField(idx, "agent", e3.target.value),
+                                      style: {
+                                        padding: "0.25rem",
+                                        background: "#161d26",
+                                        color: "#fff",
+                                        border: "1px solid #334155",
+                                        borderRadius: "4px"
+                                      },
+                                      children: KNOWN_AGENTS.map((ag) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: ag, children: ag }, ag))
+                                    }
+                                  )
+                                ] }) }),
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { style: { display: "flex", gap: "0.4rem", alignItems: "center", fontSize: "0.8rem" }, children: [
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                    "input",
+                                    {
+                                      type: "checkbox",
+                                      checked: Boolean(stg.humanApproval || stg.mode === "human"),
+                                      onChange: (e3) => updateStageField(idx, "humanApproval", e3.target.checked)
+                                    }
+                                  ),
+                                  "Human Gate Pause"
+                                ] }) }),
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { style: { color: "#94a3b8" }, children: [
+                                  "Skills: ",
+                                  (stg.skills || []).join(", ")
+                                ] }) }),
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: stg.humanApproval || stg.mode === "human" ? "severity-medium" : "blue", children: stg.humanApproval || stg.mode === "human" ? "HUMAN" : "AUTO" }) })
+                              ]
+                            },
+                            `${stg.id}-${idx}`
+                          )) }) }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExpandableSection, { defaultExpanded: true, headerText: "Advanced: Raw Workflow JSON Editor", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "s", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                            "textarea",
+                            {
+                              id: "wf-editor-json",
+                              rows: 8,
+                              value: wfJson,
+                              onChange: (e3) => {
+                                setWfJson(e3.target.value);
+                                try {
+                                  const parsed = JSON.parse(e3.target.value);
+                                  setCurrentWfObj(parsed);
+                                } catch {
+                                }
+                              },
+                              style: {
+                                width: "100%",
+                                padding: "0.6rem",
+                                background: "#0f172a",
+                                color: "#f8fafc",
+                                border: "1px solid #334155",
+                                borderRadius: "4px",
+                                fontFamily: "monospace"
+                              }
+                            }
+                          ) }) }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap" }, children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(button_default2, { variant: "primary", id: "wf-editor-save-btn", onClick: saveWorkflowFromEditor, children: [
+                              "Validate & Save Workflow to workflows/",
+                              selectedWf,
+                              ".yaml"
+                            ] }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { style: { display: "flex", gap: "0.4rem", alignItems: "center", fontSize: "0.85rem" }, children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                "input",
+                                {
+                                  type: "checkbox",
+                                  id: "wf-editor-commit-check",
+                                  checked: wfCommit,
+                                  onChange: (e3) => setWfCommit(e3.target.checked)
+                                }
+                              ),
+                              "Commit change to git directly"
+                            ] }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { id: "wf-editor-status", style: { fontSize: "0.85rem", color: "#93c5fd" }, children: wfStatus })
+                          ] })
+                        ] })
+                      }
+                    ),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "workflows-list", children: Object.values(state5?.workflows || {}).map((wf) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                      "div",
+                      {
+                        className: "card",
+                        "data-testid": `workflow-card-${wf.id}`,
+                        style: { marginBottom: "1rem" },
+                        children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                          container_default,
+                          {
+                            header: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Header2, { variant: "h2", description: wf.description, children: [
+                              "Workflow: ",
+                              wf.id,
+                              " (",
+                              wf.label,
+                              ") \u2014 Autonomy: ",
+                              wf.autonomy
+                            ] }),
+                            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", gap: "0.6rem", flexWrap: "wrap", alignItems: "center" }, children: (wf.stages || []).map((s3) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                              "div",
+                              {
+                                style: {
+                                  padding: "0.6rem 0.85rem",
+                                  background: "#0f172a",
+                                  border: s3.humanApproval || s3.mode === "human" ? "1px solid #f59e0b" : "1px solid #2b3646",
+                                  borderRadius: "6px",
+                                  fontSize: "0.82rem"
+                                },
+                                children: [
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: s3.id }),
+                                  " (",
+                                  s3.humanApproval || s3.mode === "human" ? "HUMAN" : "AUTO",
+                                  ")",
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+                                  "Agent: ",
+                                  s3.agent,
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+                                  "Skills: ",
+                                  (s3.skills || []).join(", ")
+                                ]
+                              },
+                              s3.id
+                            )) })
+                          }
+                        )
+                      },
+                      wf.id
                     )) })
                   ] }) }),
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Factory Brain (Long-Term Memory)" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "brain-list", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "xs", children: (state5?.brain || []).map((b11) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                    "div",
-                    {
-                      "data-testid": `brain-card-${b11.source}`,
-                      style: {
-                        padding: "0.6rem",
-                        background: "#0f172a",
-                        borderRadius: "6px",
-                        border: "1px solid #2b3646"
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { id: "tab-runtimes", style: { display: activeTab === "runtimes" ? "block" : "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Runtime Router & Circuit Breaker" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { id: "circuit-table", style: { width: "100%", borderCollapse: "collapse" }, children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { style: { borderBottom: "1px solid #2b3646", textAlign: "left" }, children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Runtime" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Status" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Remaining Quota" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Consecutive Failures" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Last Error" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.6rem" }, children: "Action" })
+                    ] }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: (state5?.runtimeHealth || []).map((r3) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                      "tr",
+                      {
+                        "data-testid": `circuit-row-${r3.runtime}`,
+                        style: { borderBottom: "1px solid #1e293b" },
+                        children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: r3.runtime }) }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusIndicator2, { type: r3.status === "closed" ? "success" : "error", children: r3.status.toUpperCase() }) }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: r3.quota_remaining }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: r3.consecutive_failures }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: r3.last_error_code || "-" }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.6rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                            button_default2,
+                            {
+                              variant: "primary",
+                              "data-testid": `reset-circuit-${r3.runtime}`,
+                              onClick: () => resetCircuit(r3.runtime),
+                              children: "Reset Circuit Breaker"
+                            }
+                          ) })
+                        ]
                       },
-                      children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: b11.source }),
-                        " (",
-                        b11.kind,
-                        ")",
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
-                          String(b11.content || "").slice(0, 140),
-                          "..."
-                        ] })
-                      ]
-                    },
-                    b11.source
-                  )) }) }) })
-                ] }) })
-              ]
-            }
-          )
-        }
-      ) })
+                      r3.runtime
+                    )) })
+                  ] }) }) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { id: "tab-agents", style: { display: activeTab === "agents" ? "block" : "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "l", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                      "div",
+                      {
+                        id: "agents-grid",
+                        style: {
+                          display: "grid",
+                          gap: "1rem",
+                          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))"
+                        },
+                        children: (state5?.agents || []).map((a3) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "card", "data-testid": `agent-card-${a3.id}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h3", children: a3.name }), children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "small", color: "text-body-secondary", children: a3.responsibility }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { margin: { top: "xs" }, variant: "small", children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Skills:" }),
+                            " ",
+                            (a3.skills || []).join(", ")
+                          ] })
+                        ] }) }, a3.id))
+                      }
+                    ),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Vendored & Locked Skills (skills.lock.json)" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", { id: "skills-table", style: { width: "100%", borderCollapse: "collapse" }, children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", { style: { borderBottom: "1px solid #2b3646", textAlign: "left" }, children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Skill" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Category" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "Version" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { style: { padding: "0.5rem" }, children: "SHA-256" })
+                      ] }) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: (state5?.skills || []).map((s3) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                        "tr",
+                        {
+                          "data-testid": `skill-row-${s3.name}`,
+                          style: { borderBottom: "1px solid #1e293b" },
+                          children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: s3.name }) }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: s3.category }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "green", children: s3.version }) }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("code", { children: [
+                              String(s3.sha256 || "").slice(0, 16),
+                              "\u2026"
+                            ] }) })
+                          ]
+                        },
+                        s3.name
+                      )) })
+                    ] }) })
+                  ] }) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", { id: "tab-controls", style: { display: activeTab === "controls" ? "block" : "none" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Grid, { gridDefinition: [{ colspan: 4 }, { colspan: 4 }, { colspan: 4 }], children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Operational Controls" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "s", children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Autonomy Mode", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                        "select",
+                        {
+                          id: "ctrl-autonomy",
+                          value: ctrlAutonomy,
+                          onChange: (e3) => setCtrlAutonomy(e3.target.value),
+                          style: {
+                            width: "100%",
+                            padding: "0.45rem",
+                            background: "#0f172a",
+                            color: "#fff",
+                            border: "1px solid #334155",
+                            borderRadius: "4px"
+                          },
+                          children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "manual", children: "manual" }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "triage", children: "triage" }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "gated", children: "gated" }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "auto-low", children: "auto-low" })
+                          ]
+                        }
+                      ) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Hourly Task Limit", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                        "input",
+                        {
+                          type: "number",
+                          id: "ctrl-rate",
+                          value: ctrlRate,
+                          onChange: (e3) => setCtrlRate(e3.target.value),
+                          style: {
+                            width: "100%",
+                            padding: "0.45rem",
+                            background: "#0f172a",
+                            color: "#fff",
+                            border: "1px solid #334155",
+                            borderRadius: "4px"
+                          }
+                        }
+                      ) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Daily Budget (USD)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                        "input",
+                        {
+                          type: "number",
+                          id: "ctrl-budget",
+                          step: "0.5",
+                          value: ctrlBudget,
+                          onChange: (e3) => setCtrlBudget(e3.target.value),
+                          style: {
+                            width: "100%",
+                            padding: "0.45rem",
+                            background: "#0f172a",
+                            color: "#fff",
+                            border: "1px solid #334155",
+                            borderRadius: "4px"
+                          }
+                        }
+                      ) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                        FormField,
+                        {
+                          label: "Max Concurrent Running Agents (1 to 10, default: 3)",
+                          description: "Bounds maximum active simultaneous agent tasks running across all monitored repos",
+                          children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                            "input",
+                            {
+                              type: "number",
+                              id: "ctrl-concurrent",
+                              min: "1",
+                              max: "10",
+                              step: "1",
+                              value: ctrlConcurrent,
+                              onChange: (e3) => setCtrlConcurrent(e3.target.value),
+                              style: {
+                                width: "100%",
+                                padding: "0.45rem",
+                                background: "#0f172a",
+                                color: "#fff",
+                                border: "1px solid #334155",
+                                borderRadius: "4px"
+                              }
+                            }
+                          )
+                        }
+                      ),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Stall Alarm Threshold (minutes)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                        "input",
+                        {
+                          type: "number",
+                          id: "ctrl-stall-minutes",
+                          value: ctrlStallMinutes,
+                          onChange: (e3) => setCtrlStallMinutes(e3.target.value),
+                          style: {
+                            width: "100%",
+                            padding: "0.45rem",
+                            background: "#0f172a",
+                            color: "#fff",
+                            border: "1px solid #334155",
+                            borderRadius: "4px"
+                          }
+                        }
+                      ) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { style: { display: "flex", gap: "0.5rem", alignItems: "center" }, children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                          "input",
+                          {
+                            type: "checkbox",
+                            id: "ctrl-kill",
+                            checked: ctrlKill,
+                            onChange: (e3) => setCtrlKill(e3.target.checked)
+                          }
+                        ),
+                        "Global Kill Switch (Pause Factory)"
+                      ] }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { variant: "primary", id: "save-controls-btn", onClick: saveControls, children: "Save Controls to factory.yaml" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "controls-feedback", style: { fontSize: "0.85rem", color: "#93c5fd" }, children: controlsFeedback })
+                    ] }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Post-Deploy Gate & Automatic Rollback" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "s", children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Commit SHA", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                        "input",
+                        {
+                          type: "text",
+                          id: "deploy-sha",
+                          value: deploySha,
+                          onChange: (e3) => setDeploySha(e3.target.value),
+                          placeholder: "a1b2c3d",
+                          style: {
+                            width: "100%",
+                            padding: "0.45rem",
+                            background: "#0f172a",
+                            color: "#fff",
+                            border: "1px solid #334155",
+                            borderRadius: "4px"
+                          }
+                        }
+                      ) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Error Rate (%)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                        "input",
+                        {
+                          type: "number",
+                          id: "deploy-error-rate",
+                          step: "0.1",
+                          value: deployErrorRate,
+                          onChange: (e3) => setDeployErrorRate(e3.target.value),
+                          style: {
+                            width: "100%",
+                            padding: "0.45rem",
+                            background: "#0f172a",
+                            color: "#fff",
+                            border: "1px solid #334155",
+                            borderRadius: "4px"
+                          }
+                        }
+                      ) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Max Allowed (%)", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                        "input",
+                        {
+                          type: "number",
+                          id: "deploy-max-rate",
+                          step: "0.1",
+                          value: deployMaxRate,
+                          onChange: (e3) => setDeployMaxRate(e3.target.value),
+                          style: {
+                            width: "100%",
+                            padding: "0.45rem",
+                            background: "#0f172a",
+                            color: "#fff",
+                            border: "1px solid #334155",
+                            borderRadius: "4px"
+                          }
+                        }
+                      ) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { variant: "primary", id: "deploy-verify-btn", onClick: verifyDeploymentFromUi, children: "Verify Deployment" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "deploy-feedback", style: { fontSize: "0.85rem", color: "#93c5fd" }, children: deployFeedback }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "deployments-list", children: (state5?.deployments || []).map((d3) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                        "div",
+                        {
+                          "data-testid": `deploy-card-${d3.commit_sha}`,
+                          style: {
+                            padding: "0.5rem",
+                            marginTop: "0.4rem",
+                            background: "#0f172a",
+                            borderRadius: "4px",
+                            border: "1px solid #2b3646"
+                          },
+                          children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: d3.commit_sha }),
+                            " \u2014",
+                            " ",
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: d3.status === "healthy" ? "green" : "red", children: d3.status }),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("small", { children: [
+                              "Last good SHA: ",
+                              d3.last_good_sha || "-"
+                            ] })
+                          ]
+                        },
+                        `${d3.id}-${d3.commit_sha}`
+                      )) })
+                    ] }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Factory Brain (Long-Term Memory)" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "brain-list", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "xs", children: (state5?.brain || []).map((b11) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                      "div",
+                      {
+                        "data-testid": `brain-card-${b11.source}`,
+                        style: {
+                          padding: "0.6rem",
+                          background: "#0f172a",
+                          borderRadius: "6px",
+                          border: "1px solid #2b3646"
+                        },
+                        children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: b11.source }),
+                          " (",
+                          b11.kind,
+                          ")",
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
+                            String(b11.content || "").slice(0, 140),
+                            "..."
+                          ] })
+                        ]
+                      },
+                      b11.source
+                    )) }) }) })
+                  ] }) })
+                ]
+              }
+            )
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          Modal,
+          {
+            visible: previewModalOpen,
+            onDismiss: () => setPreviewModalOpen(false),
+            header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: previewDoc.title || "Document Preview" }),
+            footer: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { float: "right", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              button_default2,
+              {
+                variant: "primary",
+                id: "close-preview-modal-btn",
+                "data-testid": "close-preview-modal-btn",
+                onClick: () => setPreviewModalOpen(false),
+                children: "Close"
+              }
+            ) }),
+            children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexDirection: "column", gap: "0.5rem" }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: "0.8rem", color: "#94a3b8" }, children: [
+                "Path: ",
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: previewDoc.path })
+              ] }),
+              previewDoc.loading && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { color: "text-body-secondary", children: "Loading file content..." }),
+              previewDoc.error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(alert_default, { type: "error", header: "Failed to load file", children: previewDoc.error }),
+              !previewDoc.loading && !previewDoc.error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                "pre",
+                {
+                  id: "doc-preview-content",
+                  "data-testid": "doc-preview-content",
+                  style: {
+                    maxHeight: "60vh",
+                    overflow: "auto",
+                    padding: "0.75rem",
+                    background: "#0a0f1d",
+                    color: "#e2e8f0",
+                    border: "1px solid #1e293b",
+                    borderRadius: "6px",
+                    fontSize: "0.82rem",
+                    lineHeight: "1.45",
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-all"
+                  },
+                  children: previewDoc.content
+                }
+              )
+            ] })
+          }
+        )
+      ] })
     ] });
   }
   var rootEl = document.getElementById("app");

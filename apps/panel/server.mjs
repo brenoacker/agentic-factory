@@ -1,6 +1,6 @@
 import http from 'node:http';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, resolve, isAbsolute } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import {
   loadAndValidateFactory,
@@ -18,6 +18,10 @@ import {
   commentOnGitHubIssue,
   closeGitHubIssue,
   updateGitHubIssue,
+  isPathContained,
+  resolveTaskReviewFiles,
+  openInEditor,
+  readFileContent,
 } from '../../packages/core/index.mjs';
 import { listAgentsCatalog, loadBrainEntries } from '../../packages/core/src/brain.mjs';
 
@@ -107,6 +111,20 @@ export function createPanelServer({
         const lock = existsSync(lockPath) ? JSON.parse(readFileSync(lockPath, 'utf8')) : { skills: [] };
         const stallThresholdMinutes = cfg.factoryConfig?.factory?.limits?.stallThresholdMinutes ?? 30;
         const status = store.getStatusSummary({ stallThresholdMinutes });
+        if (Array.isArray(status?.needsHuman)) {
+          for (const item of status.needsHuman) {
+            const t = store.getTask(item.executionKey);
+            item.workspace_path = t?.workspace_path || null;
+            item.deliverable_url = t?.deliverable_url || null;
+            item.deliverable_type = t?.deliverable_type || null;
+            item.reviewFiles = resolveTaskReviewFiles(t || item, { factoryRoot: root });
+          }
+        }
+        if (Array.isArray(status?.tasks)) {
+          for (const t of status.tasks) {
+            t.reviewFiles = resolveTaskReviewFiles(t, { factoryRoot: root });
+          }
+        }
         const agents = listAgentsCatalog(root);
         const brain = loadBrainEntries(root);
         const runtimeHealth = store.listRuntimeHealth();
@@ -228,6 +246,58 @@ export function createPanelServer({
           return;
         }
         sendJson(res, 200, { ok: true, task: updated });
+        return;
+      }
+
+      // File inspection and editor launch endpoints
+      if (req.method === 'POST' && pathname === '/api/files/open') {
+        const body = await readJsonBody(req);
+        const filePath = body.filePath || body.path;
+        if (!filePath) {
+          sendJson(res, 400, { ok: false, error: 'File path is required' });
+          return;
+        }
+        let taskWs = null;
+        if (body.executionKey) {
+          const task = store.getTask(body.executionKey);
+          if (task?.workspace_path) taskWs = task.workspace_path;
+        }
+        const allowedRoots = [root];
+        if (taskWs) allowedRoots.push(taskWs);
+
+        const resolvedPath = isAbsolute(filePath) ? resolve(filePath) : resolve(root, filePath);
+
+        if (!isPathContained(resolvedPath, allowedRoots)) {
+          sendJson(res, 400, { ok: false, error: 'Access denied: path is outside allowed repository or workspace roots' });
+          return;
+        }
+
+        const openRes = openInEditor(resolvedPath, {
+          rootDir: root,
+          line: body.line ? Number(body.line) : null,
+          runner: issuePollRunner,
+        });
+        sendJson(res, openRes.status || (openRes.ok ? 200 : 500), openRes);
+        return;
+      }
+
+      if (req.method === 'GET' && pathname === '/api/files/content') {
+        const filePath = url.searchParams.get('filePath') || url.searchParams.get('path');
+        const executionKey = url.searchParams.get('executionKey');
+        if (!filePath) {
+          sendJson(res, 400, { ok: false, error: 'path parameter is required' });
+          return;
+        }
+        let taskWs = null;
+        if (executionKey) {
+          const task = store.getTask(executionKey);
+          if (task?.workspace_path) taskWs = task.workspace_path;
+        }
+        const allowedRoots = [root];
+        if (taskWs) allowedRoots.push(taskWs);
+
+        const contentRes = readFileContent(filePath, { factoryRoot: root, allowedRoots });
+        sendJson(res, contentRes.status || (contentRes.ok ? 200 : 500), contentRes);
         return;
       }
 

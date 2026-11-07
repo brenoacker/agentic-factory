@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -18,6 +18,10 @@ import {
   autoDispatchQueuedTasks,
   checkGitHubPullRequest,
   syncMergedPullRequests,
+  isPathContained,
+  resolveTaskReviewFiles,
+  openInEditor,
+  readFileContent,
   FactoryStore,
 } from '../../../packages/core/index.mjs';
 
@@ -1417,6 +1421,95 @@ test('C19: Cron scheduler syncMergedPullRequests auto-completes tasks upon PR me
     assert.equal(checkJson.merged, true);
     assert.equal(checkJson.advancedToDone, true);
     assert.equal(checkJson.task.stage, 'done');
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C21: resolveTaskReviewFiles resolves plan documents with vscode:// URIs and openInEditor enforces path containment', () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const store = new FactoryStore(dbPath);
+
+  try {
+    const task = store.createTask({
+      executionKey: 'brenoacker/agentic-factory#901',
+      issueNumber: 901,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Plan Review Task',
+      type: 'feature',
+      stage: 'plan',
+    });
+    store.updateTaskStage(task.execution_key, {
+      needsHuman: true,
+      humanQuestion: 'Please review implementation plan: .specs/features/clickable-file-review-and-editor-integration/plan.md#L1-L50',
+    });
+
+    const files = resolveTaskReviewFiles(task, tmpDir);
+    assert.ok(files.length > 0);
+    const planFile = files.find((f) => f.path.includes('plan.md'));
+    assert.ok(planFile);
+    assert.ok(planFile.vscodeUri.startsWith('vscode://file/'));
+    assert.equal(isPathContained(planFile.resolvedPath, tmpDir), true);
+
+    // Test containment rejection
+    assert.equal(isPathContained(join(tmpDir, '..', 'secret.txt'), tmpDir), false);
+
+    // Test openInEditor with mock runner
+    let commandRan = null;
+    const mockEditorRunner = (spec) => {
+      commandRan = spec;
+      return { ok: true, status: 200 };
+    };
+    const openRes = openInEditor(planFile.resolvedPath, { rootDir: tmpDir, runner: mockEditorRunner });
+    assert.equal(openRes.ok, true);
+    assert.ok(commandRan);
+    assert.ok(commandRan.path.includes('plan.md'));
+  } finally {
+    store.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C22: POST /api/files/open launches editor and GET /api/files/content returns file contents, rejecting traversal', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    const testDocPath = join(tmpDir, 'sample-review.md');
+    const docContent = '# Sample Review Plan\n\nContent for operator inspection.';
+    writeFileSync(testDocPath, docContent, 'utf-8');
+
+    // 1. GET /api/files/content success
+    const getRes = await fetch(`${baseUrl}/api/files/content?path=sample-review.md`);
+    assert.equal(getRes.status, 200);
+    const getContent = await getRes.json();
+    assert.equal(getContent.ok, true);
+    assert.equal(getContent.content, docContent);
+
+    // 2. GET /api/files/content path traversal rejection (400)
+    const badRes = await fetch(`${baseUrl}/api/files/content?path=../../etc/passwd`);
+    assert.equal(badRes.status, 400);
+
+    // 3. POST /api/files/open success
+    const postRes = await fetch(`${baseUrl}/api/files/open`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filePath: 'sample-review.md', line: 10 }),
+    });
+    assert.equal(postRes.status, 200);
+    const postJson = await postRes.json();
+    assert.equal(postJson.ok, true);
+
+    // 4. POST /api/files/open traversal rejection (400)
+    const badPostRes = await fetch(`${baseUrl}/api/files/open`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filePath: '../../evil.sh' }),
+    });
+    assert.equal(badPostRes.status, 400);
   } finally {
     await panel.close();
     rmSync(tmpDir, { recursive: true, force: true });
