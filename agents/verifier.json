@@ -1,0 +1,8 @@
+{
+  "id": "verifier",
+  "name": "Independent Verifier",
+  "responsibility": "Audits each check's test against its criterion in an isolated context (author != verifier), runs adversarial boundary probes, and writes verification.md.",
+  "stages": ["verify"],
+  "skills": ["tlc-spec-lean"],
+  "defaultRuntime": "antigravity"
+}

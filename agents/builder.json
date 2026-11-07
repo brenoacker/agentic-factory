@@ -1,0 +1,8 @@
+{
+  "id": "builder",
+  "name": "Spec Builder",
+  "responsibility": "Freezes obligations in checks.md, writes proof-backed tests before implementation, builds surgical code, and runs check_proofs.py.",
+  "stages": ["checks_and_build"],
+  "skills": ["tlc-spec-lean", "coding-guidelines", "gh-fix-ci", "docs-writer", "mermaid-studio"],
+  "defaultRuntime": "antigravity"
+}

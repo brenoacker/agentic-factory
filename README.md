@@ -40,9 +40,25 @@ brain/                  memória da fábrica (contexto, ADRs, lessons)
 docs/                   plano e arquitetura
 ```
 
+## Comandos Rápidos
+
+```bash
+# Validar factory.yaml, workflows e schemas de contratos
+node packages/core/cli.mjs validate
+
+# Sincronizar e verificar as 23 skills vendorizadas (tlc-spec-lean v2.2.0)
+node scripts/sync-skills.mjs --verify-only
+
+# Abrir o Painel de Controle local (http://127.0.0.1:4310)
+node packages/core/cli.mjs panel --port 4310
+
+# Consultar status da fábrica via CLI
+node packages/core/cli.mjs status
+```
+
 ## Status
 
-Fase 0 (bootstrap) concluída. Veja o roadmap completo em [docs/plan.md](docs/plan.md).
+Fases 0 a 7 concluídas (`skills-sync`, `factory-core`, `runtime-loop`, `control-panel`). Veja o roadmap completo em [docs/plan.md](docs/plan.md).
 
 ## Licença e atribuição
 

@@ -1,0 +1,8 @@
+{
+  "id": "planner",
+  "name": "Spec Planner",
+  "responsibility": "Produces a human-reviewed plan.md with EARS acceptance criteria, mermaid architecture/data diagrams, Surface, and one-way Landing doors.",
+  "stages": ["plan"],
+  "skills": ["tlc-spec-lean"],
+  "defaultRuntime": "antigravity"
+}

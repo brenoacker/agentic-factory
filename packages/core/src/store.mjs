@@ -86,6 +86,16 @@ export class FactoryStore {
         last_error_code TEXT NOT NULL DEFAULT '',
         tripped_at TEXT NOT NULL DEFAULT ''
       );
+
+      CREATE TABLE IF NOT EXISTS deployments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        execution_key TEXT NOT NULL,
+        commit_sha TEXT NOT NULL,
+        status TEXT NOT NULL,
+        last_good_sha TEXT NOT NULL DEFAULT '',
+        violation_reason TEXT NOT NULL DEFAULT '',
+        created_at TEXT NOT NULL
+      );
     `);
 
     const defaultRuntimes = ['antigravity', 'claude-code', 'codex'];
@@ -142,6 +152,99 @@ export class FactoryStore {
       `)
       .run(runtime);
     return this.getRuntimeHealth(runtime);
+  }
+
+  getLastGoodDeploySha() {
+    const row = this.db
+      .prepare("SELECT commit_sha FROM deployments WHERE status = 'healthy' ORDER BY id DESC LIMIT 1")
+      .get();
+    return row ? row.commit_sha : '';
+  }
+
+  listDeployments() {
+    return this.db.prepare('SELECT * FROM deployments ORDER BY id DESC').all();
+  }
+
+  verifyDeployment({
+    executionKey,
+    commitSha,
+    errorRate = 0,
+    maxErrorRate = 1.0,
+    now = new Date().toISOString(),
+  }) {
+    const previousGoodSha = this.getLastGoodDeploySha();
+    if (errorRate > maxErrorRate) {
+      const reason = `error_rate ${errorRate}% exceeded threshold ${maxErrorRate}%`;
+      this.db
+        .prepare(
+          'INSERT INTO deployments (execution_key, commit_sha, status, last_good_sha, violation_reason, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+        )
+        .run(executionKey, commitSha, 'rolled_back', previousGoodSha, reason, now);
+      this.recordEvent({
+        executionKey,
+        eventType: 'deploy_rollback',
+        stage: 'merge',
+        payload: { commitSha, revertedToSha: previousGoodSha, errorRate, maxErrorRate, reason },
+        now,
+      });
+      return {
+        ok: true,
+        status: 'rolled_back',
+        rolledBack: true,
+        commitSha,
+        revertedToSha: previousGoodSha,
+        last_good_sha: previousGoodSha,
+        violationReason: reason,
+      };
+    }
+
+    this.db
+      .prepare(
+        'INSERT INTO deployments (execution_key, commit_sha, status, last_good_sha, violation_reason, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+      )
+      .run(executionKey, commitSha, 'healthy', commitSha, '', now);
+    this.recordEvent({
+      executionKey,
+      eventType: 'deploy_healthy',
+      stage: 'merge',
+      payload: { commitSha, errorRate, maxErrorRate },
+      now,
+    });
+    return {
+      ok: true,
+      status: 'healthy',
+      rolledBack: false,
+      commitSha,
+      revertedToSha: null,
+      last_good_sha: commitSha,
+      violationReason: '',
+    };
+  }
+
+  reopenTaskFromAlert({
+    executionKey,
+    source = 'sentry',
+    message,
+    now = new Date().toISOString(),
+  }) {
+    const task = this.getTask(executionKey);
+    if (!task) return null;
+    this.recordEvent({
+      executionKey,
+      issueNumber: task.issue_number,
+      eventType: 'production_alert_reopened',
+      stage: 'triage',
+      runtime: task.runtime,
+      model: task.model,
+      payload: { source, message },
+      now,
+    });
+    return this.updateTaskStage(executionKey, {
+      stage: 'triage',
+      needsHuman: false,
+      humanQuestion: `[${source}] ${message}`,
+      now,
+    });
   }
 
   getTask(executionKey) {

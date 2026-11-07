@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agentic Factory — Control Panel</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #111827;
+      --border: #1f2937;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #3b82f6;
+      --green: #10b981;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --purple: #8b5cf6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: #0f172a;
+    }
+    .brand { display: flex; align-items: center; gap: 0.75rem; font-weight: 700; font-size: 1.2rem; }
+    .badge {
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #1e293b;
+      border: 1px solid var(--border);
+    }
+    .badge.green { color: var(--green); border-color: var(--green); }
+    .badge.yellow { color: var(--yellow); border-color: var(--yellow); }
+    .badge.red { color: var(--red); border-color: var(--red); }
+    .badge.purple { color: var(--purple); border-color: var(--purple); }
+    nav {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.75rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+      flex-wrap: wrap;
+    }
+    nav button {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid transparent;
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    nav button.active {
+      color: var(--text);
+      background: #1e293b;
+      border-color: var(--accent);
+    }
+    main { padding: 1.5rem 2rem; max-width: 1440px; margin: 0 auto; }
+    .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 1.5rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.1rem;
+    }
+    .card h3 { margin: 0 0 0.4rem 0; font-size: 0.85rem; color: var(--muted); text-transform: uppercase; }
+    .metric { font-size: 1.75rem; font-weight: 700; }
+    .sub { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+    .board { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+    .col { background: #0f172a; border: 1px solid var(--border); border-radius: 0.75rem; padding: 0.85rem; }
+    .col h4 { margin: 0 0 0.75rem 0; font-size: 0.9rem; display: flex; justify-content: space-between; }
+    .task-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      margin-bottom: 0.65rem;
+      font-size: 0.85rem;
+    }
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.4rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+    .btn.green { background: var(--green); }
+    .btn.red { background: var(--red); }
+    .stage-flow { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; margin: 0.75rem 0; }
+    .stage-node {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.82rem;
+    }
+    .stage-node.human { border-color: var(--yellow); }
+    textarea, input, select {
+      background: #0f172a;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 0.4rem;
+      padding: 0.5rem;
+      width: 100%;
+      font-family: monospace;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th, td { text-align: left; padding: 0.6rem; border-bottom: 1px solid var(--border); }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span>Agentic Factory</span>
+      <span class="badge purple">tlc-spec-lean v2.2.0</span>
+      <span id="factory-status-badge" class="badge green">ACTIVE</span>
+    </div>
+    <div>
+      <button class="btn" onclick="loadDashboard()">Atualizar Telemetria</button>
+    </div>
+  </header>
+
+  <nav id="tabs">
+    <button class="active" onclick="showTab('overview', this)">Overview & Telemetria</button>
+    <button onclick="showTab('board', this)">Board & Needs Human</button>
+    <button onclick="showTab('workflows', this)">Workflows (Fábrica como Código)</button>
+    <button onclick="showTab('runtimes', this)">Runtimes, Router & Circuit Breaker</button>
+    <button onclick="showTab('agents', this)">Agentes & Skills (23)</button>
+    <button onclick="showTab('controls', this)">Controles, Deploy & Brain</button>
+  </nav>
+
+  <main>
+    <section id="tab-overview">
+      <div class="grid" id="kpi-grid"></div>
+      <div class="grid">
+        <div class="card">
+          <h3>Uso e Custo por Runtime</h3>
+          <table id="runtime-usage-table">
+            <thead><tr><th>Runtime</th><th>Eventos</th><th>Input Tokens</th><th>Output Tokens</th><th>Cached</th><th>Custo (USD)</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h3>Uso e Custo por Modelo</h3>
+          <table id="model-usage-table">
+            <thead><tr><th>Modelo</th><th>Eventos</th><th>Input Tokens</th><th>Output Tokens</th><th>Custo (USD)</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-board" class="hidden">
+      <div class="card" style="margin-bottom: 1rem;">
+        <h3>Fila "Precisa de Mim" (1-Click Gate Approval)</h3>
+        <div id="needs-human-list"></div>
+      </div>
+      <div class="board" id="kanban-board"></div>
+    </section>
+
+    <section id="tab-workflows" class="hidden">
+      <div id="workflows-list"></div>
+    </section>
+
+    <section id="tab-runtimes" class="hidden">
+      <div class="card">
+        <h3>Roteador de Runtimes & Disjuntor (Circuit Breaker)</h3>
+        <table id="circuit-table">
+          <thead><tr><th>Runtime</th><th>Status</th><th>Quota Livre</th><th>Falhas Seguidas</th><th>Último Erro</th><th>Ação</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-agents" class="hidden">
+      <div class="grid" id="agents-grid"></div>
+      <div class="card">
+        <h3>Skills Vendorizadas e Travadas (skills.lock.json)</h3>
+        <table id="skills-table">
+          <thead><tr><th>Skill</th><th>Categoria</th><th>Versão</th><th>SHA-256</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-controls" class="hidden">
+      <div class="grid">
+        <div class="card">
+          <h3>Controles Operacionais</h3>
+          <p><label>Autonomia: <select id="ctrl-autonomy"><option value="manual">manual</option><option value="triage">triage</option><option value="gated">gated</option><option value="auto-low">auto-low</option></select></label></p>
+          <p><label>Limite por hora: <input type="number" id="ctrl-rate" value="10" /></label></p>
+          <p><label>Orçamento diário (USD): <input type="number" id="ctrl-budget" step="0.5" value="25" /></label></p>
+          <p><label><input type="checkbox" id="ctrl-kill" style="width:auto;" /> Kill Switch Global (Pausar Fábrica)</label></p>
+          <button class="btn green" onclick="saveControls()">Salvar Controles em factory.yaml</button>
+        </div>
+        <div class="card">
+          <h3>Deploy Gate & Rollback Automático</h3>
+          <div id="deployments-list"></div>
+        </div>
+        <div class="card">
+          <h3>Brain (Memória da Fábrica)</h3>
+          <div id="brain-list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    let state = null;
+    function showTab(name, btn) {
+      document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+      document.getElementById('tab-' + name).classList.remove('hidden');
+      document.querySelectorAll('#tabs button').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+    }
+
+    async function loadDashboard() {
+      const res = await fetch('/api/dashboard');
+      state = await res.json();
+      render();
+    }
+
+    async function approveTaskKey(key) {
+      await fetch('/api/tasks/' + encodeURIComponent(key) + '/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ approver: 'brenoacker', words: 'Approved 1-click in Control Panel' }),
+      });
+      await loadDashboard();
+    }
+
+    async function resetCircuit(runtime) {
+      await fetch('/api/controls', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resetRuntime: runtime }),
+      });
+      await loadDashboard();
+    }
+
+    async function saveControls() {
+      await fetch('/api/controls', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          autonomy: document.getElementById('ctrl-autonomy').value,
+          maxTasksPerHour: Number(document.getElementById('ctrl-rate').value),
+          dailyBudgetUsd: Number(document.getElementById('ctrl-budget').value),
+          killSwitch: document.getElementById('ctrl-kill').checked,
+        }),
+      });
+      await loadDashboard();
+    }
+
+    function render() {
+      if (!state) return;
+      const st = state.status;
+      const f = state.factoryConfig.factory;
+      const badge = document.getElementById('factory-status-badge');
+      badge.textContent = f.killSwitch ? 'PAUSED (KILL SWITCH)' : 'ACTIVE (' + f.autonomy.toUpperCase() + ')';
+      badge.className = 'badge ' + (f.killSwitch ? 'red' : 'green');
+
+      document.getElementById('kpi-grid').innerHTML = [
+        `<div class="card"><h3>Total de Tickets</h3><div class="metric">${st.totalTasks}</div><div class="sub">Concluídos: ${st.byStage.done || 0}</div></div>`,
+        `<div class="card"><h3>Custo Total (USD)</h3><div class="metric">$${st.totalCostUsd.toFixed(4)}</div><div class="sub">Orçamento diário: $${f.limits.dailyBudgetUsd}</div></div>`,
+        `<div class="card"><h3>Tokens Consumidos</h3><div class="metric">${st.tokens.total.toLocaleString()}</div><div class="sub">In: ${st.tokens.input.toLocaleString()} · Out: ${st.tokens.output.toLocaleString()} · Cache: ${st.tokens.cached.toLocaleString()}</div></div>`,
+        `<div class="card"><h3>PRs Aprovados de 1ª</h3><div class="metric">${st.reviewMetrics.firstRoundApprovalRate}%</div><div class="sub">Média de rodadas: ${st.reviewMetrics.averageReviewRounds} (máx ${f.limits.maxReviewRounds})</div></div>`,
+        `<div class="card"><h3>Fila Precisa de Mim</h3><div class="metric">${st.needsHuman.length}</div><div class="sub">Gates humanos aguardando</div></div>`,
+      ].join('');
+
+      document.querySelector('#runtime-usage-table tbody').innerHTML = Object.entries(st.byRuntime).map(([rt, d]) =>
+        `<tr><td><strong>${rt}</strong></td><td>${d.events}</td><td>${d.inputTokens}</td><td>${d.outputTokens}</td><td>${d.cachedTokens}</td><td>$${d.costUsd.toFixed(4)}</td></tr>`
+      ).join('') || '<tr><td colspan="6">Nenhum evento registrado ainda</td></tr>';
+
+      document.querySelector('#model-usage-table tbody').innerHTML = Object.entries(st.byModel).map(([m, d]) =>
+        `<tr><td><strong>${m}</strong></td><td>${d.events}</td><td>${d.inputTokens}</td><td>${d.outputTokens}</td><td>$${d.costUsd.toFixed(4)}</td></tr>`
+      ).join('') || '<tr><td colspan="5">Nenhum evento registrado ainda</td></tr>';
+
+      document.getElementById('needs-human-list').innerHTML = st.needsHuman.map(item =>
+        `<div class="task-card" style="display:flex;justify-content:space-between;align-items:center;">
+          <div><strong>${item.executionKey}</strong> [${item.type}] — Etapa: <span class="badge yellow">${item.stage}</span><br/><span>${item.question}</span></div>
+          <button class="btn green" onclick="approveTaskKey('${item.executionKey}')">Aprovar com 1 Clique</button>
+        </div>`
+      ).join('') || '<div class="sub">Nenhum ticket bloqueado aguardando aprovação humana.</div>';
+
+      const stages = ['triage', 'plan', 'checks_and_build', 'verify', 'review', 'merge', 'done'];
+      document.getElementById('kanban-board').innerHTML = stages.map(col => {
+        const items = st.tasks.filter(t => t.stage === col);
+        return `<div class="col"><h4><span>${col}</span><span class="badge">${items.length}</span></h4>` +
+          items.map(t => `<div class="task-card"><strong>#${t.issue_number} ${t.title}</strong><br/><span class="badge">${t.type}</span> <span class="badge">${t.impact}</span><br/><small>${t.runtime} / ${t.model} · $${t.cost_usd.toFixed(4)}</small></div>`).join('') +
+          `</div>`;
+      }).join('');
+
+      document.getElementById('workflows-list').innerHTML = Object.values(state.workflows).map(wf =>
+        `<div class="card" style="margin-bottom:1rem;">
+          <h3>Workflow: ${wf.id} (${wf.label}) — Autonomia: ${wf.autonomy}</h3>
+          <p class="sub">${wf.description || ''}</p>
+          <div class="stage-flow">` +
+          wf.stages.map(s => `<div class="stage-node ${s.humanApproval || s.mode === 'human' ? 'human' : ''}">
+            <strong>${s.id}</strong> (${s.humanApproval || s.mode === 'human' ? 'HUMANO' : 'AUTO'})<br/>
+            Agente: ${s.agent}<br/>Skills: ${(s.skills || []).join(', ')}
+          </div>`).join(' → ') +
+          `</div></div>`
+      ).join('');
+
+      document.querySelector('#circuit-table tbody').innerHTML = state.runtimeHealth.map(r =>
+        `<tr><td><strong>${r.runtime}</strong></td><td><span class="badge ${r.status === 'closed' ? 'green' : 'red'}">${r.status.toUpperCase()}</span></td><td>${r.quota_remaining}</td><td>${r.consecutive_failures}</td><td>${r.last_error_code || '-'}</td><td><button class="btn" onclick="resetCircuit('${r.runtime}')">Resetar Disjuntor</button></td></tr>`
+      ).join('');
+
+      document.getElementById('agents-grid').innerHTML = state.agents.map(a =>
+        `<div class="card"><h3>${a.id}</h3><strong>${a.name}</strong><p class="sub">${a.responsibility}</p><div class="sub">Skills: ${a.skills.join(', ')}</div></div>`
+      ).join('');
+
+      document.querySelector('#skills-table tbody').innerHTML = state.skills.map(s =>
+        `<tr><td><strong>${s.name}</strong></td><td>${s.category}</td><td><span class="badge green">${s.version}</span></td><td><code>${s.sha256.slice(0, 16)}…</code></td></tr>`
+      ).join('');
+
+      document.getElementById('ctrl-autonomy').value = f.autonomy;
+      document.getElementById('ctrl-rate').value = f.limits.maxTasksPerHour;
+      document.getElementById('ctrl-budget').value = f.limits.dailyBudgetUsd;
+      document.getElementById('ctrl-kill').checked = Boolean(f.killSwitch);
+
+      document.getElementById('deployments-list').innerHTML = state.deployments.map(d =>
+        `<div class="task-card"><strong>${d.commit_sha}</strong> — <span class="badge ${d.status === 'healthy' ? 'green' : 'red'}">${d.status}</span><br/><small>Last good SHA: ${d.last_good_sha || '-'}</small></div>`
+      ).join('') || '<div class="sub">Nenhum deploy registrado.</div>';
+
+      document.getElementById('brain-list').innerHTML = state.brain.map(b =>
+        `<div class="task-card"><strong>${b.source}</strong> (${b.kind})<div class="sub">${b.content.slice(0, 140)}...</div></div>`
+      ).join('');
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

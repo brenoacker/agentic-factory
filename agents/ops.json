@@ -1,0 +1,8 @@
+{
+  "id": "ops",
+  "name": "Merge & Release Operator",
+  "responsibility": "Handles PR review comments, executes gated or auto-low merges, and monitors post-deploy health metrics for automatic rollback.",
+  "stages": ["merge", "discover"],
+  "skills": ["gh-address-comments", "tlc-prd", "tlc-discover", "create-technical-design-doc", "create-adr", "the-jury"],
+  "defaultRuntime": "antigravity"
+}

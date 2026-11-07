@@ -1,0 +1,8 @@
+{
+  "id": "triager",
+  "name": "Triage Specialist",
+  "responsibility": "Classifies incoming issues, reproduces bugs, determines impact (low/medium/high), and outputs a validated triage.schema.json contract.",
+  "stages": ["triage"],
+  "skills": ["codenavi", "sentry", "tlc-discover"],
+  "defaultRuntime": "antigravity"
+}

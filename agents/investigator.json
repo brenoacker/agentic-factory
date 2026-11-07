@@ -1,0 +1,8 @@
+{
+  "id": "investigator",
+  "name": "Technical Investigator",
+  "responsibility": "Executes deep codebase and production spikes without opening a PR, returning an evidence-backed investigation-report.schema.json and follow-up tickets.",
+  "stages": ["investigate"],
+  "skills": ["codenavi", "not-your-babysitter", "sentry", "the-fool"],
+  "defaultRuntime": "antigravity"
+}

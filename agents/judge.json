@@ -1,0 +1,8 @@
+{
+  "id": "judge",
+  "name": "PR Judge",
+  "responsibility": "Reviews pull requests for correctness, security, and structural quality, returning a SHA-locked review.schema.json verdict.",
+  "stages": ["review"],
+  "skills": ["the-judge", "security-best-practices"],
+  "defaultRuntime": "antigravity"
+}

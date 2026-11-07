@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Factory Core CLI: validate | status | intake | contract-check | run | approve | watch
+// Factory Core CLI: validate | status | intake | contract-check | run | approve | watch | panel
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { loadAndValidateFactory } from './src/config.mjs';
@@ -8,6 +8,7 @@ import { evaluateIntakeGuards } from './src/guards.mjs';
 import { FactoryStore } from './src/store.mjs';
 import { approveTask, dispatchTask } from './src/dispatcher.mjs';
 import { pollIssuesWithEtag } from './src/github.mjs';
+import { createPanelServer } from '../../apps/panel/server.mjs';
 
 const args = process.argv.slice(2);
 const subcommand = args[0];
@@ -19,6 +20,7 @@ let headSha = null;
 let key = null;
 let approveFlag = false;
 let onceFlag = false;
+let port = 4310;
 
 for (let i = 1; i < args.length; i++) {
   const arg = args[i];
@@ -34,6 +36,8 @@ for (let i = 1; i < args.length; i++) {
     headSha = args[++i];
   } else if (arg === '--key' && i + 1 < args.length) {
     key = args[++i];
+  } else if (arg === '--port' && i + 1 < args.length) {
+    port = Number(args[++i]);
   } else if (arg === '--approve') {
     approveFlag = true;
   } else if (arg === '--once') {
@@ -162,6 +166,12 @@ if (subcommand === 'validate') {
   } finally {
     store.close();
   }
+} else if (subcommand === 'panel') {
+  const { server } = createPanelServer({ rootDir: root, dbPath: resolvedDbPath });
+  server.listen(port, '127.0.0.1', () => {
+    const addr = server.address();
+    process.stdout.write(`${JSON.stringify({ ok: true, url: `http://127.0.0.1:${addr.port}` })}\n`);
+  });
 } else {
   process.stderr.write(`Unknown subcommand: ${subcommand || '(none)'}\n`);
   process.exit(2);

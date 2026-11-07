@@ -21,6 +21,6 @@ jobs:
       - name: Validate factory.yaml, workflows, and contract schemas
         run: node packages/core/cli.mjs validate
       - name: Run unit tests
-        run: node --test scripts/__test__/skills-sync.test.mjs packages/core/__test__/factory-core.test.mjs packages/core/__test__/runtime-loop.test.mjs
+        run: node --test scripts/__test__/skills-sync.test.mjs packages/core/__test__/factory-core.test.mjs packages/core/__test__/runtime-loop.test.mjs apps/panel/__test__/control-panel.test.mjs
       - name: Run tlc-spec-lean v2.2.0 self-test
         run: python3 skills/vendor/tlc-spec-lean/scripts/selftest.py
