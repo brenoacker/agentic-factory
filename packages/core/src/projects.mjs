@@ -1,7 +1,7 @@
 import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { loadAndValidateFactory } from './config.mjs';
-import { pollIssuesWithEtag } from './github.mjs';
+import { SUPPORTED_PROVIDERS, pollProjectTracker } from './trackers.mjs';
 import { intakeAndTriageTicket } from './pipeline.mjs';
 
 const REPO_RE = /^[^/\s]+\/[^/\s]+$/;
@@ -16,19 +16,32 @@ function saveFactoryYaml(rootDir, factoryConfig) {
 }
 
 /**
- * Returns the list of monitored GitHub repositories from `factory.yaml` (`factory.projects`).
+ * Returns the list of monitored projects from `factory.yaml` (`factory.projects`).
  */
 export function listMonitoredProjects(rootDir) {
   const cfg = loadAndValidateFactory(rootDir);
-  return Array.isArray(cfg.factoryConfig?.factory?.projects) ? cfg.factoryConfig.factory.projects : [];
+  const raw = Array.isArray(cfg.factoryConfig?.factory?.projects) ? cfg.factoryConfig.factory.projects : [];
+  return raw.map((p) => ({
+    ...p,
+    provider: p.provider || 'github',
+    trackerConfig: p.trackerConfig || {},
+  }));
 }
 
 /**
- * Adds a new monitored GitHub repository (`owner/repo`) or updates an existing entry in `factory.yaml`.
+ * Adds or updates a monitored project (`github`, `jira`, or `asana`) in `factory.yaml`.
  */
 export function upsertMonitoredProject(
   rootDir,
-  { repo, id = null, defaultBranch = 'main', localPath = '', paused = false } = {},
+  {
+    repo,
+    id = null,
+    provider = 'github',
+    defaultBranch = 'main',
+    localPath = '',
+    trackerConfig = {},
+    paused = false,
+  } = {},
 ) {
   const cleanRepo = String(repo || '').trim();
   if (!REPO_RE.test(cleanRepo)) {
@@ -39,22 +52,72 @@ export function upsertMonitoredProject(
     };
   }
 
+  const cleanProvider = String(provider || 'github').trim().toLowerCase();
+  if (!SUPPORTED_PROVIDERS.includes(cleanProvider)) {
+    return {
+      ok: false,
+      status: 400,
+      error: `Unsupported provider "${provider}". Must be one of: ${SUPPORTED_PROVIDERS.join(', ')}`,
+    };
+  }
+
+  const normalizedTrackerConfig =
+    trackerConfig && typeof trackerConfig === 'object' ? { ...trackerConfig } : {};
+
+  if (cleanProvider === 'jira') {
+    const projectKey = String(normalizedTrackerConfig.projectKey || '').trim();
+    const jql = String(normalizedTrackerConfig.jql || '').trim();
+    if (!projectKey && !jql) {
+      return {
+        ok: false,
+        status: 400,
+        error: 'Jira provider requires trackerConfig.projectKey (e.g. "FAC") or trackerConfig.jql',
+      };
+    }
+    normalizedTrackerConfig.projectKey = projectKey || 'JIRA';
+    normalizedTrackerConfig.statusFilter =
+      String(normalizedTrackerConfig.statusFilter || 'Ready for Agent').trim();
+  } else if (cleanProvider === 'asana') {
+    const projectGid = String(normalizedTrackerConfig.projectGid || '').trim();
+    if (!projectGid) {
+      return {
+        ok: false,
+        status: 400,
+        error: 'Asana provider requires trackerConfig.projectGid (e.g. "120055")',
+      };
+    }
+    normalizedTrackerConfig.projectGid = projectGid;
+    normalizedTrackerConfig.statusFilter =
+      String(
+        normalizedTrackerConfig.statusFilter ||
+          normalizedTrackerConfig.sectionFilter ||
+          'Ready for Agent',
+      ).trim();
+  }
+
   const cfg = loadAndValidateFactory(rootDir);
   const updatedCfg = structuredClone(cfg.factoryConfig);
   if (!Array.isArray(updatedCfg.factory.projects)) {
     updatedCfg.factory.projects = [];
   }
 
-  const derivedId = String(id || cleanRepo.split('/')[1] || cleanRepo).trim();
+  const derivedId = String(id || `${cleanProvider}-${cleanRepo.split('/')[1] || cleanRepo}`).trim();
   const existingIdx = updatedCfg.factory.projects.findIndex(
-    (p) => p.repo.toLowerCase() === cleanRepo.toLowerCase() || p.id === derivedId,
+    (p) =>
+      (p.repo.toLowerCase() === cleanRepo.toLowerCase() &&
+        String(p.provider || 'github').toLowerCase() === cleanProvider) ||
+      p.id === derivedId,
   );
 
   const projectEntry = {
-    id: derivedId,
+    id: id ? String(id).trim() : existingIdx >= 0 ? updatedCfg.factory.projects[existingIdx].id : cleanRepo.split('/')[1] || derivedId,
     repo: cleanRepo,
+    provider: cleanProvider,
     defaultBranch: String(defaultBranch || 'main').trim(),
     ...(localPath ? { localPath: String(localPath).trim() } : {}),
+    ...(Object.keys(normalizedTrackerConfig).length > 0
+      ? { trackerConfig: normalizedTrackerConfig }
+      : {}),
     paused: Boolean(paused),
   };
 
@@ -79,7 +142,7 @@ export function upsertMonitoredProject(
 }
 
 /**
- * Removes a monitored GitHub repository from `factory.yaml` by `owner/repo` or `id`.
+ * Removes a monitored project from `factory.yaml` by `owner/repo` or `id`.
  */
 export function removeMonitoredProject(rootDir, repoOrId) {
   const target = String(repoOrId || '').trim().toLowerCase();
@@ -108,8 +171,8 @@ export function removeMonitoredProject(rootDir, repoOrId) {
 }
 
 /**
- * Polls open GitHub issues across all active (`paused !== true`) monitored repositories in `factory.yaml`,
- * caching ETag headers per repository in SQLite (`repo_etags`) and intaking newly discovered issues.
+ * Polls open issues/tickets across all active (`paused !== true`) monitored projects (`github`, `jira`, `asana`)
+ * in `factory.yaml`, caching ETag/cursor state in SQLite (`repo_etags`) and intaking newly discovered tickets.
  */
 export function syncMonitoredProjectsIssues({ rootDir, store, runner = null }) {
   const cfg = loadAndValidateFactory(rootDir);
@@ -120,26 +183,28 @@ export function syncMonitoredProjectsIssues({ rootDir, store, runner = null }) {
   let skippedNotModified = 0;
 
   for (const proj of projects) {
+    const provider = String(proj.provider || 'github').toLowerCase();
     if (proj.paused === true) {
-      results.push({ repo: proj.repo, status: 'paused', intaked: 0 });
+      results.push({ repo: proj.repo, provider, status: 'paused', intaked: 0 });
       continue;
     }
 
     polledRepos += 1;
-    const previousEtag = store.getRepoEtag(proj.repo);
-    const polled = pollIssuesWithEtag({
-      repo: proj.repo,
+    const etagKey = provider === 'github' ? proj.repo : `${provider}:${proj.repo}`;
+    const previousEtag = store.getRepoEtag(etagKey);
+    const polled = pollProjectTracker({
+      project: { ...proj, provider },
       etag: previousEtag,
       runner,
     });
 
     if (polled.etag) {
-      store.setRepoEtag(proj.repo, polled.etag);
+      store.setRepoEtag(etagKey, polled.etag);
     }
 
     if (polled.notModified) {
       skippedNotModified += 1;
-      results.push({ repo: proj.repo, status: 'not_modified', intaked: 0, etag: polled.etag });
+      results.push({ repo: proj.repo, provider, status: 'not_modified', intaked: 0, etag: polled.etag });
       continue;
     }
 
@@ -164,6 +229,7 @@ export function syncMonitoredProjectsIssues({ rootDir, store, runner = null }) {
 
     results.push({
       repo: proj.repo,
+      provider,
       status: 'polled',
       issuesFound: polled.issues.length,
       intaked: intakedForRepo,
@@ -178,5 +244,111 @@ export function syncMonitoredProjectsIssues({ rootDir, store, runner = null }) {
     newTasksCount: newTasks.length,
     newTasks,
     results,
+  };
+}
+
+/**
+ * Creates a configurable periodic polling scheduler (cron/interval loop) that syncs GitHub, Jira, and Asana projects.
+ */
+export function createPollingScheduler({
+  rootDir,
+  store,
+  getRunner = null,
+  defaultIntervalSeconds = 60,
+}) {
+  let enabled = false;
+  let intervalSeconds = Number(defaultIntervalSeconds) || 60;
+  let pollCount = 0;
+  let lastPollAt = null;
+  let lastResult = null;
+  let timer = null;
+
+  function runOnce() {
+    try {
+      const runner = typeof getRunner === 'function' ? getRunner() : null;
+      const res = syncMonitoredProjectsIssues({ rootDir, store, runner });
+      pollCount += 1;
+      lastPollAt = new Date().toISOString();
+      lastResult = {
+        polledRepos: res.polledRepos,
+        newTasksCount: res.newTasksCount,
+      };
+      return res;
+    } catch (err) {
+      pollCount += 1;
+      lastPollAt = new Date().toISOString();
+      lastResult = { error: err.message };
+      return null;
+    }
+  }
+
+  function restartTimer() {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+    if (enabled) {
+      timer = setInterval(runOnce, intervalSeconds * 1000);
+      if (typeof timer.unref === 'function') {
+        timer.unref();
+      }
+    }
+  }
+
+  function getState() {
+    return {
+      enabled,
+      intervalSeconds,
+      pollCount,
+      lastPollAt,
+      lastResult,
+    };
+  }
+
+  function configure({
+    enabled: nextEnabled,
+    intervalSeconds: nextInterval,
+    runImmediately = false,
+  } = {}) {
+    if (nextInterval !== undefined) {
+      const parsed = Number(nextInterval);
+      if (!Number.isFinite(parsed) || parsed < 5 || parsed > 86400) {
+        return {
+          ok: false,
+          status: 400,
+          error: 'intervalSeconds must be a number between 5 and 86400',
+        };
+      }
+      intervalSeconds = Math.round(parsed);
+    }
+    if (nextEnabled !== undefined) {
+      enabled = Boolean(nextEnabled);
+    }
+    restartTimer();
+    let syncReport = null;
+    if (runImmediately) {
+      syncReport = runOnce();
+    }
+    return {
+      ok: true,
+      status: 200,
+      scheduler: getState(),
+      ...(syncReport ? { syncReport } : {}),
+    };
+  }
+
+  function stop() {
+    enabled = false;
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+  }
+
+  return {
+    getState,
+    configure,
+    runOnce,
+    stop,
   };
 }

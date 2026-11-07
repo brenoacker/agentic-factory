@@ -369,4 +369,100 @@ test('C9: Playwright E2E test verifies stalled feature alarm banner, header badg
   }
 });
 
+test('C10: Playwright E2E test verifies AWS Cloudscape Design System components and configures Jira and Asana trackers in the UI', async ({ page }) => {
+  mkdirSync(CAPTURES_DIR, { recursive: true });
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+
+  const mockTrackerRunner = ({ provider, repo }) => {
+    if (provider === 'jira' && repo === 'brenoacker/jira-checkout') {
+      return {
+        status: 200,
+        etag: 'W/"jira-checkout-1"',
+        body: {
+          issues: [
+            {
+              key: 'PAY-801',
+              fields: {
+                summary: 'TypeError when payment gateway webhook retries in Jira',
+                description: 'Fix webhook retry bug',
+                status: { name: 'Ready for Agent' },
+                issuetype: { name: 'Bug' },
+                labels: [],
+              },
+            },
+          ],
+        },
+      };
+    }
+    if (provider === 'asana' && repo === 'brenoacker/asana-portal') {
+      return {
+        status: 200,
+        etag: 'W/"asana-portal-1"',
+        body: {
+          data: [
+            {
+              gid: '1200802',
+              name: '[feature] Add dark-mode export button from Asana',
+              notes: 'Export CSV in portal',
+              completed: false,
+              memberships: [{ section: { name: 'Ready for Agent' } }],
+              tags: [{ name: 'type:feature' }],
+            },
+          ],
+        },
+      };
+    }
+    return { status: 200, etag: 'W/"gh-default"', body: [] };
+  };
+
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockTrackerRunner);
+
+  try {
+    await page.goto(baseUrl);
+
+    // 1. Verify authentic AWS Cloudscape Design System components (awsui_* classes, TopNavigation, Container, Table, Badge)
+    await expect(page.getByTestId('cloudscape-app-shell')).toBeVisible();
+    const awsuiElementsCount = await page.locator('[class*="awsui_"]').count();
+    expect(awsuiElementsCount).toBeGreaterThan(15);
+    await page.screenshot({ path: join(CAPTURES_DIR, 'cloudscape-overview.png'), fullPage: true });
+
+    // 2. Navigate to Board & Needs Human tab and configure a Jira tracker source
+    await page.locator('#tabs button[data-tab="board"]').click();
+    await page.locator('#proj-provider-select').selectOption('jira');
+    await page.locator('#proj-repo-input').fill('brenoacker/jira-checkout');
+    await page.locator('#proj-branch-input').fill('main');
+    await page.locator('#proj-status-filter-input').fill('Ready for Agent');
+    await page.locator('#proj-tracker-key-input').fill('PAY');
+    await page.locator('#proj-add-btn').click();
+    await expect(page.locator('#proj-feedback')).toContainText('Monitoring brenoacker/jira-checkout (main) via JIRA');
+    await expect(page.getByTestId('project-row-brenoacker/jira-checkout')).toContainText('JIRA');
+
+    // 3. Configure an Asana tracker source
+    await page.locator('#proj-provider-select').selectOption('asana');
+    await page.locator('#proj-repo-input').fill('brenoacker/asana-portal');
+    await page.locator('#proj-status-filter-input').fill('Ready for Agent');
+    await page.locator('#proj-tracker-key-input').fill('120055');
+    await page.locator('#proj-add-btn').click();
+    await expect(page.locator('#proj-feedback')).toContainText('Monitoring brenoacker/asana-portal (main) via ASANA');
+    await expect(page.getByTestId('project-row-brenoacker/asana-portal')).toContainText('ASANA');
+
+    // 4. Enable Periodic Cron Poller & trigger immediate sync across GitHub, Jira, and Asana
+    await page.locator('#scheduler-interval-input').fill('45');
+    await page.locator('#scheduler-run-btn').click();
+    await expect(page.getByTestId('scheduler-status-badge')).toContainText('CRON: ACTIVE (45s · #1)');
+
+    // 5. Verify both Jira (#801 bug) and Asana (#1200802 feature) tickets appear on the Cloudscape Kanban board
+    await expect(page.getByTestId('task-repo-801')).toHaveText('brenoacker/jira-checkout');
+    await expect(page.getByTestId('task-type-801')).toHaveText('bug');
+    await expect(page.getByTestId('task-repo-1200802')).toHaveText('brenoacker/asana-portal');
+    await expect(page.getByTestId('task-type-1200802')).toHaveText('feature');
+
+    await page.screenshot({ path: join(CAPTURES_DIR, 'cloudscape-multi-tracker-board.png'), fullPage: true });
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
 

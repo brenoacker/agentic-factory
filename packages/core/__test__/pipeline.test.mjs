@@ -386,4 +386,199 @@ test('C9: POST /api/tasks/:key/acknowledge clears stalled task alarm with 200 an
   }
 });
 
+test('C10: Multi-provider tracker adapter configures and polls GitHub, Jira, and Asana projects with status filtering and returns 400 on invalid provider config', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+
+  const mockMultiTrackerRunner = ({ provider, repo, jql, statusFilter }) => {
+    if (provider === 'jira' && repo === 'brenoacker/jira-payments') {
+      assert.ok(jql.includes('project = "FAC"'));
+      assert.ok(jql.includes('status = "Ready for Agent"'));
+      return {
+        status: 200,
+        etag: 'W/"jira-fac-1"',
+        body: {
+          issues: [
+            {
+              key: 'FAC-701',
+              fields: {
+                summary: 'TypeError crash when refunding partial invoice in Jira',
+                description: 'Steps to reproduce in billing worker',
+                status: { name: 'Ready for Agent' },
+                issuetype: { name: 'Bug' },
+                labels: [],
+              },
+            },
+            {
+              key: 'FAC-702',
+              fields: {
+                summary: 'Backlog ticket that should be skipped by status filter',
+                description: 'Still in backlog',
+                status: { name: 'Backlog' },
+                issuetype: { name: 'Story' },
+                labels: [],
+              },
+            },
+          ],
+        },
+      };
+    }
+
+    if (provider === 'asana' && repo === 'brenoacker/asana-growth') {
+      assert.equal(statusFilter, 'Ready for Agent');
+      return {
+        status: 200,
+        etag: 'W/"asana-1"',
+        body: {
+          data: [
+            {
+              gid: '1200703',
+              name: '[feature] Add onboarding funnel analytics event from Asana',
+              notes: 'Track signup completion step',
+              completed: false,
+              memberships: [{ section: { name: 'Ready for Agent' } }],
+              tags: [{ name: 'type:feature' }],
+            },
+            {
+              gid: '1200704',
+              name: 'Draft task in Doing section that should not be intaked',
+              notes: 'Not in target section',
+              completed: false,
+              memberships: [{ section: { name: 'In Progress' } }],
+              tags: [],
+            },
+          ],
+        },
+      };
+    }
+
+    return { status: 200, etag: 'W/"gh-default"', body: [] };
+  };
+
+  const panel = createPanelServer({ rootDir: tmpDir, dbPath, issuePollRunner: mockMultiTrackerRunner });
+  await new Promise((resolveListen) => panel.server.listen(0, '127.0.0.1', resolveListen));
+  const baseUrl = `http://127.0.0.1:${panel.server.address().port}`;
+
+  try {
+    // 1. Invalid provider -> 400
+    const badProviderRes = await fetch(`${baseUrl}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ repo: 'brenoacker/trello-app', provider: 'trello' }),
+    });
+    assert.equal(badProviderRes.status, 400);
+
+    // 2. Jira without projectKey or jql -> 400
+    const badJiraRes = await fetch(`${baseUrl}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ repo: 'brenoacker/jira-payments', provider: 'jira', trackerConfig: {} }),
+    });
+    assert.equal(badJiraRes.status, 400);
+
+    // 3. Valid Jira project -> 201
+    const okJiraRes = await fetch(`${baseUrl}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        repo: 'brenoacker/jira-payments',
+        provider: 'jira',
+        defaultBranch: 'main',
+        trackerConfig: {
+          projectKey: 'FAC',
+          statusFilter: 'Ready for Agent',
+        },
+      }),
+    });
+    assert.equal(okJiraRes.status, 201);
+
+    // 4. Valid Asana project -> 201
+    const okAsanaRes = await fetch(`${baseUrl}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        repo: 'brenoacker/asana-growth',
+        provider: 'asana',
+        defaultBranch: 'main',
+        trackerConfig: {
+          projectGid: '120055',
+          statusFilter: 'Ready for Agent',
+        },
+      }),
+    });
+    assert.equal(okAsanaRes.status, 201);
+
+    // 5. Sync across all 3 providers (github + jira + asana)
+    const syncRes = await (await fetch(`${baseUrl}/api/projects/sync`, { method: 'POST' })).json();
+    assert.equal(syncRes.ok, true);
+    assert.equal(syncRes.polledRepos, 3);
+    assert.equal(syncRes.newTasksCount, 2);
+
+    const jiraTask = panel.store.getTask('brenoacker/jira-payments#701');
+    assert.ok(jiraTask);
+    assert.equal(jiraTask.type, 'bug');
+    assert.ok(jiraTask.title.includes('[FAC-701]'));
+    assert.equal(panel.store.getTask('brenoacker/jira-payments#702'), null);
+
+    const asanaTask = panel.store.getTask('brenoacker/asana-growth#1200703');
+    assert.ok(asanaTask);
+    assert.equal(asanaTask.type, 'feature');
+    assert.ok(asanaTask.title.includes('[Asana-1200703]'));
+    assert.equal(panel.store.getTask('brenoacker/asana-growth#1200704'), null);
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C11: POST /api/scheduler configures periodic polling loop, executes immediate multi-provider sync, and returns 400 on invalid intervalSeconds', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+
+  const mockRunner = () => ({
+    status: 200,
+    etag: 'W/"sched-1"',
+    body: [
+      {
+        number: 750,
+        title: '[chore] Scheduled cron sync verification ticket',
+        body: 'Picked up by periodic scheduler',
+        labels: [{ name: 'type:chore' }],
+      },
+    ],
+  });
+
+  const panel = createPanelServer({ rootDir: tmpDir, dbPath, issuePollRunner: mockRunner });
+  await new Promise((resolveListen) => panel.server.listen(0, '127.0.0.1', resolveListen));
+  const baseUrl = `http://127.0.0.1:${panel.server.address().port}`;
+
+  try {
+    // 1. Invalid intervalSeconds (< 5) -> 400
+    const badRes = await fetch(`${baseUrl}/api/scheduler`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: true, intervalSeconds: 1 }),
+    });
+    assert.equal(badRes.status, 400);
+
+    // 2. Enable scheduler with runImmediately: true -> 200 and polls immediately
+    const okRes = await fetch(`${baseUrl}/api/scheduler`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: true, intervalSeconds: 60, runImmediately: true }),
+    });
+    assert.equal(okRes.status, 200);
+    const data = await okRes.json();
+    assert.equal(data.ok, true);
+    assert.equal(data.scheduler.enabled, true);
+    assert.equal(data.scheduler.intervalSeconds, 60);
+    assert.ok(data.scheduler.pollCount >= 1);
+    assert.ok(data.scheduler.lastPollAt);
+    assert.equal(panel.store.getTask('brenoacker/agentic-factory#750').type, 'chore');
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
 

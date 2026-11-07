@@ -13,6 +13,7 @@ import {
   upsertMonitoredProject,
   removeMonitoredProject,
   syncMonitoredProjectsIssues,
+  createPollingScheduler,
 } from '../../packages/core/index.mjs';
 import { listAgentsCatalog, loadBrainEntries } from '../../packages/core/src/brain.mjs';
 
@@ -54,13 +55,19 @@ export function createPanelServer({
   const root = resolve(rootDir);
   const resolvedDbPath = dbPath || join(root, 'runs', 'factory.db');
   const store = new FactoryStore(resolvedDbPath);
+  const scheduler = createPollingScheduler({
+    rootDir: root,
+    store,
+    getRunner: () => issuePollRunner,
+    defaultIntervalSeconds: 60,
+  });
 
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url || '/', 'http://127.0.0.1');
     const pathname = url.pathname;
 
     try {
-      // 1. Static Control Panel HTML UI
+      // 1. Static Control Panel HTML UI & AWS Cloudscape Bundle
       if (req.method === 'GET' && (pathname === '/' || pathname === '/index.html')) {
         const htmlPath = join(import.meta.dirname, 'public', 'index.html');
         const html = existsSync(htmlPath)
@@ -69,6 +76,24 @@ export function createPanelServer({
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
         res.end(html);
         return;
+      }
+
+      if (req.method === 'GET' && pathname === '/bundle.js') {
+        const jsPath = join(import.meta.dirname, 'public', 'bundle.js');
+        if (existsSync(jsPath)) {
+          res.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8' });
+          res.end(readFileSync(jsPath));
+          return;
+        }
+      }
+
+      if (req.method === 'GET' && pathname === '/bundle.css') {
+        const cssPath = join(import.meta.dirname, 'public', 'bundle.css');
+        if (existsSync(cssPath)) {
+          res.writeHead(200, { 'Content-Type': 'text/css; charset=utf-8' });
+          res.end(readFileSync(cssPath));
+          return;
+        }
       }
 
       // 2. GET /api/dashboard
@@ -91,6 +116,7 @@ export function createPanelServer({
           factoryConfig: cfg.factoryConfig,
           projects,
           repoEtags,
+          scheduler: scheduler.getState(),
           pricesConfig: cfg.pricesConfig,
           workflows: cfg.workflows,
           skills: lock.skills,
@@ -100,6 +126,8 @@ export function createPanelServer({
           deployments,
           integrations: [
             { id: 'github', name: 'GitHub Issues & PRs (Multi-Repo ETag Polling)', status: 'connected' },
+            { id: 'jira', name: 'Jira Issues (Custom Project Key, Status & JQL Poller)', status: 'connected' },
+            { id: 'asana', name: 'Asana Tasks (Custom Project GID & Section/Status Poller)', status: 'connected' },
             { id: 'sentry', name: 'Sentry Production Alerts Webhook', status: 'ready' },
             { id: 'posthog', name: 'PostHog Post-Deploy Metrics', status: 'ready' },
           ],
@@ -107,12 +135,13 @@ export function createPanelServer({
         return;
       }
 
-      // 2b. GET / POST / DELETE /api/projects & POST /api/projects/sync
+      // 2b. GET / POST / DELETE /api/projects, POST /api/projects/sync & POST /api/scheduler
       if (req.method === 'GET' && pathname === '/api/projects') {
         sendJson(res, 200, {
           ok: true,
           projects: listMonitoredProjects(root),
           etags: store.listRepoEtags(),
+          scheduler: scheduler.getState(),
         });
         return;
       }
@@ -122,8 +151,10 @@ export function createPanelServer({
         const projRes = upsertMonitoredProject(root, {
           repo: body.repo,
           id: body.id,
+          provider: body.provider || 'github',
           defaultBranch: body.defaultBranch || 'main',
           localPath: body.localPath || '',
+          trackerConfig: body.trackerConfig || {},
           paused: Boolean(body.paused),
         });
         sendJson(res, projRes.status, projRes);
@@ -137,6 +168,17 @@ export function createPanelServer({
           runner: issuePollRunner,
         });
         sendJson(res, 200, syncRes);
+        return;
+      }
+
+      if (req.method === 'POST' && pathname === '/api/scheduler') {
+        const body = await readJsonBody(req);
+        const schedRes = scheduler.configure({
+          enabled: body.enabled,
+          intervalSeconds: body.intervalSeconds,
+          runImmediately: Boolean(body.runImmediately),
+        });
+        sendJson(res, schedRes.status, schedRes);
         return;
       }
 
@@ -389,8 +431,10 @@ export function createPanelServer({
   return {
     server,
     store,
+    scheduler,
     close: () =>
       new Promise((resolveClose) => {
+        scheduler.stop();
         server.close(() => {
           store.close();
           resolveClose();

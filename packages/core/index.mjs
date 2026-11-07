@@ -25,7 +25,17 @@ export {
   upsertMonitoredProject,
   removeMonitoredProject,
   syncMonitoredProjectsIssues,
+  createPollingScheduler,
 } from './src/projects.mjs';
+export {
+  SUPPORTED_PROVIDERS,
+  normalizeNumericIssueId,
+  buildJiraJql,
+  pollGitHubTracker,
+  pollJiraTracker,
+  pollAsanaTracker,
+  pollProjectTracker,
+} from './src/trackers.mjs';
 
 
 

@@ -9,12 +9,15 @@ and built on the skills from [`tech-leads-club/agent-skills`](https://github.com
 
 ## How It Works
 
-1. **Configure the repositories you want to monitor** (`owner/repo`) in the **Control Panel** (`Board & Needs Human -> Monitored GitHub Repositories`), via the CLI (`node packages/core/cli.mjs projects --action add --repo owner/repo`), or in `factory.yaml` (`factory.projects`). You do **not** need to create issues inside `agentic-factory` — the factory monitors issues directly in your existing GitHub repositories.
-2. `factory watch` (or clicking **Sync Issues from All Monitored Repos** in the Control Panel) polls open GitHub issues across every active monitored repository using per-repository `ETag` caching (`304 Not Modified` costs zero GitHub API rate limit).
-3. The factory automatically classifies each ticket into one of the 5 workflows (`feature`, `bug`, `investigation`, `discovery`, `chore`) — via `type:*` labels, `[type]` prefixes, or natural-language problem descriptions — and provisions an isolated `git worktree` with `AGENTS.md`, `CLAUDE.md`, and all 23 locked skills.
+1. **Configure the sources you want to monitor** (`github`, `jira`, or `asana`) in the **AWS Cloudscape Control Panel** (`Board & Needs Human -> Monitored Issue Trackers`), via the CLI (`node packages/core/cli.mjs projects --action add --repo owner/repo`), or in `factory.yaml` (`factory.projects`).
+   - **GitHub Issues** (`provider: "github"`): polls open issues using per-repository `ETag` caching (`304 Not Modified` costs zero GitHub API rate limit).
+   - **Jira** (`provider: "jira"`): polls Jira issues matching a customizable `projectKey`, `statusFilter` (e.g. `"Ready for Agent"`), or custom `jql` query (`JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`).
+   - **Asana** (`provider: "asana"`): polls Asana tasks in a customizable `projectGid` filtered by section or custom field `statusFilter` (e.g. `"Ready for Agent"`, using `ASANA_ACCESS_TOKEN`).
+2. **Periodic Cron / Interval Scheduler (`POST /api/scheduler`) or On-Demand Sync**: enable the built-in periodic polling loop in the Control Panel (or run `factory watch`) so the factory automatically checks GitHub, Jira, and Asana at your chosen interval and picks up any ticket that enters the target status.
+3. The factory automatically classifies each ticket into one of the 5 workflows (`feature`, `bug`, `investigation`, `discovery`, `chore`) — via `type:*` labels, Jira issue types, `[type]` prefixes, or natural-language problem descriptions — and provisions an isolated `git worktree` with `AGENTS.md`, `CLAUDE.md`, and all 23 locked skills.
 4. For each stage, the factory invokes a **CLI runtime** — Antigravity (`agy`, default), Claude Code (`claude`), or Codex (`codex`). The agent returns a **JSON contract** validated deterministically by the factory.
-5. The factory pauses only at **human gates** (plan approval, merge approval, discovery/investigation review) — approved with 1 click in the Control Panel or via `/approve` on the GitHub issue.
-6. Every stage emits **telemetry** (stages, tokens, USD cost, verdicts, deployments) displayed in the **Control Panel** (`apps/panel`) and verified visually and end-to-end with **Playwright**.
+5. The factory pauses only at **human gates** (plan approval, merge approval, discovery/investigation review) and raises a **Stalled Task Alarm** (`warning` / `critical`) if any active feature or task sits idle beyond `stallThresholdMinutes`.
+6. Every stage emits **telemetry** (stages, tokens, USD cost, verdicts, deployments) rendered in the **AWS Cloudscape Design System** Control Panel (`@cloudscape-design/components` + `@cloudscape-design/global-styles`) and verified visually and end-to-end with **Playwright**.
 
 | Stage / Workflow | Primary Skills |
 | --- | --- |

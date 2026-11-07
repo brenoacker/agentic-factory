@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "validate": "node packages/core/cli.mjs validate",
+    "build:panel": "node scripts/build-panel.mjs",
     "sync-skills": "node scripts/sync-skills.mjs --verify-only",
     "test:unit": "node --test scripts/__test__/skills-sync.test.mjs packages/core/__test__/factory-core.test.mjs packages/core/__test__/runtime-loop.test.mjs packages/core/__test__/pipeline.test.mjs apps/panel/__test__/control-panel.test.mjs",
     "test:e2e": "npx playwright test",
@@ -15,5 +16,13 @@
   "devDependencies": {
     "@playwright/mcp": "^0.0.28",
     "@playwright/test": "^1.52.0"
+  },
+  "dependencies": {
+    "@cloudscape-design/components": "^3.0.1410",
+    "@cloudscape-design/design-tokens": "^3.0.117",
+    "@cloudscape-design/global-styles": "^1.0.72",
+    "esbuild": "^0.28.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   }
 }
