@@ -842,6 +842,7 @@ function ControlPanelApp() {
                           <option value="github">github (GitHub Issues)</option>
                           <option value="jira">jira (Jira Cloud / Server)</option>
                           <option value="asana">asana (Asana Tasks)</option>
+                          <option value="linear">linear (Linear Project Issues)</option>
                         </select>
                       </FormField>
                       <FormField label="Target Repository (owner/repo)">
@@ -1072,6 +1073,9 @@ function ControlPanelApp() {
                           } else if (prov === 'asana') {
                             triggerParts.push(`GID: ${tc.projectGid || '-'}`);
                             triggerParts.push(`Stage: ${tc.statusFilter || 'Ready for Agent'}`);
+                          } else if (prov === 'linear') {
+                            triggerParts.push(`Project: ${tc.projectKey || p.repo}`);
+                            triggerParts.push(`Stage: ${tc.statusFilter || 'Ready for Agent'}`);
                           } else {
                             triggerParts.push(tc.statusFilter ? `Stage: ${tc.statusFilter}` : 'state=open');
                           }
@@ -1102,7 +1106,7 @@ function ControlPanelApp() {
                                 <strong>{p.repo}</strong>
                               </td>
                               <td style={{ padding: '0.5rem' }}>
-                                <Badge color={prov === 'jira' ? 'blue' : prov === 'asana' ? 'red' : 'grey'}>
+                                <Badge color={prov === 'jira' ? 'blue' : prov === 'asana' ? 'red' : prov === 'linear' ? 'severity-medium' : 'grey'}>
                                   {prov.toUpperCase()}
                                 </Badge>
                               </td>

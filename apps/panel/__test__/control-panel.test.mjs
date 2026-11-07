@@ -10,6 +10,10 @@ import {
   extractFollowUpTickets,
   canAutoMergeTask,
   generateWorkflowMermaid,
+  pollLinearTracker,
+  intakeAndTriageTicket,
+  advanceTicketInPanel,
+  FactoryStore,
 } from '../../../packages/core/index.mjs';
 
 const REPO_ROOT = resolve(import.meta.dirname, '..', '..', '..');
@@ -392,4 +396,164 @@ test('C7: queryBrain, extractFollowUpTickets, and canAutoMergeTask enforce brain
     headSha: 'abc1234',
   });
   assert.equal(blockedHigh, false);
+});
+
+test('C8: Linear tracker poller queries GraphQL API, applies combinable pickup triggers, and handles missing API key', () => {
+  // 1. Missing LINEAR_API_KEY returns safe prompt error without leaking
+  const origKey = process.env.LINEAR_API_KEY;
+  delete process.env.LINEAR_API_KEY;
+  try {
+    const missingRes = pollLinearTracker({
+      project: { repo: 'brenoack/agentic-factory-80f4e9bb2ce1', provider: 'linear' },
+    });
+    assert.ok(missingRes.error && missingRes.error.includes('LINEAR_API_KEY'));
+    assert.equal(missingRes.issues.length, 0);
+  } finally {
+    if (origKey) process.env.LINEAR_API_KEY = origKey;
+  }
+
+  // 2. Linear poller with mock runner & combinable pickup triggers
+  const mockLinearRunner = () => ({
+    status: 200,
+    etag: 'W/"lin-etag-1"',
+    body: {
+      data: {
+        issues: {
+          nodes: [
+            {
+              id: 'lin-uuid-1',
+              identifier: 'FAC-101',
+              number: 101,
+              title: '[feature] Real-time Linear board sync',
+              description: 'Sync tickets from Linear project',
+              state: { name: 'Ready to be Developed', type: 'unstarted' },
+              assignee: null,
+              labels: { nodes: [{ name: 'agent-ready' }] },
+            },
+            {
+              id: 'lin-uuid-2',
+              identifier: 'FAC-102',
+              number: 102,
+              title: '[bug] Blocked Linear issue',
+              description: 'Issue has blocker label',
+              state: { name: 'Ready to be Developed', type: 'unstarted' },
+              assignee: null,
+              labels: { nodes: [{ name: 'agent-ready' }, { name: 'blocked' }] },
+            },
+            {
+              id: 'lin-uuid-3',
+              identifier: 'FAC-103',
+              number: 103,
+              title: '[chore] Backlog ticket not ready',
+              description: 'Issue is still in backlog stage',
+              state: { name: 'Backlog', type: 'backlog' },
+              assignee: null,
+              labels: { nodes: [{ name: 'agent-ready' }] },
+            },
+          ],
+        },
+      },
+    },
+  });
+
+  const polled = pollLinearTracker({
+    project: {
+      repo: 'brenoack/agentic-factory-80f4e9bb2ce1',
+      provider: 'linear',
+      trackerConfig: {
+        projectKey: 'agentic-factory-80f4e9bb2ce1',
+        statusFilter: 'Ready to be Developed',
+        requiredLabels: ['agent-ready'],
+        excludedLabels: ['blocked'],
+        assigneeFilter: 'unassigned',
+      },
+    },
+    runner: mockLinearRunner,
+  });
+
+  assert.equal(polled.issues.length, 1);
+  assert.equal(polled.issues[0].issue_number, 101);
+  assert.equal(polled.issues[0].provider, 'linear');
+  assert.equal(polled.issues[0].title, '[Linear-FAC-101] [feature] Real-time Linear board sync');
+  assert.equal(polled.skippedByTriggersCount, 2);
+});
+
+test('C9: Tracker lifecycle updates status to in-progress, posts pickup comment, and closes with completion proof', () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const store = new FactoryStore(dbPath);
+
+  const trackerCalls = [];
+  const mockTrackerRunner = (call) => {
+    trackerCalls.push(call);
+    return { ok: true, status: 200 };
+  };
+
+  try {
+    // 1. Intake ticket and verify tracker pickup comment and in-progress status update
+    const intakeRes = intakeAndTriageTicket({
+      issue: {
+        issue_number: 88,
+        repo: 'brenoacker/agentic-factory',
+        title: '[chore] Test tracker lifecycle feedback',
+        body: 'Verifying automated pickup and close comments',
+        type: 'chore',
+      },
+      factoryConfig: {
+        factory: {
+          autonomy: 'auto-low',
+          repo: 'brenoacker/agentic-factory',
+          defaultRuntime: 'antigravity',
+        },
+      },
+      workflows: {
+        chore: {
+          id: 'chore',
+          autonomy: 'auto-low',
+          stages: [
+            { id: 'triage', mode: 'auto', agent: 'triager', next: 'checks_and_build' },
+            { id: 'checks_and_build', mode: 'auto', agent: 'builder', next: 'review' },
+            { id: 'review', mode: 'auto', agent: 'judge', next: 'done' },
+          ],
+        },
+      },
+      store,
+      trackerRunner: mockTrackerRunner,
+    });
+
+    assert.equal(intakeRes.ok, true);
+    assert.ok(trackerCalls.some((c) => c.action === 'comment' && c.comment.includes('Agentic Factory Pickup')));
+    assert.ok(trackerCalls.some((c) => c.action === 'update' && c.labelsToAdd.includes('in-progress')));
+
+    // 2. Advance to completion and verify completion comment and close call
+    const dispatchRes = advanceTicketInPanel({
+      executionKey: intakeRes.executionKey,
+      factoryRoot: tmpDir,
+      factoryConfig: { factory: { autonomy: 'auto-low' } },
+      workflows: {
+        chore: {
+          id: 'chore',
+          autonomy: 'auto-low',
+          stages: [
+            { id: 'triage', mode: 'auto', agent: 'triager', next: 'checks_and_build' },
+            { id: 'checks_and_build', mode: 'auto', agent: 'builder', next: 'review' },
+            { id: 'review', mode: 'auto', agent: 'judge', next: 'done' },
+          ],
+        },
+      },
+      pricesConfig: {},
+      store,
+      headSha: 'commit8888',
+      trackerRunner: mockTrackerRunner,
+    });
+
+    assert.equal(dispatchRes.ok, true);
+    assert.equal(dispatchRes.stage, 'done');
+    assert.ok(trackerCalls.some((c) => c.action === 'comment' && c.comment.includes('Completed via Agentic Factory')));
+    assert.ok(trackerCalls.some((c) => c.action === 'close'));
+    assert.ok(trackerCalls.some((c) => c.action === 'update' && c.labelsToAdd.includes('stage:done')));
+  } finally {
+    store.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
 });

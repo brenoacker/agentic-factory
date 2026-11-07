@@ -86,6 +86,14 @@ export function upsertMonitoredProject(
       };
     }
     normalizedTrackerConfig.projectGid = projectGid;
+  } else if (cleanProvider === 'linear') {
+    const projectKey = String(
+      normalizedTrackerConfig.projectKey ||
+        normalizedTrackerConfig.projectId ||
+        cleanRepo.split('/')[1] ||
+        cleanRepo,
+    ).trim();
+    normalizedTrackerConfig.projectKey = projectKey;
   }
 
   if (triggerRules.statuses.length > 0) {

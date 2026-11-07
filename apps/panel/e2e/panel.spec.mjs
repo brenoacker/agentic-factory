@@ -640,4 +640,95 @@ test('C12: Playwright E2E test verifies authentic AWS Cloudscape AppLayout, Side
   }
 });
 
+test('C13: Playwright E2E test configures Linear tracker in Cloudscape UI, syncs issues, and verifies automated lifecycle feedback and close', async ({ page }) => {
+  mkdirSync(CAPTURES_DIR, { recursive: true });
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+
+  const trackerCalls = [];
+  const mockRunner = (callSpec) => {
+    if (callSpec.provider === 'linear' && callSpec.repo === 'brenoack/agentic-factory-80f4e9bb2ce1') {
+      return {
+        status: 200,
+        etag: 'W/"lin-live-etag"',
+        body: {
+          data: {
+            issues: {
+              nodes: [
+                {
+                  id: 'lin-ticket-901',
+                  identifier: 'FAC-901',
+                  number: 901,
+                  title: '[feature] Automated Linear board synchronization',
+                  description: 'End to end sync between Linear and Factory',
+                  state: { name: 'Ready to be Developed', type: 'unstarted' },
+                  assignee: null,
+                  labels: { nodes: [{ name: 'agent-ready' }] },
+                },
+                {
+                  id: 'lin-ticket-902',
+                  identifier: 'FAC-902',
+                  number: 902,
+                  title: '[bug] Blocked issue with impediment',
+                  description: 'Should be skipped by triggers',
+                  state: { name: 'Ready to be Developed', type: 'unstarted' },
+                  assignee: null,
+                  labels: { nodes: [{ name: 'agent-ready' }, { name: 'blocked' }] },
+                },
+              ],
+            },
+          },
+        },
+      };
+    }
+    return { status: 200, etag: 'W/"default-etag"', body: [] };
+  };
+
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockRunner);
+
+  try {
+    await page.goto(baseUrl);
+    await page.locator('#tabs button[data-tab="board"]').click();
+
+    // 1. Configure Linear project with combinable triggers in the UI
+    await page.locator('#proj-provider-select').selectOption('linear');
+    await page.locator('#proj-repo-input').fill('brenoack/agentic-factory-80f4e9bb2ce1');
+    await page.locator('#proj-branch-input').fill('main');
+    await page.locator('#proj-status-filter-input').fill('Ready to be Developed');
+    await page.locator('#proj-required-labels-input').fill('agent-ready');
+    await page.locator('#proj-excluded-labels-input').fill('blocked');
+    await page.locator('#proj-add-btn').click();
+
+    const linearRow = page.getByTestId('project-row-brenoack/agentic-factory-80f4e9bb2ce1');
+    await expect(linearRow).toBeVisible();
+    await expect(linearRow).toContainText('LINEAR');
+    await expect(linearRow).toContainText('Stage: Ready to be Developed');
+    await expect(linearRow).toContainText('+Flags: [agent-ready]');
+    await expect(linearRow).toContainText('-Exclude: [blocked]');
+
+    // 2. Click "Sync Issues from All Monitored Repos"
+    await page.locator('#sync-repos-btn').click();
+    await expect(page.locator('#proj-feedback')).toContainText('1 new issue(s) intaked (1 skipped by triggers)');
+
+    // 3. Verify matching issue appears on Kanban board classified as 'feature'
+    await expect(page.getByTestId('task-repo-901')).toHaveText('brenoack/agentic-factory-80f4e9bb2ce1');
+    await expect(page.getByTestId('task-type-901')).toHaveText('feature');
+    await expect(page.getByTestId('task-stage-901')).toHaveText('triage');
+
+    // 4. Advance Linear ticket through stages (Feature: triage -> plan -> merge -> done)
+    await page.getByTestId('dispatch-btn-901').click();
+    await expect(page.getByTestId('task-stage-901')).toHaveText('plan');
+    await page.getByTestId('approve-btn-901').click();
+    await expect(page.getByTestId('task-stage-901')).toHaveText('merge');
+    await page.getByTestId('approve-btn-901').click();
+    await expect(page.getByTestId('task-stage-901')).toHaveText('done');
+
+    await page.screenshot({ path: join(CAPTURES_DIR, 'cloudscape-linear-synced-and-done.png'), fullPage: true });
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+
 

@@ -4,7 +4,13 @@ export { buildExecutionKey, evaluateIntakeGuards } from './src/guards.mjs';
 export { calculateUsageCostUsd, FactoryStore } from './src/store.mjs';
 export { buildAdapterCommand, invokeRuntimeAdapter, parseAdapterOutput } from './src/adapters.mjs';
 export { recordRuntimeFailure, selectRuntime } from './src/router.mjs';
-export { hasHumanApprovalComment, pollIssuesWithEtag } from './src/github.mjs';
+export {
+  hasHumanApprovalComment,
+  pollIssuesWithEtag,
+  commentOnGitHubIssue,
+  updateGitHubIssue,
+  closeGitHubIssue,
+} from './src/github.mjs';
 export { prepareWorktree } from './src/worktree.mjs';
 export { approveTask, dispatchTask } from './src/dispatcher.mjs';
 export {
@@ -36,6 +42,8 @@ export {
   pollGitHubTracker,
   pollJiraTracker,
   pollAsanaTracker,
+  pollLinearTracker,
+  updateLinearIssueStatus,
   pollProjectTracker,
 } from './src/trackers.mjs';
 export { generateWorkflowMermaid } from './src/mermaid.mjs';

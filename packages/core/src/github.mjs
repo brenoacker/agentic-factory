@@ -87,3 +87,72 @@ export function hasHumanApprovalComment(comments = []) {
   }
   return { approved: false, approver: null, approvedAt: null, words: null };
 }
+
+/**
+ * Posts a comment on a GitHub issue. Accepts an injectable runner for tests.
+ */
+export function commentOnGitHubIssue({ repo, issueNumber, comment, runner = null }) {
+  if (!comment || !comment.trim()) return { ok: false, error: 'Empty comment' };
+  if (runner) {
+    return runner({ action: 'comment', repo, issueNumber, comment });
+  }
+  const args = ['issue', 'comment', String(issueNumber), '--body', comment, '-R', repo];
+  const proc = spawnSync('gh', args, { encoding: 'utf8' });
+  return {
+    ok: proc.status === 0,
+    status: proc.status === 0 ? 200 : 500,
+    output: proc.stdout?.trim() || proc.stderr?.trim() || '',
+  };
+}
+
+/**
+ * Updates status, labels, and assignment on a GitHub issue. Accepts an injectable runner for tests.
+ */
+export function updateGitHubIssue({
+  repo,
+  issueNumber,
+  labelsToAdd = [],
+  labelsToRemove = [],
+  assignees = [],
+  runner = null,
+}) {
+  if (runner) {
+    return runner({ action: 'update', repo, issueNumber, labelsToAdd, labelsToRemove, assignees });
+  }
+  const args = ['issue', 'edit', String(issueNumber), '-R', repo];
+  if (labelsToAdd.length > 0) {
+    args.push('--add-label', labelsToAdd.join(','));
+  }
+  if (labelsToRemove.length > 0) {
+    args.push('--remove-label', labelsToRemove.join(','));
+  }
+  if (assignees.length > 0) {
+    args.push('--add-assignee', assignees.join(','));
+  }
+  const proc = spawnSync('gh', args, { encoding: 'utf8' });
+  return {
+    ok: proc.status === 0,
+    status: proc.status === 0 ? 200 : 500,
+    output: proc.stdout?.trim() || proc.stderr?.trim() || '',
+  };
+}
+
+/**
+ * Closes a GitHub issue as completed with a resolution comment. Accepts an injectable runner for tests.
+ */
+export function closeGitHubIssue({ repo, issueNumber, comment = '', runner = null }) {
+  if (runner) {
+    return runner({ action: 'close', repo, issueNumber, comment });
+  }
+  const args = ['issue', 'close', String(issueNumber), '--reason', 'completed', '-R', repo];
+  if (comment) {
+    args.push('--comment', comment);
+  }
+  const proc = spawnSync('gh', args, { encoding: 'utf8' });
+  return {
+    ok: proc.status === 0,
+    status: proc.status === 0 ? 200 : 500,
+    output: proc.stdout?.trim() || proc.stderr?.trim() || '',
+  };
+}
+

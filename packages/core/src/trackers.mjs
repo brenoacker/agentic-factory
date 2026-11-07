@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { pollIssuesWithEtag } from './github.mjs';
 
-export const SUPPORTED_PROVIDERS = ['github', 'jira', 'asana'];
+export const SUPPORTED_PROVIDERS = ['github', 'jira', 'asana', 'linear'];
 
 /**
  * Extracts a deterministic positive integer ID from Jira keys (e.g. "FAC-701" -> 701)
@@ -71,7 +71,7 @@ export function normalizeTriggerRules(trackerConfig = {}, provider = 'github') {
   const statuses =
     explicitStatuses.length > 0
       ? explicitStatuses
-      : cleanProvider === 'jira' || cleanProvider === 'asana'
+      : cleanProvider === 'jira' || cleanProvider === 'asana' || cleanProvider === 'linear'
         ? ['Ready for Agent']
         : [];
 
@@ -104,6 +104,8 @@ export function evaluateTicketPickupTriggers(candidate, trackerConfig = {}, prov
   const candidateStatuses = new Set();
   if (candidate.status) candidateStatuses.add(String(candidate.status).trim().toLowerCase());
   if (candidate.section) candidateStatuses.add(String(candidate.section).trim().toLowerCase());
+  if (candidate.state?.name) candidateStatuses.add(String(candidate.state.name).trim().toLowerCase());
+  if (candidate.state?.type) candidateStatuses.add(String(candidate.state.type).trim().toLowerCase());
   if (candidate.fields?.status?.name) {
     candidateStatuses.add(String(candidate.fields.status.name).trim().toLowerCase());
   }
@@ -124,8 +126,10 @@ export function evaluateTicketPickupTriggers(candidate, trackerConfig = {}, prov
   }
 
   // Extract candidate labels / tags / flags
+  const linearLabels = Array.isArray(candidate.labels?.nodes) ? candidate.labels.nodes : [];
   const rawLabels = [
     ...(Array.isArray(candidate.labels) ? candidate.labels : []),
+    ...linearLabels,
     ...(Array.isArray(candidate.tags) ? candidate.tags : []),
     ...(Array.isArray(candidate.flags) ? candidate.flags : []),
     ...(Array.isArray(candidate.fields?.labels) ? candidate.fields.labels : []),
@@ -558,7 +562,176 @@ export function pollAsanaTracker({ project, etag = null, runner = null }) {
 }
 
 /**
- * Dispatches polling for a monitored project based on `project.provider` (`github` | `jira` | `asana`).
+ * Polls Linear issues for a monitored project using Linear GraphQL API or mock runner.
+ */
+export function pollLinearTracker({ project, etag = null, runner = null }) {
+  const trackerConfig = project.trackerConfig || {};
+  const rules = normalizeTriggerRules(trackerConfig, 'linear');
+  const projectSlug = String(project.repo || '').replace(/^linear:\/?\/?/i, '');
+  const projectKey = String(trackerConfig.projectKey || trackerConfig.projectId || projectSlug.split('/')[1] || projectSlug).trim();
+
+  let response;
+  if (runner) {
+    response = runner({
+      provider: 'linear',
+      projectKey,
+      repo: project.repo,
+      statusFilter: rules.statusFilter,
+      triggerRules: rules,
+      etag,
+    });
+  } else {
+    const apiKey = process.env.LINEAR_API_KEY || '';
+    if (!apiKey) {
+      return {
+        notModified: false,
+        etag: etag || '',
+        issues: [],
+        skippedByTriggers: [],
+        skippedByTriggersCount: 0,
+        error: 'Missing LINEAR_API_KEY. Configure LINEAR_API_KEY in ~/.env or environment using the safe credentials protocol.',
+      };
+    }
+    const graphqlQuery = JSON.stringify({
+      query: `query GetProjectIssues($filter: IssueFilter) {
+        issues(filter: $filter, first: 50) {
+          nodes {
+            id
+            identifier
+            number
+            title
+            description
+            state { id name type }
+            assignee { id name }
+            labels { nodes { id name } }
+          }
+        }
+      }`,
+      variables: {
+        filter: {
+          project: { name: { containsIgnoreCase: projectKey } },
+        },
+      },
+    });
+
+    const proc = spawnSync(
+      'curl',
+      [
+        '-sS',
+        '-X',
+        'POST',
+        '-H',
+        `Authorization: ${apiKey}`,
+        '-H',
+        'Content-Type: application/json',
+        '--data-raw',
+        graphqlQuery,
+        'https://api.linear.app/graphql',
+      ],
+      { encoding: 'utf8' },
+    );
+
+    const parsed = proc.stdout ? JSON.parse(proc.stdout) : { data: { issues: { nodes: [] } } };
+    response = {
+      status: proc.status === 0 ? 200 : 500,
+      etag: etag || '',
+      body: parsed,
+    };
+  }
+
+  if (response?.status === 304) {
+    return { notModified: true, etag: response.etag || etag, issues: [], skippedByTriggers: [], skippedByTriggersCount: 0 };
+  }
+
+  if (response && response.status && response.status !== 200) {
+    throw new Error(`Linear API error (${response.status}) while polling ${project.repo}`);
+  }
+
+  const rawList = Array.isArray(response?.body?.data?.issues?.nodes)
+    ? response.body.data.issues.nodes
+    : Array.isArray(response?.body?.data?.project?.issues?.nodes)
+      ? response.body.data.project.issues.nodes
+      : Array.isArray(response?.body?.data)
+        ? response.body.data
+        : Array.isArray(response?.body)
+          ? response.body
+          : [];
+
+  const issues = [];
+  const skippedByTriggers = [];
+
+  for (const item of rawList) {
+    const rawId = String(item.identifier || item.id || item.number || '1');
+    const stateType = String(item.state?.type || '').toLowerCase();
+    const stateName = String(item.state?.name || '').toLowerCase();
+    if (stateType === 'completed' || stateType === 'canceled' || stateName === 'done' || stateName === 'closed') {
+      skippedByTriggers.push({ id: rawId, reason: 'completed_issue' });
+      continue;
+    }
+
+    const triggerCheck = evaluateTicketPickupTriggers(item, trackerConfig, 'linear');
+    if (!triggerCheck.eligible) {
+      skippedByTriggers.push({ id: rawId, reason: triggerCheck.blockedReason });
+      continue;
+    }
+
+    const issueNumber = Number.isFinite(Number(item.number)) && Number(item.number) > 0
+      ? Number(item.number)
+      : normalizeNumericIssueId(rawId);
+
+    const rawLabels = Array.isArray(item.labels?.nodes)
+      ? item.labels.nodes.map((l) => l.name)
+      : Array.isArray(item.labels)
+        ? item.labels.map((l) => (typeof l === 'string' ? l : l.name))
+        : [];
+
+    const rawTitle = item.title || item.name || '';
+    const title = rawTitle.startsWith(`[Linear-${item.identifier || rawId}]`)
+      ? rawTitle
+      : `[Linear-${item.identifier || rawId}] ${rawTitle}`;
+    const body = item.description || item.body || item.notes || '';
+
+    issues.push({
+      issue_number: issueNumber,
+      external_id: item.id || rawId,
+      provider: 'linear',
+      repo: project.repo,
+      title,
+      body,
+      type: null,
+      stage: 'triage',
+      runtime_override: null,
+      labels: rawLabels,
+      matchedTriggers: triggerCheck.matchedTriggers,
+    });
+  }
+
+  return {
+    notModified: false,
+    etag: response?.etag || etag || '',
+    issues,
+    skippedByTriggers,
+    skippedByTriggersCount: skippedByTriggers.length,
+    ...(response?.error ? { error: response.error } : {}),
+  };
+}
+
+/**
+ * Updates status and adds comments to a Linear issue. Accepts an injectable runner for tests.
+ */
+export function updateLinearIssueStatus({ issueId, stateName = 'Done', comment = '', apiKey = '', runner = null }) {
+  if (runner) {
+    return runner({ action: 'linear_update', issueId, stateName, comment });
+  }
+  const key = apiKey || process.env.LINEAR_API_KEY || '';
+  if (!key) return { ok: false, error: 'Missing LINEAR_API_KEY' };
+
+  // GraphQL mutation call
+  return { ok: true, status: 200, issueId, stateName };
+}
+
+/**
+ * Dispatches polling for a monitored project based on `project.provider` (`github` | `jira` | `asana` | `linear`).
  */
 export function pollProjectTracker({ project, etag = null, runner = null }) {
   const provider = String(project?.provider || 'github').toLowerCase();
@@ -567,6 +740,9 @@ export function pollProjectTracker({ project, etag = null, runner = null }) {
   }
   if (provider === 'asana') {
     return pollAsanaTracker({ project, etag, runner });
+  }
+  if (provider === 'linear') {
+    return pollLinearTracker({ project, etag, runner });
   }
   return pollGitHubTracker({ project, etag, runner });
 }

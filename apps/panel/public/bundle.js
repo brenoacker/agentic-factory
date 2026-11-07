@@ -339352,7 +339352,8 @@ ${isHandDrawn ? "" : `
                               children: [
                                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "github", children: "github (GitHub Issues)" }),
                                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "jira", children: "jira (Jira Cloud / Server)" }),
-                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "asana", children: "asana (Asana Tasks)" })
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "asana", children: "asana (Asana Tasks)" }),
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "linear", children: "linear (Linear Project Issues)" })
                               ]
                             }
                           ) }),
@@ -339578,6 +339579,9 @@ ${isHandDrawn ? "" : `
                             } else if (prov === "asana") {
                               triggerParts.push(`GID: ${tc.projectGid || "-"}`);
                               triggerParts.push(`Stage: ${tc.statusFilter || "Ready for Agent"}`);
+                            } else if (prov === "linear") {
+                              triggerParts.push(`Project: ${tc.projectKey || p3.repo}`);
+                              triggerParts.push(`Stage: ${tc.statusFilter || "Ready for Agent"}`);
                             } else {
                               triggerParts.push(tc.statusFilter ? `Stage: ${tc.statusFilter}` : "state=open");
                             }
@@ -339602,7 +339606,7 @@ ${isHandDrawn ? "" : `
                                 style: { borderBottom: "1px solid #1e293b" },
                                 children: [
                                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: p3.repo }) }),
-                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: prov === "jira" ? "blue" : prov === "asana" ? "red" : "grey", children: prov.toUpperCase() }) }),
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: prov === "jira" ? "blue" : prov === "asana" ? "red" : prov === "linear" ? "severity-medium" : "grey", children: prov.toUpperCase() }) }),
                                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: filterDesc }) }),
                                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: p3.defaultBranch || "main" }) }),
                                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { style: { padding: "0.5rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusIndicator2, { type: p3.paused ? "stopped" : "success", children: p3.paused ? "PAUSED" : "MONITORING" }) }),

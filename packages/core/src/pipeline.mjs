@@ -1,6 +1,8 @@
 import { evaluateIntakeGuards } from './guards.mjs';
 import { dispatchTask } from './dispatcher.mjs';
 import { extractFollowUpTickets } from './brain.mjs';
+import { commentOnGitHubIssue, updateGitHubIssue, closeGitHubIssue } from './github.mjs';
+import { updateLinearIssueStatus } from './trackers.mjs';
 
 const VALID_TYPES = new Set(['feature', 'bug', 'investigation', 'discovery', 'chore']);
 
@@ -167,6 +169,7 @@ export function intakeAndTriageTicket({
   workflows,
   store,
   now = new Date(),
+  trackerRunner = null,
 }) {
   const nowDate = now instanceof Date ? now : new Date(now);
   const nowIso = nowDate.toISOString();
@@ -234,6 +237,35 @@ export function intakeAndTriageTicket({
     now: nowIso,
   });
 
+  // Automatic Tracker Lifecycle: update labels and post in-progress pickup comment
+  try {
+    if (trackerRunner || issue.provider === 'github' || (!issue.provider && !issue.external_id && normalizedIssue.repo.includes('/'))) {
+      commentOnGitHubIssue({
+        repo: normalizedIssue.repo,
+        issueNumber: normalizedIssue.issue_number,
+        comment: `🚀 **Agentic Factory Pickup**: Issue #${normalizedIssue.issue_number} intaked under workflow \`${classifiedType}\` (initial stage: \`${initialStage}\`).`,
+        runner: trackerRunner,
+      });
+      updateGitHubIssue({
+        repo: normalizedIssue.repo,
+        issueNumber: normalizedIssue.issue_number,
+        labelsToAdd: [`stage:${initialStage}`, 'in-progress'],
+        labelsToRemove: ['stage:triage'],
+        assignees: ['@me'],
+        runner: trackerRunner,
+      });
+    } else if (issue.provider === 'linear') {
+      updateLinearIssueStatus({
+        issueId: issue.external_id || normalizedIssue.issue_number,
+        stateName: 'In Progress',
+        comment: `🚀 **Agentic Factory Pickup**: Issue intaked under workflow \`${classifiedType}\` (initial stage: \`${initialStage}\`).`,
+        runner: trackerRunner,
+      });
+    }
+  } catch {
+    // Non-blocking telemetry
+  }
+
   return {
     ok: true,
     status: 201,
@@ -259,6 +291,7 @@ export function advanceTicketInPanel({
   verdict = 'APPROVE',
   headSha = '64e6a79',
   runner = null,
+  trackerRunner = null,
 }) {
   const existing = store.getTask(executionKey);
   if (!existing) {
@@ -292,6 +325,44 @@ export function advanceTicketInPanel({
     }
   }
 
+  let trackerFeedback = null;
+  if (res.stage === 'done') {
+    try {
+      if (trackerRunner || (existing.repo && existing.repo.includes('/') && !existing.external_id && !String(existing.execution_key).startsWith('linear:'))) {
+        commentOnGitHubIssue({
+          repo: existing.repo,
+          issueNumber: existing.issue_number,
+          comment: `✅ **Completed via Agentic Factory**: Workflow \`${existing.type}\` finished at commit \`${headSha}\`. All automated checks and gates passed.`,
+          runner: trackerRunner,
+        });
+        closeGitHubIssue({
+          repo: existing.repo,
+          issueNumber: existing.issue_number,
+          comment: `Closed as completed by Agentic Factory (commit ${headSha}).`,
+          runner: trackerRunner,
+        });
+        updateGitHubIssue({
+          repo: existing.repo,
+          issueNumber: existing.issue_number,
+          labelsToAdd: ['stage:done'],
+          labelsToRemove: ['in-progress', 'stage:merge', 'stage:review', 'stage:triage'],
+          runner: trackerRunner,
+        });
+        trackerFeedback = { closed: true, tracker: 'github' };
+      } else if (existing.provider === 'linear' || String(existing.execution_key).startsWith('linear:')) {
+        updateLinearIssueStatus({
+          issueId: existing.external_id || existing.issue_number,
+          stateName: 'Done',
+          comment: `✅ **Completed via Agentic Factory**: Workflow \`${existing.type}\` finished at commit \`${headSha}\`.`,
+          runner: trackerRunner,
+        });
+        trackerFeedback = { closed: true, tracker: 'linear' };
+      }
+    } catch {
+      // Non-blocking tracker updates
+    }
+  }
+
   return {
     ok: res.ok,
     status: 200,
@@ -300,5 +371,6 @@ export function advanceTicketInPanel({
     stepsExecuted: res.stepsExecuted,
     task: res.task,
     followUpTickets,
+    trackerFeedback,
   };
 }
