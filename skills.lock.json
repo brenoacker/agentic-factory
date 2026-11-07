@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "upstreamRepo": "https://github.com/tech-leads-club/agent-skills",
+  "upstreamCommit": "8658b6658c762b9e5efd3956ed35a51c41bdf6c3",
+  "skills": [
+    {
+      "name": "codenavi",
+      "category": "development",
+      "source": "vendor",
+      "version": "1.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/codenavi",
+      "sha256": "207da425c935885c184a27ec95ed203419bc43dfcdae517c51a9f9ae92d5a1e5"
+    },
+    {
+      "name": "coding-guidelines",
+      "category": "development",
+      "source": "vendor",
+      "version": "1.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/coding-guidelines",
+      "sha256": "257e06044a808aafe3ce1aac139f36921e5ca09b85af64a46f8bca981b95c19b"
+    },
+    {
+      "name": "create-adr",
+      "category": "creation",
+      "source": "vendor",
+      "version": "1.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/create-adr",
+      "sha256": "fdf33d55d75c8e63def6f259edc6d9cb49aa9e97abaec161df49ee565997d0c0"
+    },
+    {
+      "name": "create-rfc",
+      "category": "creation",
+      "source": "vendor",
+      "version": "1.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/create-rfc",
+      "sha256": "a50645259c399d12d226ea654b1097a59afcd9cf161e1e83d75e4443cb3fef1b"
+    },
+    {
+      "name": "create-technical-design-doc",
+      "category": "creation",
+      "source": "vendor",
+      "version": "1.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/create-technical-design-doc",
+      "sha256": "fe06bc3f1abd5fb1ea6e137bbc5820e61580b1a6bbbf05fa5293459e1c4f2b0e"
+    },
+    {
+      "name": "docs-writer",
+      "category": "development",
+      "source": "vendor",
+      "version": "1.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/docs-writer",
+      "sha256": "52111ab382faf7a9931f6dd843f769d59743f68a7108cb51f0a15370e95f3b1d"
+    },
+    {
+      "name": "gh-address-comments",
+      "category": "development",
+      "source": "vendor",
+      "version": "1.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/gh-address-comments",
+      "sha256": "6b19e0d1a4cd3c1854a6ac7ea04eaa497533b7f821f4c8ef6c01814e2a2a14ca"
+    },
+    {
+      "name": "gh-fix-ci",
+      "category": "tooling",
+      "source": "vendor",
+      "version": "1.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/gh-fix-ci",
+      "sha256": "b765c1e185526fe6c44272e63d359a6b8fddbf269bf7bea9ee1058b4f23791de"
+    },
+    {
+      "name": "harness-eval",
+      "category": "development",
+      "source": "vendor",
+      "version": "1.8.3",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/harness-eval",
+      "sha256": "ce285d117500b812f0a5a265fd261be6aff2da25aab17a215c7d43087bcd25f0"
+    },
+    {
+      "name": "mermaid-studio",
+      "category": "tooling",
+      "source": "vendor",
+      "version": "1.0.1",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/mermaid-studio",
+      "sha256": "c5353c2c4607ab8e3d0ca73dc5ffab0d0107b38808d7a2ea89d9dcd851f8db73"
+    },
+    {
+      "name": "not-your-babysitter",
+      "category": "development",
+      "source": "vendor",
+      "version": "1.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/not-your-babysitter",
+      "sha256": "5072f1b23672c2e89e87b6181d2853172f97081a8df23bca688377fb0858dc9f"
+    },
+    {
+      "name": "security-best-practices",
+      "category": "security",
+      "source": "vendor",
+      "version": "1.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/security-best-practices",
+      "sha256": "4933572346056a7a8b57c9bd1dd8512c3024efca45406556558c0023e4a21810"
+    },
+    {
+      "name": "security-threat-model",
+      "category": "security",
+      "source": "vendor",
+      "version": "1.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/security-threat-model",
+      "sha256": "d28a8a2be1c6df92813b4d0672d8a71b27b0f6749da221d08053c931908e3b28"
+    },
+    {
+      "name": "sentry",
+      "category": "monitoring",
+      "source": "vendor",
+      "version": "1.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/sentry",
+      "sha256": "79c94bbab7666377186f88156219c2c0f7c4c03c8e014860d6ec7ff7e54ebf25"
+    },
+    {
+      "name": "skill-architect",
+      "category": "creation",
+      "source": "vendor",
+      "version": "1.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/skill-architect",
+      "sha256": "f3f3998be62221bb934be03e185a253b29963eb1a8a93dd3eabd1b5a4f09a47e"
+    },
+    {
+      "name": "spec-driven-eval",
+      "category": "development",
+      "source": "vendor",
+      "version": "1.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/spec-driven-eval",
+      "sha256": "b01c844fad245c0ae6d8a5ee63ee04616c8a0b626f7e45c0b94bbeebdb2a72c8"
+    },
+    {
+      "name": "subagent-creator",
+      "category": "creation",
+      "source": "vendor",
+      "version": "1.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/subagent-creator",
+      "sha256": "5fd2e016653215d925a2bf2706a7364357edf32d20be94e8f325a24177e32681"
+    },
+    {
+      "name": "the-fool",
+      "category": "decision-making",
+      "source": "vendor",
+      "version": "2.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/the-fool",
+      "sha256": "d6c635ac60ed6bfc064ed668270085dcc8363ce5f52ea0b0931f4ce03b73f3d5"
+    },
+    {
+      "name": "the-judge",
+      "category": "quality",
+      "source": "vendor",
+      "version": "1.4.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/the-judge",
+      "sha256": "181fe3cf6e395ebcb23a7be29946506fbc8e8d52b1afaef77b5ae4ea3792388c"
+    },
+    {
+      "name": "the-jury",
+      "category": "decision-making",
+      "source": "vendor",
+      "version": "1.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/the-jury",
+      "sha256": "f51e29f6a15f70659b3d98ad686e6afa65b4dd462cda665f32245ce38cf0acfc"
+    },
+    {
+      "name": "tlc-discover",
+      "category": "development",
+      "source": "vendor",
+      "version": "0.9.2",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/tlc-discover",
+      "sha256": "acb8f683f77870b2593a0072ada9548b82ad8bebe948015835e04b8a650a4ca1"
+    },
+    {
+      "name": "tlc-prd",
+      "category": "development",
+      "source": "vendor",
+      "version": "1.0.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/tlc-prd",
+      "sha256": "1fd1baf4db343a3752d1e9e9eda06e24b07d583a65f4eed976cf926fae0bd1ad"
+    },
+    {
+      "name": "tlc-spec-lean",
+      "category": "development",
+      "source": "vendor",
+      "version": "2.2.0",
+      "license": "CC-BY-4.0",
+      "path": "skills/vendor/tlc-spec-lean",
+      "sha256": "865f1a7f8b4c91e41a67a14feabd865623d9685c11eb6c4881adafaabf9535e4"
+    }
+  ]
+}

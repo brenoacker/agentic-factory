@@ -10,6 +10,13 @@ work/
 *.db
 *.db-journal
 
+# synced runtime skill directories (populated by scripts/sync-skills.mjs from skills/vendor & skills/custom)
+.agents/skills/
+.claude/skills/
+__pycache__/
+*.pyc
+
+
 # OS / editors
 .DS_Store
 Thumbs.db
