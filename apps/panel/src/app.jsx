@@ -379,11 +379,15 @@ function ControlPanelApp() {
   };
 
   const dispatchTicketKey = async (key, approveCurrentStage = false) => {
-    await fetch('/api/tickets/' + encodeURIComponent(key) + '/dispatch', {
+    const res = await fetch('/api/tickets/' + encodeURIComponent(key) + '/dispatch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ approveCurrentStage }),
     });
+    const data = await res.json();
+    if (!res.ok && data.error) {
+      setIntakeFeedback(`Dispatch Notice: ${data.error}`);
+    }
     await loadDashboard();
   };
 
@@ -1410,6 +1414,31 @@ function ControlPanelApp() {
                                 <small style={{ color: '#9ba7b6' }}>
                                   {t.runtime} / {t.model} · ${Number(t.cost_usd || 0).toFixed(4)}
                                 </small>
+                                {t.branch_name && (
+                                  <div style={{ fontSize: '0.72rem', color: '#9ba7b6', marginTop: '0.2rem' }} data-testid={`task-branch-${t.issue_number}`}>
+                                    🌿 Branch: <code style={{ color: '#38bdf8' }}>{t.branch_name}</code>
+                                  </div>
+                                )}
+                                {t.workspace_path && (
+                                  <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '0.1rem', wordBreak: 'break-all' }} data-testid={`task-ws-${t.issue_number}`}>
+                                    📁 Workspace: <code>{t.workspace_path}</code>
+                                  </div>
+                                )}
+                                {t.deliverable_url && (
+                                  <div style={{ marginTop: '0.35rem', padding: '0.25rem 0.4rem', background: '#0f172a', borderRadius: '4px', border: '1px solid #1e293b' }} data-testid={`task-deliverable-${t.issue_number}`}>
+                                    <span style={{ fontSize: '0.72rem', fontWeight: 600, color: t.deliverable_type === 'pull_request' ? '#38bdf8' : '#a78bfa' }}>
+                                      {t.deliverable_type === 'pull_request' ? '🔗 Pull Request: ' : '📄 Research Doc: '}
+                                    </span>
+                                    <a
+                                      href={t.deliverable_url.startsWith('http') ? t.deliverable_url : `#`}
+                                      target={t.deliverable_url.startsWith('http') ? '_blank' : '_self'}
+                                      rel="noreferrer"
+                                      style={{ fontSize: '0.72rem', color: '#38bdf8', textDecoration: 'underline' }}
+                                    >
+                                      {t.deliverable_ref || t.deliverable_url}
+                                    </a>
+                                  </div>
+                                )}
                                 {t.stage !== 'done' && (
                                   <div style={{ marginTop: '0.45rem' }}>
                                     <Button

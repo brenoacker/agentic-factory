@@ -13,6 +13,7 @@ import {
   pollLinearTracker,
   intakeAndTriageTicket,
   advanceTicketInPanel,
+  provisionTaskWorkspace,
   FactoryStore,
 } from '../../../packages/core/index.mjs';
 
@@ -20,7 +21,7 @@ const REPO_ROOT = resolve(import.meta.dirname, '..', '..', '..');
 
 function makeTempFactoryClone() {
   const dir = mkdtempSync(join(tmpdir(), 'agentic-factory-panel-'));
-  for (const item of ['factory.yaml', 'skills.lock.json', 'config', 'workflows', 'contracts', 'brain', 'agents']) {
+  for (const item of ['factory.yaml', 'skills.lock.json', 'config', 'workflows', 'contracts', 'brain', 'agents', 'skills']) {
     cpSync(join(REPO_ROOT, item), join(dir, item), { recursive: true });
   }
   return dir;
@@ -622,6 +623,144 @@ test('C9: Tracker lifecycle updates status to in-progress, posts pickup comment,
     assert.ok(linearCalls.some((c) => c.action === 'linear_update' && c.stateName === 'Done'));
   } finally {
     store.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C10: Workspace provisioner clones or checks out isolated worktree on target default branch with task branch and locked skills', () => {
+  const tmpDir = makeTempFactoryClone();
+  try {
+    // 1. Injected runner returns deterministic workspace metadata
+    const runnerRes = provisionTaskWorkspace({
+      factoryRoot: tmpDir,
+      repo: 'brenoacker/incident-investigator',
+      issueNumber: 85,
+      defaultBranch: 'main',
+      runner: ({ repo, issueNumber, branchName }) => ({
+        ok: true,
+        workspacePath: join(tmpDir, '.workspaces', 'mock', `issue-${issueNumber}`),
+        branchName: branchName || `factory/issue-${issueNumber}`,
+        repo,
+      }),
+    });
+    assert.equal(runnerRes.ok, true);
+    assert.equal(runnerRes.branchName, 'factory/issue-85');
+    assert.ok(runnerRes.workspacePath.includes('issue-85'));
+
+    // 2. Local provisioner establishes task branch and copies constitution
+    const localRes = provisionTaskWorkspace({
+      factoryRoot: tmpDir,
+      repo: 'brenoacker/agentic-factory',
+      issueNumber: 42,
+      defaultBranch: 'main',
+    });
+    assert.equal(localRes.ok, true);
+    assert.equal(localRes.branchName, 'factory/issue-42');
+    assert.ok(localRes.workspacePath.includes('issue-42'));
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C11: Deliverable validation gate enforces mandatory PR for code workflows and research document for analysis workflows before done', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const store = new FactoryStore(dbPath);
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    // 1. Code ticket without PR is rejected when advancing to done
+    const codeTask = store.createTask({
+      executionKey: 'brenoacker/agentic-factory#101',
+      issueNumber: 101,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Real feature implementation',
+      type: 'feature',
+      stage: 'review',
+    });
+    const missingDelivCheck = store.validateTaskDeliverable(codeTask);
+    assert.equal(missingDelivCheck.ok, false);
+    assert.equal(missingDelivCheck.code, 'missing_deliverable');
+
+    // Advancing in panel without deliverable returns 422 missing_deliverable
+    const rejectRes = advanceTicketInPanel({
+      executionKey: codeTask.execution_key,
+      factoryRoot: tmpDir,
+      factoryConfig: { factory: { autonomy: 'auto-low' } },
+      workflows: {
+        feature: {
+          id: 'feature',
+          autonomy: 'auto-low',
+          stages: [{ id: 'review', mode: 'auto', agent: 'judge', next: 'done' }],
+        },
+      },
+      pricesConfig: {},
+      store,
+      autoAttachDeliverable: false,
+    });
+    assert.equal(rejectRes.ok, false);
+    assert.equal(rejectRes.status, 422);
+    assert.equal(rejectRes.code, 'missing_deliverable');
+
+    // 2. Code ticket with Pull Request deliverable completes successfully
+    store.attachTaskDeliverable(codeTask.execution_key, {
+      type: 'pull_request',
+      url: 'https://github.com/brenoacker/agentic-factory/pull/201',
+      ref: 'commitsha101',
+    });
+    const validDelivCheck = store.validateTaskDeliverable(store.getTask(codeTask.execution_key));
+    assert.equal(validDelivCheck.ok, true);
+
+    const approveRes = advanceTicketInPanel({
+      executionKey: codeTask.execution_key,
+      factoryRoot: tmpDir,
+      factoryConfig: { factory: { autonomy: 'auto-low' } },
+      workflows: {
+        feature: {
+          id: 'feature',
+          autonomy: 'auto-low',
+          stages: [{ id: 'review', mode: 'auto', agent: 'judge', next: 'done' }],
+        },
+      },
+      pricesConfig: {},
+      store,
+      autoAttachDeliverable: false,
+    });
+    assert.equal(approveRes.ok, true);
+    assert.equal(approveRes.stage, 'done');
+
+    // 3. Analysis ticket (investigation) without document is rejected
+    const investTask = store.createTask({
+      executionKey: 'brenoacker/incident-investigator#85',
+      issueNumber: 85,
+      repo: 'brenoacker/incident-investigator',
+      title: 'Add versioned stable-context cache',
+      type: 'investigation',
+      stage: 'investigate',
+    });
+    const missingInvestCheck = store.validateTaskDeliverable(investTask);
+    assert.equal(missingInvestCheck.ok, false);
+    assert.equal(missingInvestCheck.code, 'missing_deliverable');
+
+    // 4. Analysis ticket with research document completes successfully
+    store.attachTaskDeliverable(investTask.execution_key, {
+      type: 'research_document',
+      url: 'docs/research/issue-85-stable-context-cache.md',
+      ref: 'Investigation Report: stable-context cache',
+    });
+    const validInvestCheck = store.validateTaskDeliverable(store.getTask(investTask.execution_key));
+    assert.equal(validInvestCheck.ok, true);
+
+    // 5. Test GET /api/tickets/:key/deliverable endpoint
+    const apiRes = await fetch(`${baseUrl}/api/tickets/${encodeURIComponent(investTask.execution_key)}/deliverable`);
+    assert.equal(apiRes.status, 200);
+    const apiJson = await apiRes.json();
+    assert.equal(apiJson.ok, true);
+    assert.equal(apiJson.deliverable.type, 'research_document');
+    assert.equal(apiJson.deliverable.url, 'docs/research/issue-85-stable-context-cache.md');
+  } finally {
+    store.close();
+    await panel.close();
     rmSync(tmpDir, { recursive: true, force: true });
   }
 });

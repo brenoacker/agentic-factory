@@ -400,7 +400,31 @@ export function createPanelServer({
         return;
       }
 
-      // 9. POST /api/tickets/:key/dispatch
+      // 9. POST /api/tickets/:key/dispatch & GET /api/tickets/:key/deliverable
+      const delivMatch = pathname.match(/^\/api\/tickets\/([^/]+)\/deliverable$/);
+      if (req.method === 'GET' && delivMatch) {
+        const executionKey = decodeURIComponent(delivMatch[1]);
+        const task = store.getTask(executionKey);
+        if (!task) {
+          sendJson(res, 404, { ok: false, error: `Task not found: ${executionKey}` });
+          return;
+        }
+        sendJson(res, 200, {
+          ok: true,
+          executionKey,
+          deliverable: {
+            type: task.deliverable_type,
+            url: task.deliverable_url,
+            ref: task.deliverable_ref,
+          },
+          workspace: {
+            path: task.workspace_path,
+            branch: task.branch_name,
+          },
+        });
+        return;
+      }
+
       const dispatchMatch = pathname.match(/^\/api\/tickets\/([^/]+)\/dispatch$/);
       if (req.method === 'POST' && dispatchMatch) {
         const executionKey = decodeURIComponent(dispatchMatch[1]);
@@ -417,6 +441,8 @@ export function createPanelServer({
           impact: body.impact || 'medium',
           verdict: body.verdict || 'APPROVE',
           headSha: body.headSha || '64e6a79',
+          deliverable: body.deliverable || null,
+          autoAttachDeliverable: body.autoAttachDeliverable !== false,
           trackerRunner: issuePollRunner,
         });
         sendJson(res, dispatchRes.status, dispatchRes);

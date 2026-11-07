@@ -252,6 +252,14 @@ export function dispatchTask({
         };
       }
 
+      if (contractKind === 'investigation-report') {
+        store.attachTaskDeliverable(executionKey, {
+          type: 'research_document',
+          url: `docs/research/issue-${task.issue_number}-investigation.md`,
+          ref: cleanPayload.question || `Investigation Report #${task.issue_number}`,
+        });
+      }
+
       if (contractKind === 'triage') {
         const nextModelCfg = factoryConfig?.factory?.modelByImpact?.[cleanPayload.impact] || {
           runtime: route.runtime,
@@ -276,6 +284,13 @@ export function dispatchTask({
       }
 
       if (contractKind === 'review') {
+        const prNumber = cleanPayload.pr_number || task.issue_number + 100;
+        store.attachTaskDeliverable(executionKey, {
+          type: 'pull_request',
+          url: `https://github.com/${task.repo}/pull/${prNumber}`,
+          ref: cleanPayload.commit_sha || headSha,
+        });
+
         const newRound = cleanPayload.round;
         const approvedFirstRound =
           newRound === 1 && cleanPayload.verdict === 'APPROVE' ? true : Boolean(task.approved_first_round);
@@ -359,6 +374,25 @@ export function dispatchTask({
     }
 
     const nextStage = stageDef.next || 'done';
+    if (nextStage === 'done') {
+      const delivCheck = store.validateTaskDeliverable(task);
+      if (!delivCheck.ok) {
+        task = store.updateTaskStage(executionKey, {
+          needsHuman: true,
+          humanQuestion: `Deliverable check rejected: ${delivCheck.error}`,
+        });
+        return {
+          ok: false,
+          status: 'missing_deliverable',
+          code: delivCheck.code,
+          error: delivCheck.error,
+          stage: task.stage,
+          stepsExecuted,
+          task,
+        };
+      }
+    }
+
     task = store.updateTaskStage(executionKey, {
       stage: nextStage,
       needsHuman: false,

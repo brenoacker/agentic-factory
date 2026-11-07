@@ -9,7 +9,7 @@ const CAPTURES_DIR = join(REPO_ROOT, 'runs', 'screenshots');
 
 function makeTempFactoryClone() {
   const dir = mkdtempSync(join(tmpdir(), 'agentic-factory-pw-'));
-  for (const item of ['factory.yaml', 'skills.lock.json', 'config', 'workflows', 'contracts', 'brain', 'agents']) {
+  for (const item of ['factory.yaml', 'skills.lock.json', 'config', 'workflows', 'contracts', 'brain', 'agents', 'skills']) {
     cpSync(join(REPO_ROOT, item), join(dir, item), { recursive: true });
   }
   return dir;
@@ -731,6 +731,67 @@ test('C13: Playwright E2E test configures Linear tracker in Cloudscape UI, syncs
     expect(trackerCalls.some((c) => c.action === 'linear_update' && c.stateName === 'Done')).toBe(true);
 
     await page.screenshot({ path: join(CAPTURES_DIR, 'cloudscape-linear-synced-and-done.png'), fullPage: true });
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C14: Playwright E2E test verifies isolated workspace provisioning, deliverable gate enforcement, and deliverable links in Cloudscape UI', async ({
+  page,
+}) => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    // 1. Intake feature ticket #950 and investigation ticket #951
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#950',
+      issueNumber: 950,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Implement versioned context cache optimization',
+      type: 'feature',
+      stage: 'triage',
+    });
+
+    panel.store.createTask({
+      executionKey: 'brenoacker/incident-investigator#951',
+      issueNumber: 951,
+      repo: 'brenoacker/incident-investigator',
+      title: 'Analyze cache invalidation performance and SLOs',
+      type: 'investigation',
+      stage: 'triage',
+    });
+
+    await page.goto(baseUrl);
+    await page.locator('#tabs button[data-tab="board"]').click();
+
+    // Verify tasks rendered in triage
+    await expect(page.getByTestId('task-stage-950')).toHaveText('triage');
+    await expect(page.getByTestId('task-stage-951')).toHaveText('triage');
+
+    // 2. Dispatch #950 -> provisions isolated workspace & task branch
+    await page.getByTestId('dispatch-btn-950').click();
+    await expect(page.getByTestId('task-branch-950')).toBeVisible();
+    await expect(page.getByTestId('task-branch-950')).toContainText('factory/issue-950');
+    await expect(page.getByTestId('task-ws-950')).toBeVisible();
+
+    // Advance #950 to done -> verifies Pull Request deliverable link
+    await page.getByTestId('approve-btn-950').click();
+    await page.getByTestId('approve-btn-950').click();
+    await expect(page.getByTestId('task-stage-950')).toHaveText('done');
+    await expect(page.getByTestId('task-deliverable-950')).toBeVisible();
+    await expect(page.getByTestId('task-deliverable-950')).toContainText('Pull Request:');
+
+    // 3. Dispatch #951 (investigation) -> advances to done with research document
+    await page.getByTestId('dispatch-btn-951').click();
+    await page.getByTestId('approve-btn-951').click();
+    await expect(page.getByTestId('task-stage-951')).toHaveText('done');
+    await expect(page.getByTestId('task-deliverable-951')).toBeVisible();
+    await expect(page.getByTestId('task-deliverable-951')).toContainText('Research Doc:');
+
+    await page.screenshot({ path: join(CAPTURES_DIR, 'cloudscape-deliverables-and-workspaces.png'), fullPage: true });
   } finally {
     await panel.close();
     rmSync(tmpDir, { recursive: true, force: true });

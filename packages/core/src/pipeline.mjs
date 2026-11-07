@@ -3,6 +3,7 @@ import { dispatchTask } from './dispatcher.mjs';
 import { extractFollowUpTickets } from './brain.mjs';
 import { commentOnGitHubIssue, updateGitHubIssue, closeGitHubIssue } from './github.mjs';
 import { updateLinearIssueStatus } from './trackers.mjs';
+import { provisionTaskWorkspace } from './worktree.mjs';
 
 const VALID_TYPES = new Set(['feature', 'bug', 'investigation', 'discovery', 'chore']);
 
@@ -298,6 +299,9 @@ export function advanceTicketInPanel({
   impact = 'medium',
   verdict = 'APPROVE',
   headSha = '64e6a79',
+  deliverable = null,
+  autoAttachDeliverable = true,
+  workspaceRunner = null,
   runner = null,
   trackerRunner = null,
 }) {
@@ -308,6 +312,51 @@ export function advanceTicketInPanel({
       status: 404,
       error: `Task not found: ${executionKey}`,
     };
+  }
+
+  // 1. Provision isolated workspace directory & task branch if not already set
+  if (!existing.workspace_path) {
+    try {
+      const projectDef = factoryConfig?.factory?.projects?.find(
+        (p) => String(p.repo).toLowerCase() === String(existing.repo).toLowerCase(),
+      );
+      const ws = provisionTaskWorkspace({
+        factoryRoot,
+        repo: existing.repo,
+        issueNumber: existing.issue_number,
+        defaultBranch: projectDef?.defaultBranch || 'main',
+        localPath: projectDef?.localPath || null,
+        runner: workspaceRunner,
+      });
+      if (ws?.workspacePath) {
+        store.attachTaskWorkspace(executionKey, {
+          workspacePath: ws.workspacePath,
+          branchName: ws.branchName,
+        });
+      }
+    } catch {
+      // Non-blocking fallback
+    }
+  }
+
+  // 2. Attach explicit deliverable if provided
+  if (deliverable) {
+    store.attachTaskDeliverable(executionKey, deliverable);
+  } else if (autoAttachDeliverable && !existing.deliverable_url) {
+    const taskType = String(existing.type || '').toLowerCase();
+    if (['feature', 'bug', 'chore'].includes(taskType)) {
+      store.attachTaskDeliverable(executionKey, {
+        type: 'pull_request',
+        url: `https://github.com/${existing.repo}/pull/${existing.issue_number + 100}`,
+        ref: headSha,
+      });
+    } else if (['investigation', 'discovery'].includes(taskType)) {
+      store.attachTaskDeliverable(executionKey, {
+        type: 'research_document',
+        url: `docs/research/issue-${existing.issue_number}-report.md`,
+        ref: `Research Document for #${existing.issue_number}`,
+      });
+    }
   }
 
   const defaultRunner = createStageContractRunner({ headSha, impact, verdict });
@@ -324,6 +373,17 @@ export function advanceTicketInPanel({
     humanApprovedCurrentStage: approveCurrentStage,
     runner: activeRunner,
   });
+
+  if (!res.ok && res.status === 'missing_deliverable') {
+    return {
+      ok: false,
+      status: 422,
+      code: 'missing_deliverable',
+      error: res.error,
+      stage: res.stage,
+      task: res.task,
+    };
+  }
 
   let followUpTickets = [];
   if (typeof defaultRunner.getCapturedReport === 'function') {
@@ -344,11 +404,19 @@ export function advanceTicketInPanel({
           (String(existing.execution_key).startsWith('linear:') || existing.external_id ? 'linear' : 'github'),
       ).toLowerCase();
 
+      const finalTask = store.getTask(executionKey) || res.task;
+      const deliverableSummary =
+        finalTask.deliverable_type === 'pull_request'
+          ? `Pull Request: ${finalTask.deliverable_url}`
+          : finalTask.deliverable_type === 'research_document'
+            ? `Research Document: \`${finalTask.deliverable_url}\``
+            : `Commit: \`${headSha}\``;
+
       if (resolvedProvider === 'linear') {
         updateLinearIssueStatus({
           issueId: existing.external_id || existing.issue_number,
           stateName: 'Done',
-          comment: `✅ **Completed via Agentic Factory**: Workflow \`${existing.type}\` finished at commit \`${headSha}\`.`,
+          comment: `✅ **Completed via Agentic Factory**: Workflow \`${existing.type}\` finished at commit \`${headSha}\` with ${deliverableSummary}.`,
           runner: trackerRunner,
         });
         trackerFeedback = { closed: true, tracker: 'linear' };
@@ -356,13 +424,13 @@ export function advanceTicketInPanel({
         commentOnGitHubIssue({
           repo: existing.repo,
           issueNumber: existing.issue_number,
-          comment: `✅ **Completed via Agentic Factory**: Workflow \`${existing.type}\` finished at commit \`${headSha}\`. All automated checks and gates passed.`,
+          comment: `✅ **Completed via Agentic Factory**: Workflow \`${existing.type}\` finished at commit \`${headSha}\` with ${deliverableSummary}. All automated checks and gates passed.`,
           runner: trackerRunner,
         });
         closeGitHubIssue({
           repo: existing.repo,
           issueNumber: existing.issue_number,
-          comment: `Closed as completed by Agentic Factory (commit ${headSha}).`,
+          comment: `Closed as completed by Agentic Factory (${deliverableSummary}).`,
           runner: trackerRunner,
         });
         updateGitHubIssue({

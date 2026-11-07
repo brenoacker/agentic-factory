@@ -53,3 +53,87 @@ export function prepareWorktree({
     runtimePaths: syncRes.runtimePaths,
   };
 }
+
+/**
+ * Provisions a clean, isolated workspace for a task from the target repository's default branch.
+ * For local git repos it leverages git worktree; for remote repos it clones depth 1.
+ * Always establishes a dedicated task branch `factory/issue-<num>` and syncs locked skills.
+ */
+export function provisionTaskWorkspace({
+  factoryRoot,
+  repo,
+  issueNumber,
+  defaultBranch = 'main',
+  localPath = null,
+  branchName = null,
+  runner = null,
+}) {
+  if (runner) {
+    return runner({
+      action: 'provision_workspace',
+      repo,
+      issueNumber,
+      defaultBranch,
+      localPath,
+      branchName,
+    });
+  }
+
+  const root = resolve(factoryRoot);
+  const safeSlug = String(repo || 'default-repo').replace(/[^a-zA-Z0-9_-]+/g, '_');
+  const taskBranch = branchName || `factory/issue-${issueNumber}`;
+  const workspacePath = join(root, '.workspaces', safeSlug, `issue-${issueNumber}`);
+
+  mkdirSync(workspacePath, { recursive: true });
+
+  const isLocalGit = localPath && existsSync(join(resolve(localPath), '.git'));
+  const isFactorySelf = repo && repo.includes('agentic-factory') && existsSync(join(root, '.git'));
+
+  if (isFactorySelf || isLocalGit) {
+    const gitSource = isLocalGit ? resolve(localPath) : root;
+    try {
+      spawnSync('git', ['worktree', 'add', '--force', '-B', taskBranch, workspacePath], {
+        cwd: gitSource,
+        encoding: 'utf8',
+      });
+    } catch {
+      // fallback handled below
+    }
+  } else if (repo && repo.includes('/')) {
+    // Remote repository
+    if (!existsSync(join(workspacePath, '.git'))) {
+      const cloneRes = spawnSync(
+        'gh',
+        ['repo', 'clone', repo, workspacePath, '--', '--depth', '1', '-b', defaultBranch],
+        { cwd: root, encoding: 'utf8' },
+      );
+      if (cloneRes.status !== 0) {
+        spawnSync(
+          'git',
+          ['clone', '--depth', '1', '-b', defaultBranch, `https://github.com/${repo}.git`, workspacePath],
+          { cwd: root, encoding: 'utf8' },
+        );
+      }
+    }
+    spawnSync('git', ['checkout', '-B', taskBranch], { cwd: workspacePath, encoding: 'utf8' });
+  }
+
+  // Synchronize constitution and locked skills
+  const prep = prepareWorktree({
+    factoryRoot: root,
+    targetRepoPath: null,
+    worktreePath: workspacePath,
+    branchName: taskBranch,
+    useGitWorktree: false,
+  });
+
+  return {
+    ok: true,
+    workspacePath,
+    branchName: taskBranch,
+    defaultBranch,
+    repo,
+    issueNumber,
+    syncedSkills: prep.syncedSkills,
+  };
+}

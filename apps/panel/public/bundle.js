@@ -338878,11 +338878,15 @@ ${isHandDrawn ? "" : `
       await loadDashboard();
     };
     const dispatchTicketKey = async (key2, approveCurrentStage = false) => {
-      await fetch("/api/tickets/" + encodeURIComponent(key2) + "/dispatch", {
+      const res = await fetch("/api/tickets/" + encodeURIComponent(key2) + "/dispatch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ approveCurrentStage })
       });
+      const data6 = await res.json();
+      if (!res.ok && data6.error) {
+        setIntakeFeedback(`Dispatch Notice: ${data6.error}`);
+      }
       await loadDashboard();
     };
     const snoozeTaskAlarm = async (key2) => {
@@ -339913,6 +339917,27 @@ ${isHandDrawn ? "" : `
                                       t4.model,
                                       " \xB7 $",
                                       Number(t4.cost_usd || 0).toFixed(4)
+                                    ] }),
+                                    t4.branch_name && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: "0.72rem", color: "#9ba7b6", marginTop: "0.2rem" }, "data-testid": `task-branch-${t4.issue_number}`, children: [
+                                      "\u{1F33F} Branch: ",
+                                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { style: { color: "#38bdf8" }, children: t4.branch_name })
+                                    ] }),
+                                    t4.workspace_path && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: "0.68rem", color: "#64748b", marginTop: "0.1rem", wordBreak: "break-all" }, "data-testid": `task-ws-${t4.issue_number}`, children: [
+                                      "\u{1F4C1} Workspace: ",
+                                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: t4.workspace_path })
+                                    ] }),
+                                    t4.deliverable_url && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: "0.35rem", padding: "0.25rem 0.4rem", background: "#0f172a", borderRadius: "4px", border: "1px solid #1e293b" }, "data-testid": `task-deliverable-${t4.issue_number}`, children: [
+                                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: "0.72rem", fontWeight: 600, color: t4.deliverable_type === "pull_request" ? "#38bdf8" : "#a78bfa" }, children: t4.deliverable_type === "pull_request" ? "\u{1F517} Pull Request: " : "\u{1F4C4} Research Doc: " }),
+                                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                        "a",
+                                        {
+                                          href: t4.deliverable_url.startsWith("http") ? t4.deliverable_url : `#`,
+                                          target: t4.deliverable_url.startsWith("http") ? "_blank" : "_self",
+                                          rel: "noreferrer",
+                                          style: { fontSize: "0.72rem", color: "#38bdf8", textDecoration: "underline" },
+                                          children: t4.deliverable_ref || t4.deliverable_url
+                                        }
+                                      )
                                     ] }),
                                     t4.stage !== "done" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: "0.45rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
                                       button_default2,

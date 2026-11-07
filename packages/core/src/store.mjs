@@ -49,6 +49,11 @@ export class FactoryStore {
         input_tokens INTEGER NOT NULL DEFAULT 0,
         output_tokens INTEGER NOT NULL DEFAULT 0,
         cached_tokens INTEGER NOT NULL DEFAULT 0,
+        deliverable_type TEXT NOT NULL DEFAULT '',
+        deliverable_url TEXT NOT NULL DEFAULT '',
+        deliverable_ref TEXT NOT NULL DEFAULT '',
+        workspace_path TEXT NOT NULL DEFAULT '',
+        branch_name TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       );
@@ -103,6 +108,21 @@ export class FactoryStore {
         updated_at TEXT NOT NULL
       );
     `);
+
+    // Migrate existing tasks table columns if absent
+    const tableInfo = this.db.prepare('PRAGMA table_info(tasks)').all();
+    const existingCols = new Set(tableInfo.map((c) => c.name));
+    for (const col of [
+      { name: 'deliverable_type', type: "TEXT NOT NULL DEFAULT ''" },
+      { name: 'deliverable_url', type: "TEXT NOT NULL DEFAULT ''" },
+      { name: 'deliverable_ref', type: "TEXT NOT NULL DEFAULT ''" },
+      { name: 'workspace_path', type: "TEXT NOT NULL DEFAULT ''" },
+      { name: 'branch_name', type: "TEXT NOT NULL DEFAULT ''" },
+    ]) {
+      if (!existingCols.has(col.name)) {
+        this.db.exec(`ALTER TABLE tasks ADD COLUMN ${col.name} ${col.type}`);
+      }
+    }
 
     const defaultRuntimes = ['antigravity', 'claude-code', 'codex'];
     const insertRt = this.db.prepare(
@@ -417,7 +437,22 @@ export class FactoryStore {
     return this.getTask(executionKey);
   }
 
-  updateTaskStage(executionKey, { stage, impact, runtime, model, needsHuman, humanQuestion, reviewRounds, approvedFirstRound, now = new Date().toISOString() }) {
+  updateTaskStage(executionKey, {
+    stage,
+    impact,
+    runtime,
+    model,
+    needsHuman,
+    humanQuestion,
+    reviewRounds,
+    approvedFirstRound,
+    deliverableType,
+    deliverableUrl,
+    deliverableRef,
+    workspacePath,
+    branchName,
+    now = new Date().toISOString(),
+  }) {
     const current = this.getTask(executionKey);
     if (!current) throw new Error(`Task not found: ${executionKey}`);
     const nextStage = stage ?? current.stage;
@@ -428,17 +463,80 @@ export class FactoryStore {
     const nextQuestion = humanQuestion !== undefined ? humanQuestion : current.human_question;
     const nextRounds = reviewRounds ?? current.review_rounds;
     const nextFirstRound = approvedFirstRound !== undefined ? (approvedFirstRound ? 1 : 0) : current.approved_first_round;
+    const nextDelType = deliverableType !== undefined ? String(deliverableType || '') : current.deliverable_type;
+    const nextDelUrl = deliverableUrl !== undefined ? String(deliverableUrl || '') : current.deliverable_url;
+    const nextDelRef = deliverableRef !== undefined ? String(deliverableRef || '') : current.deliverable_ref;
+    const nextWsPath = workspacePath !== undefined ? String(workspacePath || '') : current.workspace_path;
+    const nextBranch = branchName !== undefined ? String(branchName || '') : current.branch_name;
 
     this.db
       .prepare(`
         UPDATE tasks
         SET stage = ?, impact = ?, runtime = ?, model = ?, needs_human = ?, human_question = ?,
-            review_rounds = ?, approved_first_round = ?, updated_at = ?
+            review_rounds = ?, approved_first_round = ?, deliverable_type = ?, deliverable_url = ?,
+            deliverable_ref = ?, workspace_path = ?, branch_name = ?, updated_at = ?
         WHERE execution_key = ?
       `)
-      .run(nextStage, nextImpact, nextRuntime, nextModel, nextNeedsHuman, nextQuestion, nextRounds, nextFirstRound, now, executionKey);
+      .run(
+        nextStage,
+        nextImpact,
+        nextRuntime,
+        nextModel,
+        nextNeedsHuman,
+        nextQuestion,
+        nextRounds,
+        nextFirstRound,
+        nextDelType,
+        nextDelUrl,
+        nextDelRef,
+        nextWsPath,
+        nextBranch,
+        now,
+        executionKey,
+      );
 
     return this.getTask(executionKey);
+  }
+
+  attachTaskDeliverable(executionKey, { type = '', url = '', ref = '', now = new Date().toISOString() } = {}) {
+    this.db
+      .prepare('UPDATE tasks SET deliverable_type = ?, deliverable_url = ?, deliverable_ref = ?, updated_at = ? WHERE execution_key = ?')
+      .run(String(type || ''), String(url || ''), String(ref || ''), now, executionKey);
+    return this.getTask(executionKey);
+  }
+
+  attachTaskWorkspace(executionKey, { workspacePath = '', branchName = '', now = new Date().toISOString() } = {}) {
+    this.db
+      .prepare('UPDATE tasks SET workspace_path = ?, branch_name = ?, updated_at = ? WHERE execution_key = ?')
+      .run(String(workspacePath || ''), String(branchName || ''), now, executionKey);
+    return this.getTask(executionKey);
+  }
+
+  validateTaskDeliverable(task) {
+    if (!task) return { ok: false, error: 'Task is required' };
+    const taskType = String(task.type || '').toLowerCase();
+    const dType = String(task.deliverable_type || '').toLowerCase();
+    const dUrl = String(task.deliverable_url || '').trim();
+
+    if (['feature', 'bug', 'chore'].includes(taskType)) {
+      if (dType !== 'pull_request' || !dUrl) {
+        return {
+          ok: false,
+          code: 'missing_deliverable',
+          error: `Code workflow "${taskType}" requires an open Pull Request deliverable before transitioning to done`,
+        };
+      }
+    } else if (['investigation', 'discovery'].includes(taskType)) {
+      if (dType !== 'research_document' || !dUrl) {
+        return {
+          ok: false,
+          code: 'missing_deliverable',
+          error: `Analysis workflow "${taskType}" requires a research document or PRD deliverable before transitioning to done`,
+        };
+      }
+    }
+
+    return { ok: true, deliverableType: dType, deliverableUrl: dUrl };
   }
 
   issueStageToken(executionKey, stage, now = new Date().toISOString()) {

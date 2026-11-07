@@ -7,6 +7,7 @@ dist/
 # factory runtime state
 runs/
 work/
+.workspaces/
 *.db
 *.db-journal
 
