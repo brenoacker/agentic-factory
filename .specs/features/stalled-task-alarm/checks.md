@@ -45,7 +45,7 @@ Proof: run e2e | ok 6 [chromium] › C9: Playwright E2E test verifies stalled fe
 ## Handoff
 
 - **Settled mid-build:** none
-- **Dispatched:** none
-- **Boundary:** none yet
+- **Dispatched:** S1 -> 028b19d
+- **Boundary:** S1 complete at 028b19d
 - **Abandoned:** none
-- **Walked:** pending browser E2E run
+- **Walked:** Chromium Playwright verified #stalled-alarm-banner, #header-alarm-badge, Kanban STALLED badge, #ctrl-stall-minutes threshold update, and Snooze Alarm resolution (screenshot saved in runs/screenshots/stalled-feature-alarm-active.png)
