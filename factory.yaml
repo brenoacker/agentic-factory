@@ -49,6 +49,24 @@
         "repo": "brenoacker/agentic-factory",
         "defaultBranch": "main",
         "paused": false
+      },
+      {
+        "id": "incident-investigator",
+        "repo": "brenoacker/incident-investigator",
+        "provider": "github",
+        "defaultBranch": "main",
+        "paused": false
+      },
+      {
+        "id": "linear-agentic-factory",
+        "repo": "linear://brenoack/agentic-factory-80f4e9bb2ce1",
+        "provider": "linear",
+        "defaultBranch": "main",
+        "paused": false,
+        "trackerConfig": {
+          "projectKey": "agentic-factory-80f4e9bb2ce1",
+          "statuses": "Todo,Backlog,In Progress"
+        }
       }
     ]
   }

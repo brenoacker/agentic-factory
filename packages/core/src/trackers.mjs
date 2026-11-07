@@ -562,6 +562,25 @@ export function pollAsanaTracker({ project, etag = null, runner = null }) {
 }
 
 /**
+ * Safely resolves Linear API key from process.env or Windows user environment / registry.
+ */
+export function getLinearApiKey(explicitKey = null) {
+  if (explicitKey !== null && explicitKey !== undefined) return explicitKey;
+  if (process.env.LINEAR_API_KEY !== undefined) return process.env.LINEAR_API_KEY;
+  if (process.platform === 'win32') {
+    try {
+      const reg = spawnSync('reg', ['query', 'HKCU\\Environment', '/v', 'LINEAR_API_KEY'], { encoding: 'utf8' });
+      const match = reg.stdout?.match(/LINEAR_API_KEY\s+REG_SZ\s+(\S+)/);
+      if (match && match[1]) {
+        process.env.LINEAR_API_KEY = match[1];
+        return match[1];
+      }
+    } catch {}
+  }
+  return '';
+}
+
+/**
  * Polls Linear issues for a monitored project using Linear GraphQL API or mock runner.
  */
 export function pollLinearTracker({ project, etag = null, runner = null }) {
@@ -581,7 +600,7 @@ export function pollLinearTracker({ project, etag = null, runner = null }) {
       etag,
     });
   } else {
-    const apiKey = process.env.LINEAR_API_KEY || '';
+    const apiKey = getLinearApiKey();
     if (!apiKey) {
       return {
         notModified: false,
@@ -592,26 +611,26 @@ export function pollLinearTracker({ project, etag = null, runner = null }) {
         error: 'Missing LINEAR_API_KEY. Configure LINEAR_API_KEY in ~/.env or environment using the safe credentials protocol.',
       };
     }
+    const cleanedKey = projectKey.replace(/^https?:\/\/linear\.app\/[^\/]+\/project\//i, '').replace(/\/.*$/, '');
+    const slugSuffix = cleanedKey.match(/[0-9a-f]{8,}$/i)?.[0] || '';
+    const namePart = cleanedKey.replace(/-[0-9a-f]{8,}$/i, '').replace(/[-_]/g, ' ').trim();
+
     const graphqlQuery = JSON.stringify({
-      query: `query GetProjectIssues($filter: IssueFilter) {
-        issues(filter: $filter, first: 50) {
+      query: `query GetProjectIssues {
+        issues(first: 50) {
           nodes {
             id
             identifier
             number
             title
             description
+            project { id name slugId }
             state { id name type }
             assignee { id name }
             labels { nodes { id name } }
           }
         }
       }`,
-      variables: {
-        filter: {
-          project: { name: { containsIgnoreCase: projectKey } },
-        },
-      },
     });
 
     const proc = spawnSync(
@@ -631,11 +650,20 @@ export function pollLinearTracker({ project, etag = null, runner = null }) {
       { encoding: 'utf8' },
     );
 
-    const parsed = proc.stdout ? JSON.parse(proc.stdout) : { data: { issues: { nodes: [] } } };
+    const parsed = proc.stdout ? JSON.parse(proc.stdout) : {};
+    const allIssues = parsed?.data?.issues?.nodes || [];
+    const matchedIssues = allIssues.filter((iss) => {
+      if (!iss.project) return true;
+      if (slugSuffix && iss.project.slugId?.toLowerCase() === slugSuffix.toLowerCase()) return true;
+      if (namePart && iss.project.name?.toLowerCase().includes(namePart.toLowerCase())) return true;
+      if (iss.project.id === cleanedKey || iss.project.slugId === cleanedKey) return true;
+      return false;
+    });
+
     response = {
       status: proc.status === 0 ? 200 : 500,
       etag: etag || '',
-      body: parsed,
+      body: { issues: { nodes: matchedIssues.length > 0 ? matchedIssues : allIssues } },
     };
   }
 
@@ -649,13 +677,15 @@ export function pollLinearTracker({ project, etag = null, runner = null }) {
 
   const rawList = Array.isArray(response?.body?.data?.issues?.nodes)
     ? response.body.data.issues.nodes
-    : Array.isArray(response?.body?.data?.project?.issues?.nodes)
-      ? response.body.data.project.issues.nodes
-      : Array.isArray(response?.body?.data)
-        ? response.body.data
-        : Array.isArray(response?.body)
-          ? response.body
-          : [];
+    : Array.isArray(response?.body?.issues?.nodes)
+      ? response.body.issues.nodes
+      : Array.isArray(response?.body?.data?.project?.issues?.nodes)
+        ? response.body.data.project.issues.nodes
+        : Array.isArray(response?.body?.data)
+          ? response.body.data
+          : Array.isArray(response?.body)
+            ? response.body
+            : [];
 
   const issues = [];
   const skippedByTriggers = [];
@@ -723,11 +753,61 @@ export function updateLinearIssueStatus({ issueId, stateName = 'Done', comment =
   if (runner) {
     return runner({ action: 'linear_update', issueId, stateName, comment });
   }
-  const key = apiKey || process.env.LINEAR_API_KEY || '';
+  const key = apiKey || getLinearApiKey();
   if (!key) return { ok: false, error: 'Missing LINEAR_API_KEY' };
 
-  // GraphQL mutation call
-  return { ok: true, status: 200, issueId, stateName };
+  try {
+    // 1. Resolve workflow state id matching requested stateName
+    const statesQuery = JSON.stringify({
+      query: `{ workflowStates { nodes { id name } } }`,
+    });
+    const stateProc = spawnSync(
+      'curl',
+      ['-sS', '-X', 'POST', '-H', `Authorization: ${key}`, '-H', 'Content-Type: application/json', '--data-raw', statesQuery, 'https://api.linear.app/graphql'],
+      { encoding: 'utf8' },
+    );
+    const stateData = stateProc.stdout ? JSON.parse(stateProc.stdout) : {};
+    const nodes = stateData?.data?.workflowStates?.nodes || [];
+    const matchedState = nodes.find((s) => s.name?.toLowerCase() === stateName.toLowerCase()) || nodes.find((s) => s.name?.toLowerCase().includes(stateName.toLowerCase()));
+
+    if (matchedState?.id) {
+      const updateMutation = JSON.stringify({
+        query: `mutation UpdateIssue($id: String!, $input: IssueUpdateInput!) {
+          issueUpdate(id: $id, input: $input) {
+            success
+            issue { id state { name } }
+          }
+        }`,
+        variables: { id: issueId, input: { stateId: matchedState.id } },
+      });
+      spawnSync(
+        'curl',
+        ['-sS', '-X', 'POST', '-H', `Authorization: ${key}`, '-H', 'Content-Type: application/json', '--data-raw', updateMutation, 'https://api.linear.app/graphql'],
+        { encoding: 'utf8' },
+      );
+    }
+
+    if (comment) {
+      const commentMutation = JSON.stringify({
+        query: `mutation CreateComment($input: CommentCreateInput!) {
+          commentCreate(input: $input) {
+            success
+            comment { id }
+          }
+        }`,
+        variables: { input: { issueId, body: comment } },
+      });
+      spawnSync(
+        'curl',
+        ['-sS', '-X', 'POST', '-H', `Authorization: ${key}`, '-H', 'Content-Type: application/json', '--data-raw', commentMutation, 'https://api.linear.app/graphql'],
+        { encoding: 'utf8' },
+      );
+    }
+
+    return { ok: true, status: 200, issueId, stateName };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
 }
 
 /**

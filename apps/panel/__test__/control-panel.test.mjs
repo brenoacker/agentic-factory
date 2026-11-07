@@ -401,7 +401,7 @@ test('C7: queryBrain, extractFollowUpTickets, and canAutoMergeTask enforce brain
 test('C8: Linear tracker poller queries GraphQL API, applies combinable pickup triggers, and handles missing API key', () => {
   // 1. Missing LINEAR_API_KEY returns safe prompt error without leaking
   const origKey = process.env.LINEAR_API_KEY;
-  delete process.env.LINEAR_API_KEY;
+  process.env.LINEAR_API_KEY = '';
   try {
     const missingRes = pollLinearTracker({
       project: { repo: 'brenoack/agentic-factory-80f4e9bb2ce1', provider: 'linear' },
@@ -409,7 +409,11 @@ test('C8: Linear tracker poller queries GraphQL API, applies combinable pickup t
     assert.ok(missingRes.error && missingRes.error.includes('LINEAR_API_KEY'));
     assert.equal(missingRes.issues.length, 0);
   } finally {
-    if (origKey) process.env.LINEAR_API_KEY = origKey;
+    if (origKey !== undefined) {
+      process.env.LINEAR_API_KEY = origKey;
+    } else {
+      delete process.env.LINEAR_API_KEY;
+    }
   }
 
   // 2. Linear poller with mock runner & combinable pickup triggers
