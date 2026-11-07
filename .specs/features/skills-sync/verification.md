@@ -1,7 +1,7 @@
 # Skills Synchronization and Vendor Lock verification
 
 **Verdict**: PASS
-**Proofs**: `proofs.md` at 64e6a79
+**Proofs**: `proofs.md` at 36a1cf1
 **Verifier**: independent sub-agent (author != verifier)
 
 ## Checks
