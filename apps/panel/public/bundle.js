@@ -338704,6 +338704,7 @@ ${isHandDrawn ? "" : `
     const [ctrlStallMinutes, setCtrlStallMinutes] = (0, import_react309.useState)("30");
     const [ctrlKill, setCtrlKill] = (0, import_react309.useState)(false);
     const [controlsFeedback, setControlsFeedback] = (0, import_react309.useState)("");
+    const [humanReplies, setHumanReplies] = (0, import_react309.useState)({});
     const [deploySha, setDeploySha] = (0, import_react309.useState)("");
     const [deployErrorRate, setDeployErrorRate] = (0, import_react309.useState)("0.2");
     const [deployMaxRate, setDeployMaxRate] = (0, import_react309.useState)("1.0");
@@ -338888,6 +338889,23 @@ ${isHandDrawn ? "" : `
       const data6 = await res.json();
       if (!res.ok && data6.error) {
         setIntakeFeedback(`Dispatch Notice: ${data6.error}`);
+      }
+      await loadDashboard();
+    };
+    const submitHumanReply = async (key2, replyWords) => {
+      const text5 = replyWords || "Operator clarification provided";
+      const res = await fetch("/api/tasks/" + encodeURIComponent(key2) + "/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ approver: "panel-operator", words: text5 })
+      });
+      if (res.ok) {
+        await fetch("/api/tickets/" + encodeURIComponent(key2) + "/dispatch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ approveCurrentStage: true })
+        });
+        setHumanReplies((prev2) => ({ ...prev2, [key2]: "" }));
       }
       await loadDashboard();
     };
@@ -339213,6 +339231,22 @@ ${isHandDrawn ? "" : `
                     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
                       "span",
                       {
+                        id: "header-human-badge",
+                        "data-testid": "header-human-badge",
+                        style: {
+                          padding: "0.2rem 0.6rem",
+                          borderRadius: "6px",
+                          fontWeight: 700,
+                          fontSize: "0.78rem",
+                          background: (st2.needsHuman || []).length > 0 ? "#b45309" : "#1e293b",
+                          color: (st2.needsHuman || []).length > 0 ? "#fef3c7" : "#94a3b8"
+                        },
+                        children: (st2.needsHuman || []).length > 0 ? `${st2.needsHuman.length} WAITING HUMAN` : "0 WAITING HUMAN"
+                      }
+                    ),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                      "span",
+                      {
                         id: "scheduler-status-badge",
                         "data-testid": "scheduler-status-badge",
                         style: {
@@ -339249,6 +339283,11 @@ ${isHandDrawn ? "" : `
                         " / ",
                         f2.limits?.maxConcurrentAgents ?? 3,
                         " max agents"
+                      ] }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", "data-testid": "kpi-executing-agents", children: [
+                        "Executing: ",
+                        st2.executingAgentsCount ?? 0,
+                        " running"
                       ] }),
                       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
                         "Completed: ",
@@ -339772,43 +339811,106 @@ ${isHandDrawn ? "" : `
                       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { id: "intake-feedback", style: { fontSize: "0.85rem", color: "#93c5fd" }, children: intakeFeedback })
                     ] })
                   ] }) }),
-                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Needs Human Approval Queue (1-Click Gate Approval)" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "needs-human-list", children: (st2.needsHuman || []).length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { color: "text-body-secondary", children: "No tickets blocked awaiting human approval." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "xs", children: st2.needsHuman.map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Agents Waiting for Human Input & Clarification" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "waiting-human-screen", "data-testid": "waiting-human-screen", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "needs-human-list", children: (st2.needsHuman || []).length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { color: "text-body-secondary", children: "No agents currently waiting for human input or clarification." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "m", children: st2.needsHuman.map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
                     "div",
                     {
                       "data-testid": `needs-human-card-${item.issueNumber}`,
                       style: {
                         display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "0.65rem",
+                        flexDirection: "column",
+                        gap: "0.65rem",
+                        padding: "0.85rem",
                         background: "#0f172a",
                         borderRadius: "6px",
                         border: "1px solid #f59e0b"
                       },
                       children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: item.executionKey }),
-                          " [",
-                          item.type,
-                          "] \u2014 Stage:",
-                          " ",
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "severity-medium", children: item.stage }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: item.question })
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" }, children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "severity-medium", children: "WAITING FOR HUMAN" }),
+                            " ",
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: item.executionKey }),
+                            " [",
+                            item.type,
+                            "] \u2014 Stage:",
+                            " ",
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "blue", children: item.stage })
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
+                            "Issue #",
+                            item.issueNumber
+                          ] })
                         ] }),
-                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                          button_default2,
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                          "div",
                           {
-                            variant: "primary",
-                            "data-testid": `approve-btn-${item.issueNumber}`,
-                            onClick: () => dispatchTicketKey(item.executionKey, true),
-                            children: "1-Click Approve & Advance"
+                            "data-testid": `human-question-${item.issueNumber}`,
+                            style: {
+                              padding: "0.5rem 0.75rem",
+                              background: "rgba(245, 158, 11, 0.12)",
+                              borderRadius: "4px",
+                              borderLeft: "4px solid #f59e0b",
+                              color: "#fef08a",
+                              fontSize: "0.9rem"
+                            },
+                            children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "\u26A0\uFE0F Clarification Needed:" }),
+                              " ",
+                              item.question || "Agent requested human assistance to proceed"
+                            ]
                           }
-                        )
+                        ),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: "0.75rem", alignItems: "flex-end" }, children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormField, { label: "Operator Clarification / Missing Requirements", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                            "input",
+                            {
+                              type: "text",
+                              id: `human-reply-input-${item.issueNumber}`,
+                              "data-testid": `human-reply-input-${item.issueNumber}`,
+                              value: humanReplies[item.executionKey] || "",
+                              onChange: (e3) => setHumanReplies({
+                                ...humanReplies,
+                                [item.executionKey]: e3.target.value
+                              }),
+                              placeholder: "Type missing API specs, parameters, or clarification here...",
+                              style: {
+                                width: "100%",
+                                padding: "0.5rem",
+                                background: "#0c131f",
+                                color: "#fff",
+                                border: "1px solid #475569",
+                                borderRadius: "4px",
+                                fontSize: "0.9rem"
+                              }
+                            }
+                          ) }) }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { direction: "horizontal", size: "xs", children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                              button_default2,
+                              {
+                                variant: "primary",
+                                id: `human-reply-btn-${item.issueNumber}`,
+                                "data-testid": `human-reply-btn-${item.issueNumber}`,
+                                onClick: () => submitHumanReply(item.executionKey, humanReplies[item.executionKey]),
+                                children: "Send Reply & Resume Agent"
+                              }
+                            ),
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                              button_default2,
+                              {
+                                variant: "normal",
+                                id: `approve-btn-${item.issueNumber}`,
+                                "data-testid": `approve-btn-${item.issueNumber}`,
+                                onClick: () => dispatchTicketKey(item.executionKey, true),
+                                children: "1-Click Approve & Advance"
+                              }
+                            )
+                          ] })
+                        ] })
                       ]
                     },
                     item.executionKey
-                  )) }) }) }),
+                  )) }) }) }) }),
                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
                     "div",
                     {

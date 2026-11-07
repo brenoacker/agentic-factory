@@ -178,7 +178,8 @@ export function createPanelServer({
           intervalSeconds: body.intervalSeconds,
           runImmediately: Boolean(body.runImmediately),
         });
-        sendJson(res, schedRes.status, schedRes);
+        const autoDispatchedCount = schedRes.syncReport?.autoDispatchedCount || 0;
+        sendJson(res, schedRes.status, { ...schedRes, autoDispatchedCount });
         return;
       }
 

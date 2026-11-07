@@ -32,6 +32,7 @@ export {
   removeMonitoredProject,
   syncMonitoredProjectsIssues,
   createPollingScheduler,
+  autoDispatchQueuedTasks,
 } from './src/projects.mjs';
 export {
   SUPPORTED_PROVIDERS,

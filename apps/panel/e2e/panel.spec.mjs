@@ -883,6 +883,93 @@ test('C15: Playwright E2E test verifies max concurrent agents input, Overview KP
   }
 });
 
+test('C16: Playwright E2E test verifies interactive human clarification screen, reply submission, and cron auto-dispatch', async ({ page }) => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    // 1. Create a task that paused with needs_human=1 and an explicit question
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#980',
+      issueNumber: 980,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Missing payment webhook signature secret',
+      type: 'feature',
+      stage: 'plan',
+    });
+    panel.store.updateTaskStage('brenoacker/agentic-factory#980', {
+      needsHuman: true,
+      humanQuestion: 'Please specify the webhook HMAC secret header name and hash algorithm.',
+    });
+
+    await page.goto(baseUrl);
+
+    // 2. Check navigation badges
+    const headerHumanBadge = page.locator('#header-human-badge');
+    await expect(headerHumanBadge).toBeVisible();
+    await expect(headerHumanBadge).toContainText('1 WAITING HUMAN');
+
+    // 3. Navigate to Board & Needs Human tab
+    await page.locator('#tabs button[data-tab="board"]').click();
+
+    // 4. Verify dedicated "Agents Waiting for Human Input & Clarification" view
+    const waitingScreen = page.getByTestId('waiting-human-screen');
+    await expect(waitingScreen).toBeVisible();
+    await expect(page.getByTestId('human-question-980')).toContainText(
+      'Please specify the webhook HMAC secret header name and hash algorithm.',
+    );
+
+    // 5. Operator types clarification and clicks "Send Reply & Resume Agent"
+    const replyInput = page.getByTestId('human-reply-input-980');
+    await expect(replyInput).toBeVisible();
+    await replyInput.fill('Use header X-Hub-Signature-256 with sha256 HMAC digest');
+    await page.getByTestId('human-reply-btn-980').click();
+
+    // 6. Verify task resumed and advanced to merge stage with PR deliverable
+    await expect(page.getByTestId('task-stage-980')).toHaveText('merge');
+    const updatedTask = panel.store.getTask('brenoacker/agentic-factory#980');
+    expect(updatedTask.stage).toBe('merge');
+    expect(updatedTask.deliverable_type).toBe('pull_request');
+
+    // 7. Approve merge gate to complete task to done
+    await page.getByTestId('approve-btn-980').click();
+    await expect(page.getByTestId('task-stage-980')).toHaveText('done');
+    await expect(headerHumanBadge).toContainText('0 WAITING HUMAN');
+
+    // 8. Verify cron auto-dispatch
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#981',
+      issueNumber: 981,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Auto dispatchable task 1',
+      type: 'chore',
+      stage: 'triage',
+    });
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#982',
+      issueNumber: 982,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Auto dispatchable task 2',
+      type: 'chore',
+      stage: 'triage',
+    });
+
+    const schedRes = await page.request.post(`${baseUrl}/api/scheduler`, {
+      data: { enabled: true, intervalSeconds: 60, runImmediately: true },
+    });
+    expect(schedRes.status()).toBe(200);
+    const schedJson = await schedRes.json();
+    expect(schedJson.ok).toBe(true);
+
+    await page.screenshot({ path: join(CAPTURES_DIR, 'cloudscape-human-clarification.png'), fullPage: true });
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+
 
 
 

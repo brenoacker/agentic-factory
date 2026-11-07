@@ -187,6 +187,7 @@ function ControlPanelApp() {
   const [ctrlStallMinutes, setCtrlStallMinutes] = useState('30');
   const [ctrlKill, setCtrlKill] = useState(false);
   const [controlsFeedback, setControlsFeedback] = useState('');
+  const [humanReplies, setHumanReplies] = useState({});
 
   // Post-deploy gate form state
   const [deploySha, setDeploySha] = useState('');
@@ -389,6 +390,24 @@ function ControlPanelApp() {
     const data = await res.json();
     if (!res.ok && data.error) {
       setIntakeFeedback(`Dispatch Notice: ${data.error}`);
+    }
+    await loadDashboard();
+  };
+
+  const submitHumanReply = async (key, replyWords) => {
+    const text = replyWords || 'Operator clarification provided';
+    const res = await fetch('/api/tasks/' + encodeURIComponent(key) + '/approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ approver: 'panel-operator', words: text }),
+    });
+    if (res.ok) {
+      await fetch('/api/tickets/' + encodeURIComponent(key) + '/dispatch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ approveCurrentStage: true }),
+      });
+      setHumanReplies((prev) => ({ ...prev, [key]: '' }));
     }
     await loadDashboard();
   };
@@ -705,6 +724,22 @@ function ControlPanelApp() {
                       {stalledList.length > 0 ? `${stalledList.length} STALLED ALARM(S)` : '0 ALARMS'}
                     </span>
                     <span
+                      id="header-human-badge"
+                      data-testid="header-human-badge"
+                      style={{
+                        padding: '0.2rem 0.6rem',
+                        borderRadius: '6px',
+                        fontWeight: 700,
+                        fontSize: '0.78rem',
+                        background: (st.needsHuman || []).length > 0 ? '#b45309' : '#1e293b',
+                        color: (st.needsHuman || []).length > 0 ? '#fef3c7' : '#94a3b8',
+                      }}
+                    >
+                      {(st.needsHuman || []).length > 0
+                        ? `${st.needsHuman.length} WAITING HUMAN`
+                        : '0 WAITING HUMAN'}
+                    </span>
+                    <span
                       id="scheduler-status-badge"
                       data-testid="scheduler-status-badge"
                       style={{
@@ -742,6 +777,9 @@ function ControlPanelApp() {
                       <Box variant="h1">{st.totalTasks}</Box>
                       <Box variant="small" color="text-body-secondary" data-testid="kpi-active-concurrency">
                         Active: {st.activeTasksCount ?? (st.totalTasks - (st.byStage?.done || 0))} / {f.limits?.maxConcurrentAgents ?? 3} max agents
+                      </Box>
+                      <Box variant="small" color="text-body-secondary" data-testid="kpi-executing-agents">
+                        Executing: {st.executingAgentsCount ?? 0} running
                       </Box>
                       <Box variant="small" color="text-body-secondary">
                         Completed: {st.byStage?.done || 0}
@@ -1277,43 +1315,103 @@ function ControlPanelApp() {
                   </SpaceBetween>
                 </Container>
 
-                <Container header={<Header variant="h2">Needs Human Approval Queue (1-Click Gate Approval)</Header>}>
-                  <div id="needs-human-list">
-                    {(st.needsHuman || []).length === 0 ? (
-                      <Box color="text-body-secondary">No tickets blocked awaiting human approval.</Box>
-                    ) : (
-                      <SpaceBetween size="xs">
-                        {st.needsHuman.map((item) => (
-                          <div
-                            key={item.executionKey}
-                            data-testid={`needs-human-card-${item.issueNumber}`}
-                            style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center',
-                              padding: '0.65rem',
-                              background: '#0f172a',
-                              borderRadius: '6px',
-                              border: '1px solid #f59e0b',
-                            }}
-                          >
-                            <div>
-                              <strong>{item.executionKey}</strong> [{item.type}] — Stage:{' '}
-                              <Badge color="severity-medium">{item.stage}</Badge>
-                              <br />
-                              <span>{item.question}</span>
-                            </div>
-                            <Button
-                              variant="primary"
-                              data-testid={`approve-btn-${item.issueNumber}`}
-                              onClick={() => dispatchTicketKey(item.executionKey, true)}
+                <Container header={<Header variant="h2">Agents Waiting for Human Input & Clarification</Header>}>
+                  <div id="waiting-human-screen" data-testid="waiting-human-screen">
+                    <div id="needs-human-list">
+                      {(st.needsHuman || []).length === 0 ? (
+                        <Box color="text-body-secondary">No agents currently waiting for human input or clarification.</Box>
+                      ) : (
+                        <SpaceBetween size="m">
+                          {st.needsHuman.map((item) => (
+                            <div
+                              key={item.executionKey}
+                              data-testid={`needs-human-card-${item.issueNumber}`}
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.65rem',
+                                padding: '0.85rem',
+                                background: '#0f172a',
+                                borderRadius: '6px',
+                                border: '1px solid #f59e0b',
+                              }}
                             >
-                              1-Click Approve & Advance
-                            </Button>
-                          </div>
-                        ))}
-                      </SpaceBetween>
-                    )}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div>
+                                  <Badge color="severity-medium">WAITING FOR HUMAN</Badge>{' '}
+                                  <strong>{item.executionKey}</strong> [{item.type}] — Stage:{' '}
+                                  <Badge color="blue">{item.stage}</Badge>
+                                </div>
+                                <Box variant="small" color="text-body-secondary">
+                                  Issue #{item.issueNumber}
+                                </Box>
+                              </div>
+
+                              <div
+                                data-testid={`human-question-${item.issueNumber}`}
+                                style={{
+                                  padding: '0.5rem 0.75rem',
+                                  background: 'rgba(245, 158, 11, 0.12)',
+                                  borderRadius: '4px',
+                                  borderLeft: '4px solid #f59e0b',
+                                  color: '#fef08a',
+                                  fontSize: '0.9rem',
+                                }}
+                              >
+                                <strong>⚠️ Clarification Needed:</strong> {item.question || 'Agent requested human assistance to proceed'}
+                              </div>
+
+                              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end' }}>
+                                <div style={{ flex: 1 }}>
+                                  <FormField label="Operator Clarification / Missing Requirements">
+                                    <input
+                                      type="text"
+                                      id={`human-reply-input-${item.issueNumber}`}
+                                      data-testid={`human-reply-input-${item.issueNumber}`}
+                                      value={humanReplies[item.executionKey] || ''}
+                                      onChange={(e) =>
+                                        setHumanReplies({
+                                          ...humanReplies,
+                                          [item.executionKey]: e.target.value,
+                                        })
+                                      }
+                                      placeholder="Type missing API specs, parameters, or clarification here..."
+                                      style={{
+                                        width: '100%',
+                                        padding: '0.5rem',
+                                        background: '#0c131f',
+                                        color: '#fff',
+                                        border: '1px solid #475569',
+                                        borderRadius: '4px',
+                                        fontSize: '0.9rem',
+                                      }}
+                                    />
+                                  </FormField>
+                                </div>
+                                <SpaceBetween direction="horizontal" size="xs">
+                                  <Button
+                                    variant="primary"
+                                    id={`human-reply-btn-${item.issueNumber}`}
+                                    data-testid={`human-reply-btn-${item.issueNumber}`}
+                                    onClick={() => submitHumanReply(item.executionKey, humanReplies[item.executionKey])}
+                                  >
+                                    Send Reply & Resume Agent
+                                  </Button>
+                                  <Button
+                                    variant="normal"
+                                    id={`approve-btn-${item.issueNumber}`}
+                                    data-testid={`approve-btn-${item.issueNumber}`}
+                                    onClick={() => dispatchTicketKey(item.executionKey, true)}
+                                  >
+                                    1-Click Approve & Advance
+                                  </Button>
+                                </SpaceBetween>
+                              </div>
+                            </div>
+                          ))}
+                        </SpaceBetween>
+                      )}
+                    </div>
                   </div>
                 </Container>
 

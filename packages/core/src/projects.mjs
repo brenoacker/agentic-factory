@@ -2,7 +2,7 @@ import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { loadAndValidateFactory } from './config.mjs';
 import { SUPPORTED_PROVIDERS, normalizeTriggerRules, pollProjectTracker } from './trackers.mjs';
-import { intakeAndTriageTicket } from './pipeline.mjs';
+import { intakeAndTriageTicket, advanceTicketInPanel } from './pipeline.mjs';
 
 const REPO_RE = /^[^/\s]+\/[^/\s]+$/;
 
@@ -192,7 +192,7 @@ export function removeMonitoredProject(rootDir, repoOrId) {
  * Polls open issues/tickets across all active (`paused !== true`) monitored projects (`github`, `jira`, `asana`)
  * in `factory.yaml`, caching ETag/cursor state in SQLite (`repo_etags`) and intaking newly discovered tickets.
  */
-export function syncMonitoredProjectsIssues({ rootDir, store, runner = null }) {
+export function syncMonitoredProjectsIssues({ rootDir, store, runner = null, autoDispatch = false }) {
   const cfg = loadAndValidateFactory(rootDir);
   const projects = Array.isArray(cfg.factoryConfig?.factory?.projects) ? cfg.factoryConfig.factory.projects : [];
   const results = [];
@@ -270,6 +270,15 @@ export function syncMonitoredProjectsIssues({ rootDir, store, runner = null }) {
     });
   }
 
+  let autoDispatchReport = null;
+  if (autoDispatch !== false) {
+    try {
+      autoDispatchReport = autoDispatchQueuedTasks({ rootDir, store, trackerRunner: runner });
+    } catch {
+      // Non-blocking fallback
+    }
+  }
+
   return {
     ok: true,
     polledRepos,
@@ -277,7 +286,69 @@ export function syncMonitoredProjectsIssues({ rootDir, store, runner = null }) {
     skippedByTriggersCount,
     newTasksCount: newTasks.length,
     newTasks,
+    autoDispatchedCount: autoDispatchReport?.autoDispatchedCount || 0,
+    dispatchedTasks: autoDispatchReport?.dispatchedTasks || [],
     results,
+  };
+}
+
+/**
+ * Automatically dispatches eligible queued tasks in `triage` up to available executing capacity (`maxConcurrentAgents - countExecutingAgents()`).
+ */
+export function autoDispatchQueuedTasks({
+  rootDir,
+  store,
+  runner = null,
+  trackerRunner = null,
+  maxToDispatch = null,
+}) {
+  const cfg = loadAndValidateFactory(rootDir);
+  const maxConcurrent = cfg.factoryConfig?.factory?.limits?.maxConcurrentAgents ?? 3;
+  const executingCount =
+    typeof store.countExecutingAgents === 'function' ? store.countExecutingAgents() : store.countActiveTasks();
+
+  const availableSlots = Math.max(0, maxConcurrent - executingCount);
+  const limit = maxToDispatch !== null ? Math.min(availableSlots, Number(maxToDispatch)) : availableSlots;
+
+  if (limit <= 0) {
+    return {
+      ok: true,
+      autoDispatchedCount: 0,
+      dispatchedTasks: [],
+      availableSlots,
+      executingCount,
+    };
+  }
+
+  const queuedTasks = store.db
+    .prepare("SELECT * FROM tasks WHERE stage = 'triage' AND needs_human = 0 ORDER BY created_at ASC LIMIT ?")
+    .all(limit);
+
+  const dispatchedTasks = [];
+  for (const t of queuedTasks) {
+    const res = advanceTicketInPanel({
+      executionKey: t.execution_key,
+      factoryRoot: rootDir,
+      factoryConfig: cfg.factoryConfig,
+      workflows: cfg.workflows,
+      pricesConfig: cfg.pricesConfig,
+      store,
+      approveCurrentStage: false,
+      runner,
+      trackerRunner,
+    });
+    if (res.ok) {
+      dispatchedTasks.push(res.task);
+    }
+  }
+
+  return {
+    ok: true,
+    autoDispatchedCount: dispatchedTasks.length,
+    dispatchedTasks,
+    availableSlots: Math.max(0, availableSlots - dispatchedTasks.length),
+    executingCount:
+      typeof store.countExecutingAgents === 'function' ? store.countExecutingAgents() : store.countActiveTasks(),
   };
 }
 
@@ -300,12 +371,13 @@ export function createPollingScheduler({
   function runOnce() {
     try {
       const runner = typeof getRunner === 'function' ? getRunner() : null;
-      const res = syncMonitoredProjectsIssues({ rootDir, store, runner });
+      const res = syncMonitoredProjectsIssues({ rootDir, store, runner, autoDispatch: true });
       pollCount += 1;
       lastPollAt = new Date().toISOString();
       lastResult = {
         polledRepos: res.polledRepos,
         newTasksCount: res.newTasksCount,
+        autoDispatchedCount: res.autoDispatchedCount || 0,
       };
       return res;
     } catch (err) {

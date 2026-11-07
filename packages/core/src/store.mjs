@@ -225,7 +225,9 @@ export class FactoryStore {
     const nowIso = nowDate.toISOString();
 
     const activeTasks = this.db
-      .prepare("SELECT * FROM tasks WHERE stage != 'done' AND stage != 'aborted' ORDER BY issue_number ASC")
+      .prepare(
+        "SELECT * FROM tasks WHERE stage != 'done' AND stage != 'aborted' AND (stage != 'triage' OR needs_human = 1) ORDER BY issue_number ASC",
+      )
       .all();
 
     const stalledTasks = [];
@@ -395,6 +397,14 @@ export class FactoryStore {
 
   countActiveTasks() {
     const stmt = this.db.prepare("SELECT COUNT(*) AS cnt FROM tasks WHERE stage != 'done' AND stage != 'aborted'");
+    const row = stmt.get();
+    return Number(row?.cnt || 0);
+  }
+
+  countExecutingAgents() {
+    const stmt = this.db.prepare(
+      "SELECT COUNT(*) AS cnt FROM tasks WHERE stage != 'done' AND stage != 'aborted' AND stage != 'merge' AND needs_human = 0",
+    );
     const row = stmt.get();
     return Number(row?.cnt || 0);
   }
@@ -713,6 +723,7 @@ export class FactoryStore {
       ok: true,
       totalTasks: tasks.length,
       activeTasksCount: this.countActiveTasks(),
+      executingAgentsCount: this.countExecutingAgents(),
       byStage,
       byType,
       tokens: {

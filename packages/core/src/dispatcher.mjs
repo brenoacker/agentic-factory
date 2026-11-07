@@ -65,8 +65,10 @@ export function dispatchTask({
   const stageMap = new Map(workflow.stages.map((s) => [s.id, s]));
 
   // If the operator just approved a human-gated stage, advance to `next` before continuing
-  if (humanApprovedCurrentStage && task.needs_human === 1) {
-    approveTask(store, executionKey);
+  if (humanApprovedCurrentStage) {
+    if (task.needs_human === 1) {
+      approveTask(store, executionKey);
+    }
     const currentStageDef = stageMap.get(task.stage);
     const nextStageId = currentStageDef?.next || 'done';
     task = store.updateTaskStage(executionKey, {

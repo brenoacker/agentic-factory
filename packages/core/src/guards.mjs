@@ -98,13 +98,16 @@ export function evaluateIntakeGuards(issue, factoryConfig, store, nowDate = new 
   const rawMaxConcurrent = limits.maxConcurrentAgents !== undefined ? limits.maxConcurrentAgents : 3;
   const maxConcurrent = Math.min(10, Math.max(1, Number(rawMaxConcurrent)));
   if (store) {
-    const activeCount = store.countActiveTasks();
-    if (activeCount >= maxConcurrent) {
+    const executingCount =
+      typeof store.countExecutingAgents === 'function'
+        ? store.countExecutingAgents()
+        : store.countActiveTasks();
+    if (executingCount >= maxConcurrent) {
       return {
         ok: false,
         code: 'max_concurrency_reached',
         executionKey,
-        reason: `Active running agents (${activeCount}) reached maximum concurrency limit (${maxConcurrent})`,
+        reason: `Active running agents (${executingCount}) reached maximum concurrency limit (${maxConcurrent})`,
       };
     }
   }

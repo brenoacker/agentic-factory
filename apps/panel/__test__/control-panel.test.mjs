@@ -15,6 +15,7 @@ import {
   advanceTicketInPanel,
   evaluateIntakeGuards,
   provisionTaskWorkspace,
+  autoDispatchQueuedTasks,
   FactoryStore,
 } from '../../../packages/core/index.mjs';
 
@@ -869,3 +870,153 @@ test('C13: Concurrency intake guard bounds active tasks to maxConcurrentAgents d
     rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+test('C14: Executing agent concurrency excludes merge and needs_human tasks, preserves workspace, and filters queued triage from stall alarms', () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const store = new FactoryStore(dbPath);
+
+  try {
+    const factoryConfig = {
+      factory: {
+        limits: { maxConcurrentAgents: 3 },
+      },
+    };
+
+    // 1. Populate 3 tasks: 1 in implementation, 1 in merge (PR open), 1 waiting human
+    store.createTask({
+      executionKey: 'brenoacker/agentic-factory#10',
+      issueNumber: 10,
+      repo: 'brenoacker/agentic-factory',
+      type: 'feature',
+      stage: 'implementation',
+    });
+    store.attachTaskWorkspace('brenoacker/agentic-factory#10', {
+      workspacePath: join(tmpDir, '.workspaces', 'issue-10'),
+      branchName: 'factory/issue-10',
+    });
+
+    store.createTask({
+      executionKey: 'brenoacker/agentic-factory#11',
+      issueNumber: 11,
+      repo: 'brenoacker/agentic-factory',
+      type: 'feature',
+      stage: 'merge',
+    });
+    store.attachTaskDeliverable('brenoacker/agentic-factory#11', {
+      type: 'pull_request',
+      url: 'https://github.com/brenoacker/agentic-factory/pull/111',
+    });
+    store.attachTaskWorkspace('brenoacker/agentic-factory#11', {
+      workspacePath: join(tmpDir, '.workspaces', 'issue-11'),
+      branchName: 'factory/issue-11',
+    });
+
+    store.createTask({
+      executionKey: 'brenoacker/agentic-factory#12',
+      issueNumber: 12,
+      repo: 'brenoacker/agentic-factory',
+      type: 'bug',
+      stage: 'plan',
+    });
+    store.updateTaskStage('brenoacker/agentic-factory#12', {
+      needsHuman: true,
+      humanQuestion: 'Missing reproduction steps for error',
+    });
+
+    // Total active tasks is 3
+    assert.equal(store.countActiveTasks(), 3);
+    // Executing agents is only 1 (#10), because #11 is in 'merge' and #12 has needs_human=1
+    assert.equal(store.countExecutingAgents(), 1);
+
+    // Intake guard allows a 4th task because executing count (1) < maxConcurrentAgents (3)
+    const issue13 = { issue_number: 13, repo: 'brenoacker/agentic-factory', type: 'feature', title: 'Task 13' };
+    const guard = evaluateIntakeGuards(issue13, factoryConfig, store);
+    assert.equal(guard.ok, true);
+
+    // Workspace is preserved for task #11 while stage is 'merge'
+    const task11 = store.getTask('brenoacker/agentic-factory#11');
+    assert.ok(task11.workspace_path.includes('issue-11'));
+    assert.equal(task11.stage, 'merge');
+
+    // 2. Stalled tasks filter: backlog tasks in triage do NOT trigger false alarms
+    const oldTime = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    store.createTask({
+      executionKey: 'brenoacker/agentic-factory#14',
+      issueNumber: 14,
+      repo: 'brenoacker/agentic-factory',
+      type: 'chore',
+      stage: 'triage',
+      now: oldTime,
+    });
+    store.db.prepare('UPDATE tasks SET updated_at = ? WHERE execution_key = ?').run(oldTime, 'brenoacker/agentic-factory#14');
+
+    // Also update task #10 (implementation) and #12 (needs_human) to oldTime
+    store.db.prepare('UPDATE tasks SET updated_at = ? WHERE execution_key = ?').run(oldTime, 'brenoacker/agentic-factory#10');
+    store.db.prepare('UPDATE tasks SET updated_at = ? WHERE execution_key = ?').run(oldTime, 'brenoacker/agentic-factory#12');
+
+    const stalled = store.evaluateStalledTasks({ stallThresholdMinutes: 30 });
+    const stalledKeys = stalled.map((s) => s.executionKey);
+
+    // #10 (implementation) and #12 (needs_human) are flagged, but #14 (queued triage) is NOT flagged
+    assert.ok(stalledKeys.includes('brenoacker/agentic-factory#10'));
+    assert.ok(stalledKeys.includes('brenoacker/agentic-factory#12'));
+    assert.ok(!stalledKeys.includes('brenoacker/agentic-factory#14'));
+  } finally {
+    store.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C15: Periodic scheduler auto-dispatches queued triage tasks up to executing concurrency ceiling', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    // 1. Set concurrency limit to 2
+    await fetch(`${baseUrl}/api/controls`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ maxConcurrentAgents: 2 }),
+    });
+
+    // 2. Create 3 queued tasks in triage
+    for (let i = 21; i <= 23; i++) {
+      panel.store.createTask({
+        executionKey: `brenoacker/agentic-factory#${i}`,
+        issueNumber: i,
+        repo: 'brenoacker/agentic-factory',
+        title: `Queued Task ${i}`,
+        type: 'chore',
+        stage: 'triage',
+      });
+    }
+
+    panel.store.db.prepare("UPDATE tasks SET stage = 'merge' WHERE execution_key = 'brenoacker/agentic-factory#21'").run();
+    assert.equal(panel.store.countExecutingAgents(), 2);
+
+    // Trigger auto-dispatch via POST /api/scheduler with runImmediately: true
+    const schedRes = await fetch(`${baseUrl}/api/scheduler`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: true, intervalSeconds: 60, runImmediately: true }),
+    });
+    assert.equal(schedRes.status, 200);
+    const schedJson = await schedRes.json();
+    assert.equal(schedJson.ok, true);
+    assert.equal(typeof schedJson.autoDispatchedCount, 'number');
+
+    // Reject invalid interval
+    const invalidSched = await fetch(`${baseUrl}/api/scheduler`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ intervalSeconds: 1 }),
+    });
+    assert.equal(invalidSched.status, 400);
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
