@@ -51,12 +51,16 @@ export function evaluateIntakeGuards(issue, factoryConfig, store, nowDate = new 
   const executionKey = buildExecutionKey(issue.repo, issue.issue_number);
 
   // 3. Deduplication
-  if (store && store.hasActiveTask(executionKey)) {
+  const existing = store ? store.getTask(executionKey) : null;
+  if (existing) {
     return {
       ok: false,
       code: 'duplicate_execution',
       executionKey,
-      reason: `Active execution already exists for ${executionKey}`,
+      reason:
+        existing.stage === 'done' || existing.stage === 'aborted'
+          ? `Execution ${executionKey} has already been completed`
+          : `Active execution already exists for ${executionKey}`,
     };
   }
 

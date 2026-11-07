@@ -18,6 +18,8 @@ jobs:
           python-version: "3.12"
       - name: Install dependencies and Playwright Chromium
         run: npm ci && npx playwright install --with-deps chromium
+      - name: Build AWS Cloudscape Control Panel bundle
+        run: npm run build:panel
       - name: Verify locked TLC skills and v2 requirement
         run: node scripts/sync-skills.mjs --verify-only
       - name: Validate factory.yaml, workflows, and contract schemas
