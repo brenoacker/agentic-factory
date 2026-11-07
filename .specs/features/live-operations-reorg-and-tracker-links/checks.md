@@ -16,8 +16,8 @@ Proof: run unit | ✔ C16: Factory store persists ticket_url, provider, and tria
 
 ### S2 - Reorganized 3-View Operator Control Panel
 
-**C2** - Playwright E2E test verifies 3 primary operator views (Control Tower `#tab-operations`, Board & Timeline `#tab-board`, Health & Integrations `#tab-health`), confirms clickable hyperlinks on Kanban cards (`#kanban-ticket-link-*`) and Waiting Human screen (`#human-ticket-link-*`) with `target="_blank"`, and validates real-time execution slots and triage backlog (AC 1, AC 2, AC 8, AC 9, AC 10, AC 11)
-Proof: run e2e | ok 14 [chromium] › apps\panel\e2e\panel.spec.mjs:950:1 › C17: Playwright E2E test verifies 3-view navigation, clickable tracker hyperlinks, and live execution slots
+**C2** - Playwright E2E test verifies 3 primary operator views (Control Tower `#btn-view-operations`, Board & Timeline `#btn-view-board`, Health & Integrations `#btn-view-health`), confirms clickable hyperlinks on Kanban cards (`#kanban-ticket-link-*`) and Waiting Human screen (`#human-ticket-link-*`) with `target="_blank"`, and validates real-time execution slots and triage backlog (AC 1, AC 2, AC 8, AC 9, AC 10, AC 11)
+Proof: run e2e | ok 14 [chromium] › apps\panel\e2e\panel.spec.mjs:972:1 › C17: Playwright E2E test verifies 3-view navigation, clickable tracker hyperlinks, and live execution slots
 
 ## Coverage
 

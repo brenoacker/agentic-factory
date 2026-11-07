@@ -969,6 +969,89 @@ test('C16: Playwright E2E test verifies interactive human clarification screen, 
   }
 });
 
+test('C17: Playwright E2E test verifies 3-view navigation, clickable tracker hyperlinks, and live execution slots', async ({ page }) => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const mockRunner = () => ({ status: 200, etag: 'etag-17', body: [] });
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockRunner);
+
+  try {
+    // 1. Seed tasks: one waiting for human (GitHub), one in triage (Linear)
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#701',
+      issueNumber: 701,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Clarification Needed on Auth Service',
+      type: 'feature',
+      stage: 'plan',
+      provider: 'github',
+      ticketUrl: 'https://github.com/brenoacker/agentic-factory/issues/701',
+      workspacePath: join(tmpDir, 'runs', 'ws-701'),
+      branchName: 'factory/issue-701',
+    });
+    panel.store.updateTaskStage('brenoacker/agentic-factory#701', {
+      needsHuman: true,
+      humanQuestion: 'Please clarify whether OAuth2 PKCE or standard authorization code flow is required.',
+    });
+
+    panel.store.createTask({
+      executionKey: 'linear:brenoack/project#702',
+      issueNumber: 702,
+      repo: 'brenoack/project',
+      title: 'Linear Issue in Triage Backlog',
+      type: 'bug',
+      stage: 'triage',
+      provider: 'linear',
+      ticketUrl: 'https://linear.app/issue/702',
+    });
+
+    // 2. Open Control Panel UI
+    await page.goto(baseUrl);
+    await expect(page.locator('#tabs')).toBeVisible();
+
+    // 3. Verify 3-View Quick Switch Buttons exist and switch views
+    await expect(page.locator('#btn-view-operations')).toBeVisible();
+    await expect(page.locator('#btn-view-board')).toBeVisible();
+    await expect(page.locator('#btn-view-health')).toBeVisible();
+
+    // Verify Control Tower displays Live Execution Tower
+    await page.locator('#btn-view-operations').click();
+    await expect(page.locator('#live-execution-tower')).toBeVisible();
+    await expect(page.locator('#live-execution-tower')).toContainText('Control Tower — Live Executing Slots');
+    await expect(page.locator('#live-execution-tower')).toContainText('Triage Backlog Queue');
+
+    // 4. Switch to Board & Timeline view
+    await page.locator('#btn-view-board').click();
+    await expect(page.locator('#tab-board')).toBeVisible();
+    await expect(page.locator('#waiting-human-screen')).toBeVisible();
+
+    // 5. Verify Clickable Link in Waiting Human Screen
+    const humanLink = page.locator('#human-ticket-link-701');
+    await expect(humanLink).toBeVisible();
+    await expect(humanLink).toHaveAttribute('href', 'https://github.com/brenoacker/agentic-factory/issues/701');
+    await expect(humanLink).toHaveAttribute('target', '_blank');
+    await expect(humanLink).toHaveAttribute('rel', 'noreferrer');
+
+    // 6. Verify Clickable Links in Kanban Board for both GitHub and Linear
+    const kanbanLink701 = page.locator('#kanban-ticket-link-701');
+    await expect(kanbanLink701).toBeVisible();
+    await expect(kanbanLink701).toHaveAttribute('href', 'https://github.com/brenoacker/agentic-factory/issues/701');
+    await expect(kanbanLink701).toHaveAttribute('target', '_blank');
+
+    const kanbanLink702 = page.locator('#kanban-ticket-link-702');
+    await expect(kanbanLink702).toBeVisible();
+    await expect(kanbanLink702).toHaveAttribute('href', 'https://linear.app/issue/702');
+    await expect(kanbanLink702).toHaveAttribute('target', '_blank');
+
+    // 7. Switch to Health & Integrations view
+    await page.locator('#btn-view-health').click();
+    await expect(page.locator('#tab-runtimes')).toBeVisible();
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
 
 
 

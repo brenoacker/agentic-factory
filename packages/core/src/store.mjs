@@ -54,9 +54,25 @@ export class FactoryStore {
         deliverable_ref TEXT NOT NULL DEFAULT '',
         workspace_path TEXT NOT NULL DEFAULT '',
         branch_name TEXT NOT NULL DEFAULT '',
+        ticket_url TEXT NOT NULL DEFAULT '',
+        provider TEXT NOT NULL DEFAULT 'github',
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       );
+    `);
+
+    try {
+      this.db.exec("ALTER TABLE tasks ADD COLUMN ticket_url TEXT NOT NULL DEFAULT ''");
+    } catch {
+      // Column already exists
+    }
+    try {
+      this.db.exec("ALTER TABLE tasks ADD COLUMN provider TEXT NOT NULL DEFAULT 'github'");
+    } catch {
+      // Column already exists
+    }
+
+    this.db.exec(`
 
       CREATE TABLE IF NOT EXISTS stage_tokens (
         token TEXT PRIMARY KEY,
@@ -431,16 +447,39 @@ export class FactoryStore {
     impact = 'medium',
     runtime = 'antigravity',
     model = 'claude-sonnet',
+    ticketUrl = '',
+    provider = 'github',
     now = new Date().toISOString(),
   }) {
+    const defaultTicketUrl =
+      provider === 'linear' || String(executionKey).startsWith('linear:')
+        ? (issueNumber ? `https://linear.app/issue/${issueNumber}` : '')
+        : (repo && repo.includes('/') && issueNumber ? `https://github.com/${repo}/issues/${issueNumber}` : '');
+    const resolvedTicketUrl = ticketUrl || defaultTicketUrl;
+
     const stmt = this.db.prepare(`
       INSERT INTO tasks (
         execution_key, issue_number, repo, title, type, stage, impact, runtime, model,
         review_rounds, approved_first_round, needs_human, human_question,
-        cost_usd, input_tokens, output_tokens, cached_tokens, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, '', 0, 0, 0, 0, ?, ?)
+        cost_usd, input_tokens, output_tokens, cached_tokens,
+        ticket_url, provider, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, '', 0, 0, 0, 0, ?, ?, ?, ?)
     `);
-    stmt.run(executionKey, issueNumber, repo, title, type, stage, impact, runtime, model, now, now);
+    stmt.run(
+      executionKey,
+      issueNumber,
+      repo,
+      title,
+      type,
+      stage,
+      impact,
+      runtime,
+      model,
+      resolvedTicketUrl,
+      provider,
+      now,
+      now,
+    );
     this.recordEvent({
       executionKey,
       issueNumber,
@@ -455,6 +494,7 @@ export class FactoryStore {
 
   updateTaskStage(executionKey, {
     stage,
+    type,
     impact,
     runtime,
     model,
@@ -467,11 +507,14 @@ export class FactoryStore {
     deliverableRef,
     workspacePath,
     branchName,
+    ticketUrl,
+    provider,
     now = new Date().toISOString(),
   }) {
     const current = this.getTask(executionKey);
     if (!current) throw new Error(`Task not found: ${executionKey}`);
     const nextStage = stage ?? current.stage;
+    const nextType = type ?? current.type;
     const nextImpact = impact ?? current.impact;
     const nextRuntime = runtime ?? current.runtime;
     const nextModel = model ?? current.model;
@@ -484,17 +527,20 @@ export class FactoryStore {
     const nextDelRef = deliverableRef !== undefined ? String(deliverableRef || '') : current.deliverable_ref;
     const nextWsPath = workspacePath !== undefined ? String(workspacePath || '') : current.workspace_path;
     const nextBranch = branchName !== undefined ? String(branchName || '') : current.branch_name;
+    const nextTicketUrl = ticketUrl !== undefined ? String(ticketUrl || '') : (current.ticket_url || '');
+    const nextProvider = provider !== undefined ? String(provider || 'github') : (current.provider || 'github');
 
     this.db
       .prepare(`
         UPDATE tasks
-        SET stage = ?, impact = ?, runtime = ?, model = ?, needs_human = ?, human_question = ?,
+        SET stage = ?, type = ?, impact = ?, runtime = ?, model = ?, needs_human = ?, human_question = ?,
             review_rounds = ?, approved_first_round = ?, deliverable_type = ?, deliverable_url = ?,
-            deliverable_ref = ?, workspace_path = ?, branch_name = ?, updated_at = ?
+            deliverable_ref = ?, workspace_path = ?, branch_name = ?, ticket_url = ?, provider = ?, updated_at = ?
         WHERE execution_key = ?
       `)
       .run(
         nextStage,
+        nextType,
         nextImpact,
         nextRuntime,
         nextModel,
@@ -507,6 +553,8 @@ export class FactoryStore {
         nextDelRef,
         nextWsPath,
         nextBranch,
+        nextTicketUrl,
+        nextProvider,
         now,
         executionKey,
       );

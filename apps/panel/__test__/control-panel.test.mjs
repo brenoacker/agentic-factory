@@ -1070,3 +1070,102 @@ test('C15: Periodic scheduler auto-dispatches queued triage tasks up to executin
   }
 });
 
+test('C16: Factory store persists ticket_url, provider, and triage contract type mutation, and auto-enables scheduler', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const mockIssueRunner = () => ({ status: 200, etag: 'etag-16', body: [] });
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath, mockIssueRunner);
+
+  try {
+    // 1. Verify scheduler initializes enabled by default
+    const dashRes = await fetch(`${baseUrl}/api/dashboard`);
+    assert.equal(dashRes.status, 200);
+    const dashJson = await dashRes.json();
+    assert.equal(dashJson.scheduler.enabled, true);
+
+    // 2. Create tasks with ticket_url and provider
+    const ghTask = panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#301',
+      issueNumber: 301,
+      repo: 'brenoacker/agentic-factory',
+      title: 'GitHub Tracker Link Task',
+      type: 'feature',
+      stage: 'triage',
+      provider: 'github',
+    });
+    assert.equal(ghTask.ticket_url, 'https://github.com/brenoacker/agentic-factory/issues/301');
+    assert.equal(ghTask.provider, 'github');
+
+    const linTask = panel.store.createTask({
+      executionKey: 'linear:brenoack/project#302',
+      issueNumber: 302,
+      repo: 'brenoack/project',
+      title: 'Linear Tracker Link Task',
+      type: 'bug',
+      stage: 'triage',
+      provider: 'linear',
+    });
+    assert.equal(linTask.ticket_url, 'https://linear.app/issue/302');
+    assert.equal(linTask.provider, 'linear');
+
+    // 3. Dispatch triage stage with a contract mutating type to 'investigation'
+    panel.store.attachTaskWorkspace(ghTask.execution_key, {
+      workspacePath: join(tmpDir, 'runs', 'ws-301'),
+      branchName: 'factory/issue-301',
+    });
+
+    const mutateRunner = (callSpec) => {
+      let contract;
+      if (callSpec.stage === 'triage') {
+        contract = {
+          stage_token: callSpec.stageToken,
+          issue_number: 301,
+          type: 'investigation',
+          impact: 'high',
+          root_cause: 'Root cause identified requiring investigation spike.',
+          evidence: 'packages/core/src/store.mjs#L1-L50',
+          affected_paths: ['packages/core/src/store.mjs'],
+          needs_human: false,
+        };
+      } else {
+        contract = {
+          stage_token: callSpec.stageToken,
+          issue_number: 301,
+          question: 'Why do triage contracts mutate task types?',
+          answer_summary: 'To align subsequent stages with triager agent classification.',
+          evidence: ['contracts/triage.schema.json#L8-L15'],
+          options_compared: [{ option: 'Keep immutable', pros: 'Simple', cons: 'Rigid' }],
+          recommendation: 'Mutate type upon triage completion',
+          follow_up_tickets: [],
+          needs_human: false,
+        };
+      }
+      return {
+        ok: true,
+        status: 0,
+        stdout: JSON.stringify({
+          usage: { input_tokens: 900, output_tokens: 350, cached_tokens: 150 },
+          total_cost_usd: 0.0065,
+          contract,
+        }),
+      };
+    };
+
+    const advRes = advanceTicketInPanel({
+      executionKey: ghTask.execution_key,
+      factoryRoot: tmpDir,
+      store: panel.store,
+      runner: mutateRunner,
+    });
+    assert.equal(advRes.ok, true);
+
+    // 4. Verify task.type was mutated in SQLite to 'investigation'
+    const updatedTask = panel.store.getTask(ghTask.execution_key);
+    assert.equal(updatedTask.type, 'investigation');
+    assert.equal(updatedTask.impact, 'high');
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+

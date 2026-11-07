@@ -360,8 +360,9 @@ export function createPollingScheduler({
   store,
   getRunner = null,
   defaultIntervalSeconds = 60,
+  defaultEnabled = true,
 }) {
-  let enabled = false;
+  let enabled = defaultEnabled !== undefined ? Boolean(defaultEnabled) : true;
   let intervalSeconds = Number(defaultIntervalSeconds) || 60;
   let pollCount = 0;
   let lastPollAt = null;
@@ -449,6 +450,10 @@ export function createPollingScheduler({
       clearInterval(timer);
       timer = null;
     }
+  }
+
+  if (enabled) {
+    restartTimer();
   }
 
   return {

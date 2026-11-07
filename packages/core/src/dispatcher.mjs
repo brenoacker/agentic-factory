@@ -56,13 +56,13 @@ export function dispatchTask({
     throw new Error(`Task not found in store: ${executionKey}`);
   }
 
-  const workflow = workflows[task.type];
+  let workflow = workflows[task.type];
   if (!workflow) {
     throw new Error(`No workflow found for ticket type: ${task.type}`);
   }
 
   const maxReviewRounds = workflow.maxReviewRounds ?? factoryConfig?.factory?.limits?.maxReviewRounds ?? 3;
-  const stageMap = new Map(workflow.stages.map((s) => [s.id, s]));
+  let stageMap = new Map(workflow.stages.map((s) => [s.id, s]));
 
   // If the operator just approved a human-gated stage, advance to `next` before continuing
   if (humanApprovedCurrentStage) {
@@ -81,7 +81,7 @@ export function dispatchTask({
   const stepsExecuted = [];
 
   while (task.stage !== 'done' && task.stage !== 'aborted') {
-    const stageDef = stageMap.get(task.stage);
+    let stageDef = stageMap.get(task.stage);
     if (!stageDef) {
       throw new Error(`Unknown stage "${task.stage}" in workflow "${workflow.id}"`);
     }
@@ -267,13 +267,20 @@ export function dispatchTask({
           runtime: route.runtime,
           model: route.model,
         };
+        const classifiedType = cleanPayload.type || task.type;
         task = store.updateTaskStage(executionKey, {
+          type: classifiedType,
           impact: cleanPayload.impact,
           runtime: nextModelCfg.runtime,
           model: nextModelCfg.model,
           needsHuman: Boolean(cleanPayload.needs_human),
           humanQuestion: cleanPayload.human_question || '',
         });
+        if (cleanPayload.type && workflows[cleanPayload.type] && cleanPayload.type !== workflow.id) {
+          workflow = workflows[cleanPayload.type];
+          stageMap = new Map(workflow.stages.map((s) => [s.id, s]));
+          stageDef = stageMap.get(task.stage) || stageDef;
+        }
         if (cleanPayload.needs_human) {
           return {
             ok: true,

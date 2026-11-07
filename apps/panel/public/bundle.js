@@ -338588,6 +338588,26 @@ ${isHandDrawn ? "" : `
     { type: "link", text: "Agents & Locked Skills (23)", href: "#agents", id: "agents" },
     { type: "link", text: "Controls, Deploy & Brain", href: "#controls", id: "controls" }
   ];
+  function getTicketExternalUrl(task) {
+    if (!task) return "#";
+    if (task.ticket_url && typeof task.ticket_url === "string" && task.ticket_url.startsWith("http")) {
+      return task.ticket_url;
+    }
+    const provider = String(
+      task.provider || (String(task.execution_key || task.executionKey || "").startsWith("linear:") ? "linear" : "github")
+    ).toLowerCase();
+    const issueNum = task.issue_number || task.issueNumber;
+    const externalId = task.external_id || task.externalId || issueNum;
+    if (provider === "linear") {
+      if (String(externalId).startsWith("http")) return externalId;
+      return `https://linear.app/issue/${externalId}`;
+    }
+    const repo = task.repo;
+    if (repo && repo.includes("/")) {
+      return `https://github.com/${repo}/issues/${issueNum}`;
+    }
+    return "#";
+  }
   var STAGES = [
     "triage",
     "plan",
@@ -339054,6 +339074,65 @@ ${isHandDrawn ? "" : `
             alignItems: "center"
           },
           children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { id: "operator-view-switch", style: { display: "flex", gap: "6px", marginRight: "12px" }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                "button",
+                {
+                  id: "btn-view-operations",
+                  "data-testid": "btn-view-operations",
+                  onClick: () => setActiveTab("overview"),
+                  style: {
+                    background: activeTab === "overview" ? "#0972d3" : "#1e293b",
+                    color: "#ffffff",
+                    border: activeTab === "overview" ? "2px solid #60a5fa" : "1px solid #334155",
+                    borderRadius: "6px",
+                    padding: "6px 14px",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    cursor: "pointer"
+                  },
+                  children: "\u{1F579}\uFE0F Control Tower"
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                "button",
+                {
+                  id: "btn-view-board",
+                  "data-testid": "btn-view-board",
+                  onClick: () => setActiveTab("board"),
+                  style: {
+                    background: activeTab === "board" ? "#0972d3" : "#1e293b",
+                    color: "#ffffff",
+                    border: activeTab === "board" ? "2px solid #60a5fa" : "1px solid #334155",
+                    borderRadius: "6px",
+                    padding: "6px 14px",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    cursor: "pointer"
+                  },
+                  children: "\u{1F4CB} Board & Timeline"
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                "button",
+                {
+                  id: "btn-view-health",
+                  "data-testid": "btn-view-health",
+                  onClick: () => setActiveTab("runtimes"),
+                  style: {
+                    background: activeTab === "runtimes" || activeTab === "controls" ? "#0972d3" : "#1e293b",
+                    color: "#ffffff",
+                    border: activeTab === "runtimes" || activeTab === "controls" ? "2px solid #60a5fa" : "1px solid #334155",
+                    borderRadius: "6px",
+                    padding: "6px 14px",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    cursor: "pointer"
+                  },
+                  children: "\u{1F6E1}\uFE0F Health & Integrations"
+                }
+              )
+            ] }),
             NAV_ITEMS.map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
               "button",
               {
@@ -339340,6 +339419,106 @@ ${isHandDrawn ? "" : `
                     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "h2", children: (st2.needsHuman || []).length }),
                     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "small", color: "text-body-secondary", children: "Human gates awaiting action" })
                   ] }) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                    container_default,
+                    {
+                      id: "live-execution-tower",
+                      "data-testid": "live-execution-tower",
+                      header: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                        Header2,
+                        {
+                          variant: "h2",
+                          description: "Real-time execution slots, active tasks with workspaces, and human intervention queue.",
+                          actions: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { direction: "horizontal", size: "xs", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { variant: "normal", onClick: () => setActiveTab("board"), children: "View Kanban Board" }) }),
+                          children: [
+                            "Control Tower \u2014 Live Executing Slots (",
+                            st2.executingAgentsCount ?? 0,
+                            " / ",
+                            f2.limits?.maxConcurrentAgents ?? 3,
+                            ")"
+                          ]
+                        }
+                      ),
+                      children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "m", children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "0.75rem" }, children: (st2.tasks || []).filter((t4) => t4.stage !== "done" && t4.stage !== "aborted" && t4.stage !== "merge" && t4.stage !== "triage" && t4.needs_human === 0).length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: "1rem", background: "#0b1320", borderRadius: "6px", border: "1px dashed #334155", color: "#94a3b8" }, children: [
+                          "\u26A1 No agents actively executing right now. Ready capacity: ",
+                          Math.max(0, (f2.limits?.maxConcurrentAgents ?? 3) - (st2.executingAgentsCount ?? 0)),
+                          " slot(s) free."
+                        ] }) : (st2.tasks || []).filter((t4) => t4.stage !== "done" && t4.stage !== "aborted" && t4.stage !== "merge" && t4.stage !== "triage" && t4.needs_human === 0).map((t4) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                          "div",
+                          {
+                            style: {
+                              padding: "0.75rem",
+                              background: "#0f172a",
+                              border: "1px solid #0284c7",
+                              borderRadius: "6px",
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "0.4rem"
+                            },
+                            children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" }, children: [
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "blue", children: "EXECUTING" }),
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: "0.75rem", color: "#94a3b8" }, children: [
+                                  "Stage: ",
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: t4.stage })
+                                ] })
+                              ] }),
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                                "a",
+                                {
+                                  id: `tower-ticket-link-${t4.issue_number}`,
+                                  href: getTicketExternalUrl(t4),
+                                  target: "_blank",
+                                  rel: "noreferrer",
+                                  style: { color: "#60a5fa", fontWeight: 700, textDecoration: "none", fontSize: "0.9rem" },
+                                  children: [
+                                    "#",
+                                    t4.issue_number,
+                                    " ",
+                                    t4.title,
+                                    " \u2197"
+                                  ]
+                                }
+                              ),
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: "0.76rem", color: "#cbd5e1" }, children: [
+                                "Branch: ",
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: t4.branch_name || `factory/issue-${t4.issue_number}` })
+                              ] }),
+                              t4.workspace_path && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: "0.72rem", color: "#64748b", wordBreak: "break-all" }, children: [
+                                "Workspace: ",
+                                t4.workspace_path
+                              ] })
+                            ]
+                          },
+                          t4.execution_key
+                        )) }),
+                        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: "1rem", flexWrap: "wrap", alignItems: "center", padding: "0.5rem 0", borderTop: "1px solid #1e293b" }, children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: "0.85rem", color: "#cbd5e1" }, children: [
+                            "\u{1F4E5} ",
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Triage Backlog Queue:" }),
+                            " ",
+                            (st2.tasks || []).filter((t4) => t4.stage === "triage" && t4.needs_human === 0).length,
+                            " ticket(s) waiting for available slots"
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: "0.85rem", color: "#cbd5e1" }, children: [
+                            "\u23F3 ",
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Awaiting PR Merge:" }),
+                            " ",
+                            (st2.tasks || []).filter((t4) => t4.stage === "merge").length,
+                            " ticket(s)"
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: "0.85rem", color: (st2.needsHuman || []).length > 0 ? "#f59e0b" : "#10b981", fontWeight: 600 }, children: [
+                            "\u{1F64B} ",
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Awaiting Human Input:" }),
+                            " ",
+                            (st2.needsHuman || []).length,
+                            " agent(s)"
+                          ] })
+                        ] })
+                      ] })
+                    }
+                  ),
                   /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Grid, { gridDefinition: [{ colspan: 6 }, { colspan: 6 }], children: [
                     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
                       table_default,
@@ -339607,7 +339786,7 @@ ${isHandDrawn ? "" : `
                                 }
                               )
                             ] }),
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { id: "scheduler-run-btn", onClick: () => updateScheduler(!schedulerEnabled, true), children: schedulerEnabled ? "Pause Cron Poller" : "Enable Cron & Poll Now" })
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { id: "scheduler-run-btn", onClick: () => updateScheduler(true, true), children: "Save Interval & Run Cron" })
                           ] }),
                           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { id: "proj-feedback", style: { fontSize: "0.85rem", color: "#93c5fd" }, children: projFeedback })
                         ] }),
@@ -339829,8 +340008,26 @@ ${isHandDrawn ? "" : `
                           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
                             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "severity-medium", children: "WAITING FOR HUMAN" }),
                             " ",
-                            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: item.executionKey }),
-                            " [",
+                            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                              "a",
+                              {
+                                id: `human-ticket-link-${item.issueNumber}`,
+                                "data-testid": `human-ticket-link-${item.issueNumber}`,
+                                href: getTicketExternalUrl(st2.tasks?.find((x6) => x6.execution_key === item.executionKey) || item),
+                                target: "_blank",
+                                rel: "noreferrer",
+                                style: { color: "#60a5fa", textDecoration: "underline", fontWeight: 700 },
+                                children: [
+                                  "#",
+                                  item.issueNumber,
+                                  " ",
+                                  item.title || item.executionKey,
+                                  " \u2197"
+                                ]
+                              }
+                            ),
+                            " ",
+                            "[",
                             item.type,
                             "] \u2014 Stage:",
                             " ",
@@ -339940,12 +340137,26 @@ ${isHandDrawn ? "" : `
                                     fontSize: "0.82rem"
                                   },
                                   children: [
-                                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { children: [
-                                      "#",
-                                      t4.issue_number,
-                                      " ",
-                                      t4.title
-                                    ] }),
+                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                                      "a",
+                                      {
+                                        id: `kanban-ticket-link-${t4.issue_number}`,
+                                        "data-testid": `kanban-ticket-link-${t4.issue_number}`,
+                                        href: getTicketExternalUrl(t4),
+                                        target: "_blank",
+                                        rel: "noreferrer",
+                                        style: { color: "#93c5fd", textDecoration: "none" },
+                                        onMouseEnter: (e3) => e3.currentTarget.style.textDecoration = "underline",
+                                        onMouseLeave: (e3) => e3.currentTarget.style.textDecoration = "none",
+                                        children: [
+                                          "#",
+                                          t4.issue_number,
+                                          " ",
+                                          t4.title,
+                                          " \u2197"
+                                        ]
+                                      }
+                                    ) }),
                                     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
                                       "div",
                                       {

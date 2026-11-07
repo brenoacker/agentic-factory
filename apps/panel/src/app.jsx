@@ -57,6 +57,27 @@ export const NAV_ITEMS = [
   { type: 'link', text: 'Controls, Deploy & Brain', href: '#controls', id: 'controls' },
 ];
 
+export function getTicketExternalUrl(task) {
+  if (!task) return '#';
+  if (task.ticket_url && typeof task.ticket_url === 'string' && task.ticket_url.startsWith('http')) {
+    return task.ticket_url;
+  }
+  const provider = String(
+    task.provider || (String(task.execution_key || task.executionKey || '').startsWith('linear:') ? 'linear' : 'github'),
+  ).toLowerCase();
+  const issueNum = task.issue_number || task.issueNumber;
+  const externalId = task.external_id || task.externalId || issueNum;
+  if (provider === 'linear') {
+    if (String(externalId).startsWith('http')) return externalId;
+    return `https://linear.app/issue/${externalId}`;
+  }
+  const repo = task.repo;
+  if (repo && repo.includes('/')) {
+    return `https://github.com/${repo}/issues/${issueNum}`;
+  }
+  return '#';
+}
+
 const STAGES = [
   'triage',
   'plan',
@@ -566,6 +587,59 @@ function ControlPanelApp() {
           alignItems: 'center',
         }}
       >
+        <div id="operator-view-switch" style={{ display: 'flex', gap: '6px', marginRight: '12px' }}>
+          <button
+            id="btn-view-operations"
+            data-testid="btn-view-operations"
+            onClick={() => setActiveTab('overview')}
+            style={{
+              background: activeTab === 'overview' ? '#0972d3' : '#1e293b',
+              color: '#ffffff',
+              border: activeTab === 'overview' ? '2px solid #60a5fa' : '1px solid #334155',
+              borderRadius: '6px',
+              padding: '6px 14px',
+              fontSize: '13px',
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            🕹️ Control Tower
+          </button>
+          <button
+            id="btn-view-board"
+            data-testid="btn-view-board"
+            onClick={() => setActiveTab('board')}
+            style={{
+              background: activeTab === 'board' ? '#0972d3' : '#1e293b',
+              color: '#ffffff',
+              border: activeTab === 'board' ? '2px solid #60a5fa' : '1px solid #334155',
+              borderRadius: '6px',
+              padding: '6px 14px',
+              fontSize: '13px',
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            📋 Board & Timeline
+          </button>
+          <button
+            id="btn-view-health"
+            data-testid="btn-view-health"
+            onClick={() => setActiveTab('runtimes')}
+            style={{
+              background: activeTab === 'runtimes' || activeTab === 'controls' ? '#0972d3' : '#1e293b',
+              color: '#ffffff',
+              border: activeTab === 'runtimes' || activeTab === 'controls' ? '2px solid #60a5fa' : '1px solid #334155',
+              borderRadius: '6px',
+              padding: '6px 14px',
+              fontSize: '13px',
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            🛡️ Health & Integrations
+          </button>
+        </div>
         {NAV_ITEMS.map((item) => (
           <button
             key={item.id}
@@ -828,6 +902,86 @@ function ControlPanelApp() {
                   </div>
                 </Container>
 
+                {/* CONTROL TOWER: LIVE EXECUTING SLOTS & INTERVENTIONS */}
+                <Container
+                  id="live-execution-tower"
+                  data-testid="live-execution-tower"
+                  header={
+                    <Header
+                      variant="h2"
+                      description="Real-time execution slots, active tasks with workspaces, and human intervention queue."
+                      actions={
+                        <SpaceBetween direction="horizontal" size="xs">
+                          <Button variant="normal" onClick={() => setActiveTab('board')}>
+                            View Kanban Board
+                          </Button>
+                        </SpaceBetween>
+                      }
+                    >
+                      Control Tower — Live Executing Slots ({st.executingAgentsCount ?? 0} / {f.limits?.maxConcurrentAgents ?? 3})
+                    </Header>
+                  }
+                >
+                  <SpaceBetween size="m">
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.75rem' }}>
+                      {((st.tasks || []).filter((t) => t.stage !== 'done' && t.stage !== 'aborted' && t.stage !== 'merge' && t.stage !== 'triage' && t.needs_human === 0)).length === 0 ? (
+                        <div style={{ padding: '1rem', background: '#0b1320', borderRadius: '6px', border: '1px dashed #334155', color: '#94a3b8' }}>
+                          ⚡ No agents actively executing right now. Ready capacity: {Math.max(0, (f.limits?.maxConcurrentAgents ?? 3) - (st.executingAgentsCount ?? 0))} slot(s) free.
+                        </div>
+                      ) : (
+                        (st.tasks || []).filter((t) => t.stage !== 'done' && t.stage !== 'aborted' && t.stage !== 'merge' && t.stage !== 'triage' && t.needs_human === 0).map((t) => (
+                          <div
+                            key={t.execution_key}
+                            style={{
+                              padding: '0.75rem',
+                              background: '#0f172a',
+                              border: '1px solid #0284c7',
+                              borderRadius: '6px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '0.4rem',
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <Badge color="blue">EXECUTING</Badge>
+                              <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Stage: <strong>{t.stage}</strong></span>
+                            </div>
+                            <a
+                              id={`tower-ticket-link-${t.issue_number}`}
+                              href={getTicketExternalUrl(t)}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ color: '#60a5fa', fontWeight: 700, textDecoration: 'none', fontSize: '0.9rem' }}
+                            >
+                              #{t.issue_number} {t.title} ↗
+                            </a>
+                            <div style={{ fontSize: '0.76rem', color: '#cbd5e1' }}>
+                              Branch: <code>{t.branch_name || `factory/issue-${t.issue_number}`}</code>
+                            </div>
+                            {t.workspace_path && (
+                              <div style={{ fontSize: '0.72rem', color: '#64748b', wordBreak: 'break-all' }}>
+                                Workspace: {t.workspace_path}
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', padding: '0.5rem 0', borderTop: '1px solid #1e293b' }}>
+                      <span style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>
+                        📥 <strong>Triage Backlog Queue:</strong> {(st.tasks || []).filter((t) => t.stage === 'triage' && t.needs_human === 0).length} ticket(s) waiting for available slots
+                      </span>
+                      <span style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>
+                        ⏳ <strong>Awaiting PR Merge:</strong> {(st.tasks || []).filter((t) => t.stage === 'merge').length} ticket(s)
+                      </span>
+                      <span style={{ fontSize: '0.85rem', color: (st.needsHuman || []).length > 0 ? '#f59e0b' : '#10b981', fontWeight: 600 }}>
+                        🙋 <strong>Awaiting Human Input:</strong> {(st.needsHuman || []).length} agent(s)
+                      </span>
+                    </div>
+                  </SpaceBetween>
+                </Container>
+
                 <Grid gridDefinition={[{ colspan: 6 }, { colspan: 6 }]}>
                   <Table
                     header={<Header variant="h2">Usage & Cost by Runtime</Header>}
@@ -1088,8 +1242,8 @@ function ControlPanelApp() {
                             }}
                           />
                         </label>
-                        <Button id="scheduler-run-btn" onClick={() => updateScheduler(!schedulerEnabled, true)}>
-                          {schedulerEnabled ? 'Pause Cron Poller' : 'Enable Cron & Poll Now'}
+                        <Button id="scheduler-run-btn" onClick={() => updateScheduler(true, true)}>
+                          Save Interval & Run Cron
                         </Button>
                       </div>
                       <span id="proj-feedback" style={{ fontSize: '0.85rem', color: '#93c5fd' }}>
@@ -1339,7 +1493,17 @@ function ControlPanelApp() {
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <div>
                                   <Badge color="severity-medium">WAITING FOR HUMAN</Badge>{' '}
-                                  <strong>{item.executionKey}</strong> [{item.type}] — Stage:{' '}
+                                  <a
+                                    id={`human-ticket-link-${item.issueNumber}`}
+                                    data-testid={`human-ticket-link-${item.issueNumber}`}
+                                    href={getTicketExternalUrl(st.tasks?.find((x) => x.execution_key === item.executionKey) || item)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    style={{ color: '#60a5fa', textDecoration: 'underline', fontWeight: 700 }}
+                                  >
+                                    #{item.issueNumber} {item.title || item.executionKey} ↗
+                                  </a>{' '}
+                                  [{item.type}] — Stage:{' '}
                                   <Badge color="blue">{item.stage}</Badge>
                                 </div>
                                 <Box variant="small" color="text-body-secondary">
@@ -1450,7 +1614,18 @@ function ControlPanelApp() {
                                 }}
                               >
                                 <strong>
-                              #{t.issue_number} {t.title}
+                                  <a
+                                    id={`kanban-ticket-link-${t.issue_number}`}
+                                    data-testid={`kanban-ticket-link-${t.issue_number}`}
+                                    href={getTicketExternalUrl(t)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    style={{ color: '#93c5fd', textDecoration: 'none' }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+                                    onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+                                  >
+                                    #{t.issue_number} {t.title} ↗
+                                  </a>
                                 </strong>
                                 <div
                                   style={{

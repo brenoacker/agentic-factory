@@ -112,10 +112,10 @@ Consolidate Control Panel tabs into three clear, actionable operator views.
 
 **Acceptance Criteria**
 
-8. WHEN an operator opens the Control Panel navigation THEN the navigation SHALL provide exactly three primary operator tabs: Control Tower (`#tab-operations`), Board & Timeline (`#tab-board`), and Health & Integrations (`#tab-health`).
-9. WHILE viewing the Control Tower view (`#tab-operations`) THEN the page SHALL display real-time executing agent slots, the triage backlog count, the interactive Human Clarification screen, and operational limits.
-10. WHILE viewing the Board & Timeline view (`#tab-board`) THEN the page SHALL render the full Kanban board with all workflow stage columns, clickable tracker links, and the visual Mermaid workflow viewer.
-11. WHILE viewing the Health & Integrations view (`#tab-health`) THEN the page SHALL present human-readable AI provider health, token expenditure, and tracker synchronization status.
+8. WHEN an operator opens the Control Panel navigation THEN the navigation SHALL provide exactly three primary operator tabs: Control Tower (`#btn-view-operations`), Board & Timeline (`#btn-view-board`), and Health & Integrations (`#btn-view-health`).
+9. WHILE viewing the Control Tower view (`#btn-view-operations`) THEN the page SHALL display real-time executing agent slots, the triage backlog count, the interactive Human Clarification screen, and operational limits.
+10. WHILE viewing the Board & Timeline view (`#btn-view-board`) THEN the page SHALL render the full Kanban board with all workflow stage columns, clickable tracker links, and the visual Mermaid workflow viewer.
+11. WHILE viewing the Health & Integrations view (`#btn-view-health`) THEN the page SHALL present human-readable AI provider health, token expenditure, and tracker synchronization status.
 
 ## Out of scope
 

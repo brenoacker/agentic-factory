@@ -4,6 +4,7 @@ import { extractFollowUpTickets } from './brain.mjs';
 import { commentOnGitHubIssue, updateGitHubIssue, closeGitHubIssue } from './github.mjs';
 import { updateLinearIssueStatus } from './trackers.mjs';
 import { provisionTaskWorkspace } from './worktree.mjs';
+import { loadAndValidateFactory } from './config.mjs';
 
 const VALID_TYPES = new Set(['feature', 'bug', 'investigation', 'discovery', 'chore']);
 
@@ -227,6 +228,23 @@ export function intakeAndTriageTicket({
     };
   }
 
+  const resolvedProvider = String(
+    issue.provider ||
+      factoryConfig?.factory?.projects?.find(
+        (p) => String(p.repo).toLowerCase() === String(normalizedIssue.repo).toLowerCase(),
+      )?.provider ||
+      (issue.external_id || String(guard.executionKey).startsWith('linear:') ? 'linear' : 'github'),
+  ).toLowerCase();
+
+  const ticketUrl =
+    issue.html_url ||
+    issue.url ||
+    (resolvedProvider === 'linear'
+      ? `https://linear.app/issue/${issue.external_id || normalizedIssue.issue_number}`
+      : normalizedIssue.repo.includes('/')
+        ? `https://github.com/${normalizedIssue.repo}/issues/${normalizedIssue.issue_number}`
+        : '');
+
   const task = store.createTask({
     executionKey: guard.executionKey,
     issueNumber: normalizedIssue.issue_number,
@@ -235,18 +253,13 @@ export function intakeAndTriageTicket({
     type: classifiedType,
     stage: initialStage,
     runtime: normalizedIssue.runtime_override || factoryConfig?.factory?.defaultRuntime || 'antigravity',
+    ticketUrl,
+    provider: resolvedProvider,
     now: nowIso,
   });
 
   // Automatic Tracker Lifecycle: update labels and post in-progress pickup comment
   try {
-    const resolvedProvider = String(
-      issue.provider ||
-        factoryConfig?.factory?.projects?.find(
-          (p) => String(p.repo).toLowerCase() === String(normalizedIssue.repo).toLowerCase(),
-        )?.provider ||
-        (issue.external_id ? 'linear' : 'github'),
-    ).toLowerCase();
 
     if (resolvedProvider === 'linear') {
       updateLinearIssueStatus({
@@ -314,10 +327,15 @@ export function advanceTicketInPanel({
     };
   }
 
+  const autoCfg = (!factoryConfig || !workflows) ? loadAndValidateFactory(factoryRoot) : null;
+  const resolvedFactoryConfig = factoryConfig || autoCfg?.factoryConfig;
+  const resolvedWorkflows = workflows || autoCfg?.workflows;
+  const resolvedPricesConfig = pricesConfig || autoCfg?.pricesConfig;
+
   // 1. Provision isolated workspace directory & task branch if not already set
   if (!existing.workspace_path) {
     try {
-      const projectDef = factoryConfig?.factory?.projects?.find(
+      const projectDef = resolvedFactoryConfig?.factory?.projects?.find(
         (p) => String(p.repo).toLowerCase() === String(existing.repo).toLowerCase(),
       );
       const ws = provisionTaskWorkspace({
@@ -365,9 +383,9 @@ export function advanceTicketInPanel({
   const res = dispatchTask({
     executionKey,
     factoryRoot,
-    factoryConfig,
-    workflows,
-    pricesConfig,
+    factoryConfig: resolvedFactoryConfig,
+    workflows: resolvedWorkflows,
+    pricesConfig: resolvedPricesConfig,
     store,
     headSha,
     humanApprovedCurrentStage: approveCurrentStage,
