@@ -412,7 +412,7 @@ export function autoDispatchQueuedTasks({
 
   const queuedTasks = store.db
     .prepare(
-      "SELECT * FROM tasks WHERE stage IN ('triage', 'plan', 'checks_and_build', 'verify', 'review') AND needs_human = 0 ORDER BY created_at ASC LIMIT ?",
+      "SELECT * FROM tasks WHERE stage IN ('triage', 'plan', 'checks_and_build', 'verify', 'review', 'investigate', 'discover') AND needs_human = 0 ORDER BY created_at ASC LIMIT ?",
     )
     .all(limit);
 
