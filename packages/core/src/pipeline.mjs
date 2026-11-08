@@ -3,7 +3,7 @@ import { dispatchTask } from './dispatcher.mjs';
 import { extractFollowUpTickets } from './brain.mjs';
 import { commentOnGitHubIssue, updateGitHubIssue, closeGitHubIssue, checkGitHubPullRequest } from './github.mjs';
 import { updateLinearIssueStatus, syncTaskStateToTracker } from './trackers.mjs';
-import { provisionTaskWorkspace } from './worktree.mjs';
+import { provisionTaskWorkspace, cleanupTaskWorkspace } from './worktree.mjs';
 import { loadAndValidateFactory } from './config.mjs';
 
 const VALID_TYPES = new Set(['feature', 'bug', 'investigation', 'discovery', 'chore']);
@@ -427,8 +427,13 @@ export function advanceTicketInPanel({
         runner: trackerRunner,
       });
       trackerFeedback = { closed: syncRes.shouldClose, tracker: syncRes.provider };
+
+      // Safe lifecycle cleanup: remove temp workspace upon done
+      if (finalTask.workspace_path) {
+        cleanupTaskWorkspace(finalTask.workspace_path);
+      }
     } catch {
-      // Non-blocking tracker updates
+      // Non-blocking tracker updates / cleanup
     }
   }
 

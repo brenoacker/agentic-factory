@@ -289,6 +289,21 @@ test('C5: dispatchTask executes gated feature workflow, pauses at human gates, a
           }),
         };
       }
+      if (stage === 'plan') {
+        return {
+          ok: true,
+          stdout: JSON.stringify({
+            structured_output: {
+              stage_token: stageToken,
+              status: 'ok',
+              stage,
+              needs_human: true,
+              human_question: 'Operator review needed for architectural plan',
+            },
+            usage: { input_tokens: 1500, output_tokens: 300, cache_read_input_tokens: 0 },
+          }),
+        };
+      }
       return {
         ok: true,
         stdout: JSON.stringify({
@@ -307,6 +322,13 @@ test('C5: dispatchTask executes gated feature workflow, pauses at human gates, a
       pricesConfig,
       store,
       runner: mockRunner,
+      trackerRunner: () => ({
+        ok: true,
+        merged: true,
+        prNumber: 30,
+        state: 'MERGED',
+        url: 'https://github.com/brenoacker/agentic-factory/pull/30',
+      }),
       headSha: '64e6a79',
     });
     assert.equal(run1.ok, true);
@@ -326,6 +348,13 @@ test('C5: dispatchTask executes gated feature workflow, pauses at human gates, a
       pricesConfig,
       store,
       runner: mockRunner,
+      trackerRunner: () => ({
+        ok: true,
+        merged: true,
+        prNumber: 30,
+        state: 'MERGED',
+        url: 'https://github.com/brenoacker/agentic-factory/pull/30',
+      }),
       headSha: '64e6a79',
       humanApprovedCurrentStage: true,
     });
@@ -348,6 +377,13 @@ test('C5: dispatchTask executes gated feature workflow, pauses at human gates, a
       pricesConfig,
       store,
       runner: mockRunner,
+      trackerRunner: () => ({
+        ok: true,
+        merged: true,
+        prNumber: 30,
+        state: 'MERGED',
+        url: 'https://github.com/brenoacker/agentic-factory/pull/30',
+      }),
       headSha: '64e6a79',
       humanApprovedCurrentStage: true,
     });

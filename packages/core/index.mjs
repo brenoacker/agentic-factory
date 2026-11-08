@@ -13,8 +13,8 @@ export {
   checkGitHubPullRequest,
   createGitHubPullRequest,
 } from './src/github.mjs';
-export { prepareWorktree, provisionTaskWorkspace } from './src/worktree.mjs';
-export { approveTask, dispatchTask } from './src/dispatcher.mjs';
+export { prepareWorktree, provisionTaskWorkspace, cleanupTaskWorkspace } from './src/worktree.mjs';
+export { approveTask, dispatchTask, materializeInvestigationReport } from './src/dispatcher.mjs';
 export {
   listAgentsCatalog,
   loadBrainEntries,

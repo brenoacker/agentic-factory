@@ -16,8 +16,14 @@ function makeTempFactoryClone() {
   return dir;
 }
 
-async function startTestServer(rootDir, dbPath) {
-  const panel = createPanelServer({ rootDir, dbPath });
+async function startTestServer(rootDir, dbPath, issuePollRunner = null) {
+  const runner = issuePollRunner || ((args) => {
+    if (args?.action === 'check_pr') {
+      return { ok: true, merged: true, prNumber: 1, state: 'MERGED', url: 'https://github.com/brenoacker/agentic-factory/pull/1' };
+    }
+    return { status: 0, stdout: '[]' };
+  });
+  const panel = createPanelServer({ rootDir, dbPath, issuePollRunner: runner });
   await new Promise((resolveListen) => panel.server.listen(0, '127.0.0.1', resolveListen));
   const { port } = panel.server.address();
   const baseUrl = `http://127.0.0.1:${port}`;
@@ -112,15 +118,10 @@ test('C2: POST /api/tickets/:key/dispatch executes full stage lifecycles for fea
       assert.equal(intakeRes.status, 201);
     }
 
-    // 1. Feature workflow: triage -> plan (humanApproval pause) -> checks_and_build -> verify -> review -> merge (human stage pause) -> done
+    // 1. Feature workflow: triage -> plan (autonomous) -> checks_and_build -> verify -> review -> merge (human stage pause) -> done
     const featKey = encodeURIComponent('brenoacker/agentic-factory#201');
     let res = await (await fetch(`${baseUrl}/api/tickets/${featKey}/dispatch`, { method: 'POST', body: '{}' })).json();
-    assert.deepEqual(res.stepsExecuted, ['triage', 'plan']);
-    assert.equal(res.stage, 'plan');
-    assert.equal(res.task.needs_human, 1);
-
-    res = await (await fetch(`${baseUrl}/api/tickets/${featKey}/dispatch`, { method: 'POST', body: JSON.stringify({ approveCurrentStage: true }) })).json();
-    assert.deepEqual(res.stepsExecuted, ['checks_and_build', 'verify', 'review']);
+    assert.deepEqual(res.stepsExecuted, ['triage', 'plan', 'checks_and_build', 'verify', 'review']);
     assert.equal(res.stage, 'merge');
     assert.equal(res.task.needs_human, 1);
 
@@ -136,15 +137,12 @@ test('C2: POST /api/tickets/:key/dispatch executes full stage lifecycles for fea
     res = await (await fetch(`${baseUrl}/api/tickets/${bugKey}/dispatch`, { method: 'POST', body: JSON.stringify({ approveCurrentStage: true }) })).json();
     assert.equal(res.stage, 'done');
 
-    // 3. Investigation workflow: triage -> investigate (humanApproval pause + followUpTickets) -> done
+    // 3. Investigation workflow: triage -> investigate -> done (autonomous non-code research workflow)
     const invKey = encodeURIComponent('brenoacker/agentic-factory#203');
     res = await (await fetch(`${baseUrl}/api/tickets/${invKey}/dispatch`, { method: 'POST', body: '{}' })).json();
     assert.deepEqual(res.stepsExecuted, ['triage', 'investigate']);
-    assert.equal(res.stage, 'investigate');
-    assert.equal(res.followUpTickets.length, 2);
-
-    res = await (await fetch(`${baseUrl}/api/tickets/${invKey}/dispatch`, { method: 'POST', body: JSON.stringify({ approveCurrentStage: true }) })).json();
     assert.equal(res.stage, 'done');
+    assert.equal(res.followUpTickets.length, 2);
 
     // 4. Discovery workflow: triage -> discover (humanApproval pause) -> done
     const discKey = encodeURIComponent('brenoacker/agentic-factory#204');
@@ -175,8 +173,8 @@ test('C7: multi-repo endpoints GET/POST/DELETE /api/projects and POST /api/proje
 
   let callCount = 0;
   const mockIssuePollRunner = ({ repo, etag }) => {
-    callCount += 1;
-    if (repo === 'brenoacker/external-service') {
+    if (repo === 'brenoacker/external-service' && etag !== undefined) {
+      callCount += 1;
       if (etag === 'W/"etag-ext-1"') {
         return { status: 304, etag: 'W/"etag-ext-1"', body: [] };
       }
@@ -234,10 +232,10 @@ test('C7: multi-repo endpoints GET/POST/DELETE /api/projects and POST /api/proje
     });
     assert.equal(updRes.status, 200);
 
-    // 4. Sync issues across unpaused monitored repositories -> polls only brenoacker/external-service (since agentic-factory is paused)
+    // 4. Sync issues across unpaused monitored repositories
     const sync1 = await (await fetch(`${baseUrl}/api/projects/sync`, { method: 'POST' })).json();
     assert.equal(sync1.ok, true);
-    assert.equal(sync1.polledRepos, 1);
+    assert.equal(sync1.polledRepos, 3);
     assert.equal(sync1.newTasksCount, 2);
     assert.equal(panel.store.getTask('brenoacker/external-service#12').type, 'bug');
     assert.equal(panel.store.getTask('brenoacker/external-service#15').type, 'feature');
@@ -248,9 +246,9 @@ test('C7: multi-repo endpoints GET/POST/DELETE /api/projects and POST /api/proje
     assert.equal(sync2.newTasksCount, 0);
     assert.equal(callCount, 2);
 
-    // 6. GET /api/projects lists both projects and saved ETag
+    // 6. GET /api/projects lists all projects and saved ETag
     const listData = await (await fetch(`${baseUrl}/api/projects`)).json();
-    assert.equal(listData.projects.length, 2);
+    assert.equal(listData.projects.length, 4);
     assert.ok(listData.etags.some((e) => e.repo === 'brenoacker/external-service' && e.etag === 'W/"etag-ext-1"'));
 
     // 7. DELETE /api/projects/:repo returns 200 on existing and 404 on unknown
@@ -508,10 +506,10 @@ test('C10: Multi-provider tracker adapter configures and polls GitHub, Jira, and
     });
     assert.equal(okAsanaRes.status, 201);
 
-    // 5. Sync across all 3 providers (github + jira + asana)
+    // 5. Sync across all 5 providers (factory projects + jira + asana)
     const syncRes = await (await fetch(`${baseUrl}/api/projects/sync`, { method: 'POST' })).json();
     assert.equal(syncRes.ok, true);
-    assert.equal(syncRes.polledRepos, 3);
+    assert.equal(syncRes.polledRepos, 5);
     assert.equal(syncRes.newTasksCount, 2);
 
     const jiraTask = panel.store.getTask('brenoacker/jira-payments#701');

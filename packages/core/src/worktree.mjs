@@ -1,7 +1,24 @@
-import { cpSync, existsSync, mkdirSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { syncSkills } from '../../../scripts/lib/skills-sync.mjs';
+
+/**
+ * Safely removes a completed or aborted task workspace from disk.
+ */
+export function cleanupTaskWorkspace(workspacePath) {
+  if (!workspacePath) return { ok: false, error: 'No workspace path provided' };
+  try {
+    const resolved = resolve(workspacePath);
+    if (existsSync(resolved)) {
+      rmSync(resolved, { recursive: true, force: true });
+      return { ok: true, deleted: true, path: resolved };
+    }
+    return { ok: true, deleted: false, reason: 'Path does not exist' };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
 
 /**
  * Prepares an isolated workspace directory (or git worktree when `useGitWorktree` is true),
@@ -66,6 +83,8 @@ export function provisionTaskWorkspace({
   defaultBranch = 'main',
   localPath = null,
   branchName = null,
+  timestamp = null,
+  baseWorkspacesDir = null,
   runner = null,
 }) {
   if (runner) {
@@ -76,13 +95,16 @@ export function provisionTaskWorkspace({
       defaultBranch,
       localPath,
       branchName,
+      timestamp,
     });
   }
 
   const root = resolve(factoryRoot);
   const safeSlug = String(repo || 'default-repo').replace(/[^a-zA-Z0-9_-]+/g, '_');
   const taskBranch = branchName || `factory/issue-${issueNumber}`;
-  const workspacePath = join(root, '.workspaces', safeSlug, `issue-${issueNumber}`);
+  const nowStamp = (timestamp || new Date().toISOString()).replace(/[^a-zA-Z0-9]+/g, '-');
+  const targetBase = baseWorkspacesDir ? resolve(baseWorkspacesDir) : join(root, 'runs', 'workspaces');
+  const workspacePath = join(targetBase, `${safeSlug}-issue-${issueNumber}-${nowStamp}`);
 
   mkdirSync(workspacePath, { recursive: true });
 

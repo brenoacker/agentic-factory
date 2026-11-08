@@ -4,6 +4,7 @@ import { loadAndValidateFactory } from './config.mjs';
 import { SUPPORTED_PROVIDERS, normalizeTriggerRules, pollProjectTracker, syncTaskStateToTracker } from './trackers.mjs';
 import { intakeAndTriageTicket, advanceTicketInPanel } from './pipeline.mjs';
 import { checkGitHubPullRequest, commentOnGitHubIssue, closeGitHubIssue, updateGitHubIssue } from './github.mjs';
+import { cleanupTaskWorkspace } from './worktree.mjs';
 
 const REPO_RE = /^[^/\s]+\/[^/\s]+$/;
 
@@ -356,6 +357,11 @@ export function syncMergedPullRequests({ rootDir, store, runner = null, trackerR
         });
 
         mergedTasks.push(store.getTask(task.execution_key));
+
+        // Safe lifecycle cleanup: remove temp workspace upon verified PR merge
+        if (task.workspace_path) {
+          cleanupTaskWorkspace(task.workspace_path);
+        }
       }
     } catch {
       // Non-blocking telemetry

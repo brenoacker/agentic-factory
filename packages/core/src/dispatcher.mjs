@@ -1,9 +1,85 @@
-import { join, resolve } from 'node:path';
+import { join, resolve, dirname } from 'node:path';
+import { writeFileSync, mkdirSync } from 'node:fs';
 import { invokeRuntimeAdapter } from './adapters.mjs';
 import { validateContract } from './contracts.mjs';
 import { selectRuntime, recordRuntimeFailure } from './router.mjs';
 import { checkGitHubPullRequest } from './github.mjs';
 import { syncTaskStateToTracker } from './trackers.mjs';
+
+/**
+ * Materializes a structured investigation or discovery contract payload into a concrete Markdown report file.
+ */
+export function materializeInvestigationReport({
+  workspacePath = null,
+  factoryRoot = null,
+  issueNumber,
+  contractPayload = {},
+  type = 'investigation',
+} = {}) {
+  const q = contractPayload.question || `Investigation on #${issueNumber}`;
+  const summary = contractPayload.answer_summary || contractPayload.summary || 'Summary pending.';
+  const evidence = Array.isArray(contractPayload.evidence) ? contractPayload.evidence : [];
+  const options = Array.isArray(contractPayload.options_compared) ? contractPayload.options_compared : [];
+  const recommendation = contractPayload.recommendation || 'Proceed with findings.';
+  const followUps = Array.isArray(contractPayload.follow_up_tickets) ? contractPayload.follow_up_tickets : [];
+
+  let md = `# Investigation Report #${issueNumber}: ${q}\n\n`;
+  md += `**Date**: ${new Date().toISOString()}\n`;
+  md += `**Type**: ${type}\n\n`;
+  md += `## Answer Summary\n\n${summary}\n\n`;
+
+  if (evidence.length > 0) {
+    md += `## Evidence\n\n`;
+    for (const e of evidence) {
+      md += `- ${e}\n`;
+    }
+    md += `\n`;
+  }
+
+  if (options.length > 0) {
+    md += `## Options Compared\n\n`;
+    md += `| Option | Pros | Cons |\n| --- | --- | --- |\n`;
+    for (const opt of options) {
+      md += `| ${opt.option || '-'} | ${opt.pros || '-'} | ${opt.cons || '-'} |\n`;
+    }
+    md += `\n`;
+  }
+
+  md += `## Recommendation\n\n${recommendation}\n\n`;
+
+  if (followUps.length > 0) {
+    md += `## Follow-up Tickets\n\n`;
+    for (const ft of followUps) {
+      md += `- **[${ft.type || 'feature'}]** ${ft.title}: ${ft.description || ''}\n`;
+    }
+    md += `\n`;
+  }
+
+  const relPath = `docs/research/issue-${issueNumber}-${type === 'discovery' ? 'report' : 'investigation'}.md`;
+  const targets = [];
+  if (workspacePath) {
+    targets.push(resolve(workspacePath, relPath));
+  }
+  if (factoryRoot) {
+    targets.push(resolve(factoryRoot, relPath));
+  }
+
+  for (const targetPath of targets) {
+    try {
+      mkdirSync(dirname(targetPath), { recursive: true });
+      writeFileSync(targetPath, md, 'utf8');
+    } catch {
+      // Best-effort write
+    }
+  }
+
+  return {
+    ok: true,
+    relPath,
+    targets,
+    content: md,
+  };
+}
 
 function contractKindFromPath(contractPath) {
   if (!contractPath) return null;
@@ -309,9 +385,17 @@ export function dispatchTask({
       }
 
       if (contractKind === 'investigation-report') {
+        const relUrl = `docs/research/issue-${task.issue_number}-investigation.md`;
+        materializeInvestigationReport({
+          workspacePath: task.workspace_path,
+          factoryRoot: root,
+          issueNumber: task.issue_number,
+          contractPayload: cleanPayload,
+          type: task.type,
+        });
         store.attachTaskDeliverable(executionKey, {
           type: 'research_document',
-          url: `docs/research/issue-${task.issue_number}-investigation.md`,
+          url: relUrl,
           ref: cleanPayload.question || `Investigation Report #${task.issue_number}`,
         });
         task = store.getTask(executionKey) || task;

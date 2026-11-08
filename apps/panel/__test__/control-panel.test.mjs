@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cpSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -16,6 +16,8 @@ import {
   advanceTicketInPanel,
   evaluateIntakeGuards,
   provisionTaskWorkspace,
+  cleanupTaskWorkspace,
+  materializeInvestigationReport,
   autoDispatchQueuedTasks,
   checkGitHubPullRequest,
   syncMergedPullRequests,
@@ -1910,6 +1912,132 @@ test('C31: Markdown document preview parses formatted markdown, extracts embedde
     assert.equal(readRes.path, wsFullPath);
     assert.equal(readRes.extension, 'md');
     assert.equal(readRes.content, sampleDoc);
+  } finally {
+    store.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C32: provisionTaskWorkspace creates timestamped isolated directories under runs/workspaces and cleanupTaskWorkspace deletes them safely', () => {
+  const tmpDir = makeTempFactoryClone();
+
+  try {
+    const fixedTime = '2026-11-08T03:00:00.000Z';
+    const wsRes = provisionTaskWorkspace({
+      factoryRoot: tmpDir,
+      repo: 'brenoacker/incident-investigator',
+      issueNumber: 86,
+      timestamp: fixedTime,
+    });
+
+    assert.equal(wsRes.ok, true);
+    // Verifies workspace is placed under runs/workspaces and contains safeSlug, issue number, and timestamp
+    assert.ok(wsRes.workspacePath.includes('runs'));
+    assert.ok(wsRes.workspacePath.includes('workspaces'));
+    assert.ok(wsRes.workspacePath.includes('issue-86'));
+    assert.ok(wsRes.workspacePath.includes('2026-11-08'));
+    assert.ok(existsSync(wsRes.workspacePath));
+
+    // Verifies cleanupTaskWorkspace removes the directory safely
+    const cleanupRes = cleanupTaskWorkspace(wsRes.workspacePath);
+    assert.equal(cleanupRes.ok, true);
+    assert.equal(cleanupRes.deleted, true);
+    assert.equal(existsSync(wsRes.workspacePath), false);
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C33: dispatcher physically materializes investigation and discovery markdown documents with concrete evidence and recommendations', () => {
+  const tmpDir = makeTempFactoryClone();
+  const taskWs = join(tmpDir, 'runs', 'workspaces', 'test-task-86');
+  mkdirSync(taskWs, { recursive: true });
+
+  try {
+    const payload = {
+      question: 'Why do concurrent stage callbacks require single-use stage tokens?',
+      answer_summary: 'Without single-use tokens, parallel webhook dispatches can execute duplicate transitions.',
+      evidence: ['Race condition detected on tasks table at timestamp T1', 'Replay attack replicated in SQLite tests'],
+      options_compared: [
+        { option: 'Pessimistic table lock', pros: 'Simple', cons: 'Blocks unrelated tickets' },
+        { option: 'Single-use stage token', pros: 'Fine-grained atomicity', cons: 'Requires token generation' },
+      ],
+      recommendation: 'Enforce single-use stage token on all dispatch transitions.',
+      follow_up_tickets: [{ title: 'Add token replay guard', type: 'bug', description: 'Prevent token reuse' }],
+    };
+
+    const matRes = materializeInvestigationReport({
+      workspacePath: taskWs,
+      factoryRoot: tmpDir,
+      issueNumber: 86,
+      contractPayload: payload,
+      type: 'investigation',
+    });
+
+    assert.equal(matRes.ok, true);
+    const expectedFile = join(taskWs, 'docs', 'research', 'issue-86-investigation.md');
+    assert.ok(existsSync(expectedFile));
+
+    const content = readFileSync(expectedFile, 'utf8');
+    assert.ok(content.includes('# Investigation Report #86: Why do concurrent stage callbacks require single-use stage tokens?'));
+    assert.ok(content.includes('## Answer Summary'));
+    assert.ok(content.includes('Without single-use tokens, parallel webhook dispatches can execute duplicate transitions.'));
+    assert.ok(content.includes('## Evidence'));
+    assert.ok(content.includes('Race condition detected on tasks table at timestamp T1'));
+    assert.ok(content.includes('## Options Compared'));
+    assert.ok(content.includes('Pessimistic table lock'));
+    assert.ok(content.includes('Single-use stage token'));
+    assert.ok(content.includes('## Recommendation'));
+    assert.ok(content.includes('Enforce single-use stage token on all dispatch transitions.'));
+    assert.ok(content.includes('## Follow-up Tickets'));
+    assert.ok(content.includes('Add token replay guard'));
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C34: advanceTicketInPanel cleans up temporary workspace when task reaches done', () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const store = new FactoryStore(dbPath);
+  const taskWs = join(tmpDir, 'runs', 'workspaces', 'temp-ws-cleanup-test');
+  mkdirSync(taskWs, { recursive: true });
+  writeFileSync(join(taskWs, 'report.txt'), 'Deliverable content', 'utf8');
+
+  try {
+    const task = store.createTask({
+      executionKey: 'brenoacker/agentic-factory#950',
+      issueNumber: 950,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Investigation task to complete and cleanup',
+      type: 'investigation',
+      stage: 'investigate',
+      workspacePath: taskWs,
+    });
+    store.attachTaskDeliverable(task.execution_key, {
+      type: 'research_document',
+      url: 'docs/research/issue-950-investigation.md',
+      ref: 'Cleanup Verification',
+    });
+
+    assert.ok(existsSync(taskWs));
+
+    const advRes = advanceTicketInPanel({
+      executionKey: task.execution_key,
+      factoryRoot: tmpDir,
+      store,
+      approveCurrentStage: true,
+      trackerRunner: () => ({ ok: true, status: 200 }),
+    });
+
+    assert.equal(advRes.ok, true);
+    assert.equal(advRes.stage, 'done');
+    // Verifies workspace directory was deleted on disk upon reaching 'done'
+    assert.equal(existsSync(taskWs), false);
+    // Verifies task record is still preserved in SQLite
+    const finalTask = store.getTask(task.execution_key);
+    assert.equal(finalTask.stage, 'done');
+    assert.equal(finalTask.deliverable_type, 'research_document');
   } finally {
     store.close();
     rmSync(tmpDir, { recursive: true, force: true });

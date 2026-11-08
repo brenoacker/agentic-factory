@@ -1282,7 +1282,20 @@ test('C23: Playwright E2E verifies clickable vscode:// link, 1-click Open in Edi
     const specDir = join(tmpDir, '.specs', 'features', 'test-review');
     mkdirSync(specDir, { recursive: true });
     const planPath = join(specDir, 'plan.md');
-    const planText = '# Implementation Plan for Test Review\n\n## Summary\nVerify operator can review and launch editor directly.';
+    const planText = [
+      '# Implementation Plan for Test Review',
+      '',
+      '## Summary',
+      'Verify operator can review and launch editor directly.',
+      '',
+      '```mermaid',
+      'graph LR',
+      '  A[Operator Review] --> B[Rendered Markdown]',
+      '  B --> C[Interactive SVG Diagram]',
+      '```',
+      '',
+      'All automated proofs verified.',
+    ].join('\n');
     writeFileSync(planPath, planText, 'utf-8');
 
     // 2. Create task in stage plan awaiting operator evaluation
@@ -1333,6 +1346,15 @@ test('C23: Playwright E2E verifies clickable vscode:// link, 1-click Open in Edi
     await expect(modalContent).toBeVisible();
     await expect(modalContent).toContainText('Implementation Plan for Test Review');
     await expect(modalContent).toContainText('Verify operator can review');
+
+    // Verify rendered Markdown elements (not raw markdown string)
+    await expect(page.locator('#doc-preview-content h1')).toHaveText('Implementation Plan for Test Review');
+    await expect(page.locator('#doc-preview-content h2')).toHaveText('Summary');
+
+    // Verify embedded Mermaid diagram is rendered as SVG
+    const mermaidDiagram = page.locator('[data-testid="doc-preview-mermaid-0"]');
+    await expect(mermaidDiagram).toBeVisible();
+    await expect(mermaidDiagram.locator('svg')).toBeVisible();
 
     // Take screenshot for visual evidence
     await page.screenshot({ path: join(CAPTURES_DIR, 'plan-inline-preview-modal.png'), fullPage: true });

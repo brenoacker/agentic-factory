@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { resolve, relative, isAbsolute, extname } from 'node:path';
 import { spawn } from 'node:child_process';
+import { marked } from 'marked';
 
 /**
  * Checks whether a given target path is strictly contained within at least one allowed root directory.
@@ -57,7 +58,11 @@ export function resolveTaskReviewFiles(task, options = {}) {
       ? resolve(cleanPath)
       : task.workspace_path && existsSync(resolve(task.workspace_path, cleanPath))
         ? resolve(task.workspace_path, cleanPath)
-        : resolve(root, cleanPath);
+        : existsSync(resolve(root, cleanPath))
+          ? resolve(root, cleanPath)
+          : task.workspace_path
+            ? resolve(task.workspace_path, cleanPath)
+            : resolve(root, cleanPath);
 
     const normKey = resolvedPath.toLowerCase().replace(/\\/g, '/');
     if (seenPaths.has(normKey)) return;
@@ -227,7 +232,20 @@ export function readFileContent(filePath, { factoryRoot = process.cwd(), allowed
   const root = resolve(factoryRoot);
   const roots = allowedRoots.length > 0 ? allowedRoots.map((r) => resolve(r)) : [root];
 
-  const resolved = isAbsolute(filePath) ? resolve(filePath) : resolve(root, filePath);
+  let resolved = isAbsolute(filePath) ? resolve(filePath) : resolve(root, filePath);
+
+  if (!existsSync(resolved)) {
+    // If not found at primary path, attempt lookup relative to any other allowed roots (e.g., task workspace)
+    const relFromRoot = relative(root, resolved);
+    for (const altRoot of roots) {
+      if (altRoot === root) continue;
+      const candidate = resolve(altRoot, relFromRoot);
+      if (existsSync(candidate)) {
+        resolved = candidate;
+        break;
+      }
+    }
+  }
 
   if (!isPathContained(resolved, roots)) {
     return {
@@ -280,5 +298,48 @@ export function readFileContent(filePath, { factoryRoot = process.cwd(), allowed
       status: 500,
       error: `Failed to read file: ${err.message}`,
     };
+  }
+}
+
+/**
+ * Parses markdown text into interleaved sections of rendered HTML and Mermaid diagram code blocks.
+ */
+export function parseMarkdownWithMermaid(markdownText) {
+  if (!markdownText) return [];
+  try {
+    const tokens = marked.lexer(markdownText);
+    const segments = [];
+    let currentTokens = [];
+
+    for (const token of tokens) {
+      if (token.type === 'code' && (token.lang === 'mermaid' || token.lang === 'mermaid-js')) {
+        if (currentTokens.length > 0) {
+          currentTokens.links = tokens.links;
+          segments.push({
+            type: 'html',
+            html: marked.parser(currentTokens),
+          });
+          currentTokens = [];
+        }
+        segments.push({
+          type: 'mermaid',
+          code: token.text,
+        });
+      } else {
+        currentTokens.push(token);
+      }
+    }
+
+    if (currentTokens.length > 0) {
+      currentTokens.links = tokens.links;
+      segments.push({
+        type: 'html',
+        html: marked.parser(currentTokens),
+      });
+    }
+
+    return segments;
+  } catch (err) {
+    return [{ type: 'html', html: `<p>${markdownText}</p>` }];
   }
 }

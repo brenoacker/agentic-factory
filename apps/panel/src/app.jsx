@@ -137,7 +137,7 @@ export function generateWorkflowMermaid(wf) {
   return lines.join('\n');
 }
 
-export function MermaidRenderer({ code, id = 'workflow-mermaid', testId = 'wf-mermaid-diagram' }) {
+export function MermaidRenderer({ code, id = 'workflow-mermaid', containerId = null, testId = 'wf-mermaid-diagram' }) {
   const [svgContent, setSvgContent] = useState('');
   const [error, setError] = useState(null);
 
@@ -178,8 +178,8 @@ export function MermaidRenderer({ code, id = 'workflow-mermaid', testId = 'wf-me
 
   return (
     <div
-      id={id}
-      data-testid={testId}
+      id={containerId || 'wf-mermaid-diagram'}
+      data-testid={testId || 'wf-mermaid-diagram'}
       style={{
         padding: '1.25rem',
         background: '#0c131f',
@@ -297,26 +297,31 @@ export function MarkdownDocumentViewer({ content, filePath = '', extension = 'md
         .markdown-document-viewer th { background: #0f1b2a; color: #f8fafc; font-weight: 600; }
         .markdown-document-viewer a { color: #60a5fa; text-decoration: underline; }
       `}</style>
-      {segments.map((seg, idx) => {
-        if (seg.type === 'mermaid') {
+      {(() => {
+        let mermaidIdx = 0;
+        return segments.map((seg, idx) => {
+          if (seg.type === 'mermaid') {
+            const currentMermaidIdx = mermaidIdx++;
+            return (
+              <div key={`mermaid-wrapper-${idx}`} style={{ margin: '1rem 0' }} data-testid="doc-preview-mermaid-wrapper">
+                <MermaidRenderer
+                  code={seg.code}
+                  id={`doc-preview-mermaid-${currentMermaidIdx}`}
+                  containerId={`doc-preview-mermaid-${currentMermaidIdx}`}
+                  testId={`doc-preview-mermaid-${currentMermaidIdx}`}
+                />
+              </div>
+            );
+          }
           return (
-            <div key={`mermaid-wrapper-${idx}`} style={{ margin: '1rem 0' }}>
-              <MermaidRenderer
-                code={seg.code}
-                id={`doc-preview-mermaid-${idx}`}
-                testId={`doc-preview-mermaid-${idx}`}
-              />
-            </div>
+            <div
+              key={`html-${idx}`}
+              className="markdown-section"
+              dangerouslySetInnerHTML={{ __html: seg.html }}
+            />
           );
-        }
-        return (
-          <div
-            key={`html-${idx}`}
-            className="markdown-section"
-            dangerouslySetInnerHTML={{ __html: seg.html }}
-          />
-        );
-      })}
+        });
+      })()}
     </div>
   );
 }

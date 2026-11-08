@@ -339347,7 +339347,7 @@ ${isHandDrawn ? "" : `
     lines.push('  done["done\\n(complete)"]:::done');
     return lines.join("\n");
   }
-  function MermaidRenderer({ code, id: id38 = "workflow-mermaid", testId = "wf-mermaid-diagram" }) {
+  function MermaidRenderer({ code, id: id38 = "workflow-mermaid", containerId = null, testId = "wf-mermaid-diagram" }) {
     const [svgContent, setSvgContent] = (0, import_react311.useState)("");
     const [error3, setError] = (0, import_react311.useState)(null);
     (0, import_react311.useEffect)(() => {
@@ -339386,8 +339386,8 @@ ${isHandDrawn ? "" : `
     return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
       "div",
       {
-        id: id38,
-        "data-testid": testId,
+        id: containerId || "wf-mermaid-diagram",
+        "data-testid": testId || "wf-mermaid-diagram",
         style: {
           padding: "1.25rem",
           background: "#0c131f",
@@ -339498,26 +339498,31 @@ ${isHandDrawn ? "" : `
         .markdown-document-viewer th { background: #0f1b2a; color: #f8fafc; font-weight: 600; }
         .markdown-document-viewer a { color: #60a5fa; text-decoration: underline; }
       ` }),
-          segments.map((seg, idx) => {
-            if (seg.type === "mermaid") {
-              return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { margin: "1rem 0" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                MermaidRenderer,
+          (() => {
+            let mermaidIdx = 0;
+            return segments.map((seg, idx) => {
+              if (seg.type === "mermaid") {
+                const currentMermaidIdx = mermaidIdx++;
+                return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { margin: "1rem 0" }, "data-testid": "doc-preview-mermaid-wrapper", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                  MermaidRenderer,
+                  {
+                    code: seg.code,
+                    id: `doc-preview-mermaid-${currentMermaidIdx}`,
+                    containerId: `doc-preview-mermaid-${currentMermaidIdx}`,
+                    testId: `doc-preview-mermaid-${currentMermaidIdx}`
+                  }
+                ) }, `mermaid-wrapper-${idx}`);
+              }
+              return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                "div",
                 {
-                  code: seg.code,
-                  id: `doc-preview-mermaid-${idx}`,
-                  testId: `doc-preview-mermaid-${idx}`
-                }
-              ) }, `mermaid-wrapper-${idx}`);
-            }
-            return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-              "div",
-              {
-                className: "markdown-section",
-                dangerouslySetInnerHTML: { __html: seg.html }
-              },
-              `html-${idx}`
-            );
-          })
+                  className: "markdown-section",
+                  dangerouslySetInnerHTML: { __html: seg.html }
+                },
+                `html-${idx}`
+              );
+            });
+          })()
         ]
       }
     );
