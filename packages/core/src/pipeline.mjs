@@ -2,7 +2,7 @@ import { evaluateIntakeGuards } from './guards.mjs';
 import { dispatchTask } from './dispatcher.mjs';
 import { extractFollowUpTickets } from './brain.mjs';
 import { commentOnGitHubIssue, updateGitHubIssue, closeGitHubIssue, checkGitHubPullRequest } from './github.mjs';
-import { updateLinearIssueStatus } from './trackers.mjs';
+import { updateLinearIssueStatus, syncTaskStateToTracker } from './trackers.mjs';
 import { provisionTaskWorkspace } from './worktree.mjs';
 import { loadAndValidateFactory } from './config.mjs';
 
@@ -260,30 +260,11 @@ export function intakeAndTriageTicket({
 
   // Automatic Tracker Lifecycle: update labels and post in-progress pickup comment
   try {
-
-    if (resolvedProvider === 'linear') {
-      updateLinearIssueStatus({
-        issueId: issue.external_id || normalizedIssue.issue_number,
-        stateName: 'In Progress',
-        comment: `🚀 **Agentic Factory Pickup**: Issue intaked under workflow \`${classifiedType}\` (initial stage: \`${initialStage}\`).`,
-        runner: trackerRunner,
-      });
-    } else if (resolvedProvider === 'github' || normalizedIssue.repo.includes('/')) {
-      commentOnGitHubIssue({
-        repo: normalizedIssue.repo,
-        issueNumber: normalizedIssue.issue_number,
-        comment: `🚀 **Agentic Factory Pickup**: Issue #${normalizedIssue.issue_number} intaked under workflow \`${classifiedType}\` (initial stage: \`${initialStage}\`).`,
-        runner: trackerRunner,
-      });
-      updateGitHubIssue({
-        repo: normalizedIssue.repo,
-        issueNumber: normalizedIssue.issue_number,
-        labelsToAdd: [`stage:${initialStage}`, 'in-progress'],
-        labelsToRemove: ['stage:triage'],
-        assignees: ['@me'],
-        runner: trackerRunner,
-      });
-    }
+    syncTaskStateToTracker({
+      task,
+      store,
+      runner: trackerRunner,
+    });
   } catch {
     // Non-blocking telemetry
   }
@@ -439,52 +420,13 @@ export function advanceTicketInPanel({
   let trackerFeedback = null;
   if (res.stage === 'done') {
     try {
-      const resolvedProvider = String(
-        existing.provider ||
-          factoryConfig?.factory?.projects?.find(
-            (p) => String(p.repo).toLowerCase() === String(existing.repo).toLowerCase(),
-          )?.provider ||
-          (String(existing.execution_key).startsWith('linear:') || existing.external_id ? 'linear' : 'github'),
-      ).toLowerCase();
-
       const finalTask = store.getTask(executionKey) || res.task;
-      const deliverableSummary =
-        finalTask.deliverable_type === 'pull_request'
-          ? `Pull Request: ${finalTask.deliverable_url}`
-          : finalTask.deliverable_type === 'research_document'
-            ? `Research Document: \`${finalTask.deliverable_url}\``
-            : `Commit: \`${headSha}\``;
-
-      if (resolvedProvider === 'linear') {
-        updateLinearIssueStatus({
-          issueId: existing.external_id || existing.issue_number,
-          stateName: 'Done',
-          comment: `✅ **Completed via Agentic Factory**: Workflow \`${existing.type}\` finished at commit \`${headSha}\` with ${deliverableSummary}.`,
-          runner: trackerRunner,
-        });
-        trackerFeedback = { closed: true, tracker: 'linear' };
-      } else if (resolvedProvider === 'github' || (existing.repo && existing.repo.includes('/'))) {
-        commentOnGitHubIssue({
-          repo: existing.repo,
-          issueNumber: existing.issue_number,
-          comment: `✅ **Completed via Agentic Factory**: Workflow \`${existing.type}\` finished at commit \`${headSha}\` with ${deliverableSummary}. All automated checks and gates passed.`,
-          runner: trackerRunner,
-        });
-        closeGitHubIssue({
-          repo: existing.repo,
-          issueNumber: existing.issue_number,
-          comment: `Closed as completed by Agentic Factory (${deliverableSummary}).`,
-          runner: trackerRunner,
-        });
-        updateGitHubIssue({
-          repo: existing.repo,
-          issueNumber: existing.issue_number,
-          labelsToAdd: ['stage:done'],
-          labelsToRemove: ['in-progress', 'stage:merge', 'stage:review', 'stage:triage'],
-          runner: trackerRunner,
-        });
-        trackerFeedback = { closed: true, tracker: 'github' };
-      }
+      const syncRes = syncTaskStateToTracker({
+        task: finalTask,
+        store,
+        runner: trackerRunner,
+      });
+      trackerFeedback = { closed: syncRes.shouldClose, tracker: syncRes.provider };
     } catch {
       // Non-blocking tracker updates
     }

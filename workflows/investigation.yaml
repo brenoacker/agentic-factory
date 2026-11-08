@@ -21,7 +21,7 @@
       "agent": "investigator",
       "skills": ["codenavi", "not-your-babysitter", "sentry", "the-fool"],
       "contract": "contracts/investigation-report.schema.json",
-      "humanApproval": true,
+      "humanApproval": false,
       "next": "done"
     }
   ]

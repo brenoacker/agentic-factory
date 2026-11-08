@@ -11,6 +11,7 @@ import {
   canAutoMergeTask,
   generateWorkflowMermaid,
   pollLinearTracker,
+  createStageContractRunner,
   intakeAndTriageTicket,
   advanceTicketInPanel,
   evaluateIntakeGuards,
@@ -22,6 +23,7 @@ import {
   resolveTaskReviewFiles,
   openInEditor,
   readFileContent,
+  syncTaskStateToTracker,
   FactoryStore,
 } from '../../../packages/core/index.mjs';
 
@@ -1512,6 +1514,271 @@ test('C22: POST /api/files/open launches editor and GET /api/files/content retur
     assert.equal(badPostRes.status, 400);
   } finally {
     await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C26: Autonomous plan progression for well-described tasks and conditional human gating', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const store = new FactoryStore(dbPath);
+
+  try {
+    // 1. Task with well-described plan (needs_human: false) advances autonomously past plan stage
+    const taskWell = store.createTask({
+      executionKey: 'brenoacker/agentic-factory#101',
+      issueNumber: 101,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Well-described feature task',
+      type: 'feature',
+      stage: 'plan',
+    });
+
+    const baseRunner = createStageContractRunner({ headSha: '64e6a79', verdict: 'APPROVE' });
+    const mockAutonomousRunner = (spec) => {
+      if (spec.stage === 'plan') {
+        return {
+          ok: true,
+          status: 0,
+          stdout: JSON.stringify({
+            contract: {
+              stage_token: spec.stageToken,
+              issue_number: 101,
+              needs_human: false,
+            },
+          }),
+        };
+      }
+      return baseRunner(spec);
+    };
+
+    const resWell = advanceTicketInPanel({
+      executionKey: taskWell.execution_key,
+      factoryRoot: tmpDir,
+      store,
+      runner: mockAutonomousRunner,
+    });
+
+    // Verify task did not pause at plan; advanced autonomously through checks, verify, and review into merge
+    assert.equal(resWell.ok, true);
+    const updatedWell = store.getTask(taskWell.execution_key);
+    assert.notEqual(updatedWell.stage, 'plan');
+    assert.equal(updatedWell.stage, 'merge');
+    assert.ok(resWell.stepsExecuted.includes('plan'));
+    assert.ok(resWell.stepsExecuted.includes('checks_and_build'));
+    assert.ok(resWell.stepsExecuted.includes('verify'));
+    assert.ok(resWell.stepsExecuted.includes('review'));
+
+    // 2. Task with ambiguous plan (needs_human: true) pauses for human clarification
+    const taskAmbiguous = store.createTask({
+      executionKey: 'brenoacker/agentic-factory#102',
+      issueNumber: 102,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Ambiguous feature task',
+      type: 'feature',
+      stage: 'plan',
+    });
+
+    const mockAmbiguousRunner = (spec) => {
+      return {
+        ok: true,
+        status: 0,
+        stdout: JSON.stringify({
+          contract: {
+            stage_token: spec.stageToken,
+            issue_number: 102,
+            needs_human: true,
+            human_question: 'Ambiguous OAuth provider: please specify Google or GitHub',
+          },
+        }),
+      };
+    };
+
+    const resAmbiguous = advanceTicketInPanel({
+      executionKey: taskAmbiguous.execution_key,
+      factoryRoot: tmpDir,
+      store,
+      runner: mockAmbiguousRunner,
+    });
+
+    assert.equal(resAmbiguous.ok, true);
+    assert.equal(resAmbiguous.dispatchStatus, 'paused_for_human');
+    const updatedAmbiguous = store.getTask(taskAmbiguous.execution_key);
+    assert.equal(updatedAmbiguous.stage, 'plan');
+    assert.equal(updatedAmbiguous.needs_human, 1);
+    assert.ok(updatedAmbiguous.human_question.includes('Ambiguous OAuth provider'));
+  } finally {
+    store.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C27: Deduplicated tracker lifecycle updates and PR notifications across GitHub and Linear', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const store = new FactoryStore(dbPath);
+
+  const trackerCalls = [];
+  const mockTrackerRunner = (spec) => {
+    trackerCalls.push(spec);
+    return { ok: true, status: 200 };
+  };
+
+  try {
+    // 1. Initial transition on Linear
+    const linearTask = store.createTask({
+      executionKey: 'linear://brenoack/agentic-factory#501',
+      issueNumber: 501,
+      externalId: 'LIN-501',
+      provider: 'linear',
+      repo: 'linear://brenoack/agentic-factory-80f4e9bb2ce1',
+      title: 'Linear Lifecycle Task',
+      type: 'feature',
+      stage: 'checks_and_build',
+    });
+
+    const sync1 = syncTaskStateToTracker({
+      task: linearTask,
+      store,
+      runner: mockTrackerRunner,
+    });
+    assert.equal(sync1.ok, true);
+    assert.equal(sync1.provider, 'linear');
+    assert.equal(sync1.statusName, 'In Progress');
+    assert.equal(trackerCalls.length, 1);
+    assert.equal(trackerCalls[0].action, 'linear_update');
+    assert.equal(trackerCalls[0].stateName, 'In Progress');
+
+    // 2. Second call with same state suppresses duplicate comment
+    const taskReloaded = store.getTask(linearTask.execution_key);
+    const sync2 = syncTaskStateToTracker({
+      task: taskReloaded,
+      store,
+      runner: mockTrackerRunner,
+    });
+    assert.equal(sync2.ok, true);
+    assert.equal(sync2.skippedDuplicate, true);
+    assert.equal(trackerCalls.length, 1); // No new call made!
+
+    // 3. Move to stage merge with PR attached: sets In Review and posts PR link
+    store.updateTaskStage(linearTask.execution_key, {
+      stage: 'merge',
+      needsHuman: true,
+      humanQuestion: 'Stage "merge" requires human action',
+    });
+    store.attachTaskDeliverable(linearTask.execution_key, {
+      type: 'pull_request',
+      url: 'https://github.com/brenoacker/agentic-factory/pull/501',
+      ref: 'head501',
+    });
+
+    const taskInMerge = store.getTask(linearTask.execution_key);
+    const sync3 = syncTaskStateToTracker({
+      task: taskInMerge,
+      store,
+      runner: mockTrackerRunner,
+    });
+    assert.equal(sync3.ok, true);
+    assert.equal(sync3.statusName, 'In Review');
+    assert.equal(sync3.shouldClose, false);
+    assert.equal(trackerCalls.length, 2);
+    assert.equal(trackerCalls[1].stateName, 'In Review');
+    assert.ok(trackerCalls[1].comment.includes('https://github.com/brenoacker/agentic-factory/pull/501'));
+
+    // 4. Move to done: sets Done, posts completion and allows close
+    store.updateTaskStage(linearTask.execution_key, {
+      stage: 'done',
+      needsHuman: false,
+    });
+    const taskDone = store.getTask(linearTask.execution_key);
+    const sync4 = syncTaskStateToTracker({
+      task: taskDone,
+      store,
+      runner: mockTrackerRunner,
+    });
+    assert.equal(sync4.ok, true);
+    assert.equal(sync4.statusName, 'Done');
+    assert.equal(sync4.shouldClose, true);
+    assert.equal(trackerCalls.length, 3);
+    assert.equal(trackerCalls[2].stateName, 'Done');
+  } finally {
+    store.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C28: Non-code research workflow auto-close and post-merge closing', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const store = new FactoryStore(dbPath);
+
+  const trackerCalls = [];
+  const mockTrackerRunner = (spec) => {
+    trackerCalls.push(spec);
+    return { ok: true, status: 200 };
+  };
+
+  try {
+    // 1. Research investigation task auto-completes and auto-closes on document delivery
+    const researchTask = store.createTask({
+      executionKey: 'brenoacker/agentic-factory#601',
+      issueNumber: 601,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Investigate SQLite performance',
+      type: 'investigation',
+      stage: 'triage',
+    });
+
+    const resResearch = advanceTicketInPanel({
+      executionKey: researchTask.execution_key,
+      factoryRoot: tmpDir,
+      store,
+      trackerRunner: mockTrackerRunner,
+    });
+
+    assert.equal(resResearch.ok, true);
+    assert.equal(resResearch.stage, 'done');
+    const finalResearch = store.getTask(researchTask.execution_key);
+    assert.equal(finalResearch.stage, 'done');
+    assert.equal(finalResearch.deliverable_type, 'research_document');
+    // Closed on GitHub tracker
+    assert.ok(trackerCalls.some((c) => c.action === 'close' && c.issueNumber === 601));
+
+    // 2. Code feature workflow does NOT auto-close until live PR is merged
+    const codeTask = store.createTask({
+      executionKey: 'brenoacker/agentic-factory#602',
+      issueNumber: 602,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Implement feature endpoint',
+      type: 'feature',
+      stage: 'merge',
+    });
+    store.attachTaskDeliverable(codeTask.execution_key, {
+      type: 'pull_request',
+      url: 'https://github.com/brenoacker/agentic-factory/pull/602',
+      ref: 'sha602',
+    });
+
+    const advPremature = advanceTicketInPanel({
+      executionKey: codeTask.execution_key,
+      factoryRoot: tmpDir,
+      store,
+      approveCurrentStage: true,
+      trackerRunner: (spec) => {
+        if (spec.action === 'check_pr') {
+          return { ok: true, state: 'OPEN', merged: false, prNumber: 602, url: spec.prNumberOrUrl };
+        }
+        return mockTrackerRunner(spec);
+      },
+    });
+
+    // Premature approve rejected
+    assert.equal(advPremature.ok, false);
+    assert.equal(advPremature.status, 409);
+    assert.equal(advPremature.code, 'pr_not_merged');
+    assert.equal(store.getTask(codeTask.execution_key).stage, 'merge');
+  } finally {
+    store.close();
     rmSync(tmpDir, { recursive: true, force: true });
   }
 });

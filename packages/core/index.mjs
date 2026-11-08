@@ -48,6 +48,7 @@ export {
   pollAsanaTracker,
   pollLinearTracker,
   updateLinearIssueStatus,
+  syncTaskStateToTracker,
   pollProjectTracker,
 } from './src/trackers.mjs';
 export { generateWorkflowMermaid } from './src/mermaid.mjs';

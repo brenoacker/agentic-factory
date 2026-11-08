@@ -293,12 +293,10 @@ test('C6: Playwright E2E test triages, advances, approves human gates, and compl
     await page.screenshot({ path: join(CAPTURES_DIR, 'board-after-intake.png'), fullPage: true });
 
     // 2. Drive each of the 5 tickets through every workflow stage to 'done'
-    // Feature (#301): triage -> plan (gate) -> checks_and_build -> verify -> review -> merge (gate) -> done
+    // Feature (#301): triage -> autonomous plan, checks, verify, review -> merge (gate) -> done
     await page.getByTestId('dispatch-btn-301').click();
-    await expect(page.getByTestId('task-stage-301')).toHaveText('plan');
-    await expect(page.getByTestId('needs-human-card-301')).toBeVisible();
-    await page.getByTestId('approve-btn-301').click();
     await expect(page.getByTestId('task-stage-301')).toHaveText('merge');
+    await expect(page.getByTestId('needs-human-card-301')).toBeVisible();
     await page.getByTestId('approve-btn-301').click();
     await expect(page.getByTestId('task-stage-301')).toHaveText('done');
 
@@ -308,10 +306,8 @@ test('C6: Playwright E2E test triages, advances, approves human gates, and compl
     await page.getByTestId('approve-btn-302').click();
     await expect(page.getByTestId('task-stage-302')).toHaveText('done');
 
-    // Investigation (#303): triage -> investigate (gate) -> done
+    // Investigation (#303): triage -> investigate (delivers research doc) -> done
     await page.getByTestId('dispatch-btn-303').click();
-    await expect(page.getByTestId('task-stage-303')).toHaveText('investigate');
-    await page.getByTestId('approve-btn-303').click();
     await expect(page.getByTestId('task-stage-303')).toHaveText('done');
 
     // Discovery (#304): triage -> discover (gate) -> done
@@ -822,10 +818,8 @@ test('C13: Playwright E2E test configures Linear tracker in Cloudscape UI, syncs
     await expect(page.getByTestId('task-type-901')).toHaveText('feature');
     await expect(page.getByTestId('task-stage-901')).toHaveText('triage');
 
-    // 4. Advance Linear ticket through stages (Feature: triage -> plan -> merge -> done)
+    // 4. Advance Linear ticket through stages (Feature: triage -> autonomous plan & review -> merge -> done)
     await page.getByTestId('dispatch-btn-901').click();
-    await expect(page.getByTestId('task-stage-901')).toHaveText('plan');
-    await page.getByTestId('approve-btn-901').click();
     await expect(page.getByTestId('task-stage-901')).toHaveText('merge');
     await page.getByTestId('approve-btn-901').click();
     await expect(page.getByTestId('task-stage-901')).toHaveText('done');
@@ -886,22 +880,20 @@ test('C14: Playwright E2E test verifies isolated workspace provisioning, deliver
     await expect(page.getByTestId('task-stage-950')).toHaveText('triage');
     await expect(page.getByTestId('task-stage-951')).toHaveText('triage');
 
-    // 2. Dispatch #950 -> provisions isolated workspace & task branch
+    // 2. Dispatch #950 -> provisions isolated workspace & task branch, advancing to merge with PR
     await page.getByTestId('dispatch-btn-950').click();
     await expect(page.getByTestId('task-branch-950')).toBeVisible();
     await expect(page.getByTestId('task-branch-950')).toContainText('factory/issue-950');
     await expect(page.getByTestId('task-ws-950')).toBeVisible();
 
-    // Advance #950 to done -> verifies Pull Request deliverable link
-    await page.getByTestId('approve-btn-950').click();
+    // Advance #950 from merge to done -> verifies Pull Request deliverable link
     await page.getByTestId('approve-btn-950').click();
     await expect(page.getByTestId('task-stage-950')).toHaveText('done');
     await expect(page.getByTestId('task-deliverable-950')).toBeVisible();
     await expect(page.getByTestId('task-deliverable-950')).toContainText('Pull Request:');
 
-    // 3. Dispatch #951 (investigation) -> advances to done with research document
+    // 3. Dispatch #951 (investigation) -> advances directly to done with research document
     await page.getByTestId('dispatch-btn-951').click();
-    await page.getByTestId('approve-btn-951').click();
     await expect(page.getByTestId('task-stage-951')).toHaveText('done');
     await expect(page.getByTestId('task-deliverable-951')).toBeVisible();
     await expect(page.getByTestId('task-deliverable-951')).toContainText('Research Doc:');
@@ -1425,6 +1417,81 @@ test('C25: Playwright E2E verifies contextual purpose explainers for circuit bre
     await expect(brainExplainer).toContainText('Persistent cross-ticket repository memory');
 
     await page.screenshot({ path: join(CAPTURES_DIR, 'unified-navigation-and-explainers.png'), fullPage: true });
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C26: Playwright E2E verifies tracker status badges and PR notification in Kanban and Waiting Human', async ({ page }) => {
+  mkdirSync(CAPTURES_DIR, { recursive: true });
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    // 1. Seed task in merge stage with genuine PR deliverable and Linear tracker link
+    const taskMerge = panel.store.createTask({
+      executionKey: 'linear://brenoack/agentic-factory#777',
+      issueNumber: 777,
+      externalId: 'LIN-777',
+      provider: 'linear',
+      repo: 'brenoacker/agentic-factory',
+      title: 'PR Verification & Status Sync Task',
+      type: 'feature',
+      stage: 'merge',
+      ticketUrl: 'https://linear.app/issue/LIN-777',
+    });
+    panel.store.updateTaskStage(taskMerge.execution_key, {
+      needsHuman: true,
+      humanQuestion: 'Pull request awaiting human review and merge',
+    });
+    panel.store.attachTaskDeliverable(taskMerge.execution_key, {
+      type: 'pull_request',
+      url: 'https://github.com/brenoacker/agentic-factory/pull/777',
+      ref: '777abcd',
+    });
+
+    // 2. Seed task in checks_and_build stage with GitHub tracker link
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#778',
+      issueNumber: 778,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Active Building Task',
+      type: 'feature',
+      stage: 'checks_and_build',
+      ticketUrl: 'https://github.com/brenoacker/agentic-factory/issues/778',
+    });
+
+    await page.goto(baseUrl);
+
+    // 3. Navigate to Board & Needs Human tab
+    await page.locator('#tabs button[data-tab="board"]').click();
+    await expect(page.locator('#tab-board')).toBeVisible();
+
+    // 4. Verify Waiting for Human card renders Linear ticket link and question
+    const humanCard = page.locator('[data-testid="needs-human-card-777"]');
+    await expect(humanCard).toBeVisible();
+    const humanLink = page.locator('[data-testid="human-ticket-link-777"]');
+    await expect(humanLink).toBeVisible();
+    await expect(humanLink).toHaveAttribute('href', 'https://linear.app/issue/LIN-777');
+    await expect(page.locator('[data-testid="human-question-777"]')).toContainText('Pull request awaiting human review and merge');
+
+    // 5. Verify Kanban board shows task in merge column with PR deliverable link
+    const kanbanCard777 = page.locator('[data-testid="task-card-777"]');
+    await expect(kanbanCard777).toBeVisible();
+    const deliverableBox = page.locator('[data-testid="task-deliverable-777"]');
+    await expect(deliverableBox).toBeVisible();
+    await expect(deliverableBox).toContainText('Pull Request');
+    await expect(deliverableBox.locator('a')).toHaveAttribute('href', 'https://github.com/brenoacker/agentic-factory/pull/777');
+
+    // 6. Verify Kanban board shows task 778 with GitHub link in checks_and_build stage
+    const kanbanLink778 = page.locator('[data-testid="kanban-ticket-link-778"]');
+    await expect(kanbanLink778).toBeVisible();
+    await expect(kanbanLink778).toHaveAttribute('href', 'https://github.com/brenoacker/agentic-factory/issues/778');
+
+    await page.screenshot({ path: join(CAPTURES_DIR, 'tracker-lifecycle-sync.png'), fullPage: true });
   } finally {
     await panel.close();
     rmSync(tmpDir, { recursive: true, force: true });

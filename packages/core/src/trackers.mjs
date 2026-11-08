@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { pollIssuesWithEtag } from './github.mjs';
+import { pollIssuesWithEtag, commentOnGitHubIssue, updateGitHubIssue, closeGitHubIssue } from './github.mjs';
 
 export const SUPPORTED_PROVIDERS = ['github', 'jira', 'asana', 'linear'];
 
@@ -825,4 +825,190 @@ export function pollProjectTracker({ project, etag = null, runner = null }) {
     return pollLinearTracker({ project, etag, runner });
   }
   return pollGitHubTracker({ project, etag, runner });
+}
+
+/**
+ * Synchronizes task lifecycle changes (stage transitions, waiting for human, PR links, completion)
+ * to external issue trackers (GitHub, Linear, Jira, Asana) without duplicate comments across polling cycles.
+ */
+export function syncTaskStateToTracker({
+  task,
+  store = null,
+  runner = null,
+  force = false,
+} = {}) {
+  if (!task) return { ok: false, error: 'Task is required' };
+
+  const stage = String(task.stage || 'triage');
+  const needsHuman = Boolean(task.needs_human);
+  const delivUrl = String(task.deliverable_url || '');
+  const delivType = String(task.deliverable_type || '');
+  const question = String(task.human_question || '');
+
+  const rawProvider = String(task.provider || '').toLowerCase();
+  const provider =
+    rawProvider ||
+    (String(task.execution_key || '').startsWith('linear:') || String(task.repo || '').startsWith('linear://')
+      ? 'linear'
+      : 'github');
+
+  const signature = `${stage}:${needsHuman ? '1' : '0'}:${delivUrl}:${question}`;
+  if (!force && task.last_synced_stage && task.last_synced_stage === signature) {
+    return {
+      ok: true,
+      skippedDuplicate: true,
+      signature,
+      provider,
+      statusName: stage === 'done' ? 'Done' : 'In Progress',
+      shouldClose: stage === 'done',
+    };
+  }
+
+  let comment = '';
+  let statusName = '';
+  let labelsToAdd = [];
+  let labelsToRemove = [];
+  let shouldClose = false;
+
+  if (stage === 'done') {
+    statusName = 'Done';
+    const deliverableSummary =
+      delivType === 'pull_request'
+        ? `Pull Request: ${delivUrl}`
+        : delivType === 'research_document'
+          ? `Research Document: \`${delivUrl}\``
+          : `Deliverable: completed`;
+
+    if (delivType === 'pull_request' && delivUrl) {
+      comment = `✅ **Completed via Agentic Factory**: Pull Request ${delivUrl} was merged into default branch. Issue closed as completed.`;
+    } else {
+      comment = `✅ **Completed via Agentic Factory**: Workflow finished with ${deliverableSummary}. All automated checks and gates passed.`;
+    }
+    labelsToAdd = ['stage:done'];
+    labelsToRemove = ['in-progress', 'waiting-for-human', 'stage:merge', 'stage:review', 'stage:triage'];
+    shouldClose = true;
+  } else if (stage === 'merge') {
+    statusName = 'In Review';
+    if (delivUrl) {
+      comment = `👀 **Waiting for Human Review**: Pull Request created: ${delivUrl}. Please review and merge the PR.`;
+    } else {
+      comment = `👀 **Waiting for Human Review**: Task reached stage \`merge\` and awaits operator review.`;
+    }
+    labelsToAdd = ['waiting-for-human', 'stage:merge'];
+    labelsToRemove = ['in-progress', 'stage:triage'];
+    shouldClose = false;
+  } else if (needsHuman) {
+    statusName = 'In Review';
+    comment = question
+      ? `⚠️ **Human Input Required**: ${question}`
+      : `⚠️ **Human Input Required**: Task paused awaiting operator input.`;
+    labelsToAdd = ['waiting-for-human'];
+    labelsToRemove = ['in-progress'];
+    shouldClose = false;
+  } else if (stage === 'triage') {
+    statusName = 'In Progress';
+    comment = `🚀 **Agentic Factory Pickup**: Issue intaked under workflow \`${task.type || 'feature'}\` (initial stage: \`triage\`).`;
+    labelsToAdd = ['in-progress', 'stage:triage'];
+    labelsToRemove = ['waiting-for-human'];
+    shouldClose = false;
+  } else if (stage === 'checks_and_build' || stage === 'plan' || stage === 'verify' || stage === 'review') {
+    statusName = 'In Progress';
+    comment = `🔨 **Stage Transition**: Task advanced to stage \`${stage}\`.`;
+    labelsToAdd = ['in-progress', `stage:${stage}`];
+    labelsToRemove = ['waiting-for-human', 'stage:triage'];
+    shouldClose = false;
+  } else {
+    statusName = 'In Progress';
+    comment = `🔨 **Stage Transition**: Task entered stage \`${stage}\`.`;
+    labelsToAdd = ['in-progress', `stage:${stage}`];
+    labelsToRemove = ['waiting-for-human'];
+    shouldClose = false;
+  }
+
+  const result = {
+    ok: true,
+    provider,
+    signature,
+    comment,
+    statusName,
+    labelsToAdd,
+    labelsToRemove,
+    shouldClose,
+  };
+
+  try {
+    if (provider === 'linear') {
+      const issueId = task.external_id || task.issue_number;
+      updateLinearIssueStatus({
+        issueId,
+        stateName: statusName || 'In Progress',
+        comment,
+        runner,
+      });
+    } else if (provider === 'jira') {
+      if (runner) {
+        runner({
+          action: 'jira_update',
+          issueKey: task.external_id || task.issue_number,
+          statusName,
+          comment,
+        });
+      }
+    } else if (provider === 'asana') {
+      if (runner) {
+        runner({
+          action: 'asana_update',
+          gid: task.external_id || task.issue_number,
+          statusName,
+          comment,
+        });
+      }
+    } else {
+      // GitHub
+      let repo = task.repo;
+      if (repo && repo.startsWith('linear://')) {
+        repo = repo.replace(/^linear:\/?\/?/i, '');
+      }
+      const issueNumber = task.issue_number;
+      if (repo && repo.includes('/') && issueNumber) {
+        if (comment) {
+          commentOnGitHubIssue({
+            repo,
+            issueNumber,
+            comment,
+            runner,
+          });
+        }
+        if (labelsToAdd.length > 0 || labelsToRemove.length > 0) {
+          updateGitHubIssue({
+            repo,
+            issueNumber,
+            labelsToAdd,
+            labelsToRemove,
+            runner,
+          });
+        }
+        if (shouldClose) {
+          const closeComment =
+            delivType === 'pull_request' && delivUrl
+              ? `Closed as completed by Agentic Factory (Merged PR: ${delivUrl}).`
+              : `Closed as completed by Agentic Factory.`;
+          closeGitHubIssue({
+            repo,
+            issueNumber,
+            comment: closeComment,
+            runner,
+          });
+        }
+      }
+    }
+
+    if (store && typeof store.updateTaskLastSyncedStage === 'function') {
+      store.updateTaskLastSyncedStage(task.execution_key, signature);
+    }
+  } catch (err) {
+    result.error = err.message;
+  }
+
+  return result;
 }

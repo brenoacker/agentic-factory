@@ -21,7 +21,7 @@
       "agent": "planner",
       "skills": ["tlc-spec-lean"],
       "gate": "python skills/vendor/tlc-spec-lean/scripts/validate_plan.py {feature}",
-      "humanApproval": true,
+      "humanApproval": false,
       "next": "checks_and_build"
     },
     {

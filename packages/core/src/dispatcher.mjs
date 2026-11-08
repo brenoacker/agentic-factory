@@ -3,6 +3,7 @@ import { invokeRuntimeAdapter } from './adapters.mjs';
 import { validateContract } from './contracts.mjs';
 import { selectRuntime, recordRuntimeFailure } from './router.mjs';
 import { checkGitHubPullRequest } from './github.mjs';
+import { syncTaskStateToTracker } from './trackers.mjs';
 
 function contractKindFromPath(contractPath) {
   if (!contractPath) return null;
@@ -100,7 +101,10 @@ export function dispatchTask({
       needsHuman: false,
       humanQuestion: '',
     });
+    syncTaskStateToTracker({ task, store, runner: trackerRunner });
   }
+
+  syncTaskStateToTracker({ task, store, runner: trackerRunner });
 
   const stepsExecuted = [];
 
@@ -116,6 +120,7 @@ export function dispatchTask({
         needsHuman: true,
         humanQuestion: `Stage "${stageDef.id}" requires human action`,
       });
+      syncTaskStateToTracker({ task, store, runner: trackerRunner });
       store.recordEvent({
         executionKey,
         issueNumber: task.issue_number,
@@ -249,6 +254,31 @@ export function dispatchTask({
       pricesConfig,
     );
 
+    // Check if agent explicitly raised its hand for human clarification (needs_human: true)
+    if (execRes.contract?.needs_human === true) {
+      task = store.updateTaskStage(executionKey, {
+        needsHuman: true,
+        humanQuestion: execRes.contract.human_question || `Stage "${stageDef.id}" requested human clarification`,
+      });
+      syncTaskStateToTracker({ task, store, runner: trackerRunner });
+      store.recordEvent({
+        executionKey,
+        issueNumber: task.issue_number,
+        eventType: 'human_needed',
+        stage: stageDef.id,
+        runtime: route.runtime,
+        model: route.model,
+        payload: { reason: 'agent_requested_human', question: execRes.contract.human_question },
+      });
+      return {
+        ok: true,
+        status: 'paused_for_human',
+        stage: task.stage,
+        stepsExecuted: [...stepsExecuted, stageDef.id],
+        task,
+      };
+    }
+
     // Validate contract if the stage specifies one
     if (contractKind) {
       const cleanPayload = { ...execRes.contract };
@@ -284,6 +314,7 @@ export function dispatchTask({
           url: `docs/research/issue-${task.issue_number}-investigation.md`,
           ref: cleanPayload.question || `Investigation Report #${task.issue_number}`,
         });
+        task = store.getTask(executionKey) || task;
       }
 
       if (contractKind === 'triage') {
@@ -306,6 +337,7 @@ export function dispatchTask({
           stageDef = stageMap.get(task.stage) || stageDef;
         }
         if (cleanPayload.needs_human) {
+          syncTaskStateToTracker({ task, store, runner: trackerRunner });
           return {
             ok: true,
             status: 'paused_for_human',
@@ -319,11 +351,19 @@ export function dispatchTask({
       if (contractKind === 'review') {
         const prNumber = cleanPayload.pr_number;
         if (prNumber) {
+          let targetRepo = task.repo;
+          if (targetRepo && targetRepo.startsWith('linear://')) {
+            targetRepo = targetRepo.replace(/^linear:\/?\/?/i, '');
+          }
+          if (!targetRepo || !targetRepo.includes('/') || targetRepo.includes('://')) {
+            targetRepo = factoryConfig?.factory?.repo || 'brenoacker/agentic-factory';
+          }
           store.attachTaskDeliverable(executionKey, {
             type: 'pull_request',
-            url: `https://github.com/${task.repo}/pull/${prNumber}`,
+            url: `https://github.com/${targetRepo}/pull/${prNumber}`,
             ref: cleanPayload.commit_sha || headSha,
           });
+          task = store.getTask(executionKey) || task;
         }
 
         const newRound = cleanPayload.round;
@@ -346,6 +386,7 @@ export function dispatchTask({
               needsHuman: true,
               humanQuestion: `max_review_rounds_reached (${newRound}/${maxReviewRounds})`,
             });
+            syncTaskStateToTracker({ task, store, runner: trackerRunner });
             store.recordEvent({
               executionKey,
               issueNumber: task.issue_number,
@@ -370,6 +411,7 @@ export function dispatchTask({
             reviewRounds: newRound,
             needsHuman: false,
           });
+          syncTaskStateToTracker({ task, store, runner: trackerRunner });
           stepsExecuted.push(stageDef.id);
           continue;
         }
@@ -390,6 +432,7 @@ export function dispatchTask({
         needsHuman: true,
         humanQuestion: `Stage "${stageDef.id}" completed and awaits human approval (/approve)`,
       });
+      syncTaskStateToTracker({ task, store, runner: trackerRunner });
       store.recordEvent({
         executionKey,
         issueNumber: task.issue_number,
@@ -410,12 +453,14 @@ export function dispatchTask({
 
     const nextStage = stageDef.next || 'done';
     if (nextStage === 'done') {
+      task = store.getTask(executionKey) || task;
       const delivCheck = store.validateTaskDeliverable(task);
       if (!delivCheck.ok) {
         task = store.updateTaskStage(executionKey, {
           needsHuman: true,
           humanQuestion: `Deliverable check rejected: ${delivCheck.error}`,
         });
+        syncTaskStateToTracker({ task, store, runner: trackerRunner });
         return {
           ok: false,
           status: 'missing_deliverable',
@@ -433,8 +478,10 @@ export function dispatchTask({
       needsHuman: false,
       humanQuestion: '',
     });
+    syncTaskStateToTracker({ task, store, runner: trackerRunner });
   }
 
+  syncTaskStateToTracker({ task, store, runner: trackerRunner });
   return {
     ok: true,
     status: 'completed',

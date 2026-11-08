@@ -56,6 +56,7 @@ export class FactoryStore {
         branch_name TEXT NOT NULL DEFAULT '',
         ticket_url TEXT NOT NULL DEFAULT '',
         provider TEXT NOT NULL DEFAULT 'github',
+        last_synced_stage TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       );
@@ -68,6 +69,11 @@ export class FactoryStore {
     }
     try {
       this.db.exec("ALTER TABLE tasks ADD COLUMN provider TEXT NOT NULL DEFAULT 'github'");
+    } catch {
+      // Column already exists
+    }
+    try {
+      this.db.exec("ALTER TABLE tasks ADD COLUMN last_synced_stage TEXT NOT NULL DEFAULT ''");
     } catch {
       // Column already exists
     }
@@ -509,6 +515,7 @@ export class FactoryStore {
     branchName,
     ticketUrl,
     provider,
+    lastSyncedStage,
     now = new Date().toISOString(),
   }) {
     const current = this.getTask(executionKey);
@@ -529,13 +536,14 @@ export class FactoryStore {
     const nextBranch = branchName !== undefined ? String(branchName || '') : current.branch_name;
     const nextTicketUrl = ticketUrl !== undefined ? String(ticketUrl || '') : (current.ticket_url || '');
     const nextProvider = provider !== undefined ? String(provider || 'github') : (current.provider || 'github');
+    const nextLastSynced = lastSyncedStage !== undefined ? String(lastSyncedStage || '') : (current.last_synced_stage || '');
 
     this.db
       .prepare(`
         UPDATE tasks
         SET stage = ?, type = ?, impact = ?, runtime = ?, model = ?, needs_human = ?, human_question = ?,
             review_rounds = ?, approved_first_round = ?, deliverable_type = ?, deliverable_url = ?,
-            deliverable_ref = ?, workspace_path = ?, branch_name = ?, ticket_url = ?, provider = ?, updated_at = ?
+            deliverable_ref = ?, workspace_path = ?, branch_name = ?, ticket_url = ?, provider = ?, last_synced_stage = ?, updated_at = ?
         WHERE execution_key = ?
       `)
       .run(
@@ -555,10 +563,18 @@ export class FactoryStore {
         nextBranch,
         nextTicketUrl,
         nextProvider,
+        nextLastSynced,
         now,
         executionKey,
       );
 
+    return this.getTask(executionKey);
+  }
+
+  updateTaskLastSyncedStage(executionKey, lastSyncedStage, now = new Date().toISOString()) {
+    this.db
+      .prepare('UPDATE tasks SET last_synced_stage = ?, updated_at = ? WHERE execution_key = ?')
+      .run(String(lastSyncedStage || ''), now, executionKey);
     return this.getTask(executionKey);
   }
 

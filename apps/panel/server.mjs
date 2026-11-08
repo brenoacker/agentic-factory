@@ -15,6 +15,7 @@ import {
   syncMonitoredProjectsIssues,
   createPollingScheduler,
   checkGitHubPullRequest,
+  syncTaskStateToTracker,
   commentOnGitHubIssue,
   closeGitHubIssue,
   updateGitHubIssue,
@@ -340,23 +341,9 @@ export function createPanelServer({
             payload: { deliverableUrl: task.deliverable_url, deliverableType: task.deliverable_type },
           });
           try {
-            commentOnGitHubIssue({
-              repo: task.repo,
-              issueNumber: task.issue_number,
-              comment: `✅ **Completed via Agentic Factory**: Pull Request ${task.deliverable_url} was merged into default branch. Issue closed as completed.`,
-              runner: issuePollRunner,
-            });
-            closeGitHubIssue({
-              repo: task.repo,
-              issueNumber: task.issue_number,
-              comment: `Closed as completed by Agentic Factory (Merged PR: ${task.deliverable_url}).`,
-              runner: issuePollRunner,
-            });
-            updateGitHubIssue({
-              repo: task.repo,
-              issueNumber: task.issue_number,
-              labelsToAdd: ['stage:done'],
-              labelsToRemove: ['in-progress', 'stage:merge'],
+            syncTaskStateToTracker({
+              task: store.getTask(executionKey),
+              store,
               runner: issuePollRunner,
             });
           } catch {}

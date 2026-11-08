@@ -1,7 +1,7 @@
 import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { loadAndValidateFactory } from './config.mjs';
-import { SUPPORTED_PROVIDERS, normalizeTriggerRules, pollProjectTracker } from './trackers.mjs';
+import { SUPPORTED_PROVIDERS, normalizeTriggerRules, pollProjectTracker, syncTaskStateToTracker } from './trackers.mjs';
 import { intakeAndTriageTicket, advanceTicketInPanel } from './pipeline.mjs';
 import { checkGitHubPullRequest, commentOnGitHubIssue, closeGitHubIssue, updateGitHubIssue } from './github.mjs';
 
@@ -349,28 +349,11 @@ export function syncMergedPullRequests({ rootDir, store, runner = null, trackerR
           payload: { deliverableUrl: task.deliverable_url, deliverableType: task.deliverable_type },
         });
 
-        const provider = String(task.provider || 'github').toLowerCase();
-        if (provider === 'github' || (task.repo && task.repo.includes('/'))) {
-          commentOnGitHubIssue({
-            repo: task.repo,
-            issueNumber: task.issue_number,
-            comment: `✅ **Completed via Agentic Factory**: Pull Request ${task.deliverable_url} was merged into default branch. Issue closed as completed.`,
-            runner: activeRunner,
-          });
-          closeGitHubIssue({
-            repo: task.repo,
-            issueNumber: task.issue_number,
-            comment: `Closed as completed by Agentic Factory (Merged PR: ${task.deliverable_url}).`,
-            runner: activeRunner,
-          });
-          updateGitHubIssue({
-            repo: task.repo,
-            issueNumber: task.issue_number,
-            labelsToAdd: ['stage:done'],
-            labelsToRemove: ['in-progress', 'stage:merge'],
-            runner: activeRunner,
-          });
-        }
+        syncTaskStateToTracker({
+          task: store.getTask(task.execution_key),
+          store,
+          runner: activeRunner,
+        });
 
         mergedTasks.push(store.getTask(task.execution_key));
       }
