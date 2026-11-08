@@ -1044,6 +1044,7 @@ export function syncTaskStateToTracker({
       }
     }
 
+    task.last_synced_stage = signature;
     if (store && typeof store.updateTaskLastSyncedStage === 'function') {
       store.updateTaskLastSyncedStage(task.execution_key, signature);
     }

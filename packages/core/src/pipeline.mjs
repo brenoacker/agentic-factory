@@ -27,12 +27,22 @@ export function classifyTicketType({ title = '', body = '', type = null, labels 
     return type.toLowerCase().trim();
   }
 
-  const bracketMatches = [...String(title).matchAll(/\[(feature|bug|investigation|discovery|chore)\]/gi)];
+  const bracketMatches = [...String(title).matchAll(/\[(feature|bug|investigation|discovery|chore|spec)\]/gi)];
   if (bracketMatches.length > 0) {
-    return bracketMatches[0][1].toLowerCase();
+    const matched = bracketMatches[0][1].toLowerCase();
+    return matched === 'spec' ? 'feature' : matched;
+  }
+
+  const trimmedTitle = String(title).trim();
+  if (/^(spec|feature|implement|build):/i.test(trimmedTitle)) {
+    return 'feature';
   }
 
   const combined = `${title} ${body}`.toLowerCase();
+
+  if (/\b(ready for implementation)\b/.test(combined)) {
+    return 'feature';
+  }
 
   if (/\b(discovery|prd|design doc|product requirement|broad idea|greenfield|user interview)\b/.test(combined)) {
     return 'discovery';
