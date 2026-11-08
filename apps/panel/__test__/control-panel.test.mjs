@@ -2012,7 +2012,10 @@ test('C34: advanceTicketInPanel cleans up temporary workspace when task reaches 
       title: 'Investigation task to complete and cleanup',
       type: 'investigation',
       stage: 'investigate',
+    });
+    store.attachTaskWorkspace(task.execution_key, {
       workspacePath: taskWs,
+      branchName: 'factory/issue-950',
     });
     store.attachTaskDeliverable(task.execution_key, {
       type: 'research_document',

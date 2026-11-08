@@ -48,6 +48,6 @@ Proof: run unit | C34: advanceTicketInPanel cleans up temporary workspace when t
 
 - **Settled mid-build:** none
 - **Dispatched:** Independent Feature Verifier
-- **Boundary:** pending
+- **Boundary:** verified
 - **Abandoned:** none
-- **Walked:** pending
+- **Walked:** verified (all 3 checks hold with independent proofs)
