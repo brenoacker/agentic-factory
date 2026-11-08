@@ -1,4 +1,20 @@
 import { spawnSync } from 'node:child_process';
+import crypto from 'node:crypto';
+
+/**
+ * Validates a GitHub webhook payload signature against the HMAC secret.
+ */
+export function validateGitHubWebhookSignature({ payload, signature, secret }) {
+  if (!signature || !secret) return false;
+  const hmac = crypto.createHmac('sha256', secret);
+  const rawBody = typeof payload === 'string' ? payload : JSON.stringify(payload);
+  const digest = `sha256=${hmac.update(rawBody).digest('hex')}`;
+  try {
+    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Polls GitHub issues using an ETag (`If-None-Match` header) so HTTP 304 responses consume zero API rate limit.

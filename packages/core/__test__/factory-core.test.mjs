@@ -10,6 +10,7 @@ import {
   validateContract,
   evaluateIntakeGuards,
   FactoryStore,
+  validateGitHubWebhookSignature,
 } from '../index.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..', '..', '..');
@@ -429,4 +430,19 @@ test('C7: cli status aggregates tasks, token usage, USD cost, review metrics, an
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
+});
+
+test('C21: validateGitHubWebhookSignature validates valid HMAC-SHA256 signatures and rejects mismatches', async () => {
+  const secret = 'webhook-super-secret-key';
+  const payload = JSON.stringify({ action: 'opened', issue: { number: 11 } });
+  
+  // Valid signature
+  const crypto = await import('node:crypto');
+  const hmac = crypto.createHmac('sha256', secret);
+  const validSig = `sha256=${hmac.update(payload).digest('hex')}`;
+  
+  assert.equal(validateGitHubWebhookSignature({ payload, signature: validSig, secret }), true);
+  assert.equal(validateGitHubWebhookSignature({ payload, signature: 'sha256=invalid', secret }), false);
+  assert.equal(validateGitHubWebhookSignature({ payload, signature: '', secret }), false);
+  assert.equal(validateGitHubWebhookSignature({ payload, signature: validSig, secret: '' }), false);
 });
