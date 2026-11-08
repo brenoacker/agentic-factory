@@ -1630,6 +1630,58 @@ function ControlPanelApp() {
                                 <strong>⚠️ Clarification Needed:</strong> {item.question || 'Agent requested human assistance to proceed'}
                               </div>
 
+                              {item.deliverable_url && (
+                                <div
+                                  id={`human-deliverable-${item.issueNumber}`}
+                                  data-testid={`human-deliverable-${item.issueNumber}`}
+                                  style={{
+                                    padding: '0.5rem 0.75rem',
+                                    background: '#0c131f',
+                                    borderRadius: '4px',
+                                    border: item.deliverable_type === 'pull_request' || item.deliverable_url.startsWith('http') ? '1px solid #38bdf8' : '1px solid #a78bfa',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: '0.5rem',
+                                  }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}>
+                                    <span style={{ color: item.deliverable_type === 'pull_request' || item.deliverable_url.startsWith('http') ? '#38bdf8' : '#a78bfa', fontWeight: 700 }}>
+                                      {item.deliverable_type === 'pull_request' || item.deliverable_url.startsWith('http') ? '🔗 Pull Request for Review:' : '📄 Deliverable Document:'}
+                                    </span>
+                                    {item.deliverable_url.startsWith('http') ? (
+                                      <a
+                                        href={item.deliverable_url}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        style={{ color: '#60a5fa', textDecoration: 'underline', fontWeight: 600 }}
+                                      >
+                                        {item.deliverable_url} ↗
+                                      </a>
+                                    ) : (
+                                      <code style={{ color: '#e2e8f0' }}>{item.deliverable_ref || item.deliverable_url}</code>
+                                    )}
+                                  </div>
+                                  <div>
+                                    {item.deliverable_url.startsWith('http') ? (
+                                      <Button
+                                        variant="normal"
+                                        onClick={() => window.open(item.deliverable_url, '_blank')}
+                                      >
+                                        Open PR ↗
+                                      </Button>
+                                    ) : (
+                                      <Button
+                                        variant="normal"
+                                        onClick={() => openPreviewModal(item.deliverable_url, item.executionKey, item.deliverable_ref || item.deliverable_url)}
+                                      >
+                                        Preview Document
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
                               {item.reviewFiles && item.reviewFiles.length > 0 && (
                                 <div
                                   id={`human-review-files-${item.issueNumber}`}
@@ -1889,8 +1941,14 @@ function ControlPanelApp() {
                                     <a
                                       href={t.deliverable_url.startsWith('http') ? t.deliverable_url : `#`}
                                       target={t.deliverable_url.startsWith('http') ? '_blank' : '_self'}
+                                      onClick={(e) => {
+                                        if (!t.deliverable_url.startsWith('http')) {
+                                          e.preventDefault();
+                                          openPreviewModal(t.deliverable_url, t.execution_key, t.deliverable_ref || t.deliverable_url);
+                                        }
+                                      }}
                                       rel="noreferrer"
-                                      style={{ fontSize: '0.72rem', color: '#38bdf8', textDecoration: 'underline' }}
+                                      style={{ fontSize: '0.72rem', color: '#38bdf8', textDecoration: 'underline', cursor: 'pointer' }}
                                     >
                                       {t.deliverable_ref || t.deliverable_url}
                                     </a>

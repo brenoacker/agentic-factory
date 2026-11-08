@@ -340862,6 +340862,56 @@ ${isHandDrawn ? "" : `
                               ]
                             }
                           ),
+                          item.deliverable_url && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                            "div",
+                            {
+                              id: `human-deliverable-${item.issueNumber}`,
+                              "data-testid": `human-deliverable-${item.issueNumber}`,
+                              style: {
+                                padding: "0.5rem 0.75rem",
+                                background: "#0c131f",
+                                borderRadius: "4px",
+                                border: item.deliverable_type === "pull_request" || item.deliverable_url.startsWith("http") ? "1px solid #38bdf8" : "1px solid #a78bfa",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                gap: "0.5rem"
+                              },
+                              children: [
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.85rem" }, children: [
+                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { color: item.deliverable_type === "pull_request" || item.deliverable_url.startsWith("http") ? "#38bdf8" : "#a78bfa", fontWeight: 700 }, children: item.deliverable_type === "pull_request" || item.deliverable_url.startsWith("http") ? "\u{1F517} Pull Request for Review:" : "\u{1F4C4} Deliverable Document:" }),
+                                  item.deliverable_url.startsWith("http") ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                                    "a",
+                                    {
+                                      href: item.deliverable_url,
+                                      target: "_blank",
+                                      rel: "noreferrer",
+                                      style: { color: "#60a5fa", textDecoration: "underline", fontWeight: 600 },
+                                      children: [
+                                        item.deliverable_url,
+                                        " \u2197"
+                                      ]
+                                    }
+                                  ) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { style: { color: "#e2e8f0" }, children: item.deliverable_ref || item.deliverable_url })
+                                ] }),
+                                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: item.deliverable_url.startsWith("http") ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                  button_default2,
+                                  {
+                                    variant: "normal",
+                                    onClick: () => window.open(item.deliverable_url, "_blank"),
+                                    children: "Open PR \u2197"
+                                  }
+                                ) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                                  button_default2,
+                                  {
+                                    variant: "normal",
+                                    onClick: () => openPreviewModal(item.deliverable_url, item.executionKey, item.deliverable_ref || item.deliverable_url),
+                                    children: "Preview Document"
+                                  }
+                                ) })
+                              ]
+                            }
+                          ),
                           item.reviewFiles && item.reviewFiles.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
                             "div",
                             {
@@ -341141,8 +341191,14 @@ ${isHandDrawn ? "" : `
                                           {
                                             href: t4.deliverable_url.startsWith("http") ? t4.deliverable_url : `#`,
                                             target: t4.deliverable_url.startsWith("http") ? "_blank" : "_self",
+                                            onClick: (e3) => {
+                                              if (!t4.deliverable_url.startsWith("http")) {
+                                                e3.preventDefault();
+                                                openPreviewModal(t4.deliverable_url, t4.execution_key, t4.deliverable_ref || t4.deliverable_url);
+                                              }
+                                            },
                                             rel: "noreferrer",
-                                            style: { fontSize: "0.72rem", color: "#38bdf8", textDecoration: "underline" },
+                                            style: { fontSize: "0.72rem", color: "#38bdf8", textDecoration: "underline", cursor: "pointer" },
                                             children: t4.deliverable_ref || t4.deliverable_url
                                           }
                                         )

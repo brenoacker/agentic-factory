@@ -118,6 +118,7 @@ export function createPanelServer({
             item.workspace_path = t?.workspace_path || null;
             item.deliverable_url = t?.deliverable_url || null;
             item.deliverable_type = t?.deliverable_type || null;
+            item.deliverable_ref = t?.deliverable_ref || null;
             item.reviewFiles = resolveTaskReviewFiles(t || item, { factoryRoot: root });
           }
         }
