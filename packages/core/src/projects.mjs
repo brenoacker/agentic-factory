@@ -323,7 +323,13 @@ export function syncMergedPullRequests({ rootDir, store, runner = null, trackerR
         runner: activeRunner,
       });
 
-      if (prCheck.ok && prCheck.merged) {
+      const branchMatches =
+        !task.branch_name ||
+        !prCheck.headRefName ||
+        prCheck.headRefName === task.branch_name ||
+        prCheck.headRefName.includes(`issue-${task.issue_number}`);
+
+      if (prCheck.ok && prCheck.merged && branchMatches) {
         store.updateTaskStage(task.execution_key, {
           stage: 'done',
           needsHuman: false,
