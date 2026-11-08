@@ -27,9 +27,9 @@ export function classifyTicketType({ title = '', body = '', type = null, labels 
     return type.toLowerCase().trim();
   }
 
-  const prefixMatch = String(title).match(/^\s*\[(feature|bug|investigation|discovery|chore)\]/i);
-  if (prefixMatch) {
-    return prefixMatch[1].toLowerCase();
+  const bracketMatches = [...String(title).matchAll(/\[(feature|bug|investigation|discovery|chore)\]/gi)];
+  if (bracketMatches.length > 0) {
+    return bracketMatches[0][1].toLowerCase();
   }
 
   const combined = `${title} ${body}`.toLowerCase();

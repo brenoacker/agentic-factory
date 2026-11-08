@@ -747,6 +747,30 @@ export function pollLinearTracker({ project, etag = null, runner = null }) {
 }
 
 /**
+ * Extracts the canonical Linear issue identifier or UUID from a task.
+ */
+export function resolveLinearIssueId(task) {
+  if (!task) return null;
+  const rawExternal = String(task.external_id || '').trim();
+  if (rawExternal && !/^\d+$/.test(rawExternal)) {
+    return rawExternal;
+  }
+  const ticketUrl = String(task.ticket_url || '').trim();
+  if (ticketUrl) {
+    const uuidMatch = ticketUrl.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+    if (uuidMatch) return uuidMatch[0];
+    const identMatch = ticketUrl.match(/\/issue\/([A-Za-z0-9]+-\d+)/i);
+    if (identMatch) return identMatch[1];
+  }
+  const title = String(task.title || '').trim();
+  if (title) {
+    const titleMatch = title.match(/\[Linear-([^\]]+)\]/i);
+    if (titleMatch) return titleMatch[1].trim();
+  }
+  return task.external_id || task.issue_number;
+}
+
+/**
  * Updates status and adds comments to a Linear issue. Accepts an injectable runner for tests.
  */
 export function updateLinearIssueStatus({ issueId, stateName = 'Done', comment = '', apiKey = '', runner = null }) {
@@ -757,6 +781,23 @@ export function updateLinearIssueStatus({ issueId, stateName = 'Done', comment =
   if (!key) return { ok: false, error: 'Missing LINEAR_API_KEY' };
 
   try {
+    let resolvedIssueId = String(issueId || '').trim();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(resolvedIssueId);
+    if (!isUuid && resolvedIssueId) {
+      const issueQuery = JSON.stringify({
+        query: `{ issue(id: "${resolvedIssueId}") { id } }`,
+      });
+      const issueProc = spawnSync(
+        'curl',
+        ['-sS', '-X', 'POST', '-H', `Authorization: ${key}`, '-H', 'Content-Type: application/json', '--data-raw', issueQuery, 'https://api.linear.app/graphql'],
+        { encoding: 'utf8' },
+      );
+      const parsedIssue = issueProc.stdout ? JSON.parse(issueProc.stdout) : {};
+      if (parsedIssue?.data?.issue?.id) {
+        resolvedIssueId = parsedIssue.data.issue.id;
+      }
+    }
+
     // 1. Resolve workflow state id matching requested stateName
     const statesQuery = JSON.stringify({
       query: `{ workflowStates { nodes { id name } } }`,
@@ -770,7 +811,7 @@ export function updateLinearIssueStatus({ issueId, stateName = 'Done', comment =
     const nodes = stateData?.data?.workflowStates?.nodes || [];
     const matchedState = nodes.find((s) => s.name?.toLowerCase() === stateName.toLowerCase()) || nodes.find((s) => s.name?.toLowerCase().includes(stateName.toLowerCase()));
 
-    if (matchedState?.id) {
+    if (matchedState?.id && resolvedIssueId) {
       const updateMutation = JSON.stringify({
         query: `mutation UpdateIssue($id: String!, $input: IssueUpdateInput!) {
           issueUpdate(id: $id, input: $input) {
@@ -778,7 +819,7 @@ export function updateLinearIssueStatus({ issueId, stateName = 'Done', comment =
             issue { id state { name } }
           }
         }`,
-        variables: { id: issueId, input: { stateId: matchedState.id } },
+        variables: { id: resolvedIssueId, input: { stateId: matchedState.id } },
       });
       spawnSync(
         'curl',
@@ -787,7 +828,7 @@ export function updateLinearIssueStatus({ issueId, stateName = 'Done', comment =
       );
     }
 
-    if (comment) {
+    if (comment && resolvedIssueId) {
       const commentMutation = JSON.stringify({
         query: `mutation CreateComment($input: CommentCreateInput!) {
           commentCreate(input: $input) {
@@ -795,7 +836,7 @@ export function updateLinearIssueStatus({ issueId, stateName = 'Done', comment =
             comment { id }
           }
         }`,
-        variables: { input: { issueId, body: comment } },
+        variables: { input: { issueId: resolvedIssueId, body: comment } },
       });
       spawnSync(
         'curl',
@@ -804,7 +845,7 @@ export function updateLinearIssueStatus({ issueId, stateName = 'Done', comment =
       );
     }
 
-    return { ok: true, status: 200, issueId, stateName };
+    return { ok: true, status: 200, issueId: resolvedIssueId, stateName };
   } catch (err) {
     return { ok: false, error: err.message };
   }
@@ -938,7 +979,7 @@ export function syncTaskStateToTracker({
 
   try {
     if (provider === 'linear') {
-      const issueId = task.external_id || task.issue_number;
+      const issueId = resolveLinearIssueId(task);
       updateLinearIssueStatus({
         issueId,
         stateName: statusName || 'In Progress',

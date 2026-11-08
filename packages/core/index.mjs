@@ -47,6 +47,7 @@ export {
   pollJiraTracker,
   pollAsanaTracker,
   pollLinearTracker,
+  resolveLinearIssueId,
   updateLinearIssueStatus,
   syncTaskStateToTracker,
   pollProjectTracker,
