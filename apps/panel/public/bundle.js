@@ -339551,6 +339551,7 @@ ${isHandDrawn ? "" : `
     const [intakeBody, setIntakeBody] = (0, import_react311.useState)("");
     const [intakeFeedback, setIntakeFeedback] = (0, import_react311.useState)("");
     const [dispatchingKeys, setDispatchingKeys] = (0, import_react311.useState)({});
+    const [reclassifyingKeys, setReclassifyingKeys] = (0, import_react311.useState)({});
     const [addingProject, setAddingProject] = (0, import_react311.useState)(false);
     const [syncingProjects, setSyncingProjects] = (0, import_react311.useState)(false);
     const [intakingTicket, setIntakingTicket] = (0, import_react311.useState)(false);
@@ -339792,6 +339793,39 @@ ${isHandDrawn ? "" : `
         setIntakeFeedback(`Dispatch Failed: ${err.message}`);
       } finally {
         setDispatchingKeys((prev2) => {
+          const next3 = { ...prev2 };
+          delete next3[key2];
+          return next3;
+        });
+      }
+    };
+    const handleReclassifyTask = async (key2, newType) => {
+      if (reclassifyingKeys[key2]) return;
+      setReclassifyingKeys((prev2) => ({ ...prev2, [key2]: true }));
+      try {
+        const res = await fetch("/api/tickets/" + encodeURIComponent(key2) + "/reclassify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: newType })
+        });
+        const data6 = await res.json();
+        if (!res.ok) {
+          setIntakeFeedback(`Reclassify Notice (${res.status}): ${data6.error || "Failed to reclassify task"}`);
+        } else {
+          setIntakeFeedback(`Task reclassified to ${newType}`);
+          setState((prev2) => {
+            if (!prev2 || !Array.isArray(prev2.tasks)) return prev2;
+            const updatedTasks = prev2.tasks.map(
+              (t4) => t4.execution_key === key2 ? { ...t4, type: newType, stage: data6.task?.stage || t4.stage } : t4
+            );
+            return { ...prev2, tasks: updatedTasks };
+          });
+          await loadDashboard();
+        }
+      } catch (err) {
+        setIntakeFeedback(`Reclassify Failed: ${err.message}`);
+      } finally {
+        setReclassifyingKeys((prev2) => {
           const next3 = { ...prev2 };
           delete next3[key2];
           return next3;
@@ -341026,7 +341060,35 @@ ${isHandDrawn ? "" : `
                               item.type,
                               "] \u2014 Stage:",
                               " ",
-                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "blue", children: item.stage })
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "blue", children: item.stage }),
+                              /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                                "select",
+                                {
+                                  id: `human-reclassify-select-${item.issueNumber}`,
+                                  "data-testid": `human-reclassify-select-${item.issueNumber}`,
+                                  value: item.type,
+                                  disabled: Boolean(reclassifyingKeys[item.executionKey]),
+                                  onChange: (e3) => handleReclassifyTask(item.executionKey, e3.target.value),
+                                  title: "Reclassify workflow type",
+                                  style: {
+                                    background: "#1e293b",
+                                    color: "#93c5fd",
+                                    border: "1px solid #334155",
+                                    borderRadius: "4px",
+                                    fontSize: "0.75rem",
+                                    padding: "0.1rem 0.35rem",
+                                    marginLeft: "0.45rem",
+                                    cursor: "pointer"
+                                  },
+                                  children: [
+                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "feature", children: "feature" }),
+                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "bug", children: "bug" }),
+                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "chore", children: "chore" }),
+                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "investigation", children: "investigation" }),
+                                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "discovery", children: "discovery" })
+                                  ]
+                                }
+                              )
                             ] }),
                             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
                               "Issue #",
@@ -341321,6 +341383,33 @@ ${isHandDrawn ? "" : `
                                                   fontWeight: 600
                                                 },
                                                 children: t4.type
+                                              }
+                                            ),
+                                            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+                                              "select",
+                                              {
+                                                id: `reclassify-select-${t4.issue_number}`,
+                                                "data-testid": `reclassify-select-${t4.issue_number}`,
+                                                value: t4.type,
+                                                disabled: Boolean(reclassifyingKeys[t4.execution_key]),
+                                                onChange: (e3) => handleReclassifyTask(t4.execution_key, e3.target.value),
+                                                title: "Reclassify workflow type",
+                                                style: {
+                                                  background: "#1e293b",
+                                                  color: "#93c5fd",
+                                                  border: "1px solid #334155",
+                                                  borderRadius: "4px",
+                                                  fontSize: "0.72rem",
+                                                  padding: "0.05rem 0.35rem",
+                                                  cursor: "pointer"
+                                                },
+                                                children: [
+                                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "feature", children: "feature" }),
+                                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "bug", children: "bug" }),
+                                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "chore", children: "chore" }),
+                                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "investigation", children: "investigation" }),
+                                                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "discovery", children: "discovery" })
+                                                ]
                                               }
                                             ),
                                             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(

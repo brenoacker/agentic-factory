@@ -592,6 +592,67 @@ export class FactoryStore {
     return this.getTask(executionKey);
   }
 
+  reclassifyTaskType(executionKey, newType, workflows = {}, now = new Date().toISOString()) {
+    const VALID_TYPES = new Set(['feature', 'bug', 'chore', 'investigation', 'discovery']);
+    const normalizedType = String(newType || '').toLowerCase().trim();
+    if (!VALID_TYPES.has(normalizedType)) {
+      throw new Error('Invalid ticket type');
+    }
+
+    const task = this.getTask(executionKey);
+    if (!task) return null;
+
+    const isCodeType = ['feature', 'bug', 'chore'].includes(normalizedType);
+    let deliverableType = task.deliverable_type;
+    let deliverableUrl = task.deliverable_url;
+    let deliverableRef = task.deliverable_ref;
+
+    // Reset deliverable expectation to empty if switching to code workflow from non-PR deliverable
+    if (isCodeType && deliverableType !== 'pull_request') {
+      deliverableType = '';
+      deliverableUrl = '';
+      deliverableRef = '';
+    }
+
+    // Determine target workflow stage alignment if workflow config is provided
+    let nextStage = task.stage;
+    const targetWorkflow = workflows?.[normalizedType];
+    if (targetWorkflow && Array.isArray(targetWorkflow.stages) && targetWorkflow.stages.length > 0) {
+      const stageExistsInTarget = targetWorkflow.stages.some((s) => s.id === task.stage);
+      if (!stageExistsInTarget) {
+        nextStage = targetWorkflow.stages[0].id;
+      }
+    } else if (isCodeType && ['investigate', 'interview'].includes(task.stage)) {
+      nextStage = 'triage';
+    }
+
+    this.db
+      .prepare(`
+        UPDATE tasks
+        SET type = ?, stage = ?, deliverable_type = ?, deliverable_url = ?, deliverable_ref = ?, updated_at = ?
+        WHERE execution_key = ?
+      `)
+      .run(normalizedType, nextStage, deliverableType, deliverableUrl, deliverableRef, now, executionKey);
+
+    this.recordEvent({
+      executionKey,
+      issueNumber: task.issue_number,
+      eventType: 'reclassified',
+      stage: nextStage,
+      runtime: task.runtime,
+      model: task.model,
+      payload: {
+        previousType: task.type,
+        newType: normalizedType,
+        previousStage: task.stage,
+        newStage: nextStage,
+      },
+      now,
+    });
+
+    return this.getTask(executionKey);
+  }
+
   validateTaskDeliverable(task) {
     if (!task) return { ok: false, error: 'Task is required' };
     const taskType = String(task.type || '').toLowerCase();

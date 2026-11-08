@@ -12,6 +12,7 @@ import {
   generateWorkflowMermaid,
   pollLinearTracker,
   createStageContractRunner,
+  classifyTicketType,
   intakeAndTriageTicket,
   advanceTicketInPanel,
   evaluateIntakeGuards,
@@ -2039,6 +2040,132 @@ test('C34: advanceTicketInPanel cleans up temporary workspace when task reaches 
     rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+test('C35: classifyTicketType uses deliverable-oriented weighted scoring, discounts repository stopwords, and prioritizes engineering sections', () => {
+  // AC 1: Prefix in title returns feature
+  assert.equal(classifyTicketType({ title: 'Spec: Incident Investigation Harness — Read-Only Investigation MVP' }), 'feature');
+  assert.equal(classifyTicketType({ title: '[Spec] Incident Investigation Harness' }), 'feature');
+  assert.equal(classifyTicketType({ title: 'Feature: Add OAuth Login' }), 'feature');
+  assert.equal(classifyTicketType({ title: '[Feature] Export metrics to Prometheus' }), 'feature');
+  assert.equal(classifyTicketType({ title: 'Implement: Webhook delivery queue' }), 'feature');
+
+  // AC 2 & 3: Body with structural engineering sections & repository stopwords discounted
+  const specClassification = classifyTicketType({
+    title: 'Incident Investigation Harness — Read-Only MVP',
+    repo: 'brenoacker/incident-investigator',
+    body: `
+## User Stories
+As a site reliability engineer, I want to query recent incidents.
+
+## Acceptance Criteria
+- [ ] Provide read-only investigation API endpoint
+- [ ] Ready for implementation
+    `,
+  });
+  assert.equal(specClassification, 'feature');
+
+  // AC 3: Discounts repository stopwords so they don't falsely classify
+  const repoStopwordClassification = classifyTicketType({
+    title: 'Update incident investigator dependencies',
+    repo: 'brenoacker/incident-investigator',
+    body: 'Bump all package versions and clean up lockfile',
+  });
+  assert.equal(repoStopwordClassification, 'chore');
+
+  // AC 4: Steps to reproduce, error, or stack traces return bug
+  const bugClassification = classifyTicketType({
+    title: 'Null pointer in session handler',
+    body: `
+## Steps to Reproduce
+1. Start worker
+2. Send empty payload
+TypeError: Cannot read properties of undefined (reading 'session')
+    `,
+  });
+  assert.equal(bugClassification, 'bug');
+
+  // AC 5: Open exploratory questions without implementation criteria return investigation
+  const investigationClassification = classifyTicketType({
+    title: 'Why does CPU spike under high traffic?',
+    body: 'Options comparison and technical spike to evaluate root causes without implementation.',
+  });
+  assert.equal(investigationClassification, 'investigation');
+});
+
+test('C36: POST /api/tickets/:key/reclassify updates task type, resets deliverable rules, and rejects invalid types', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+  const store = panel.store;
+
+  try {
+    // Setup a task with type 'investigation' and an attached research doc
+    const key = 'brenoacker/agentic-factory#980';
+    store.createTask({
+      executionKey: key,
+      issueNumber: 980,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Investigation task to be reclassified',
+      type: 'investigation',
+      stage: 'investigate',
+    });
+    store.attachTaskDeliverable(key, {
+      type: 'research_document',
+      url: 'docs/research/sample.md',
+      ref: 'Sample Research Doc',
+    });
+
+    const initialTask = store.getTask(key);
+    assert.equal(initialTask.type, 'investigation');
+    assert.equal(initialTask.deliverable_type, 'research_document');
+
+    // AC 6: Reclassify to feature -> HTTP 200, task type updated in DB
+    const res200 = await fetch(`${baseUrl}/api/tickets/${encodeURIComponent(key)}/reclassify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'feature' }),
+    });
+    assert.equal(res200.status, 200);
+    const body200 = await res200.json();
+    assert.equal(body200.ok, true);
+    assert.equal(body200.task.type, 'feature');
+
+    // AC 9: Deliverable expectations reset to require a pull request for code workflows
+    const updatedTask = store.getTask(key);
+    assert.equal(updatedTask.type, 'feature');
+    assert.equal(updatedTask.deliverable_type, '');
+    assert.equal(updatedTask.deliverable_url, '');
+    const deliverableCheck = store.validateTaskDeliverable(updatedTask);
+    assert.equal(deliverableCheck.ok, false);
+    assert.equal(deliverableCheck.code, 'missing_deliverable');
+
+    // AC 7: Invalid type -> HTTP 400
+    const res400 = await fetch(`${baseUrl}/api/tickets/${encodeURIComponent(key)}/reclassify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'invalid_banana' }),
+    });
+    assert.equal(res400.status, 400);
+    const body400 = await res400.json();
+    assert.equal(body400.ok, false);
+    assert.equal(body400.error, 'Invalid ticket type');
+
+    // AC 8: Non-existent task -> HTTP 404
+    const res404 = await fetch(`${baseUrl}/api/tickets/non-existent-task%239999/reclassify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'feature' }),
+    });
+    assert.equal(res404.status, 404);
+    const body404 = await res404.json();
+    assert.equal(body404.ok, false);
+    assert.equal(body404.error, 'Task not found');
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
 
 
 

@@ -10,9 +10,10 @@ const VALID_TYPES = new Set(['feature', 'bug', 'investigation', 'discovery', 'ch
 
 /**
  * Classifies a ticket into one of the 5 factory ticket types (`feature`, `bug`, `investigation`, `discovery`, `chore`)
- * using explicit `type:*` labels, explicit `type` field, `[type]` title prefix, or natural-language keywords.
+ * using explicit `type:*` labels, explicit `type` field, `[type]` title prefix, deliverable-oriented weighted scoring,
+ * structural engineering sections, and repository stop-word exclusion.
  */
-export function classifyTicketType({ title = '', body = '', type = null, labels = [] } = {}) {
+export function classifyTicketType({ title = '', body = '', type = null, labels = [], repo = '' } = {}) {
   if (Array.isArray(labels)) {
     for (const rawLabel of labels) {
       const lbl = String(rawLabel).toLowerCase().trim();
@@ -37,27 +38,109 @@ export function classifyTicketType({ title = '', body = '', type = null, labels 
   if (/^(spec|feature|implement|build):/i.test(trimmedTitle)) {
     return 'feature';
   }
-
-  const combined = `${title} ${body}`.toLowerCase();
-
-  if (/\b(ready for implementation)\b/.test(combined)) {
-    return 'feature';
-  }
-
-  if (/\b(discovery|prd|design doc|product requirement|broad idea|greenfield|user interview)\b/.test(combined)) {
-    return 'discovery';
-  }
-  if (/\b(investigate|investigation|spike|why does|compare options|root cause question|benchmark)\b/.test(combined)) {
-    return 'investigation';
-  }
-  if (/\b(bug|regression|crash|exception|typeerror|referenceerror|broken|defect|fails when|500 error)\b/.test(combined)) {
+  if (/^(bug|fix):/i.test(trimmedTitle)) {
     return 'bug';
   }
-  if (/\b(chore|ci|github actions|dependencies|dependency|bump|refactor docs|readme|lint|cleanup|maintenance)\b/.test(combined)) {
+  if (/^(chore|ci|docs):/i.test(trimmedTitle)) {
     return 'chore';
   }
 
-  return 'feature';
+  // Extract stop-words from repository name so project identity tokens don't falsely classify workflows
+  const repoStopWords = new Set();
+  if (typeof repo === 'string' && repo.trim()) {
+    const parts = repo.toLowerCase().split(/[/_.-]+/);
+    for (const p of parts) {
+      if (p.length > 2) {
+        repoStopWords.add(p);
+        if (p.endsWith('s')) repoStopWords.add(p.slice(0, -1));
+        if (p.endsWith('or')) repoStopWords.add(p.slice(0, -2));
+        if (p.endsWith('er')) repoStopWords.add(p.slice(0, -2));
+        if (p.includes('investigat')) {
+          repoStopWords.add('investigate');
+          repoStopWords.add('investigation');
+          repoStopWords.add('investigator');
+        }
+      }
+    }
+  }
+
+  const scores = {
+    feature: 0,
+    bug: 0,
+    chore: 0,
+    investigation: 0,
+    discovery: 0,
+  };
+
+  const combined = `${title}\n${body}`;
+  const lowerCombined = combined.toLowerCase();
+
+  // Structural engineering sections & implementation deliverables (dominant priority)
+  if (
+    /##\s*(user stories|acceptance criteria|specification ready for implementation|spec)/i.test(combined) ||
+    /\b(ready for implementation)\b/i.test(combined) ||
+    /acceptance criteria:/i.test(combined)
+  ) {
+    scores.feature += 30;
+  }
+
+  if (
+    /##\s*steps to reproduce/i.test(combined) ||
+    /\b(steps to reproduce:?)/i.test(lowerCombined) ||
+    /\b(typeerror|referenceerror|stack trace|500 error|500 internal server error)\b/i.test(lowerCombined) ||
+    /\b(crash|exception|error):\s*/i.test(lowerCombined)
+  ) {
+    scores.bug += 30;
+  }
+
+  if (
+    /##\s*(discovery|user interviews|problem definition)/i.test(combined) ||
+    /\b(write prd|design doc|user interview|market research)\b/i.test(lowerCombined)
+  ) {
+    scores.discovery += 20;
+  }
+
+  // Exploratory research keywords (investigation), filtering out repo stopwords
+  const hasInvestigationStopword = repoStopWords.has('investigation') || repoStopWords.has('investigate');
+  if (!hasInvestigationStopword) {
+    if (/\b(investigate|investigation|root cause question|why does|options comparison|technical spike)\b/i.test(lowerCombined)) {
+      scores.investigation += 15;
+    }
+  } else {
+    // Repo name includes investigation/investigator: only award points if explicit open question without engineering specs
+    if (/\b(why does|options comparison|compare options|technical spike)\b/i.test(lowerCombined)) {
+      scores.investigation += 12;
+    }
+  }
+
+  // General keyword weighting
+  if (/\b(implement|feature|endpoint|capability|build)\b/i.test(lowerCombined)) {
+    scores.feature += 5;
+  }
+  if (/\b(bug|regression|crash|defect|broken|fails when|failure|exception|error|typeerror|referenceerror)\b/i.test(lowerCombined)) {
+    scores.bug += 15;
+  }
+  if (/\b(chore|ci|github actions|dependencies|dependency|bump|refactor docs|readme|lint|cleanup|maintenance)\b/i.test(lowerCombined)) {
+    scores.chore += 10;
+  }
+  if (/\b(discovery|prd|design doc|product requirement|broad idea|greenfield)\b/i.test(lowerCombined)) {
+    scores.discovery += 10;
+  }
+  if (/\b(spike|benchmark)\b/i.test(lowerCombined)) {
+    scores.investigation += 5;
+  }
+
+  // Pick highest scoring workflow type
+  let bestType = 'feature';
+  let bestScore = 0;
+  for (const [t, s] of Object.entries(scores)) {
+    if (s > bestScore) {
+      bestScore = s;
+      bestType = t;
+    }
+  }
+
+  return bestType;
 }
 
 /**
@@ -193,11 +276,14 @@ export function intakeAndTriageTicket({
     };
   }
 
+  const repo = issue.repo || factoryConfig?.factory?.repo || 'brenoacker/agentic-factory';
+
   const classifiedType = classifyTicketType({
     title: issue.title,
     body: issue.body,
     type: issue.type,
     labels: issue.labels,
+    repo,
   });
 
   const workflow = workflows?.[classifiedType];
@@ -210,7 +296,6 @@ export function intakeAndTriageTicket({
   }
 
   const initialStage = workflow.stages[0].id;
-  const repo = issue.repo || factoryConfig?.factory?.repo || 'brenoacker/agentic-factory';
 
   const normalizedIssue = {
     issue_number: issue.issue_number,

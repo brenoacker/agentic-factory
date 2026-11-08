@@ -356,6 +356,7 @@ function ControlPanelApp() {
   const [intakeBody, setIntakeBody] = useState('');
   const [intakeFeedback, setIntakeFeedback] = useState('');
   const [dispatchingKeys, setDispatchingKeys] = useState({});
+  const [reclassifyingKeys, setReclassifyingKeys] = useState({});
   const [addingProject, setAddingProject] = useState(false);
   const [syncingProjects, setSyncingProjects] = useState(false);
   const [intakingTicket, setIntakingTicket] = useState(false);
@@ -619,6 +620,40 @@ function ControlPanelApp() {
       setIntakeFeedback(`Dispatch Failed: ${err.message}`);
     } finally {
       setDispatchingKeys((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }
+  };
+
+  const handleReclassifyTask = async (key, newType) => {
+    if (reclassifyingKeys[key]) return;
+    setReclassifyingKeys((prev) => ({ ...prev, [key]: true }));
+    try {
+      const res = await fetch('/api/tickets/' + encodeURIComponent(key) + '/reclassify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: newType }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setIntakeFeedback(`Reclassify Notice (${res.status}): ${data.error || 'Failed to reclassify task'}`);
+      } else {
+        setIntakeFeedback(`Task reclassified to ${newType}`);
+        setState((prev) => {
+          if (!prev || !Array.isArray(prev.tasks)) return prev;
+          const updatedTasks = prev.tasks.map((t) =>
+            t.execution_key === key ? { ...t, type: newType, stage: data.task?.stage || t.stage } : t
+          );
+          return { ...prev, tasks: updatedTasks };
+        });
+        await loadDashboard();
+      }
+    } catch (err) {
+      setIntakeFeedback(`Reclassify Failed: ${err.message}`);
+    } finally {
+      setReclassifyingKeys((prev) => {
         const next = { ...prev };
         delete next[key];
         return next;
@@ -1836,6 +1871,30 @@ function ControlPanelApp() {
                                   </a>{' '}
                                   [{item.type}] — Stage:{' '}
                                   <Badge color="blue">{item.stage}</Badge>
+                                  <select
+                                    id={`human-reclassify-select-${item.issueNumber}`}
+                                    data-testid={`human-reclassify-select-${item.issueNumber}`}
+                                    value={item.type}
+                                    disabled={Boolean(reclassifyingKeys[item.executionKey])}
+                                    onChange={(e) => handleReclassifyTask(item.executionKey, e.target.value)}
+                                    title="Reclassify workflow type"
+                                    style={{
+                                      background: '#1e293b',
+                                      color: '#93c5fd',
+                                      border: '1px solid #334155',
+                                      borderRadius: '4px',
+                                      fontSize: '0.75rem',
+                                      padding: '0.1rem 0.35rem',
+                                      marginLeft: '0.45rem',
+                                      cursor: 'pointer',
+                                    }}
+                                  >
+                                    <option value="feature">feature</option>
+                                    <option value="bug">bug</option>
+                                    <option value="chore">chore</option>
+                                    <option value="investigation">investigation</option>
+                                    <option value="discovery">discovery</option>
+                                  </select>
                                 </div>
                                 <Box variant="small" color="text-body-secondary">
                                   Issue #{item.issueNumber}
@@ -2123,6 +2182,29 @@ function ControlPanelApp() {
                                   >
                                     {t.type}
                                   </span>
+                                  <select
+                                    id={`reclassify-select-${t.issue_number}`}
+                                    data-testid={`reclassify-select-${t.issue_number}`}
+                                    value={t.type}
+                                    disabled={Boolean(reclassifyingKeys[t.execution_key])}
+                                    onChange={(e) => handleReclassifyTask(t.execution_key, e.target.value)}
+                                    title="Reclassify workflow type"
+                                    style={{
+                                      background: '#1e293b',
+                                      color: '#93c5fd',
+                                      border: '1px solid #334155',
+                                      borderRadius: '4px',
+                                      fontSize: '0.72rem',
+                                      padding: '0.05rem 0.35rem',
+                                      cursor: 'pointer',
+                                    }}
+                                  >
+                                    <option value="feature">feature</option>
+                                    <option value="bug">bug</option>
+                                    <option value="chore">chore</option>
+                                    <option value="investigation">investigation</option>
+                                    <option value="discovery">discovery</option>
+                                  </select>
                                   <span
                                     data-testid={`task-stage-${t.issue_number}`}
                                     id={`task-stage-badge-${t.issue_number}`}

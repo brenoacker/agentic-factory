@@ -570,7 +570,31 @@ export function createPanelServer({
         return;
       }
 
-      // 9. POST /api/tickets/:key/dispatch & GET /api/tickets/:key/deliverable
+      // 9. POST /api/tickets/:key/reclassify & POST /api/tickets/:key/dispatch & GET /api/tickets/:key/deliverable
+      const reclassifyMatch = pathname.match(/^\/api\/tickets\/([^/]+)\/reclassify$/);
+      if (req.method === 'POST' && reclassifyMatch) {
+        const executionKey = decodeURIComponent(reclassifyMatch[1]);
+        const body = await readJsonBody(req);
+        const VALID_TYPES = new Set(['feature', 'bug', 'chore', 'investigation', 'discovery']);
+        const newType = String(body?.type || '').toLowerCase().trim();
+        if (!VALID_TYPES.has(newType)) {
+          sendJson(res, 400, { ok: false, error: 'Invalid ticket type' });
+          return;
+        }
+        const cfg = loadAndValidateFactory(root);
+        try {
+          const updated = store.reclassifyTaskType(executionKey, newType, cfg.workflows);
+          if (!updated) {
+            sendJson(res, 404, { ok: false, error: 'Task not found' });
+            return;
+          }
+          sendJson(res, 200, { ok: true, task: updated });
+        } catch (err) {
+          sendJson(res, 400, { ok: false, error: err.message });
+        }
+        return;
+      }
+
       const delivMatch = pathname.match(/^\/api\/tickets\/([^/]+)\/deliverable$/);
       if (req.method === 'GET' && delivMatch) {
         const executionKey = decodeURIComponent(delivMatch[1]);

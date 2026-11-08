@@ -1631,6 +1631,60 @@ test('C31: Playwright E2E verifies 4-column unified Kanban board and stage badge
   }
 });
 
+test('C32: Playwright E2E verifies interactive workflow reclassification from Kanban card', async ({ page }) => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    // 1. Create a task initially classified as investigation
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#880',
+      issueNumber: 880,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Incident Investigation MVP',
+      type: 'investigation',
+      stage: 'triage',
+    });
+
+    await page.goto(baseUrl);
+
+    // 2. Navigate to Board tab
+    await page.locator('#tabs button[data-tab="board"]').click();
+    await expect(page.locator('#tab-board')).toBeVisible();
+
+    // 3. Verify Kanban card exists and type badge displays 'investigation'
+    const card = page.locator('#kanban-board [data-testid="task-card-880"]');
+    await expect(card).toBeVisible();
+    const typeBadge = card.locator('[data-testid="task-type-880"]');
+    await expect(typeBadge).toHaveText('investigation');
+
+    // 4. Verify reclassification selector exists on the card
+    const select = card.locator('[data-testid="reclassify-select-880"]');
+    await expect(select).toBeVisible();
+    await expect(select).toHaveValue('investigation');
+
+    await page.screenshot({ path: join(CAPTURES_DIR, 'reclassify-before-change.png'), fullPage: true });
+
+    // 5. Select 'feature' from the reclassification dropdown
+    await select.selectOption('feature');
+
+    // 6. Verify type badge updates immediately in browser to 'feature'
+    await expect(typeBadge).toHaveText('feature');
+    await expect(select).toHaveValue('feature');
+
+    // 7. Verify persisted in SQLite database
+    const updatedInDb = panel.store.getTask('brenoacker/agentic-factory#880');
+    expect(updatedInDb.type).toBe('feature');
+
+    await page.screenshot({ path: join(CAPTURES_DIR, 'reclassify-after-change.png'), fullPage: true });
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+
 
 
 
