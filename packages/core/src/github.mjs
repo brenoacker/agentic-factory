@@ -24,10 +24,18 @@ export function pollIssuesWithEtag({ repo, etag = null, runner = null }) {
     const newEtag = etagMatch ? etagMatch[1].trim() : etag;
     const parts = raw.split(/\r?\n\r?\n/);
     const bodyText = parts.slice(1).join('\n\n').trim();
+    let parsedBody = [];
+    if (bodyText) {
+      try {
+        parsedBody = JSON.parse(bodyText);
+      } catch {
+        parsedBody = [];
+      }
+    }
     response = {
       status,
       etag: newEtag,
-      body: bodyText ? JSON.parse(bodyText) : [],
+      body: parsedBody,
     };
   }
 

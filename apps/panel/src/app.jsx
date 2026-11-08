@@ -172,6 +172,10 @@ function ControlPanelApp() {
   const [intakeBody, setIntakeBody] = useState('');
   const [intakeFeedback, setIntakeFeedback] = useState('');
   const [dispatchingKeys, setDispatchingKeys] = useState({});
+  const [addingProject, setAddingProject] = useState(false);
+  const [syncingProjects, setSyncingProjects] = useState(false);
+  const [intakingTicket, setIntakingTicket] = useState(false);
+  const [savingControls, setSavingControls] = useState(false);
 
   // Workflow editor form state
   const [selectedWf, setSelectedWf] = useState('feature');
@@ -274,29 +278,39 @@ function ControlPanelApp() {
       trackerConfig.assigneeFilter = projAssigneeFilter.trim();
     }
 
-    const res = await fetch('/api/projects', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        repo: projRepo,
-        provider: projProvider,
-        defaultBranch: projBranch || 'main',
-        trackerConfig,
-      }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      const p = data.project;
-      const providerBadge = (p.provider || 'github').toUpperCase();
-      setProjFeedback(
-        `Monitoring ${p.repo} (${p.defaultBranch}) via ${providerBadge}${
-          p.trackerConfig?.statusFilter ? ` [status: ${p.trackerConfig.statusFilter}]` : ''
-        }`,
-      );
-    } else {
-      setProjFeedback(`Error: ${data.error}`);
+    if (addingProject) return;
+    setAddingProject(true);
+    try {
+      const res = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          repo: projRepo,
+          provider: projProvider,
+          defaultBranch: projBranch || 'main',
+          trackerConfig,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const p = data.project;
+        const providerBadge = (p.provider || 'github').toUpperCase();
+        setProjFeedback(
+          `Monitoring ${p.repo} (${p.defaultBranch}) via ${providerBadge}${
+            p.trackerConfig?.statusFilter ? ` [status: ${p.trackerConfig.statusFilter}]` : ''
+          }`,
+        );
+        setProjRepo('');
+        setProjTrackerKey('');
+      } else {
+        setProjFeedback(`Error: ${data.error}`);
+      }
+      await loadDashboard();
+    } catch (err) {
+      setProjFeedback(`Error: ${err.message}`);
+    } finally {
+      setAddingProject(false);
     }
-    await loadDashboard();
   };
 
   const toggleProjectPause = async (project) => {
@@ -320,18 +334,26 @@ function ControlPanelApp() {
   };
 
   const syncAllMonitoredProjects = async () => {
-    const res = await fetch('/api/projects/sync', { method: 'POST' });
-    const data = await res.json();
-    if (res.ok) {
-      const skippedNote =
-        data.skippedByTriggersCount > 0 ? ` (${data.skippedByTriggersCount} skipped by triggers)` : '';
-      setProjFeedback(
-        `Synced ${data.polledRepos} repo(s): ${data.newTasksCount} new issue(s) intaked${skippedNote}`,
-      );
-    } else {
-      setProjFeedback(`Sync error: ${data.error}`);
+    if (syncingProjects) return;
+    setSyncingProjects(true);
+    try {
+      const res = await fetch('/api/projects/sync', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        const skippedNote =
+          data.skippedByTriggersCount > 0 ? ` (${data.skippedByTriggersCount} skipped by triggers)` : '';
+        setProjFeedback(
+          `Synced ${data.polledRepos} repo(s): ${data.newTasksCount} new issue(s) intaked${skippedNote}`,
+        );
+      } else {
+        setProjFeedback(`Sync error: ${data.error}`);
+      }
+      await loadDashboard();
+    } catch (err) {
+      setProjFeedback(`Sync error: ${err.message}`);
+    } finally {
+      setSyncingProjects(false);
     }
-    await loadDashboard();
   };
 
   const updateScheduler = async (nextEnabled, runImmediately = true) => {
@@ -357,26 +379,37 @@ function ControlPanelApp() {
   };
 
   const submitTicketIntake = async () => {
-    const res = await fetch('/api/tickets/intake', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        repo: intakeRepo || undefined,
-        issue_number: Number(intakeIssueNum),
-        title: intakeTitle,
-        body: intakeBody,
-        type: intakeType || null,
-      }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setIntakeFeedback(
-        `Classified as ${data.classifiedType} at stage ${data.initialStage} (${data.executionKey})`,
-      );
-    } else {
-      setIntakeFeedback(`Error: ${data.error || 'Intake failed'}`);
+    if (intakingTicket) return;
+    setIntakingTicket(true);
+    try {
+      const res = await fetch('/api/tickets/intake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          repo: intakeRepo || undefined,
+          issue_number: Number(intakeIssueNum),
+          title: intakeTitle,
+          body: intakeBody,
+          type: intakeType || null,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setIntakeFeedback(
+          `Classified as ${data.classifiedType} at stage ${data.initialStage} (${data.executionKey})`,
+        );
+        setIntakeIssueNum('');
+        setIntakeTitle('');
+        setIntakeBody('');
+      } else {
+        setIntakeFeedback(`Error: ${data.error || 'Intake failed'}`);
+      }
+      await loadDashboard();
+    } catch (err) {
+      setIntakeFeedback(`Error: ${err.message}`);
+    } finally {
+      setIntakingTicket(false);
     }
-    await loadDashboard();
   };
 
   const dispatchTicketKey = async (key, approveCurrentStage = false) => {
@@ -450,19 +483,28 @@ function ControlPanelApp() {
   };
 
   const saveControls = async () => {
-    const res = await fetch('/api/controls', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        autonomy: ctrlAutonomy,
-        maxTasksPerHour: Number(ctrlRate),
-        dailyBudgetUsd: Number(ctrlBudget),
-        stallThresholdMinutes: Number(ctrlStallMinutes),
-        killSwitch: ctrlKill,
-      }),
-    });
-    setControlsFeedback(res.ok ? 'Controls saved' : 'Failed to save controls');
-    await loadDashboard();
+    if (savingControls) return;
+    setSavingControls(true);
+    try {
+      const res = await fetch('/api/controls', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          autonomy: ctrlAutonomy,
+          maxTasksPerHour: Number(ctrlRate),
+          dailyBudgetUsd: Number(ctrlBudget),
+          stallThresholdMinutes: Number(ctrlStallMinutes),
+          killSwitch: ctrlKill,
+        }),
+      });
+      const data = await res.json();
+      setControlsFeedback(res.ok ? 'Controls saved successfully' : `Failed to save controls: ${data.error || 'Invalid parameters'}`);
+      await loadDashboard();
+    } catch (err) {
+      setControlsFeedback(`Failed to save controls: ${err.message}`);
+    } finally {
+      setSavingControls(false);
+    }
   };
 
   const verifyDeploymentFromUi = async () => {
@@ -518,7 +560,7 @@ function ControlPanelApp() {
       <div className="awsui-top-navigation">
         <TopNavigation
           identity={{
-            href: '#',
+            href: '#overview',
             title: 'AWS Cloudscape — Agentic Factory Console',
             logo: {
               src: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23ec7211"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
@@ -603,7 +645,7 @@ function ControlPanelApp() {
             <div className="awsui-side-navigation">
               <SideNavigation
                 activeHref={`#${activeTab}`}
-                header={{ href: '#', text: 'Agentic Factory' }}
+                header={{ href: '#overview', text: 'Agentic Factory' }}
                 items={NAV_ITEMS.map((item) => ({
                   type: 'link',
                   text: item.text,
@@ -617,8 +659,8 @@ function ControlPanelApp() {
                 }))}
                 onFollow={(e) => {
                   e.preventDefault();
-                  const target = e.detail.href.replace('#', '');
-                  if (target) setActiveTab(target);
+                  const target = e.detail.href.replace('#', '') || 'overview';
+                  setActiveTab(target);
                 }}
               />
             </div>
@@ -1039,11 +1081,11 @@ function ControlPanelApp() {
                     </ColumnLayout>
 
                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                      <Button variant="primary" id="proj-add-btn" onClick={addMonitoredProject}>
-                        Add Monitored Repository
+                      <Button variant="primary" id="proj-add-btn" disabled={addingProject} onClick={addMonitoredProject}>
+                        {addingProject ? 'Adding Repository...' : 'Add Monitored Repository'}
                       </Button>
-                      <Button id="sync-repos-btn" onClick={syncAllMonitoredProjects}>
-                        Sync Issues from All Monitored Repos
+                      <Button id="sync-repos-btn" disabled={syncingProjects} onClick={syncAllMonitoredProjects}>
+                        {syncingProjects ? 'Syncing Repos...' : 'Sync Issues from All Monitored Repos'}
                       </Button>
                       <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
                         <label style={{ fontSize: '0.82rem', color: '#9ba7b6' }}>
@@ -1280,8 +1322,8 @@ function ControlPanelApp() {
                       />
                     </FormField>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <Button variant="primary" id="intake-submit-btn" onClick={submitTicketIntake}>
-                        Intake & Classify Ticket
+                      <Button variant="primary" id="intake-submit-btn" disabled={intakingTicket} onClick={submitTicketIntake}>
+                        {intakingTicket ? 'Intaking & Classifying...' : 'Intake & Classify Ticket'}
                       </Button>
                       <span id="intake-feedback" style={{ fontSize: '0.85rem', color: '#93c5fd' }}>
                         {intakeFeedback}
@@ -1935,8 +1977,8 @@ function ControlPanelApp() {
                       />
                       Global Kill Switch (Pause Factory)
                     </label>
-                    <Button variant="primary" id="save-controls-btn" onClick={saveControls}>
-                      Save Controls to factory.yaml
+                    <Button variant="primary" id="save-controls-btn" disabled={savingControls} onClick={saveControls}>
+                      {savingControls ? 'Saving Controls...' : 'Save Controls to factory.yaml'}
                     </Button>
                     <div id="controls-feedback" style={{ fontSize: '0.85rem', color: '#93c5fd' }}>
                       {controlsFeedback}

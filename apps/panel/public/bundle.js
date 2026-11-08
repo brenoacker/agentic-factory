@@ -338693,6 +338693,10 @@ ${isHandDrawn ? "" : `
     const [intakeBody, setIntakeBody] = (0, import_react309.useState)("");
     const [intakeFeedback, setIntakeFeedback] = (0, import_react309.useState)("");
     const [dispatchingKeys, setDispatchingKeys] = (0, import_react309.useState)({});
+    const [addingProject, setAddingProject] = (0, import_react309.useState)(false);
+    const [syncingProjects, setSyncingProjects] = (0, import_react309.useState)(false);
+    const [intakingTicket, setIntakingTicket] = (0, import_react309.useState)(false);
+    const [savingControls, setSavingControls] = (0, import_react309.useState)(false);
     const [selectedWf, setSelectedWf] = (0, import_react309.useState)("feature");
     const [currentWfObj, setCurrentWfObj] = (0, import_react309.useState)(null);
     const [wfJson, setWfJson] = (0, import_react309.useState)("");
@@ -338782,27 +338786,37 @@ ${isHandDrawn ? "" : `
       if (projAssigneeFilter.trim() && projAssigneeFilter.trim() !== "any") {
         trackerConfig.assigneeFilter = projAssigneeFilter.trim();
       }
-      const res = await fetch("/api/projects", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          repo: projRepo,
-          provider: projProvider,
-          defaultBranch: projBranch || "main",
-          trackerConfig
-        })
-      });
-      const data6 = await res.json();
-      if (res.ok) {
-        const p3 = data6.project;
-        const providerBadge = (p3.provider || "github").toUpperCase();
-        setProjFeedback(
-          `Monitoring ${p3.repo} (${p3.defaultBranch}) via ${providerBadge}${p3.trackerConfig?.statusFilter ? ` [status: ${p3.trackerConfig.statusFilter}]` : ""}`
-        );
-      } else {
-        setProjFeedback(`Error: ${data6.error}`);
+      if (addingProject) return;
+      setAddingProject(true);
+      try {
+        const res = await fetch("/api/projects", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            repo: projRepo,
+            provider: projProvider,
+            defaultBranch: projBranch || "main",
+            trackerConfig
+          })
+        });
+        const data6 = await res.json();
+        if (res.ok) {
+          const p3 = data6.project;
+          const providerBadge = (p3.provider || "github").toUpperCase();
+          setProjFeedback(
+            `Monitoring ${p3.repo} (${p3.defaultBranch}) via ${providerBadge}${p3.trackerConfig?.statusFilter ? ` [status: ${p3.trackerConfig.statusFilter}]` : ""}`
+          );
+          setProjRepo("");
+          setProjTrackerKey("");
+        } else {
+          setProjFeedback(`Error: ${data6.error}`);
+        }
+        await loadDashboard();
+      } catch (err) {
+        setProjFeedback(`Error: ${err.message}`);
+      } finally {
+        setAddingProject(false);
       }
-      await loadDashboard();
     };
     const toggleProjectPause = async (project) => {
       await fetch("/api/projects", {
@@ -338823,17 +338837,25 @@ ${isHandDrawn ? "" : `
       await loadDashboard();
     };
     const syncAllMonitoredProjects = async () => {
-      const res = await fetch("/api/projects/sync", { method: "POST" });
-      const data6 = await res.json();
-      if (res.ok) {
-        const skippedNote = data6.skippedByTriggersCount > 0 ? ` (${data6.skippedByTriggersCount} skipped by triggers)` : "";
-        setProjFeedback(
-          `Synced ${data6.polledRepos} repo(s): ${data6.newTasksCount} new issue(s) intaked${skippedNote}`
-        );
-      } else {
-        setProjFeedback(`Sync error: ${data6.error}`);
+      if (syncingProjects) return;
+      setSyncingProjects(true);
+      try {
+        const res = await fetch("/api/projects/sync", { method: "POST" });
+        const data6 = await res.json();
+        if (res.ok) {
+          const skippedNote = data6.skippedByTriggersCount > 0 ? ` (${data6.skippedByTriggersCount} skipped by triggers)` : "";
+          setProjFeedback(
+            `Synced ${data6.polledRepos} repo(s): ${data6.newTasksCount} new issue(s) intaked${skippedNote}`
+          );
+        } else {
+          setProjFeedback(`Sync error: ${data6.error}`);
+        }
+        await loadDashboard();
+      } catch (err) {
+        setProjFeedback(`Sync error: ${err.message}`);
+      } finally {
+        setSyncingProjects(false);
       }
-      await loadDashboard();
     };
     const updateScheduler = async (nextEnabled, runImmediately = true) => {
       const res = await fetch("/api/scheduler", {
@@ -338857,26 +338879,37 @@ ${isHandDrawn ? "" : `
       await loadDashboard();
     };
     const submitTicketIntake = async () => {
-      const res = await fetch("/api/tickets/intake", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          repo: intakeRepo || void 0,
-          issue_number: Number(intakeIssueNum),
-          title: intakeTitle,
-          body: intakeBody,
-          type: intakeType || null
-        })
-      });
-      const data6 = await res.json();
-      if (res.ok) {
-        setIntakeFeedback(
-          `Classified as ${data6.classifiedType} at stage ${data6.initialStage} (${data6.executionKey})`
-        );
-      } else {
-        setIntakeFeedback(`Error: ${data6.error || "Intake failed"}`);
+      if (intakingTicket) return;
+      setIntakingTicket(true);
+      try {
+        const res = await fetch("/api/tickets/intake", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            repo: intakeRepo || void 0,
+            issue_number: Number(intakeIssueNum),
+            title: intakeTitle,
+            body: intakeBody,
+            type: intakeType || null
+          })
+        });
+        const data6 = await res.json();
+        if (res.ok) {
+          setIntakeFeedback(
+            `Classified as ${data6.classifiedType} at stage ${data6.initialStage} (${data6.executionKey})`
+          );
+          setIntakeIssueNum("");
+          setIntakeTitle("");
+          setIntakeBody("");
+        } else {
+          setIntakeFeedback(`Error: ${data6.error || "Intake failed"}`);
+        }
+        await loadDashboard();
+      } catch (err) {
+        setIntakeFeedback(`Error: ${err.message}`);
+      } finally {
+        setIntakingTicket(false);
       }
-      await loadDashboard();
     };
     const dispatchTicketKey = async (key2, approveCurrentStage = false) => {
       if (dispatchingKeys[key2]) return;
@@ -338945,19 +338978,28 @@ ${isHandDrawn ? "" : `
       await loadDashboard();
     };
     const saveControls = async () => {
-      const res = await fetch("/api/controls", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          autonomy: ctrlAutonomy,
-          maxTasksPerHour: Number(ctrlRate),
-          dailyBudgetUsd: Number(ctrlBudget),
-          stallThresholdMinutes: Number(ctrlStallMinutes),
-          killSwitch: ctrlKill
-        })
-      });
-      setControlsFeedback(res.ok ? "Controls saved" : "Failed to save controls");
-      await loadDashboard();
+      if (savingControls) return;
+      setSavingControls(true);
+      try {
+        const res = await fetch("/api/controls", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            autonomy: ctrlAutonomy,
+            maxTasksPerHour: Number(ctrlRate),
+            dailyBudgetUsd: Number(ctrlBudget),
+            stallThresholdMinutes: Number(ctrlStallMinutes),
+            killSwitch: ctrlKill
+          })
+        });
+        const data6 = await res.json();
+        setControlsFeedback(res.ok ? "Controls saved successfully" : `Failed to save controls: ${data6.error || "Invalid parameters"}`);
+        await loadDashboard();
+      } catch (err) {
+        setControlsFeedback(`Failed to save controls: ${err.message}`);
+      } finally {
+        setSavingControls(false);
+      }
     };
     const verifyDeploymentFromUi = async () => {
       const res = await fetch("/api/deploy/verify", {
@@ -339007,7 +339049,7 @@ ${isHandDrawn ? "" : `
         TopNavigation,
         {
           identity: {
-            href: "#",
+            href: "#overview",
             title: "AWS Cloudscape \u2014 Agentic Factory Console",
             logo: {
               src: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23ec7211"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
@@ -339096,7 +339138,7 @@ ${isHandDrawn ? "" : `
             SideNavigation,
             {
               activeHref: `#${activeTab}`,
-              header: { href: "#", text: "Agentic Factory" },
+              header: { href: "#overview", text: "Agentic Factory" },
               items: NAV_ITEMS.map((item) => ({
                 type: "link",
                 text: item.text,
@@ -339105,8 +339147,8 @@ ${isHandDrawn ? "" : `
               })),
               onFollow: (e3) => {
                 e3.preventDefault();
-                const target = e3.detail.href.replace("#", "");
-                if (target) setActiveTab(target);
+                const target = e3.detail.href.replace("#", "") || "overview";
+                setActiveTab(target);
               }
             }
           ) }),
@@ -339538,8 +339580,8 @@ ${isHandDrawn ? "" : `
                           ) })
                         ] }),
                         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }, children: [
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { variant: "primary", id: "proj-add-btn", onClick: addMonitoredProject, children: "Add Monitored Repository" }),
-                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { id: "sync-repos-btn", onClick: syncAllMonitoredProjects, children: "Sync Issues from All Monitored Repos" }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { variant: "primary", id: "proj-add-btn", disabled: addingProject, onClick: addMonitoredProject, children: addingProject ? "Adding Repository..." : "Add Monitored Repository" }),
+                          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { id: "sync-repos-btn", disabled: syncingProjects, onClick: syncAllMonitoredProjects, children: syncingProjects ? "Syncing Repos..." : "Sync Issues from All Monitored Repos" }),
                           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: "0.4rem", alignItems: "center" }, children: [
                             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { style: { fontSize: "0.82rem", color: "#9ba7b6" }, children: [
                               "Cron Interval (s):",
@@ -339762,7 +339804,7 @@ ${isHandDrawn ? "" : `
                       }
                     ) }),
                     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: "1rem" }, children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { variant: "primary", id: "intake-submit-btn", onClick: submitTicketIntake, children: "Intake & Classify Ticket" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { variant: "primary", id: "intake-submit-btn", disabled: intakingTicket, onClick: submitTicketIntake, children: intakingTicket ? "Intaking & Classifying..." : "Intake & Classify Ticket" }),
                       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { id: "intake-feedback", style: { fontSize: "0.85rem", color: "#93c5fd" }, children: intakeFeedback })
                     ] })
                   ] }) }),
@@ -340383,7 +340425,7 @@ ${isHandDrawn ? "" : `
                       ),
                       "Global Kill Switch (Pause Factory)"
                     ] }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { variant: "primary", id: "save-controls-btn", onClick: saveControls, children: "Save Controls to factory.yaml" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(button_default2, { variant: "primary", id: "save-controls-btn", disabled: savingControls, onClick: saveControls, children: savingControls ? "Saving Controls..." : "Save Controls to factory.yaml" }),
                     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "controls-feedback", style: { fontSize: "0.85rem", color: "#93c5fd" }, children: controlsFeedback })
                   ] }) }),
                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h2", children: "Post-Deploy Gate & Automatic Rollback" }), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SpaceBetween, { size: "s", children: [

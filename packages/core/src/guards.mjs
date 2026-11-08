@@ -38,7 +38,10 @@ export function evaluateIntakeGuards(issue, factoryConfig, store, nowDate = new 
   }
 
   if (Array.isArray(f.projects)) {
-    const proj = f.projects.find((p) => p.repo === issue.repo || p.id === issue.repo);
+    const targetRepo = String(issue.repo || '').toLowerCase();
+    const proj = f.projects.find(
+      (p) => String(p.repo || '').toLowerCase() === targetRepo || String(p.id || '').toLowerCase() === targetRepo,
+    );
     if (proj && proj.paused === true) {
       return {
         ok: false,

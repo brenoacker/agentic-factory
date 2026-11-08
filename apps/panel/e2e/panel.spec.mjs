@@ -202,6 +202,8 @@ test('C6: Playwright E2E test triages, advances, approves human gates, and compl
       await page.locator('#intake-type').selectOption('');
       await page.locator('#intake-submit-btn').click();
       await expect(page.locator('#intake-feedback')).toContainText(`Classified as ${t.expectedType} at stage triage`);
+      await expect(page.locator('#intake-title')).toHaveValue('');
+      await expect(page.locator('#intake-issue-number')).toHaveValue('');
       await expect(page.getByTestId(`task-type-${t.num}`)).toHaveText(t.expectedType);
       await expect(page.getByTestId(`task-stage-${t.num}`)).toHaveText('triage');
     }
@@ -292,6 +294,7 @@ test('C8: Playwright E2E test configures an external GitHub repository in the UI
     await page.locator('#proj-branch-input').fill('main');
     await page.locator('#proj-add-btn').click();
     await expect(page.locator('#proj-feedback')).toContainText('Monitoring brenoacker/external-webapp (main)');
+    await expect(page.locator('#proj-repo-input')).toHaveValue('');
     await expect(page.getByTestId('project-row-brenoacker/external-webapp')).toContainText('MONITORING');
 
     // 2. Click "Sync Issues from All Monitored Repos"
