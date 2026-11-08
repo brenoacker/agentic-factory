@@ -171,6 +171,7 @@ function ControlPanelApp() {
   const [intakeType, setIntakeType] = useState('');
   const [intakeBody, setIntakeBody] = useState('');
   const [intakeFeedback, setIntakeFeedback] = useState('');
+  const [dispatchingKeys, setDispatchingKeys] = useState({});
 
   // Workflow editor form state
   const [selectedWf, setSelectedWf] = useState('feature');
@@ -379,16 +380,28 @@ function ControlPanelApp() {
   };
 
   const dispatchTicketKey = async (key, approveCurrentStage = false) => {
-    const res = await fetch('/api/tickets/' + encodeURIComponent(key) + '/dispatch', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ approveCurrentStage }),
-    });
-    const data = await res.json();
-    if (!res.ok && data.error) {
-      setIntakeFeedback(`Dispatch Notice: ${data.error}`);
+    if (dispatchingKeys[key]) return;
+    setDispatchingKeys((prev) => ({ ...prev, [key]: true }));
+    try {
+      const res = await fetch('/api/tickets/' + encodeURIComponent(key) + '/dispatch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ approveCurrentStage }),
+      });
+      const data = await res.json();
+      if (!res.ok && data.error) {
+        setIntakeFeedback(`Dispatch Notice: ${data.error}`);
+      }
+      await loadDashboard();
+    } catch (err) {
+      setIntakeFeedback(`Dispatch Failed: ${err.message}`);
+    } finally {
+      setDispatchingKeys((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
     }
-    await loadDashboard();
   };
 
   const snoozeTaskAlarm = async (key) => {
@@ -483,7 +496,7 @@ function ControlPanelApp() {
     byModel: {},
     tokens: { input: 0, output: 0, cached: 0, total: 0 },
     totalCostUsd: 0,
-    reviewMetrics: { firstRoundApprovalRate: 100, averageReviewRounds: 0 },
+    reviewMetrics: { reviewedTasks: 0, firstRoundApprovalRate: 0, averageReviewRounds: 0 },
     needsHuman: [],
     stalledTasks: [],
     tasks: [],
@@ -646,10 +659,11 @@ function ControlPanelApp() {
                       <SpaceBetween direction="horizontal" size="xs">
                         <Button
                           variant="primary"
+                          disabled={Boolean(dispatchingKeys[item.executionKey])}
                           data-testid={`alarm-act-btn-${item.issueNumber}`}
                           onClick={() => dispatchTicketKey(item.executionKey, item.needsHuman)}
                         >
-                          Act Now (Approve & Resume)
+                          {dispatchingKeys[item.executionKey] ? 'Resuming...' : 'Act Now (Approve & Resume)'}
                         </Button>
                         <Button
                           variant="normal"
@@ -747,7 +761,7 @@ function ControlPanelApp() {
                       <Box variant="awsui-key-label">Total Cost (USD)</Box>
                       <Box variant="h1">${Number(st.totalCostUsd || 0).toFixed(4)}</Box>
                       <Box variant="small" color="text-body-secondary">
-                        Daily budget: ${f.limits?.dailyBudgetUsd}
+                        Daily budget: {f.limits?.dailyBudgetUsd != null ? `$${f.limits.dailyBudgetUsd}` : 'Unlimited'}
                       </Box>
                     </div>
                   </Container>
@@ -765,10 +779,15 @@ function ControlPanelApp() {
                   <Container>
                     <div data-testid="kpi-first-round">
                       <Box variant="awsui-key-label">First-Round PR Approval</Box>
-                      <Box variant="h1">{st.reviewMetrics?.firstRoundApprovalRate ?? 100}%</Box>
+                      <Box variant="h1">
+                        {st.reviewMetrics?.reviewedTasks > 0
+                          ? `${st.reviewMetrics.firstRoundApprovalRate}%`
+                          : 'N/A'}
+                      </Box>
                       <Box variant="small" color="text-body-secondary">
-                        Avg review rounds: {st.reviewMetrics?.averageReviewRounds ?? 0} (max{' '}
-                        {f.limits?.maxReviewRounds ?? 3})
+                        {st.reviewMetrics?.reviewedTasks > 0
+                          ? `Avg review rounds: ${st.reviewMetrics?.averageReviewRounds ?? 0} (max ${f.limits?.maxReviewRounds ?? 3})`
+                          : 'No PR reviews recorded yet'}
                       </Box>
                     </div>
                   </Container>
@@ -1299,10 +1318,11 @@ function ControlPanelApp() {
                             </div>
                             <Button
                               variant="primary"
+                              disabled={Boolean(dispatchingKeys[item.executionKey])}
                               data-testid={`approve-btn-${item.issueNumber}`}
                               onClick={() => dispatchTicketKey(item.executionKey, true)}
                             >
-                              1-Click Approve & Advance
+                              {dispatchingKeys[item.executionKey] ? 'Approving...' : '1-Click Approve & Advance'}
                             </Button>
                           </div>
                         ))}
@@ -1430,8 +1450,8 @@ function ControlPanelApp() {
                                       {t.deliverable_type === 'pull_request' ? '🔗 Pull Request: ' : '📄 Research Doc: '}
                                     </span>
                                     <a
-                                      href={t.deliverable_url.startsWith('http') ? t.deliverable_url : `#`}
-                                      target={t.deliverable_url.startsWith('http') ? '_blank' : '_self'}
+                                      href={t.deliverable_url.startsWith('http') ? t.deliverable_url : `/api/tickets/${encodeURIComponent(t.execution_key)}/deliverable`}
+                                      target="_blank"
                                       rel="noreferrer"
                                       style={{ fontSize: '0.72rem', color: '#38bdf8', textDecoration: 'underline' }}
                                     >
@@ -1442,11 +1462,18 @@ function ControlPanelApp() {
                                 {t.stage !== 'done' && (
                                   <div style={{ marginTop: '0.45rem' }}>
                                     <Button
-                                      variant="primary"
+                                      variant={t.needs_human === 1 ? 'primary' : 'normal'}
+                                      disabled={Boolean(dispatchingKeys[t.execution_key])}
                                       data-testid={`dispatch-btn-${t.issue_number}`}
                                       onClick={() => dispatchTicketKey(t.execution_key, t.needs_human === 1)}
                                     >
-                                      {t.needs_human === 1 ? 'Approve & Continue' : 'Run Workflow'}
+                                      {dispatchingKeys[t.execution_key]
+                                        ? `Executing Stage (${t.stage})...`
+                                        : t.needs_human === 1
+                                        ? 'Approve & Continue'
+                                        : t.stage === 'triage' || t.stage === 'interview'
+                                        ? 'Run Workflow'
+                                        : `Advance Stage (${t.stage})`}
                                     </Button>
                                   </div>
                                 )}

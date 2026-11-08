@@ -338692,6 +338692,7 @@ ${isHandDrawn ? "" : `
     const [intakeType, setIntakeType] = (0, import_react309.useState)("");
     const [intakeBody, setIntakeBody] = (0, import_react309.useState)("");
     const [intakeFeedback, setIntakeFeedback] = (0, import_react309.useState)("");
+    const [dispatchingKeys, setDispatchingKeys] = (0, import_react309.useState)({});
     const [selectedWf, setSelectedWf] = (0, import_react309.useState)("feature");
     const [currentWfObj, setCurrentWfObj] = (0, import_react309.useState)(null);
     const [wfJson, setWfJson] = (0, import_react309.useState)("");
@@ -338878,16 +338879,28 @@ ${isHandDrawn ? "" : `
       await loadDashboard();
     };
     const dispatchTicketKey = async (key2, approveCurrentStage = false) => {
-      const res = await fetch("/api/tickets/" + encodeURIComponent(key2) + "/dispatch", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ approveCurrentStage })
-      });
-      const data6 = await res.json();
-      if (!res.ok && data6.error) {
-        setIntakeFeedback(`Dispatch Notice: ${data6.error}`);
+      if (dispatchingKeys[key2]) return;
+      setDispatchingKeys((prev2) => ({ ...prev2, [key2]: true }));
+      try {
+        const res = await fetch("/api/tickets/" + encodeURIComponent(key2) + "/dispatch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ approveCurrentStage })
+        });
+        const data6 = await res.json();
+        if (!res.ok && data6.error) {
+          setIntakeFeedback(`Dispatch Notice: ${data6.error}`);
+        }
+        await loadDashboard();
+      } catch (err) {
+        setIntakeFeedback(`Dispatch Failed: ${err.message}`);
+      } finally {
+        setDispatchingKeys((prev2) => {
+          const next3 = { ...prev2 };
+          delete next3[key2];
+          return next3;
+        });
       }
-      await loadDashboard();
     };
     const snoozeTaskAlarm = async (key2) => {
       await fetch("/api/tasks/" + encodeURIComponent(key2) + "/acknowledge", {
@@ -338974,7 +338987,7 @@ ${isHandDrawn ? "" : `
       byModel: {},
       tokens: { input: 0, output: 0, cached: 0, total: 0 },
       totalCostUsd: 0,
-      reviewMetrics: { firstRoundApprovalRate: 100, averageReviewRounds: 0 },
+      reviewMetrics: { reviewedTasks: 0, firstRoundApprovalRate: 0, averageReviewRounds: 0 },
       needsHuman: [],
       stalledTasks: [],
       tasks: []
@@ -339146,9 +339159,10 @@ ${isHandDrawn ? "" : `
                         button_default2,
                         {
                           variant: "primary",
+                          disabled: Boolean(dispatchingKeys[item.executionKey]),
                           "data-testid": `alarm-act-btn-${item.issueNumber}`,
                           onClick: () => dispatchTicketKey(item.executionKey, item.needsHuman),
-                          children: "Act Now (Approve & Resume)"
+                          children: dispatchingKeys[item.executionKey] ? "Resuming..." : "Act Now (Approve & Resume)"
                         }
                       ),
                       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
@@ -339252,8 +339266,8 @@ ${isHandDrawn ? "" : `
                         Number(st2.totalCostUsd || 0).toFixed(4)
                       ] }),
                       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
-                        "Daily budget: $",
-                        f2.limits?.dailyBudgetUsd
+                        "Daily budget: ",
+                        f2.limits?.dailyBudgetUsd != null ? `$${f2.limits.dailyBudgetUsd}` : "Unlimited"
                       ] })
                     ] }) }),
                     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { "data-testid": "kpi-tokens", children: [
@@ -339272,18 +339286,8 @@ ${isHandDrawn ? "" : `
                     ] }) }),
                     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { "data-testid": "kpi-first-round", children: [
                       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "awsui-key-label", children: "First-Round PR Approval" }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "h1", children: [
-                        st2.reviewMetrics?.firstRoundApprovalRate ?? 100,
-                        "%"
-                      ] }),
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { variant: "small", color: "text-body-secondary", children: [
-                        "Avg review rounds: ",
-                        st2.reviewMetrics?.averageReviewRounds ?? 0,
-                        " (max",
-                        " ",
-                        f2.limits?.maxReviewRounds ?? 3,
-                        ")"
-                      ] })
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "h1", children: st2.reviewMetrics?.reviewedTasks > 0 ? `${st2.reviewMetrics.firstRoundApprovalRate}%` : "N/A" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { variant: "small", color: "text-body-secondary", children: st2.reviewMetrics?.reviewedTasks > 0 ? `Avg review rounds: ${st2.reviewMetrics?.averageReviewRounds ?? 0} (max ${f2.limits?.maxReviewRounds ?? 3})` : "No PR reviews recorded yet" })
                     ] }) })
                   ] }),
                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)(container_default, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { "data-testid": "kpi-needs-human", children: [
@@ -339790,9 +339794,10 @@ ${isHandDrawn ? "" : `
                           button_default2,
                           {
                             variant: "primary",
+                            disabled: Boolean(dispatchingKeys[item.executionKey]),
                             "data-testid": `approve-btn-${item.issueNumber}`,
                             onClick: () => dispatchTicketKey(item.executionKey, true),
-                            children: "1-Click Approve & Advance"
+                            children: dispatchingKeys[item.executionKey] ? "Approving..." : "1-Click Approve & Advance"
                           }
                         )
                       ]
@@ -339931,8 +339936,8 @@ ${isHandDrawn ? "" : `
                                       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
                                         "a",
                                         {
-                                          href: t4.deliverable_url.startsWith("http") ? t4.deliverable_url : `#`,
-                                          target: t4.deliverable_url.startsWith("http") ? "_blank" : "_self",
+                                          href: t4.deliverable_url.startsWith("http") ? t4.deliverable_url : `/api/tickets/${encodeURIComponent(t4.execution_key)}/deliverable`,
+                                          target: "_blank",
                                           rel: "noreferrer",
                                           style: { fontSize: "0.72rem", color: "#38bdf8", textDecoration: "underline" },
                                           children: t4.deliverable_ref || t4.deliverable_url
@@ -339942,10 +339947,11 @@ ${isHandDrawn ? "" : `
                                     t4.stage !== "done" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: "0.45rem" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
                                       button_default2,
                                       {
-                                        variant: "primary",
+                                        variant: t4.needs_human === 1 ? "primary" : "normal",
+                                        disabled: Boolean(dispatchingKeys[t4.execution_key]),
                                         "data-testid": `dispatch-btn-${t4.issue_number}`,
                                         onClick: () => dispatchTicketKey(t4.execution_key, t4.needs_human === 1),
-                                        children: t4.needs_human === 1 ? "Approve & Continue" : "Run Workflow"
+                                        children: dispatchingKeys[t4.execution_key] ? `Executing Stage (${t4.stage})...` : t4.needs_human === 1 ? "Approve & Continue" : t4.stage === "triage" || t4.stage === "interview" ? "Run Workflow" : `Advance Stage (${t4.stage})`
                                       }
                                     ) })
                                   ]

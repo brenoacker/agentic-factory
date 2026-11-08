@@ -78,6 +78,8 @@ test('C4: Playwright visual and component tests verify KPIs, Runtimes, Circuit B
     await expect(page.getByTestId('kpi-total-cost')).toContainText('Total Cost (USD)');
     await expect(page.getByTestId('kpi-tokens')).toContainText('Consumed Tokens');
     await expect(page.getByTestId('kpi-first-round')).toContainText('First-Round PR Approval');
+    await expect(page.getByTestId('kpi-first-round')).toContainText('N/A');
+    await expect(page.getByTestId('kpi-first-round')).toContainText('No PR reviews recorded yet');
     await expect(page.getByTestId('kpi-needs-human')).toContainText('Needs Human Queue');
     await page.screenshot({ path: join(CAPTURES_DIR, 'overview-tab.png'), fullPage: true });
 
@@ -208,13 +210,17 @@ test('C6: Playwright E2E test triages, advances, approves human gates, and compl
 
     // 2. Drive each of the 5 tickets through every workflow stage to 'done'
     // Feature (#301): triage -> plan (gate) -> checks_and_build -> verify -> review -> merge (gate) -> done
+    await expect(page.getByTestId('dispatch-btn-301')).toHaveText('Run Workflow');
     await page.getByTestId('dispatch-btn-301').click();
     await expect(page.getByTestId('task-stage-301')).toHaveText('plan');
     await expect(page.getByTestId('needs-human-card-301')).toBeVisible();
+    await expect(page.getByTestId('dispatch-btn-301')).toHaveText('Approve & Continue');
+    await expect(page.getByTestId('approve-btn-301')).toHaveText('1-Click Approve & Advance');
     await page.getByTestId('approve-btn-301').click();
     await expect(page.getByTestId('task-stage-301')).toHaveText('merge');
     await page.getByTestId('approve-btn-301').click();
     await expect(page.getByTestId('task-stage-301')).toHaveText('done');
+    await expect(page.getByTestId('dispatch-btn-301')).toHaveCount(0);
 
     // Bug (#302): triage -> checks_and_build -> verify -> review -> merge (gate) -> done
     await page.getByTestId('dispatch-btn-302').click();
@@ -783,6 +789,9 @@ test('C14: Playwright E2E test verifies isolated workspace provisioning, deliver
     await expect(page.getByTestId('task-stage-951')).toHaveText('done');
     await expect(page.getByTestId('task-deliverable-951')).toBeVisible();
     await expect(page.getByTestId('task-deliverable-951')).toContainText('Research Doc:');
+    const docLink = page.locator('[data-testid="task-deliverable-951"] a');
+    await expect(docLink).toHaveAttribute('href', /\/api\/tickets\/.*\/deliverable/);
+    await expect(docLink).not.toHaveAttribute('href', '#');
 
     await page.screenshot({ path: join(CAPTURES_DIR, 'cloudscape-deliverables-and-workspaces.png'), fullPage: true });
   } finally {
