@@ -4,29 +4,98 @@ on:
   push:
     branches: [main]
   pull_request:
+  merge_group:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Job names below are referenced as required status checks by
+# .github/rulesets/main.json. Rename them only together with the ruleset.
 jobs:
-  validate-and-test:
+  static:
+    name: static
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
+          cache: npm
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install dependencies and Playwright Chromium
-        run: npm ci && npx playwright install --with-deps chromium
-      - name: Build AWS Cloudscape Control Panel bundle
-        run: npm run build:panel
-      - name: Verify locked TLC skills and v2 requirement
-        run: node scripts/sync-skills.mjs --verify-only
-      - name: Validate factory.yaml, workflows, and contract schemas
-        run: node packages/core/cli.mjs validate
-      - name: Run unit tests
-        run: node --test scripts/__test__/skills-sync.test.mjs packages/core/__test__/factory-core.test.mjs packages/core/__test__/runtime-loop.test.mjs packages/core/__test__/pipeline.test.mjs apps/panel/__test__/control-panel.test.mjs
-      - name: Run Playwright visual, component, integration, and E2E tests
-        run: npx playwright test --reporter=list
-      - name: Run tlc-spec-lean v2.2.0 self-test
-        run: python3 skills/vendor/tlc-spec-lean/scripts/selftest.py
+      - run: npm ci --no-audit --no-fund
+      - name: Build panel, verify locked skills, validate factory config, tlc-spec-lean self-test
+        run: npm run check:static
+
+  unit:
+    name: unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build:panel
+      - run: npm run test:unit
+
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Resolve Playwright version
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+      - run: npm run build:panel
+      - run: npm run test:e2e
+      - name: Upload Playwright artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-${{ github.run_id }}
+          path: |
+            test-results/
+            playwright-report/
+            runs/screenshots/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  pr-title:
+    name: pr-title
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Enforce Conventional Commits PR title (squash commit message)
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|fix|docs|test|refactor|perf|build|ci|chore|revert)(\([a-z0-9._/-]+\))?!?: .+'
+          if [[ ! "$TITLE" =~ $pattern ]]; then
+            echo "::error::PR title must follow Conventional Commits, e.g. 'feat(panel): add X'. Got: $TITLE"
+            exit 1
+          fi
