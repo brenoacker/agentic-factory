@@ -8,9 +8,12 @@
     "validate": "node packages/core/cli.mjs validate",
     "build:panel": "node scripts/build-panel.mjs",
     "sync-skills": "node scripts/sync-skills.mjs --verify-only",
-    "test:unit": "node --test scripts/__test__/skills-sync.test.mjs packages/core/__test__/factory-core.test.mjs packages/core/__test__/runtime-loop.test.mjs packages/core/__test__/pipeline.test.mjs apps/panel/__test__/control-panel.test.mjs",
-    "test:e2e": "npx playwright test",
+    "selftest:spec": "node scripts/selftest-spec.mjs",
+    "check:static": "npm run build:panel && npm run sync-skills && npm run validate && npm run selftest:spec",
+    "test:unit": "node --test \"scripts/__test__/*.test.mjs\" \"packages/**/__test__/*.test.mjs\" \"apps/**/__test__/*.test.mjs\"",
+    "test:e2e": "playwright test",
     "test": "npm run test:unit && npm run test:e2e",
+    "verify": "npm run check:static && npm test",
     "panel": "node packages/core/cli.mjs panel --port 4310"
   },
   "devDependencies": {

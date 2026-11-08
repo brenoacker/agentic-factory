@@ -632,6 +632,9 @@ export function createPanelServer({
     close: () =>
       new Promise((resolveClose) => {
         scheduler.stop();
+        if (typeof server.closeAllConnections === 'function') {
+          server.closeAllConnections();
+        }
         server.close(() => {
           store.close();
           resolveClose();

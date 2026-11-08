@@ -5,16 +5,9 @@ import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createPanelServer } from '../../../apps/panel/server.mjs';
 import { classifyTicketType, evaluateTicketPickupTriggers } from '../index.mjs';
+import { makeTempFactoryClone } from '../../../test-support/factory-clone.mjs';
 
 const REPO_ROOT = resolve(import.meta.dirname, '..', '..', '..');
-
-function makeTempFactoryClone() {
-  const dir = mkdtempSync(join(tmpdir(), 'agentic-factory-pipeline-'));
-  for (const item of ['factory.yaml', 'skills.lock.json', 'config', 'workflows', 'contracts', 'brain', 'agents']) {
-    cpSync(join(REPO_ROOT, item), join(dir, item), { recursive: true });
-  }
-  return dir;
-}
 
 async function startTestServer(rootDir, dbPath, issuePollRunner = null) {
   const runner = issuePollRunner || ((args) => {
@@ -172,9 +165,11 @@ test('C7: multi-repo endpoints GET/POST/DELETE /api/projects and POST /api/proje
   const dbPath = join(tmpDir, 'factory.db');
 
   let callCount = 0;
-  const mockIssuePollRunner = ({ repo, etag }) => {
-    if (repo === 'brenoacker/external-service' && etag !== undefined) {
-      callCount += 1;
+  const mockIssuePollRunner = (spec) => {
+    if (spec.action && spec.action !== 'poll') return { ok: true };
+    const { repo, etag } = spec;
+    callCount += 1;
+    if (repo === 'brenoacker/external-service') {
       if (etag === 'W/"etag-ext-1"') {
         return { status: 304, etag: 'W/"etag-ext-1"', body: [] };
       }
@@ -232,10 +227,10 @@ test('C7: multi-repo endpoints GET/POST/DELETE /api/projects and POST /api/proje
     });
     assert.equal(updRes.status, 200);
 
-    // 4. Sync issues across unpaused monitored repositories
+    // 4. Sync issues across unpaused monitored repositories -> polls only brenoacker/external-service (since agentic-factory is paused)
     const sync1 = await (await fetch(`${baseUrl}/api/projects/sync`, { method: 'POST' })).json();
     assert.equal(sync1.ok, true);
-    assert.equal(sync1.polledRepos, 3);
+    assert.equal(sync1.polledRepos, 1);
     assert.equal(sync1.newTasksCount, 2);
     assert.equal(panel.store.getTask('brenoacker/external-service#12').type, 'bug');
     assert.equal(panel.store.getTask('brenoacker/external-service#15').type, 'feature');
@@ -246,9 +241,9 @@ test('C7: multi-repo endpoints GET/POST/DELETE /api/projects and POST /api/proje
     assert.equal(sync2.newTasksCount, 0);
     assert.equal(callCount, 2);
 
-    // 6. GET /api/projects lists all projects and saved ETag
+    // 6. GET /api/projects lists both projects and saved ETag
     const listData = await (await fetch(`${baseUrl}/api/projects`)).json();
-    assert.equal(listData.projects.length, 4);
+    assert.equal(listData.projects.length, 2);
     assert.ok(listData.etags.some((e) => e.repo === 'brenoacker/external-service' && e.etag === 'W/"etag-ext-1"'));
 
     // 7. DELETE /api/projects/:repo returns 200 on existing and 404 on unknown
@@ -506,10 +501,10 @@ test('C10: Multi-provider tracker adapter configures and polls GitHub, Jira, and
     });
     assert.equal(okAsanaRes.status, 201);
 
-    // 5. Sync across all 5 providers (factory projects + jira + asana)
+    // 5. Sync across all 3 providers (github + jira + asana)
     const syncRes = await (await fetch(`${baseUrl}/api/projects/sync`, { method: 'POST' })).json();
     assert.equal(syncRes.ok, true);
-    assert.equal(syncRes.polledRepos, 5);
+    assert.equal(syncRes.polledRepos, 3);
     assert.equal(syncRes.newTasksCount, 2);
 
     const jiraTask = panel.store.getTask('brenoacker/jira-payments#701');

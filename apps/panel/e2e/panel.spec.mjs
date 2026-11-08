@@ -3,17 +3,10 @@ import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } f
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createPanelServer } from '../server.mjs';
+import { makeTempFactoryClone } from '../../../test-support/factory-clone.mjs';
 
 const REPO_ROOT = resolve(import.meta.dirname, '..', '..', '..');
 const CAPTURES_DIR = join(REPO_ROOT, 'runs', 'screenshots');
-
-function makeTempFactoryClone() {
-  const dir = mkdtempSync(join(tmpdir(), 'agentic-factory-pw-'));
-  for (const item of ['factory.yaml', 'skills.lock.json', 'config', 'workflows', 'contracts', 'brain', 'agents', 'skills']) {
-    cpSync(join(REPO_ROOT, item), join(dir, item), { recursive: true });
-  }
-  return dir;
-}
 
 async function startTestServer(rootDir, dbPath, issuePollRunner = null) {
   const defaultRunner = (spec) => {
@@ -135,6 +128,8 @@ test('C4: Playwright visual and component tests verify KPIs, Runtimes, Circuit B
     await expect(page.getByTestId('kpi-total-cost')).toContainText('Total Cost (USD)');
     await expect(page.getByTestId('kpi-tokens')).toContainText('Consumed Tokens');
     await expect(page.getByTestId('kpi-first-round')).toContainText('First-Round PR Approval');
+    await expect(page.getByTestId('kpi-first-round')).toContainText('N/A');
+    await expect(page.getByTestId('kpi-first-round')).toContainText('No PR reviews recorded yet');
     await expect(page.getByTestId('kpi-needs-human')).toContainText('Needs Human Queue');
     await page.screenshot({ path: join(CAPTURES_DIR, 'overview-tab.png'), fullPage: true });
 
@@ -286,6 +281,8 @@ test('C6: Playwright E2E test triages, advances, approves human gates, and compl
       await page.locator('#intake-type').selectOption('');
       await page.locator('#intake-submit-btn').click();
       await expect(page.locator('#intake-feedback')).toContainText(`Classified as ${t.expectedType} at stage triage`);
+      await expect(page.locator('#intake-title')).toHaveValue('');
+      await expect(page.locator('#intake-issue-number')).toHaveValue('');
       await expect(page.getByTestId(`task-type-${t.num}`)).toHaveText(t.expectedType);
       await expect(page.getByTestId(`task-stage-${t.num}`)).toHaveText('triage');
     }
@@ -299,6 +296,7 @@ test('C6: Playwright E2E test triages, advances, approves human gates, and compl
     await expect(page.getByTestId('needs-human-card-301')).toBeVisible();
     await page.getByTestId('approve-btn-301').click();
     await expect(page.getByTestId('task-stage-301')).toHaveText('done');
+    await expect(page.getByTestId('dispatch-btn-301')).toHaveCount(0);
 
     // Bug (#302): triage -> checks_and_build -> verify -> review -> merge (gate) -> done
     await page.getByTestId('dispatch-btn-302').click();
@@ -368,6 +366,7 @@ test('C8: Playwright E2E test configures an external GitHub repository in the UI
     await page.locator('#proj-branch-input').fill('main');
     await page.locator('#proj-add-btn').click();
     await expect(page.locator('#proj-feedback')).toContainText('Monitoring brenoacker/external-webapp (main)');
+    await expect(page.locator('#proj-repo-input')).toHaveValue('');
     await expect(page.getByTestId('project-row-brenoacker/external-webapp')).toContainText('MONITORING');
 
     // 2. Click "Sync Issues from All Monitored Repos"
@@ -897,6 +896,9 @@ test('C14: Playwright E2E test verifies isolated workspace provisioning, deliver
     await expect(page.getByTestId('task-stage-951')).toHaveText('done');
     await expect(page.getByTestId('task-deliverable-951')).toBeVisible();
     await expect(page.getByTestId('task-deliverable-951')).toContainText('Research Doc:');
+    const docLink = page.locator('[data-testid="task-deliverable-951"] a');
+    await expect(docLink).toHaveAttribute('href', /\/api\/tickets\/.*\/deliverable/);
+    await expect(docLink).not.toHaveAttribute('href', '#');
 
     await page.screenshot({ path: join(CAPTURES_DIR, 'cloudscape-deliverables-and-workspaces.png'), fullPage: true });
   } finally {

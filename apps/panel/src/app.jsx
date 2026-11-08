@@ -355,6 +355,11 @@ function ControlPanelApp() {
   const [intakeType, setIntakeType] = useState('');
   const [intakeBody, setIntakeBody] = useState('');
   const [intakeFeedback, setIntakeFeedback] = useState('');
+  const [dispatchingKeys, setDispatchingKeys] = useState({});
+  const [addingProject, setAddingProject] = useState(false);
+  const [syncingProjects, setSyncingProjects] = useState(false);
+  const [intakingTicket, setIntakingTicket] = useState(false);
+  const [savingControls, setSavingControls] = useState(false);
 
   // Workflow editor form state
   const [selectedWf, setSelectedWf] = useState('feature');
@@ -462,29 +467,39 @@ function ControlPanelApp() {
       trackerConfig.assigneeFilter = projAssigneeFilter.trim();
     }
 
-    const res = await fetch('/api/projects', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        repo: projRepo,
-        provider: projProvider,
-        defaultBranch: projBranch || 'main',
-        trackerConfig,
-      }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      const p = data.project;
-      const providerBadge = (p.provider || 'github').toUpperCase();
-      setProjFeedback(
-        `Monitoring ${p.repo} (${p.defaultBranch}) via ${providerBadge}${
-          p.trackerConfig?.statusFilter ? ` [status: ${p.trackerConfig.statusFilter}]` : ''
-        }`,
-      );
-    } else {
-      setProjFeedback(`Error: ${data.error}`);
+    if (addingProject) return;
+    setAddingProject(true);
+    try {
+      const res = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          repo: projRepo,
+          provider: projProvider,
+          defaultBranch: projBranch || 'main',
+          trackerConfig,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const p = data.project;
+        const providerBadge = (p.provider || 'github').toUpperCase();
+        setProjFeedback(
+          `Monitoring ${p.repo} (${p.defaultBranch}) via ${providerBadge}${
+            p.trackerConfig?.statusFilter ? ` [status: ${p.trackerConfig.statusFilter}]` : ''
+          }`,
+        );
+        setProjRepo('');
+        setProjTrackerKey('');
+      } else {
+        setProjFeedback(`Error: ${data.error}`);
+      }
+      await loadDashboard();
+    } catch (err) {
+      setProjFeedback(`Error: ${err.message}`);
+    } finally {
+      setAddingProject(false);
     }
-    await loadDashboard();
   };
 
   const toggleProjectPause = async (project) => {
@@ -508,18 +523,26 @@ function ControlPanelApp() {
   };
 
   const syncAllMonitoredProjects = async () => {
-    const res = await fetch('/api/projects/sync', { method: 'POST' });
-    const data = await res.json();
-    if (res.ok) {
-      const skippedNote =
-        data.skippedByTriggersCount > 0 ? ` (${data.skippedByTriggersCount} skipped by triggers)` : '';
-      setProjFeedback(
-        `Synced ${data.polledRepos} repo(s): ${data.newTasksCount} new issue(s) intaked${skippedNote}`,
-      );
-    } else {
-      setProjFeedback(`Sync error: ${data.error}`);
+    if (syncingProjects) return;
+    setSyncingProjects(true);
+    try {
+      const res = await fetch('/api/projects/sync', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        const skippedNote =
+          data.skippedByTriggersCount > 0 ? ` (${data.skippedByTriggersCount} skipped by triggers)` : '';
+        setProjFeedback(
+          `Synced ${data.polledRepos} repo(s): ${data.newTasksCount} new issue(s) intaked${skippedNote}`,
+        );
+      } else {
+        setProjFeedback(`Sync error: ${data.error}`);
+      }
+      await loadDashboard();
+    } catch (err) {
+      setProjFeedback(`Sync error: ${err.message}`);
+    } finally {
+      setSyncingProjects(false);
     }
-    await loadDashboard();
   };
 
   const updateScheduler = async (nextEnabled, runImmediately = true) => {
@@ -545,39 +568,62 @@ function ControlPanelApp() {
   };
 
   const submitTicketIntake = async () => {
-    const res = await fetch('/api/tickets/intake', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        repo: intakeRepo || undefined,
-        issue_number: Number(intakeIssueNum),
-        title: intakeTitle,
-        body: intakeBody,
-        type: intakeType || null,
-      }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setIntakeFeedback(
-        `Classified as ${data.classifiedType} at stage ${data.initialStage} (${data.executionKey})`,
-      );
-    } else {
-      setIntakeFeedback(`Error: ${data.error || 'Intake failed'}`);
+    if (intakingTicket) return;
+    setIntakingTicket(true);
+    try {
+      const res = await fetch('/api/tickets/intake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          repo: intakeRepo || undefined,
+          issue_number: Number(intakeIssueNum),
+          title: intakeTitle,
+          body: intakeBody,
+          type: intakeType || null,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setIntakeFeedback(
+          `Classified as ${data.classifiedType} at stage ${data.initialStage} (${data.executionKey})`,
+        );
+        setIntakeIssueNum('');
+        setIntakeTitle('');
+        setIntakeBody('');
+      } else {
+        setIntakeFeedback(`Error: ${data.error || 'Intake failed'}`);
+      }
+      await loadDashboard();
+    } catch (err) {
+      setIntakeFeedback(`Error: ${err.message}`);
+    } finally {
+      setIntakingTicket(false);
     }
-    await loadDashboard();
   };
 
   const dispatchTicketKey = async (key, approveCurrentStage = false) => {
-    const res = await fetch('/api/tickets/' + encodeURIComponent(key) + '/dispatch', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ approveCurrentStage }),
-    });
-    const data = await res.json();
-    if (!res.ok && data.error) {
-      setIntakeFeedback(`Dispatch Notice: ${data.error}`);
+    if (dispatchingKeys[key]) return;
+    setDispatchingKeys((prev) => ({ ...prev, [key]: true }));
+    try {
+      const res = await fetch('/api/tickets/' + encodeURIComponent(key) + '/dispatch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ approveCurrentStage }),
+      });
+      const data = await res.json();
+      if (!res.ok && data.error) {
+        setIntakeFeedback(`Dispatch Notice: ${data.error}`);
+      }
+      await loadDashboard();
+    } catch (err) {
+      setIntakeFeedback(`Dispatch Failed: ${err.message}`);
+    } finally {
+      setDispatchingKeys((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
     }
-    await loadDashboard();
   };
 
   const checkTaskPr = async (key) => {
@@ -720,20 +766,29 @@ function ControlPanelApp() {
   };
 
   const saveControls = async () => {
-    const res = await fetch('/api/controls', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        autonomy: ctrlAutonomy,
-        maxTasksPerHour: Number(ctrlRate),
-        dailyBudgetUsd: Number(ctrlBudget),
-        maxConcurrentAgents: Number(ctrlConcurrent),
-        stallThresholdMinutes: Number(ctrlStallMinutes),
-        killSwitch: ctrlKill,
-      }),
-    });
-    setControlsFeedback(res.ok ? 'Controls saved' : 'Failed to save controls');
-    await loadDashboard();
+    if (savingControls) return;
+    setSavingControls(true);
+    try {
+      const res = await fetch('/api/controls', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          autonomy: ctrlAutonomy,
+          maxTasksPerHour: Number(ctrlRate),
+          dailyBudgetUsd: Number(ctrlBudget),
+          maxConcurrentAgents: Number(ctrlConcurrent),
+          stallThresholdMinutes: Number(ctrlStallMinutes),
+          killSwitch: ctrlKill,
+        }),
+      });
+      const data = await res.json();
+      setControlsFeedback(res.ok ? 'Controls saved successfully' : `Failed to save controls: ${data.error || 'Invalid parameters'}`);
+      await loadDashboard();
+    } catch (err) {
+      setControlsFeedback(`Failed to save controls: ${err.message}`);
+    } finally {
+      setSavingControls(false);
+    }
   };
 
   const verifyDeploymentFromUi = async () => {
@@ -767,7 +822,7 @@ function ControlPanelApp() {
     byModel: {},
     tokens: { input: 0, output: 0, cached: 0, total: 0 },
     totalCostUsd: 0,
-    reviewMetrics: { firstRoundApprovalRate: 100, averageReviewRounds: 0 },
+    reviewMetrics: { reviewedTasks: 0, firstRoundApprovalRate: 0, averageReviewRounds: 0 },
     needsHuman: [],
     stalledTasks: [],
     tasks: [],
@@ -789,7 +844,7 @@ function ControlPanelApp() {
       <div className="awsui-top-navigation">
         <TopNavigation
           identity={{
-            href: '#',
+            href: '#overview',
             title: 'AWS Cloudscape — Agentic Factory Console',
             logo: {
               src: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23ec7211"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
@@ -970,8 +1025,8 @@ function ControlPanelApp() {
                 ]}
                 onFollow={(e) => {
                   e.preventDefault();
-                  const target = e.detail.href.replace('#', '');
-                  if (target) setActiveTab(target);
+                  const target = e.detail.href.replace('#', '') || 'overview';
+                  setActiveTab(target);
                 }}
               />
             </div>
@@ -1012,10 +1067,11 @@ function ControlPanelApp() {
                       <SpaceBetween direction="horizontal" size="xs">
                         <Button
                           variant="primary"
+                          disabled={Boolean(dispatchingKeys[item.executionKey])}
                           data-testid={`alarm-act-btn-${item.issueNumber}`}
                           onClick={() => dispatchTicketKey(item.executionKey, item.needsHuman)}
                         >
-                          Act Now (Approve & Resume)
+                          {dispatchingKeys[item.executionKey] ? 'Resuming...' : 'Act Now (Approve & Resume)'}
                         </Button>
                         <Button
                           variant="normal"
@@ -1135,7 +1191,7 @@ function ControlPanelApp() {
                       <Box variant="awsui-key-label">Total Cost (USD)</Box>
                       <Box variant="h1">${Number(st.totalCostUsd || 0).toFixed(4)}</Box>
                       <Box variant="small" color="text-body-secondary">
-                        Daily budget: ${f.limits?.dailyBudgetUsd}
+                        Daily budget: {f.limits?.dailyBudgetUsd != null ? `$${f.limits.dailyBudgetUsd}` : 'Unlimited'}
                       </Box>
                     </div>
                   </Container>
@@ -1153,10 +1209,15 @@ function ControlPanelApp() {
                   <Container>
                     <div data-testid="kpi-first-round">
                       <Box variant="awsui-key-label">First-Round PR Approval</Box>
-                      <Box variant="h1">{st.reviewMetrics?.firstRoundApprovalRate ?? 100}%</Box>
+                      <Box variant="h1">
+                        {st.reviewMetrics?.reviewedTasks > 0
+                          ? `${st.reviewMetrics.firstRoundApprovalRate}%`
+                          : 'N/A'}
+                      </Box>
                       <Box variant="small" color="text-body-secondary">
-                        Avg review rounds: {st.reviewMetrics?.averageReviewRounds ?? 0} (max{' '}
-                        {f.limits?.maxReviewRounds ?? 3})
+                        {st.reviewMetrics?.reviewedTasks > 0
+                          ? `Avg review rounds: ${st.reviewMetrics?.averageReviewRounds ?? 0} (max ${f.limits?.maxReviewRounds ?? 3})`
+                          : 'No PR reviews recorded yet'}
                       </Box>
                     </div>
                   </Container>
@@ -1488,11 +1549,11 @@ function ControlPanelApp() {
                     </ColumnLayout>
 
                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                      <Button variant="primary" id="proj-add-btn" onClick={addMonitoredProject}>
-                        Add Monitored Repository
+                      <Button variant="primary" id="proj-add-btn" disabled={addingProject} onClick={addMonitoredProject}>
+                        {addingProject ? 'Adding Repository...' : 'Add Monitored Repository'}
                       </Button>
-                      <Button id="sync-repos-btn" onClick={syncAllMonitoredProjects}>
-                        Sync Issues from All Monitored Repos
+                      <Button id="sync-repos-btn" disabled={syncingProjects} onClick={syncAllMonitoredProjects}>
+                        {syncingProjects ? 'Syncing Repos...' : 'Sync Issues from All Monitored Repos'}
                       </Button>
                       <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
                         <label style={{ fontSize: '0.82rem', color: '#9ba7b6' }}>
@@ -1729,8 +1790,8 @@ function ControlPanelApp() {
                       />
                     </FormField>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <Button variant="primary" id="intake-submit-btn" onClick={submitTicketIntake}>
-                        Intake & Classify Ticket
+                      <Button variant="primary" id="intake-submit-btn" disabled={intakingTicket} onClick={submitTicketIntake}>
+                        {intakingTicket ? 'Intaking & Classifying...' : 'Intake & Classify Ticket'}
                       </Button>
                       <span id="intake-feedback" style={{ fontSize: '0.85rem', color: '#93c5fd' }}>
                         {intakeFeedback}
@@ -2114,7 +2175,7 @@ function ControlPanelApp() {
                                       {t.deliverable_type === 'pull_request' ? '🔗 Pull Request: ' : '📄 Research Doc: '}
                                     </span>
                                     <a
-                                      href={t.deliverable_url.startsWith('http') ? t.deliverable_url : `#`}
+                                      href={t.deliverable_url.startsWith('http') ? t.deliverable_url : `/api/tickets/${encodeURIComponent(t.execution_key)}/deliverable`}
                                       target={t.deliverable_url.startsWith('http') ? '_blank' : '_self'}
                                       onClick={(e) => {
                                         if (!t.deliverable_url.startsWith('http')) {
@@ -2230,10 +2291,15 @@ function ControlPanelApp() {
                                     ) : (
                                       <Button
                                         variant="primary"
+                                        disabled={Boolean(dispatchingKeys[t.execution_key])}
                                         data-testid={`dispatch-btn-${t.issue_number}`}
                                         onClick={() => dispatchTicketKey(t.execution_key, t.needs_human === 1)}
                                       >
-                                        {t.needs_human === 1 ? 'Approve & Continue' : 'Run Workflow'}
+                                        {dispatchingKeys[t.execution_key]
+                                          ? `Executing Stage (${t.stage})...`
+                                          : t.needs_human === 1
+                                          ? 'Approve & Continue'
+                                          : 'Run Workflow'}
                                       </Button>
                                     )}
                                   </div>
@@ -2731,8 +2797,8 @@ function ControlPanelApp() {
                       />
                       Global Kill Switch (Pause Factory)
                     </label>
-                    <Button variant="primary" id="save-controls-btn" onClick={saveControls}>
-                      Save Controls to factory.yaml
+                    <Button variant="primary" id="save-controls-btn" disabled={savingControls} onClick={saveControls}>
+                      {savingControls ? 'Saving Controls...' : 'Save Controls to factory.yaml'}
                     </Button>
                     <div id="controls-feedback" style={{ fontSize: '0.85rem', color: '#93c5fd' }}>
                       {controlsFeedback}
