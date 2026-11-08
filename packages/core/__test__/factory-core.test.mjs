@@ -253,6 +253,16 @@ test('C6: evaluateIntakeGuards enforces 5 ordered guards and produces determinis
     assert.equal(gOk.ok, true);
     assert.equal(gOk.executionKey, 'brenoacker/agentic-factory#42');
 
+    // 2b. Paused project check is case-insensitive
+    const gPausedCaseInsensitive = evaluateIntakeGuards(
+      { issue_number: 99, repo: 'BrenoAcker/Paused-Repo', type: 'feature' },
+      { factory: { ...baseConfig.factory, projects: [{ repo: 'brenoacker/paused-repo', paused: true }] } },
+      store,
+      now,
+    );
+    assert.equal(gPausedCaseInsensitive.ok, false);
+    assert.equal(gPausedCaseInsensitive.code, 'factory_paused');
+
     // Persist active task #42
     store.createTask({
       executionKey: gOk.executionKey,
