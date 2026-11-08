@@ -1,4 +1,6 @@
 import { spawnSync } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { pollIssuesWithEtag, commentOnGitHubIssue, updateGitHubIssue, closeGitHubIssue } from './github.mjs';
 
 export const SUPPORTED_PROVIDERS = ['github', 'jira', 'asana', 'linear'];
@@ -911,6 +913,22 @@ export function syncTaskStateToTracker({
   let labelsToRemove = [];
   let shouldClose = false;
 
+  let deliverableDocContent = '';
+  if (delivType === 'research_document' && delivUrl) {
+    try {
+      let candidate = resolve(delivUrl);
+      if (!existsSync(candidate) && task.workspace_path) {
+        candidate = resolve(task.workspace_path, delivUrl);
+      }
+      if (existsSync(candidate)) {
+        const docText = readFileSync(candidate, 'utf8').trim();
+        if (docText) {
+          deliverableDocContent = `\n\n---\n### 📄 Research Document Deliverable\n\n${docText}`;
+        }
+      }
+    } catch {}
+  }
+
   if (stage === 'done') {
     statusName = 'Done';
     const deliverableSummary =
@@ -923,7 +941,7 @@ export function syncTaskStateToTracker({
     if (delivType === 'pull_request' && delivUrl) {
       comment = `✅ **Completed via Agentic Factory**: Pull Request ${delivUrl} was merged into default branch. Issue closed as completed.`;
     } else {
-      comment = `✅ **Completed via Agentic Factory**: Workflow finished with ${deliverableSummary}. All automated checks and gates passed.`;
+      comment = `✅ **Completed via Agentic Factory**: Workflow finished with ${deliverableSummary}. All automated checks and gates passed.${deliverableDocContent}`;
     }
     labelsToAdd = ['stage:done'];
     labelsToRemove = ['in-progress', 'waiting-for-human', 'stage:merge', 'stage:review', 'stage:triage'];
@@ -940,9 +958,10 @@ export function syncTaskStateToTracker({
     shouldClose = false;
   } else if (needsHuman) {
     statusName = 'In Review';
-    comment = question
+    const baseQuestion = question
       ? `⚠️ **Human Input Required**: ${question}`
       : `⚠️ **Human Input Required**: Task paused awaiting operator input.`;
+    comment = deliverableDocContent ? `${baseQuestion}${deliverableDocContent}` : baseQuestion;
     labelsToAdd = ['waiting-for-human'];
     labelsToRemove = ['in-progress'];
     shouldClose = false;

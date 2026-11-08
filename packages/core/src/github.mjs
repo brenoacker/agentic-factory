@@ -229,13 +229,44 @@ export function createGitHubPullRequest({ repo, head, base = 'main', title, body
   if (runner) {
     return runner({ action: 'create_pr', repo, head, base, title, body, cwd });
   }
+  // Ensure branch is pushed to remote origin first
+  if (cwd && head) {
+    spawnSync('git', ['push', '-u', 'origin', head], { cwd, encoding: 'utf8' });
+  }
   const args = ['pr', 'create', '--repo', repo, '--head', head, '--base', base, '--title', title, '--body', body];
   const proc = spawnSync('gh', args, { cwd: cwd || undefined, encoding: 'utf8' });
   const raw = proc.stdout?.trim() || '';
   const match = raw.match(/https:\/\/github\.com\/[^\s]+/);
+  if (proc.status === 0 && match) {
+    const numMatch = match[0].match(/\/pull\/(\d+)/);
+    return {
+      ok: true,
+      url: match[0],
+      prNumber: numMatch ? Number(numMatch[1]) : null,
+      output: raw,
+    };
+  }
+  // If PR already exists for this branch on GitHub, fetch its URL and number
+  const viewProc = spawnSync('gh', ['pr', 'view', head, '--repo', repo, '--json', 'url,number'], {
+    cwd: cwd || undefined,
+    encoding: 'utf8',
+  });
+  if (viewProc.status === 0 && viewProc.stdout) {
+    try {
+      const data = JSON.parse(viewProc.stdout);
+      if (data.url) {
+        return {
+          ok: true,
+          url: data.url,
+          prNumber: Number(data.number),
+          output: data.url,
+        };
+      }
+    } catch {}
+  }
   return {
-    ok: proc.status === 0,
-    url: match ? match[0] : raw,
+    ok: false,
+    url: match ? match[0] : '',
     output: raw || proc.stderr?.trim() || '',
   };
 }
