@@ -172,36 +172,68 @@ export function createStageContractRunner({
         affected_paths: ['packages/core/src/dispatcher.mjs', 'apps/panel/server.mjs'],
         needs_human: false,
       };
-    } else if (stage === 'investigate') {
+    } else if (stage === 'investigate' || stage === 'discover') {
+      const isDiscovery = stage === 'discover' || callSpec.ticketType === 'discovery';
       const report = {
         issue_number: issueNum,
-        question: 'Why do concurrent stage callbacks require a single-use stage token in SQLite?',
-        answer_summary:
-          'Single-use stage tokens prevent duplicate state transitions when a worker retries or a stale process reports late.',
-        evidence: [
-          'packages/core/src/store.mjs#L340-L359 enforces used === 0 before advancing stage',
-          'packages/core/src/dispatcher.mjs#L190-L205 rejects replayed tokens with 409',
-        ],
-        options_compared: [
-          {
-            option: 'SQLite atomic stage_tokens table',
-            pros: 'Zero external dependencies and deterministic 409 on replay',
-            cons: 'Single-node local SQLite scope',
-          },
-        ],
-        recommendation: 'Keep atomic stage_tokens verification in FactoryStore before recording stage transition.',
-        follow_up_tickets: [
-          {
-            title: 'Add expired stage_token cleanup job',
-            type: 'chore',
-            description: 'Prune consumed stage tokens older than 30 days from SQLite.',
-          },
-          {
-            title: 'Expose token rejection counters in dashboard API',
-            type: 'feature',
-            description: 'Surface 409 token replay counts on the Control Panel security card.',
-          },
-        ],
+        question: isDiscovery
+          ? `PRD and Architecture Discovery Report for #${issueNum}`
+          : 'Why do concurrent stage callbacks require a single-use stage token in SQLite?',
+        answer_summary: isDiscovery
+          ? 'Product Requirements Document and ADR defining service architecture, data boundary, and deployment topologies.'
+          : 'Single-use stage tokens prevent duplicate state transitions when a worker retries or a stale process reports late.',
+        evidence: isDiscovery
+          ? [
+              'Technical design review validated architectural boundary in RFC document',
+              'Evaluated deployment topologies and cross-region latency trade-offs',
+            ]
+          : [
+              'packages/core/src/store.mjs#L340-L359 enforces used === 0 before advancing stage',
+              'packages/core/src/dispatcher.mjs#L190-L205 rejects replayed tokens with 409',
+            ],
+        options_compared: isDiscovery
+          ? [
+              {
+                option: 'Centralized cluster orchestration',
+                pros: 'Simplified operational model and centralized state',
+                cons: 'Single point of failure and cross-region latency penalty',
+              },
+              {
+                option: 'Decentralized SQLite replica mesh',
+                pros: 'Local fast reads and fault isolation across worker pools',
+                cons: 'Requires asynchronous write replication',
+              },
+            ]
+          : [
+              {
+                option: 'SQLite atomic stage_tokens table',
+                pros: 'Zero external dependencies and deterministic 409 on replay',
+                cons: 'Single-node local SQLite scope',
+              },
+            ],
+        recommendation: isDiscovery
+          ? 'Implement decentralized replica mesh with local SQLite read pools and heartbeat failover.'
+          : 'Keep atomic stage_tokens verification in FactoryStore before recording stage transition.',
+        follow_up_tickets: isDiscovery
+          ? [
+              {
+                title: `Implement core storage adapter for #${issueNum}`,
+                type: 'feature',
+                description: 'Build storage engine implementation according to discovery PRD specifications.',
+              },
+            ]
+          : [
+              {
+                title: 'Add expired stage_token cleanup job',
+                type: 'chore',
+                description: 'Prune consumed stage tokens older than 30 days from SQLite.',
+              },
+              {
+                title: 'Expose token rejection counters in dashboard API',
+                type: 'feature',
+                description: 'Surface 409 token replay counts on the Control Panel security card.',
+              },
+            ],
         needs_human: false,
       };
       capturedReports.set(executionKey, report);

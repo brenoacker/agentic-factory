@@ -385,7 +385,8 @@ export function dispatchTask({
       }
 
       if (contractKind === 'investigation-report') {
-        const relUrl = `docs/research/issue-${task.issue_number}-investigation.md`;
+        const isDiscovery = task.type === 'discovery';
+        const relUrl = `docs/research/issue-${task.issue_number}-${isDiscovery ? 'report' : 'investigation'}.md`;
         materializeInvestigationReport({
           workspacePath: task.workspace_path,
           factoryRoot: root,
@@ -396,7 +397,7 @@ export function dispatchTask({
         store.attachTaskDeliverable(executionKey, {
           type: 'research_document',
           url: relUrl,
-          ref: cleanPayload.question || `Investigation Report #${task.issue_number}`,
+          ref: cleanPayload.question || `${isDiscovery ? 'Discovery Report' : 'Investigation Report'} #${task.issue_number}`,
         });
         task = store.getTask(executionKey) || task;
       }

@@ -20,6 +20,7 @@
       "mode": "auto",
       "agent": "architect",
       "skills": ["tlc-prd", "tlc-discover", "create-technical-design-doc", "create-adr", "the-jury"],
+      "contract": "contracts/investigation-report.schema.json",
       "humanApproval": true,
       "next": "done"
     }
