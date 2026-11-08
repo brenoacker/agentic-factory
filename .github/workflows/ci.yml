@@ -30,6 +30,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: npm ci --no-audit --no-fund
+      - name: Syntax and lint check
+        run: npm run lint
       - name: Build panel, verify locked skills, validate factory config, tlc-spec-lean self-test
         run: npm run check:static
 
