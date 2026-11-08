@@ -57,7 +57,12 @@ export {
   resolveTaskReviewFiles,
   openInEditor,
   readFileContent,
+  parseMarkdownWithMermaid,
 } from './src/files.mjs';
 
-
+export {
+  BOARD_COLUMNS,
+  getTaskBoardColumn,
+  groupTasksByBoardColumn,
+} from './src/board.mjs';
 

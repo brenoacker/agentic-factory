@@ -1498,6 +1498,116 @@ test('C26: Playwright E2E verifies tracker status badges and PR notification in 
   }
 });
 
+test('C31: Playwright E2E verifies 4-column unified Kanban board and stage badge display', async ({ page }) => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    // 1. Seed tasks across stages
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#801',
+      issueNumber: 801,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Backlog Item in Triage',
+      type: 'feature',
+      stage: 'triage',
+    });
+
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#802',
+      issueNumber: 802,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Building Features in checks_and_build',
+      type: 'feature',
+      stage: 'checks_and_build',
+    });
+
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#803',
+      issueNumber: 803,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Autonomous Plan Task',
+      type: 'feature',
+      stage: 'plan',
+    });
+
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#804',
+      issueNumber: 804,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Paused Plan Task',
+      type: 'bug',
+      stage: 'plan',
+    });
+    panel.store.updateTaskStage('brenoacker/agentic-factory#804', {
+      needsHuman: true,
+      humanQuestion: 'Operator approval needed',
+    });
+
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#805',
+      issueNumber: 805,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Awaiting PR Merge',
+      type: 'feature',
+      stage: 'merge',
+    });
+
+    panel.store.createTask({
+      executionKey: 'brenoacker/agentic-factory#806',
+      issueNumber: 806,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Completed Task',
+      type: 'chore',
+      stage: 'done',
+    });
+
+    await page.goto(baseUrl);
+
+    // 2. Navigate to Board tab
+    await page.locator('#tabs button[data-tab="board"]').click();
+    await expect(page.locator('#tab-board')).toBeVisible();
+
+    // 3. Verify exactly 4 unified columns exist in #kanban-board
+    const kanbanBoard = page.locator('#kanban-board');
+    await expect(kanbanBoard).toBeVisible();
+
+    const colTriage = page.locator('#kanban-col-triage');
+    const colInProgress = page.locator('#kanban-col-in_progress');
+    const colWaitingHuman = page.locator('#kanban-col-waiting_human');
+    const colDone = page.locator('#kanban-col-done');
+
+    await expect(colTriage).toBeVisible();
+    await expect(colInProgress).toBeVisible();
+    await expect(colWaitingHuman).toBeVisible();
+    await expect(colDone).toBeVisible();
+
+    await expect(colTriage).toContainText('Triage');
+    await expect(colInProgress).toContainText('In Progress');
+    await expect(colWaitingHuman).toContainText('Waiting for Human');
+    await expect(colDone).toContainText('Done');
+
+    // 4. Verify task assignment into columns
+    await expect(colTriage.locator('[data-testid="task-card-801"]')).toBeVisible();
+    await expect(colInProgress.locator('[data-testid="task-card-802"]')).toBeVisible();
+    await expect(colInProgress.locator('[data-testid="task-card-803"]')).toBeVisible();
+    await expect(colWaitingHuman.locator('[data-testid="task-card-804"]')).toBeVisible();
+    await expect(colWaitingHuman.locator('[data-testid="task-card-805"]')).toBeVisible();
+    await expect(colDone.locator('[data-testid="task-card-806"]')).toBeVisible();
+
+    // 5. Verify granular stage badges inside cards
+    await expect(page.locator('[data-testid="task-stage-badge-802"]')).toContainText('checks_and_build');
+    await expect(page.locator('[data-testid="task-stage-badge-803"]')).toContainText('plan');
+
+    await page.screenshot({ path: join(CAPTURES_DIR, 'unified-kanban-board.png'), fullPage: true });
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+
 
 
 

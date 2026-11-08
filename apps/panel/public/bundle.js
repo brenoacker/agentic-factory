@@ -304192,6 +304192,9 @@ ${isHandDrawn ? "" : `
   };
   var mermaid_default = mermaid;
 
+  // apps/panel/src/app.jsx
+  init_marked_esm();
+
   // node_modules/@cloudscape-design/global-styles/index.js
   var _a210;
   var Mode;
@@ -339277,6 +339280,10 @@ ${isHandDrawn ? "" : `
     },
     securityLevel: "loose"
   });
+  k2.setOptions({
+    gfm: true,
+    breaks: true
+  });
   var NAV_ITEMS = [
     { type: "link", text: "Overview & Telemetry", href: "#overview", id: "overview" },
     { type: "link", text: "Board & Needs Human", href: "#board", id: "board" },
@@ -339305,17 +339312,19 @@ ${isHandDrawn ? "" : `
     }
     return "#";
   }
-  var STAGES = [
-    "triage",
-    "plan",
-    "checks_and_build",
-    "verify",
-    "review",
-    "investigate",
-    "discover",
-    "merge",
-    "done"
+  var BOARD_COLUMNS = [
+    { id: "triage", label: "\u{1F4E5} Triage", color: "#64748b" },
+    { id: "in_progress", label: "\u26A1 In Progress", color: "#0284c7" },
+    { id: "waiting_human", label: "\u{1F64B} Waiting for Human", color: "#f59e0b" },
+    { id: "done", label: "\u2705 Done", color: "#10b981" }
   ];
+  function getTaskBoardColumn(task) {
+    if (!task) return "triage";
+    if (task.stage === "done" || task.stage === "aborted") return "done";
+    if (task.needs_human === 1 || task.stage === "merge") return "waiting_human";
+    if (task.stage === "triage") return "triage";
+    return "in_progress";
+  }
   var KNOWN_AGENTS = ["planner", "builder", "verifier", "judge", "triager", "investigator", "ops"];
   function generateWorkflowMermaid(wf) {
     if (!wf || !Array.isArray(wf.stages) || wf.stages.length === 0) {
@@ -339338,14 +339347,19 @@ ${isHandDrawn ? "" : `
     lines.push('  done["done\\n(complete)"]:::done');
     return lines.join("\n");
   }
-  function MermaidRenderer({ code, id: id38 = "workflow-mermaid" }) {
+  function MermaidRenderer({ code, id: id38 = "workflow-mermaid", testId = "wf-mermaid-diagram" }) {
     const [svgContent, setSvgContent] = (0, import_react311.useState)("");
     const [error3, setError] = (0, import_react311.useState)(null);
     (0, import_react311.useEffect)(() => {
       let isMounted = true;
       async function renderDiagram2() {
+        if (!code || !code.trim()) {
+          setSvgContent("");
+          return;
+        }
         try {
-          const uniqueId2 = `mermaid-${id38}-${Math.random().toString(36).substring(2, 8)}`;
+          const cleanId = String(id38).replace(/[^a-zA-Z0-9_-]/g, "-");
+          const uniqueId2 = `mermaid-${cleanId}-${Math.random().toString(36).substring(2, 8)}`;
           const { svg: svg3 } = await mermaid_default.render(uniqueId2, code);
           if (isMounted) {
             setSvgContent(svg3);
@@ -339363,16 +339377,17 @@ ${isHandDrawn ? "" : `
       };
     }, [code, id38]);
     if (error3) {
-      return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(box_default, { color: "text-status-error", children: [
-        "Mermaid syntax error: ",
+      return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: "0.75rem", background: "#3b1219", color: "#fca5a5", borderRadius: "6px", fontSize: "0.82rem", margin: "0.5rem 0" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "Mermaid syntax error:" }),
+        " ",
         error3
       ] });
     }
     return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
       "div",
       {
-        id: "wf-mermaid-diagram",
-        "data-testid": "wf-mermaid-diagram",
+        id: id38,
+        "data-testid": testId,
         style: {
           padding: "1.25rem",
           background: "#0c131f",
@@ -339380,9 +339395,130 @@ ${isHandDrawn ? "" : `
           border: "1px solid #1f2937",
           overflowX: "auto",
           display: "flex",
-          justifyContent: "center"
+          justifyContent: "center",
+          margin: "0.75rem 0"
         },
         dangerouslySetInnerHTML: { __html: svgContent }
+      }
+    );
+  }
+  function parseMarkdownWithMermaid(markdownText) {
+    if (!markdownText) return [];
+    try {
+      const tokens2 = k2.lexer(markdownText);
+      const segments = [];
+      let currentTokens = [];
+      for (const token2 of tokens2) {
+        if (token2.type === "code" && (token2.lang === "mermaid" || token2.lang === "mermaid-js")) {
+          if (currentTokens.length > 0) {
+            currentTokens.links = tokens2.links;
+            segments.push({
+              type: "html",
+              html: k2.parser(currentTokens)
+            });
+            currentTokens = [];
+          }
+          segments.push({
+            type: "mermaid",
+            code: token2.text
+          });
+        } else {
+          currentTokens.push(token2);
+        }
+      }
+      if (currentTokens.length > 0) {
+        currentTokens.links = tokens2.links;
+        segments.push({
+          type: "html",
+          html: k2.parser(currentTokens)
+        });
+      }
+      return segments;
+    } catch (err) {
+      return [{ type: "html", html: `<p>${markdownText}</p>` }];
+    }
+  }
+  function MarkdownDocumentViewer({ content, filePath = "", extension: extension4 = "md" }) {
+    const isMd = extension4 === "md" || extension4 === "markdown" || /\.md$/i.test(filePath) || !extension4;
+    if (!isMd) {
+      return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "pre",
+        {
+          id: "doc-preview-content",
+          "data-testid": "doc-preview-content",
+          style: {
+            maxHeight: "60vh",
+            overflow: "auto",
+            padding: "0.75rem",
+            background: "#0a0f1d",
+            color: "#e2e8f0",
+            border: "1px solid #1e293b",
+            borderRadius: "6px",
+            fontSize: "0.82rem",
+            lineHeight: "1.45",
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-all"
+          },
+          children: content
+        }
+      );
+    }
+    const segments = (0, import_react311.useMemo)(() => parseMarkdownWithMermaid(content || ""), [content]);
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+      "div",
+      {
+        id: "doc-preview-content",
+        "data-testid": "doc-preview-content",
+        className: "markdown-document-viewer",
+        style: {
+          maxHeight: "65vh",
+          overflowY: "auto",
+          padding: "1.25rem",
+          background: "#090e17",
+          color: "#e2e8f0",
+          border: "1px solid #1e293b",
+          borderRadius: "8px",
+          fontSize: "0.9rem",
+          lineHeight: "1.65"
+        },
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("style", { children: `
+        .markdown-document-viewer h1 { font-size: 1.5rem; font-weight: 700; margin-top: 0; margin-bottom: 0.75rem; color: #f8fafc; border-bottom: 1px solid #1e293b; padding-bottom: 0.5rem; }
+        .markdown-document-viewer h2 { font-size: 1.25rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; color: #f1f5f9; border-bottom: 1px solid #1e293b; padding-bottom: 0.25rem; }
+        .markdown-document-viewer h3 { font-size: 1.05rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; color: #e2e8f0; }
+        .markdown-document-viewer p { margin-top: 0; margin-bottom: 0.75rem; color: #cbd5e1; }
+        .markdown-document-viewer ul, .markdown-document-viewer ol { margin-top: 0; margin-bottom: 0.75rem; padding-left: 1.5rem; }
+        .markdown-document-viewer li { margin-bottom: 0.25rem; color: #cbd5e1; }
+        .markdown-document-viewer code { background: #1e293b; color: #38bdf8; padding: 0.15rem 0.35rem; border-radius: 4px; font-size: 0.85em; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+        .markdown-document-viewer pre { background: #0c131f; border: 1px solid #1e293b; border-radius: 6px; padding: 0.75rem; overflow-x: auto; margin: 0.75rem 0; }
+        .markdown-document-viewer pre code { background: transparent; padding: 0; color: #e2e8f0; }
+        .markdown-document-viewer blockquote { border-left: 3px solid #3b82f6; padding-left: 0.75rem; margin: 0.75rem 0; color: #94a3b8; font-style: italic; }
+        .markdown-document-viewer table { border-collapse: collapse; width: 100%; margin: 0.75rem 0; font-size: 0.85rem; }
+        .markdown-document-viewer th, .markdown-document-viewer td { border: 1px solid #1e293b; padding: 0.4rem 0.6rem; text-align: left; }
+        .markdown-document-viewer th { background: #0f1b2a; color: #f8fafc; font-weight: 600; }
+        .markdown-document-viewer a { color: #60a5fa; text-decoration: underline; }
+      ` }),
+          segments.map((seg, idx) => {
+            if (seg.type === "mermaid") {
+              return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { margin: "1rem 0" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                MermaidRenderer,
+                {
+                  code: seg.code,
+                  id: `doc-preview-mermaid-${idx}`,
+                  testId: `doc-preview-mermaid-${idx}`
+                }
+              ) }, `mermaid-wrapper-${idx}`);
+            }
+            return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "div",
+              {
+                className: "markdown-section",
+                dangerouslySetInnerHTML: { __html: seg.html }
+              },
+              `html-${idx}`
+            );
+          })
+        ]
       }
     );
   }
@@ -339423,7 +339559,7 @@ ${isHandDrawn ? "" : `
     const [controlsFeedback, setControlsFeedback] = (0, import_react311.useState)("");
     const [humanReplies, setHumanReplies] = (0, import_react311.useState)({});
     const [previewModalOpen, setPreviewModalOpen] = (0, import_react311.useState)(false);
-    const [previewDoc, setPreviewDoc] = (0, import_react311.useState)({ title: "", path: "", content: "", loading: false, error: null });
+    const [previewDoc, setPreviewDoc] = (0, import_react311.useState)({ title: "", path: "", content: "", extension: "md", loading: false, error: null });
     const [deploySha, setDeploySha] = (0, import_react311.useState)("");
     const [deployErrorRate, setDeployErrorRate] = (0, import_react311.useState)("0.2");
     const [deployMaxRate, setDeployMaxRate] = (0, import_react311.useState)("1.0");
@@ -339664,7 +339800,7 @@ ${isHandDrawn ? "" : `
       }
     };
     const openPreviewModal = async (filePath, executionKey, label) => {
-      setPreviewDoc({ title: label || filePath, path: filePath, content: "", loading: true, error: null });
+      setPreviewDoc({ title: label || filePath, path: filePath, content: "", extension: "md", loading: true, error: null });
       setPreviewModalOpen(true);
       try {
         const q3 = new URLSearchParams({ path: filePath });
@@ -339676,6 +339812,7 @@ ${isHandDrawn ? "" : `
             title: label || filePath,
             path: filePath,
             content: "",
+            extension: "md",
             loading: false,
             error: data6.error || "Failed to read file"
           });
@@ -339684,6 +339821,7 @@ ${isHandDrawn ? "" : `
             title: label || filePath,
             path: filePath,
             content: data6.content,
+            extension: data6.extension || "md",
             loading: false,
             error: null
           });
@@ -339693,6 +339831,7 @@ ${isHandDrawn ? "" : `
           title: label || filePath,
           path: filePath,
           content: "",
+          extension: "md",
           loading: false,
           error: err.message
         });
@@ -341047,18 +341186,19 @@ ${isHandDrawn ? "" : `
                       "div",
                       {
                         id: "kanban-board",
+                        "data-testid": "kanban-board",
                         style: {
                           display: "grid",
-                          gap: "0.75rem",
-                          gridTemplateColumns: "repeat(auto-fit, minmax(195px, 1fr))"
+                          gap: "0.85rem",
+                          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))"
                         },
-                        children: STAGES.map((col) => {
-                          const items = (st2.tasks || []).filter((t4) => t4.stage === col);
-                          return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                        children: BOARD_COLUMNS.map((colDef) => {
+                          const items = (st2.tasks || []).filter((t4) => getTaskBoardColumn(t4) === colDef.id);
+                          return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: `kanban-col-${colDef.id}`, "data-testid": `kanban-col-${colDef.id}`, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
                             container_default,
                             {
-                              header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h3", counter: `(${items.length})`, children: col }),
-                              children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "xs", children: items.map((t4) => {
+                              header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h3", counter: `(${items.length})`, children: colDef.label }),
+                              children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "xs", children: items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { color: "text-body-secondary", textAlign: "center", padding: { vertical: "s" }, children: "No tasks" }) : items.map((t4) => {
                                 const stalledInfo = stalledMap[t4.execution_key];
                                 return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
                                   "div",
@@ -341136,6 +341276,8 @@ ${isHandDrawn ? "" : `
                                               "span",
                                               {
                                                 "data-testid": `task-stage-${t4.issue_number}`,
+                                                id: `task-stage-badge-${t4.issue_number}`,
+                                                "data-stage": t4.stage,
                                                 style: {
                                                   background: t4.needs_human ? "#78350f" : "#064e3b",
                                                   color: "#fff",
@@ -341144,7 +341286,7 @@ ${isHandDrawn ? "" : `
                                                   fontSize: "0.72rem",
                                                   fontWeight: 600
                                                 },
-                                                children: t4.stage
+                                                children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { "data-testid": `task-stage-badge-${t4.issue_number}`, children: t4.stage })
                                               }
                                             ),
                                             stalledInfo && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
@@ -341325,9 +341467,8 @@ ${isHandDrawn ? "" : `
                                   t4.execution_key
                                 );
                               }) })
-                            },
-                            col
-                          );
+                            }
+                          ) }, colDef.id);
                         })
                       }
                     )
@@ -341939,24 +342080,11 @@ ${isHandDrawn ? "" : `
               previewDoc.loading && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(box_default, { color: "text-body-secondary", children: "Loading file content..." }),
               previewDoc.error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(alert_default, { type: "error", header: "Failed to load file", children: previewDoc.error }),
               !previewDoc.loading && !previewDoc.error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                "pre",
+                MarkdownDocumentViewer,
                 {
-                  id: "doc-preview-content",
-                  "data-testid": "doc-preview-content",
-                  style: {
-                    maxHeight: "60vh",
-                    overflow: "auto",
-                    padding: "0.75rem",
-                    background: "#0a0f1d",
-                    color: "#e2e8f0",
-                    border: "1px solid #1e293b",
-                    borderRadius: "6px",
-                    fontSize: "0.82rem",
-                    lineHeight: "1.45",
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-all"
-                  },
-                  children: previewDoc.content
+                  content: previewDoc.content,
+                  filePath: previewDoc.path,
+                  extension: previewDoc.extension
                 }
               )
             ] })

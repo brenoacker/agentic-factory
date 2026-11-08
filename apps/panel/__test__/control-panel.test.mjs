@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -23,7 +23,11 @@ import {
   resolveTaskReviewFiles,
   openInEditor,
   readFileContent,
+  parseMarkdownWithMermaid,
   syncTaskStateToTracker,
+  BOARD_COLUMNS,
+  getTaskBoardColumn,
+  groupTasksByBoardColumn,
   FactoryStore,
 } from '../../../packages/core/index.mjs';
 
@@ -1782,5 +1786,135 @@ test('C28: Non-code research workflow auto-close and post-merge closing', async 
     rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+test('C29: Unified 4-column Kanban board preserves 100% of tasks across triage, in_progress, waiting_human, and done', () => {
+  assert.equal(BOARD_COLUMNS.length, 4);
+  assert.deepEqual(
+    BOARD_COLUMNS.map((c) => c.id),
+    ['triage', 'in_progress', 'waiting_human', 'done'],
+  );
+
+  const mockTasks = [
+    { execution_key: 'task-1', issue_number: 1, stage: 'triage', needs_human: 0 },
+    { execution_key: 'task-2', issue_number: 2, stage: 'plan', needs_human: 0 },
+    { execution_key: 'task-3', issue_number: 3, stage: 'checks_and_build', needs_human: 0 },
+    { execution_key: 'task-4', issue_number: 4, stage: 'verify', needs_human: 0 },
+    { execution_key: 'task-5', issue_number: 5, stage: 'review', needs_human: 0 },
+    { execution_key: 'task-6', issue_number: 6, stage: 'investigate', needs_human: 0 },
+    { execution_key: 'task-7', issue_number: 7, stage: 'discover', needs_human: 0 },
+    { execution_key: 'task-8', issue_number: 8, stage: 'plan', needs_human: 1 },
+    { execution_key: 'task-9', issue_number: 9, stage: 'merge', needs_human: 0 },
+    { execution_key: 'task-10', issue_number: 10, stage: 'done', needs_human: 0 },
+    { execution_key: 'task-11', issue_number: 11, stage: 'aborted', needs_human: 0 },
+  ];
+
+  const grouped = groupTasksByBoardColumn(mockTasks);
+
+  // 1. Triage: contains task-1
+  assert.equal(grouped.triage.length, 1);
+  assert.equal(grouped.triage[0].issue_number, 1);
+
+  // 2. In Progress: contains active autonomous tasks without human block (plan, checks_and_build, verify, review, investigate, discover)
+  assert.equal(grouped.in_progress.length, 6);
+  assert.deepEqual(
+    grouped.in_progress.map((t) => t.issue_number),
+    [2, 3, 4, 5, 6, 7],
+  );
+
+  // 3. Waiting for Human: contains needs_human=1 and stage=merge
+  assert.equal(grouped.waiting_human.length, 2);
+  assert.deepEqual(
+    grouped.waiting_human.map((t) => t.issue_number),
+    [8, 9],
+  );
+
+  // 4. Done: contains done and aborted
+  assert.equal(grouped.done.length, 2);
+  assert.deepEqual(
+    grouped.done.map((t) => t.issue_number),
+    [10, 11],
+  );
+
+  // ZERO TASK LOSS: total count across columns must equal total input tasks
+  const totalInColumns =
+    grouped.triage.length + grouped.in_progress.length + grouped.waiting_human.length + grouped.done.length;
+  assert.equal(totalInColumns, mockTasks.length);
+});
+
+test('C30: In-progress and waiting-human tasks display distinct granular stage badges in unified columns', () => {
+  const activePlanTask = { stage: 'plan', needs_human: 0 };
+  const activeBuildTask = { stage: 'checks_and_build', needs_human: 0 };
+  const pausedPlanTask = { stage: 'plan', needs_human: 1 };
+  const pausedMergeTask = { stage: 'merge', needs_human: 0 };
+
+  // Both active tasks map to 'in_progress', yet preserve distinct stage values
+  assert.equal(getTaskBoardColumn(activePlanTask), 'in_progress');
+  assert.equal(getTaskBoardColumn(activeBuildTask), 'in_progress');
+  assert.equal(activePlanTask.stage, 'plan');
+  assert.equal(activeBuildTask.stage, 'checks_and_build');
+
+  // Both paused tasks map to 'waiting_human', yet preserve distinct stages
+  assert.equal(getTaskBoardColumn(pausedPlanTask), 'waiting_human');
+  assert.equal(getTaskBoardColumn(pausedMergeTask), 'waiting_human');
+  assert.equal(pausedPlanTask.stage, 'plan');
+  assert.equal(pausedMergeTask.stage, 'merge');
+});
+
+test('C31: Markdown document preview parses formatted markdown, extracts embedded mermaid, and falls back to workspace roots', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const store = new FactoryStore(dbPath);
+  const taskWs = join(tmpDir, '.workspaces', 'issue-71');
+
+  try {
+    // 1. parseMarkdownWithMermaid separates markdown HTML from mermaid code blocks
+    const sampleDoc = [
+      '# Investigation Report #71',
+      '',
+      'Key findings on worker retry loop:',
+      '- Finding A: Concurrent requests trigger contention',
+      '- Finding B: Stage tokens guarantee single-use',
+      '',
+      '```mermaid',
+      'graph TD',
+      '  A[Request] --> B[Atomic Lock]',
+      '  B --> C[Execute Stage]',
+      '```',
+      '',
+      '## Next Steps',
+      'Apply database index.',
+    ].join('\n');
+
+    const segments = parseMarkdownWithMermaid(sampleDoc);
+    assert.equal(segments.length, 3);
+    assert.equal(segments[0].type, 'html');
+    assert.ok(segments[0].html.includes('<h1 id="investigation-report-71">Investigation Report #71</h1>') || segments[0].html.includes('Investigation Report #71'));
+    assert.ok(segments[0].html.includes('<li>Finding A: Concurrent requests trigger contention</li>') || segments[0].html.includes('Finding A:'));
+    assert.equal(segments[1].type, 'mermaid');
+    assert.ok(segments[1].code.includes('graph TD'));
+    assert.ok(segments[1].code.includes('A[Request] --> B[Atomic Lock]'));
+    assert.equal(segments[2].type, 'html');
+    assert.ok(segments[2].html.includes('Next Steps'));
+
+    // 2. readFileContent fallback: file present in task workspace but not factory root
+    const wsRelPath = join('docs', 'research', 'issue-71-investigation.md');
+    const wsFullPath = join(taskWs, wsRelPath);
+    mkdirSync(join(taskWs, 'docs', 'research'), { recursive: true });
+    writeFileSync(wsFullPath, sampleDoc, 'utf-8');
+
+    const readRes = readFileContent(join(tmpDir, wsRelPath), {
+      factoryRoot: tmpDir,
+      allowedRoots: [tmpDir, taskWs],
+    });
+    assert.equal(readRes.ok, true);
+    assert.equal(readRes.path, wsFullPath);
+    assert.equal(readRes.extension, 'md');
+    assert.equal(readRes.content, sampleDoc);
+  } finally {
+    store.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
 
 

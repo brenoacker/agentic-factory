@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import mermaid from 'mermaid';
+import { marked } from 'marked';
 import '@cloudscape-design/global-styles/index.css';
 import { applyMode, Mode } from '@cloudscape-design/global-styles';
 import {
@@ -49,6 +50,11 @@ mermaid.initialize({
   securityLevel: 'loose',
 });
 
+marked.setOptions({
+  gfm: true,
+  breaks: true,
+});
+
 export const NAV_ITEMS = [
   { type: 'link', text: 'Overview & Telemetry', href: '#overview', id: 'overview' },
   { type: 'link', text: 'Board & Needs Human', href: '#board', id: 'board' },
@@ -77,6 +83,21 @@ export function getTicketExternalUrl(task) {
     return `https://github.com/${repo}/issues/${issueNum}`;
   }
   return '#';
+}
+
+export const BOARD_COLUMNS = [
+  { id: 'triage', label: '📥 Triage', color: '#64748b' },
+  { id: 'in_progress', label: '⚡ In Progress', color: '#0284c7' },
+  { id: 'waiting_human', label: '🙋 Waiting for Human', color: '#f59e0b' },
+  { id: 'done', label: '✅ Done', color: '#10b981' },
+];
+
+export function getTaskBoardColumn(task) {
+  if (!task) return 'triage';
+  if (task.stage === 'done' || task.stage === 'aborted') return 'done';
+  if (task.needs_human === 1 || task.stage === 'merge') return 'waiting_human';
+  if (task.stage === 'triage') return 'triage';
+  return 'in_progress';
 }
 
 const STAGES = [
@@ -116,15 +137,20 @@ export function generateWorkflowMermaid(wf) {
   return lines.join('\n');
 }
 
-function MermaidRenderer({ code, id = 'workflow-mermaid' }) {
+export function MermaidRenderer({ code, id = 'workflow-mermaid', testId = 'wf-mermaid-diagram' }) {
   const [svgContent, setSvgContent] = useState('');
   const [error, setError] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
     async function renderDiagram() {
+      if (!code || !code.trim()) {
+        setSvgContent('');
+        return;
+      }
       try {
-        const uniqueId = `mermaid-${id}-${Math.random().toString(36).substring(2, 8)}`;
+        const cleanId = String(id).replace(/[^a-zA-Z0-9_-]/g, '-');
+        const uniqueId = `mermaid-${cleanId}-${Math.random().toString(36).substring(2, 8)}`;
         const { svg } = await mermaid.render(uniqueId, code);
         if (isMounted) {
           setSvgContent(svg);
@@ -143,13 +169,17 @@ function MermaidRenderer({ code, id = 'workflow-mermaid' }) {
   }, [code, id]);
 
   if (error) {
-    return <Box color="text-status-error">Mermaid syntax error: {error}</Box>;
+    return (
+      <div style={{ padding: '0.75rem', background: '#3b1219', color: '#fca5a5', borderRadius: '6px', fontSize: '0.82rem', margin: '0.5rem 0' }}>
+        <strong>Mermaid syntax error:</strong> {error}
+      </div>
+    );
   }
 
   return (
     <div
-      id="wf-mermaid-diagram"
-      data-testid="wf-mermaid-diagram"
+      id={id}
+      data-testid={testId}
       style={{
         padding: '1.25rem',
         background: '#0c131f',
@@ -158,9 +188,136 @@ function MermaidRenderer({ code, id = 'workflow-mermaid' }) {
         overflowX: 'auto',
         display: 'flex',
         justifyContent: 'center',
+        margin: '0.75rem 0',
       }}
       dangerouslySetInnerHTML={{ __html: svgContent }}
     />
+  );
+}
+
+export function parseMarkdownWithMermaid(markdownText) {
+  if (!markdownText) return [];
+  try {
+    const tokens = marked.lexer(markdownText);
+    const segments = [];
+    let currentTokens = [];
+
+    for (const token of tokens) {
+      if (token.type === 'code' && (token.lang === 'mermaid' || token.lang === 'mermaid-js')) {
+        if (currentTokens.length > 0) {
+          currentTokens.links = tokens.links;
+          segments.push({
+            type: 'html',
+            html: marked.parser(currentTokens),
+          });
+          currentTokens = [];
+        }
+        segments.push({
+          type: 'mermaid',
+          code: token.text,
+        });
+      } else {
+        currentTokens.push(token);
+      }
+    }
+
+    if (currentTokens.length > 0) {
+      currentTokens.links = tokens.links;
+      segments.push({
+        type: 'html',
+        html: marked.parser(currentTokens),
+      });
+    }
+
+    return segments;
+  } catch (err) {
+    return [{ type: 'html', html: `<p>${markdownText}</p>` }];
+  }
+}
+
+export function MarkdownDocumentViewer({ content, filePath = '', extension = 'md' }) {
+  const isMd = extension === 'md' || extension === 'markdown' || /\.md$/i.test(filePath) || !extension;
+
+  if (!isMd) {
+    return (
+      <pre
+        id="doc-preview-content"
+        data-testid="doc-preview-content"
+        style={{
+          maxHeight: '60vh',
+          overflow: 'auto',
+          padding: '0.75rem',
+          background: '#0a0f1d',
+          color: '#e2e8f0',
+          border: '1px solid #1e293b',
+          borderRadius: '6px',
+          fontSize: '0.82rem',
+          lineHeight: '1.45',
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-all',
+        }}
+      >
+        {content}
+      </pre>
+    );
+  }
+
+  const segments = useMemo(() => parseMarkdownWithMermaid(content || ''), [content]);
+
+  return (
+    <div
+      id="doc-preview-content"
+      data-testid="doc-preview-content"
+      className="markdown-document-viewer"
+      style={{
+        maxHeight: '65vh',
+        overflowY: 'auto',
+        padding: '1.25rem',
+        background: '#090e17',
+        color: '#e2e8f0',
+        border: '1px solid #1e293b',
+        borderRadius: '8px',
+        fontSize: '0.9rem',
+        lineHeight: '1.65',
+      }}
+    >
+      <style>{`
+        .markdown-document-viewer h1 { font-size: 1.5rem; font-weight: 700; margin-top: 0; margin-bottom: 0.75rem; color: #f8fafc; border-bottom: 1px solid #1e293b; padding-bottom: 0.5rem; }
+        .markdown-document-viewer h2 { font-size: 1.25rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; color: #f1f5f9; border-bottom: 1px solid #1e293b; padding-bottom: 0.25rem; }
+        .markdown-document-viewer h3 { font-size: 1.05rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; color: #e2e8f0; }
+        .markdown-document-viewer p { margin-top: 0; margin-bottom: 0.75rem; color: #cbd5e1; }
+        .markdown-document-viewer ul, .markdown-document-viewer ol { margin-top: 0; margin-bottom: 0.75rem; padding-left: 1.5rem; }
+        .markdown-document-viewer li { margin-bottom: 0.25rem; color: #cbd5e1; }
+        .markdown-document-viewer code { background: #1e293b; color: #38bdf8; padding: 0.15rem 0.35rem; border-radius: 4px; font-size: 0.85em; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+        .markdown-document-viewer pre { background: #0c131f; border: 1px solid #1e293b; border-radius: 6px; padding: 0.75rem; overflow-x: auto; margin: 0.75rem 0; }
+        .markdown-document-viewer pre code { background: transparent; padding: 0; color: #e2e8f0; }
+        .markdown-document-viewer blockquote { border-left: 3px solid #3b82f6; padding-left: 0.75rem; margin: 0.75rem 0; color: #94a3b8; font-style: italic; }
+        .markdown-document-viewer table { border-collapse: collapse; width: 100%; margin: 0.75rem 0; font-size: 0.85rem; }
+        .markdown-document-viewer th, .markdown-document-viewer td { border: 1px solid #1e293b; padding: 0.4rem 0.6rem; text-align: left; }
+        .markdown-document-viewer th { background: #0f1b2a; color: #f8fafc; font-weight: 600; }
+        .markdown-document-viewer a { color: #60a5fa; text-decoration: underline; }
+      `}</style>
+      {segments.map((seg, idx) => {
+        if (seg.type === 'mermaid') {
+          return (
+            <div key={`mermaid-wrapper-${idx}`} style={{ margin: '1rem 0' }}>
+              <MermaidRenderer
+                code={seg.code}
+                id={`doc-preview-mermaid-${idx}`}
+                testId={`doc-preview-mermaid-${idx}`}
+              />
+            </div>
+          );
+        }
+        return (
+          <div
+            key={`html-${idx}`}
+            className="markdown-section"
+            dangerouslySetInnerHTML={{ __html: seg.html }}
+          />
+        );
+      })}
+    </div>
   );
 }
 
@@ -211,7 +368,7 @@ function ControlPanelApp() {
   const [controlsFeedback, setControlsFeedback] = useState('');
   const [humanReplies, setHumanReplies] = useState({});
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
-  const [previewDoc, setPreviewDoc] = useState({ title: '', path: '', content: '', loading: false, error: null });
+  const [previewDoc, setPreviewDoc] = useState({ title: '', path: '', content: '', extension: 'md', loading: false, error: null });
 
   // Post-deploy gate form state
   const [deploySha, setDeploySha] = useState('');
@@ -474,7 +631,7 @@ function ControlPanelApp() {
   };
 
   const openPreviewModal = async (filePath, executionKey, label) => {
-    setPreviewDoc({ title: label || filePath, path: filePath, content: '', loading: true, error: null });
+    setPreviewDoc({ title: label || filePath, path: filePath, content: '', extension: 'md', loading: true, error: null });
     setPreviewModalOpen(true);
     try {
       const q = new URLSearchParams({ path: filePath });
@@ -486,6 +643,7 @@ function ControlPanelApp() {
           title: label || filePath,
           path: filePath,
           content: '',
+          extension: 'md',
           loading: false,
           error: data.error || 'Failed to read file',
         });
@@ -494,6 +652,7 @@ function ControlPanelApp() {
           title: label || filePath,
           path: filePath,
           content: data.content,
+          extension: data.extension || 'md',
           loading: false,
           error: null,
         });
@@ -503,6 +662,7 @@ function ControlPanelApp() {
         title: label || filePath,
         path: filePath,
         content: '',
+        extension: 'md',
         loading: false,
         error: err.message,
       });
@@ -1811,25 +1971,31 @@ function ControlPanelApp() {
 
                 <div
                   id="kanban-board"
+                  data-testid="kanban-board"
                   style={{
                     display: 'grid',
-                    gap: '0.75rem',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(195px, 1fr))',
+                    gap: '0.85rem',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
                   }}
                 >
-                  {STAGES.map((col) => {
-                    const items = (st.tasks || []).filter((t) => t.stage === col);
+                  {BOARD_COLUMNS.map((colDef) => {
+                    const items = (st.tasks || []).filter((t) => getTaskBoardColumn(t) === colDef.id);
                     return (
-                      <Container
-                        key={col}
-                        header={
-                          <Header variant="h3" counter={`(${items.length})`}>
-                            {col}
-                          </Header>
-                        }
-                      >
-                        <SpaceBetween size="xs">
-                          {items.map((t) => {
+                      <div key={colDef.id} id={`kanban-col-${colDef.id}`} data-testid={`kanban-col-${colDef.id}`}>
+                        <Container
+                          header={
+                            <Header variant="h3" counter={`(${items.length})`}>
+                              {colDef.label}
+                            </Header>
+                          }
+                        >
+                          <SpaceBetween size="xs">
+                            {items.length === 0 ? (
+                              <Box color="text-body-secondary" textAlign="center" padding={{ vertical: 's' }}>
+                                No tasks
+                              </Box>
+                            ) : (
+                              items.map((t) => {
                             const stalledInfo = stalledMap[t.execution_key];
                             return (
                               <div
@@ -1893,6 +2059,8 @@ function ControlPanelApp() {
                                   </span>
                                   <span
                                     data-testid={`task-stage-${t.issue_number}`}
+                                    id={`task-stage-badge-${t.issue_number}`}
+                                    data-stage={t.stage}
                                     style={{
                                       background: t.needs_human ? '#78350f' : '#064e3b',
                                       color: '#fff',
@@ -1902,7 +2070,9 @@ function ControlPanelApp() {
                                       fontWeight: 600,
                                     }}
                                   >
-                                    {t.stage}
+                                    <span data-testid={`task-stage-badge-${t.issue_number}`}>
+                                      {t.stage}
+                                    </span>
                                   </span>
                                   {stalledInfo && (
                                     <span
@@ -2065,11 +2235,12 @@ function ControlPanelApp() {
                                 )}
                               </div>
                             );
-                          })}
+                          }))}
                         </SpaceBetween>
                       </Container>
-                    );
-                  })}
+                    </div>
+                  );
+                })}
                 </div>
               </SpaceBetween>
             </section>
@@ -2710,25 +2881,11 @@ function ControlPanelApp() {
             </Alert>
           )}
           {!previewDoc.loading && !previewDoc.error && (
-            <pre
-              id="doc-preview-content"
-              data-testid="doc-preview-content"
-              style={{
-                maxHeight: '60vh',
-                overflow: 'auto',
-                padding: '0.75rem',
-                background: '#0a0f1d',
-                color: '#e2e8f0',
-                border: '1px solid #1e293b',
-                borderRadius: '6px',
-                fontSize: '0.82rem',
-                lineHeight: '1.45',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-all',
-              }}
-            >
-              {previewDoc.content}
-            </pre>
+            <MarkdownDocumentViewer
+              content={previewDoc.content}
+              filePath={previewDoc.path}
+              extension={previewDoc.extension}
+            />
           )}
         </div>
       </Modal>
