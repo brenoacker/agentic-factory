@@ -10,6 +10,7 @@ import {
   validateContract,
   evaluateIntakeGuards,
   FactoryStore,
+  formatPullRequestBody,
 } from '../index.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..', '..', '..');
@@ -429,4 +430,44 @@ test('C7: cli status aggregates tasks, token usage, USD cost, review metrics, an
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
+});
+
+test('C22: formatPullRequestBody generates standardized PR template with What & Why, How it was implemented, Verification, Evidence, and Checklist', () => {
+  const task = {
+    issue_number: 42,
+    title: 'Add robust metrics collection endpoint',
+    type: 'feature',
+    impact: 'high',
+    branch_name: 'factory/issue-42',
+    execution_key: 'brenoacker/agentic-factory#42',
+  };
+  const cleanPayload = {
+    verdict: 'APPROVE',
+    round: 1,
+    summary: 'All deterministic checks and review obligations passed at HEAD.',
+    commit_sha: 'a1b2c3d4e5f6',
+  };
+
+  const body = formatPullRequestBody({
+    task,
+    cleanPayload,
+    commitSha: 'a1b2c3d4e5f6',
+    implementationNotes: '- Implemented Prometheus metrics endpoint\n- Added integration tests',
+  });
+
+  assert.ok(body.includes('## What and why'));
+  assert.ok(body.includes('Closes #42 (Tracker: `brenoacker/agentic-factory#42`)'));
+  assert.ok(body.includes('- **Workflow Type**: `feature`'));
+  assert.ok(body.includes('- **Task Branch**: `factory/issue-42`'));
+  assert.ok(body.includes('- **Target Commit**: `a1b2c3d4e5f6`'));
+  assert.ok(body.includes('## How it was implemented'));
+  assert.ok(body.includes('Key architectural & code changes:'));
+  assert.ok(body.includes('- Implemented Prometheus metrics endpoint'));
+  assert.ok(body.includes('## Verification and Tests'));
+  assert.ok(body.includes('- **Review Verdict**: `APPROVE` (Round 1)'));
+  assert.ok(body.includes('`npm run check:static`'));
+  assert.ok(body.includes('## Visual & Artifact Evidence'));
+  assert.ok(body.includes('## Checklist'));
+  assert.ok(body.includes('- [x] Conventional Commit title matching workflow type'));
+  assert.ok(body.includes('- [x] Automated test suite and static checks pass cleanly'));
 });

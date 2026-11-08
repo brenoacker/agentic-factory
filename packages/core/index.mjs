@@ -12,6 +12,7 @@ export {
   closeGitHubIssue,
   checkGitHubPullRequest,
   createGitHubPullRequest,
+  formatPullRequestBody,
 } from './src/github.mjs';
 export { prepareWorktree, provisionTaskWorkspace, cleanupTaskWorkspace } from './src/worktree.mjs';
 export { approveTask, dispatchTask, materializeInvestigationReport } from './src/dispatcher.mjs';
