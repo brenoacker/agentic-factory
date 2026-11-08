@@ -437,10 +437,7 @@ export function dispatchTask({
         const prNumber = cleanPayload.pr_number;
         if (prNumber) {
           let targetRepo = task.repo;
-          if (targetRepo && targetRepo.startsWith('linear://')) {
-            targetRepo = targetRepo.replace(/^linear:\/?\/?/i, '');
-          }
-          if (!targetRepo || !targetRepo.includes('/') || targetRepo.includes('://')) {
+          if (task.provider !== 'github' || !targetRepo || targetRepo.includes('://')) {
             targetRepo = factoryConfig?.factory?.repo || 'brenoacker/agentic-factory';
           }
           store.attachTaskDeliverable(executionKey, {
