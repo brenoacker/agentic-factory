@@ -7,9 +7,11 @@ export default defineConfig({
   workers: 1,
   reporter: 'list',
   use: {
-    trace: 'off',
+    trace: 'on-first-retry',
     headless: true,
     viewport: { width: 1440, height: 900 },
+    screenshot: 'on',
+    video: 'retain-on-failure',
   },
   projects: [
     {

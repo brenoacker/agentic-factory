@@ -3,17 +3,10 @@ import { cpSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createPanelServer } from '../server.mjs';
+import { makeTempFactoryClone } from '../../../test-support/factory-clone.mjs';
 
 const REPO_ROOT = resolve(import.meta.dirname, '..', '..', '..');
 const CAPTURES_DIR = join(REPO_ROOT, 'runs', 'screenshots');
-
-function makeTempFactoryClone() {
-  const dir = mkdtempSync(join(tmpdir(), 'agentic-factory-pw-'));
-  for (const item of ['factory.yaml', 'skills.lock.json', 'config', 'workflows', 'contracts', 'brain', 'agents', 'skills']) {
-    cpSync(join(REPO_ROOT, item), join(dir, item), { recursive: true });
-  }
-  return dir;
-}
 
 async function startTestServer(rootDir, dbPath, issuePollRunner = null) {
   const panel = createPanelServer({ rootDir, dbPath, issuePollRunner });

@@ -5,16 +5,9 @@ import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createPanelServer } from '../../../apps/panel/server.mjs';
 import { classifyTicketType, evaluateTicketPickupTriggers } from '../index.mjs';
+import { makeTempFactoryClone } from '../../../test-support/factory-clone.mjs';
 
 const REPO_ROOT = resolve(import.meta.dirname, '..', '..', '..');
-
-function makeTempFactoryClone() {
-  const dir = mkdtempSync(join(tmpdir(), 'agentic-factory-pipeline-'));
-  for (const item of ['factory.yaml', 'skills.lock.json', 'config', 'workflows', 'contracts', 'brain', 'agents']) {
-    cpSync(join(REPO_ROOT, item), join(dir, item), { recursive: true });
-  }
-  return dir;
-}
 
 async function startTestServer(rootDir, dbPath) {
   const panel = createPanelServer({ rootDir, dbPath });
@@ -174,7 +167,9 @@ test('C7: multi-repo endpoints GET/POST/DELETE /api/projects and POST /api/proje
   const dbPath = join(tmpDir, 'factory.db');
 
   let callCount = 0;
-  const mockIssuePollRunner = ({ repo, etag }) => {
+  const mockIssuePollRunner = (spec) => {
+    if (spec.action && spec.action !== 'poll') return { ok: true };
+    const { repo, etag } = spec;
     callCount += 1;
     if (repo === 'brenoacker/external-service') {
       if (etag === 'W/"etag-ext-1"') {

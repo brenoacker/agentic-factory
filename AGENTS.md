@@ -1,25 +1,29 @@
-# AGENTS.md — Agentic Factory Constitution
+# AGENTS.md
 
-These rules apply to **every agent** (Antigravity, Claude Code, Codex) operating in this repository or in any target project invoked by the factory.
+Rules that are not obvious from reading the code. Everything else: read the code, `docs/plan.md`, and `.specs/`.
 
-## Principles
+## Two modes — know which one you are in
 
-1. **The factory is in control.** You execute one stage and return the requested contract. Do not decide workflow routing, do not advance stages, do not mutate labels, do not open/merge PRs, and do not run `git push` — that is the factory's responsibility.
-2. **Contract over prose.** When a stage requires a contract file (JSON), populate it according to the schema in `contracts/`. Empty or generic required fields (`"bug"`, `"fixed"`) are rejected by deterministic gates.
-3. **Evidence always.** Never claim something is done without proof (test, command, output). Never fabricate test, CI, deploy, or review results. Every visual interface must be verified with Playwright (`@playwright/test` / `@playwright/mcp`).
-4. **Same skills for humans and agents.** Use the vendored skills in `skills/` specified by the stage. For feature/bug coding, follow `tlc-spec-lean` v2.2.0.
-5. **Stop and ask** when a product decision is missing, when a test appears wrong, or when an action is irreversible. Record the question in the contract (`needs_human`).
+- **Factory stage** (you were dispatched by the factory into a `.workspaces/` checkout with a stage + contract): do only that stage and return the JSON contract from `contracts/`. Do not push, merge, open PRs, change labels, or advance stages — the factory does that. Generic contract values (`"bug"`, `"fixed"`) are rejected.
+- **Developing this repo**: follow the delivery loop below.
 
-## Conventions
+## Delivery loop
 
-- Small commits following Conventional Commits.
-- All code, UI, templates, headings, and documentation in the repository must be in English.
-- Secrets never enter the repository or transcript.
+1. `main` is protected. Every change lands through a PR from a short-lived branch (`feat/<slug>`, `fix/<slug>`, `chore/<slug>`). Never push to `main`, never force-push, never bypass checks.
+2. Features and bugs use `tlc-spec-lean` v2.2.0 in `.specs/features/<slug>/`: `plan.md` → `checks.md` → build → `verification.md`. The verifier must be a fresh sub-agent that did not write the code. Test titles start with their check ID (`C3: ...`).
+3. Done means `npm run verify` is green locally **and** CI is green on the PR. A verification report is invalid if CI on that commit is red. If `main` is red, fixing it comes before any new work.
+4. PR title is a Conventional Commit (it becomes the squash commit). Fill the PR template with the commands you actually ran.
 
-## Repository Map
+## Testing & Visual Proof
 
-- Architecture & roadmap: `docs/plan.md`
-- Workflows per ticket type: `workflows/`
-- Deterministic JSON contracts: `contracts/`
-- Vendored & locked skills: `skills/` and `skills.lock.json`
-- Control Panel & Playwright E2E tests: `apps/panel/`
+- **Visual & behavioral proof is mandatory**: Any UI change or user-visible state transition MUST have a Playwright test in `apps/panel/e2e/`. No feature or UI change is accepted without visual proof (screenshots in `.specs/features/<slug>/captures/` or `runs/screenshots/`, and video on failures).
+- **Test state transitions in practice**: If a feature advances stages, moves Kanban columns, or mutates UI state, the Playwright test must exercise the full user journey in the browser, assert on visible roles/labels, and capture the resulting visual proof before and after the transition.
+- **Hermetic tests**: Build test state with `test-support/factory-clone.mjs`; run local servers on port `0`; never depend on live `factory.yaml` projects, network, or real tokens.
+- **Integrity**: If a test fails or looks wrong, stop and ask — never weaken or edit an assertion just to make it pass.
+
+## Always
+
+- English only in code, UI, docs, and commits.
+- Never commit secrets, `.env*`, tokens, or runtime state (`runs/`, `.workspaces/`, `*.db`).
+- Never claim a result you did not observe. Stop and ask on missing product decisions or irreversible actions (record `needs_human` in factory stages).
+- Record durable decisions in `.specs/STATE.md` and reusable lessons in `brain/`.
