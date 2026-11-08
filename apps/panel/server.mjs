@@ -18,13 +18,14 @@ import {
 import { listAgentsCatalog, loadBrainEntries } from '../../packages/core/src/brain.mjs';
 
 function readJsonBody(req) {
+  if (!req || typeof req.on !== 'function') return Promise.resolve({});
   return new Promise((resolveBody, rejectBody) => {
     let data = '';
     req.on('data', (chunk) => {
       data += chunk;
     });
     req.on('end', () => {
-      if (!data.trim()) return resolveBody({});
+      if (!data || !data.trim()) return resolveBody({});
       try {
         resolveBody(JSON.parse(data));
       } catch (err) {
