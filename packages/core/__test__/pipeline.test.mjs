@@ -1,10 +1,20 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cpSync, mkdtempSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, rmSync, mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createPanelServer } from '../../../apps/panel/server.mjs';
-import { classifyTicketType, evaluateTicketPickupTriggers } from '../index.mjs';
+import {
+  classifyTicketType,
+  evaluateTicketPickupTriggers,
+  advanceTicketInPanel,
+  dispatchTask,
+  loadAndValidateFactory,
+  FactoryStore,
+  createStageContractRunner,
+  provisionTaskWorkspace,
+  cleanupTaskWorkspace,
+} from '../index.mjs';
 import { makeTempFactoryClone } from '../../../test-support/factory-clone.mjs';
 
 const REPO_ROOT = resolve(import.meta.dirname, '..', '..', '..');
@@ -794,5 +804,205 @@ test('C12: evaluateTicketPickupTriggers and POST /api/projects/sync enforce comb
     rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+test('C2: dispatchTask enriches prompt with full ticket context, sets cwd to workspace, and eliminates silent mock fallback', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const store = new FactoryStore(dbPath);
+  const { factoryConfig, workflows, pricesConfig } = loadAndValidateFactory(tmpDir);
+
+  try {
+    const execKey = 'brenoacker/agentic-factory#301';
+    store.createTask({
+      executionKey: execKey,
+      issueNumber: 301,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Fix edge case in YAML parsing',
+      type: 'bug',
+      stage: 'triage',
+    });
+    store.updateTaskStage(execKey, {
+      body: 'When YAML contains empty arrays, parser throws TypeError. Expected: return empty list.',
+    });
+
+    const mockWsPath = join(tmpDir, 'runs', 'workspaces', 'brenoacker', 'agentic-factory', 'issue-301');
+    mkdirSync(mockWsPath, { recursive: true });
+    store.attachTaskWorkspace(execKey, {
+      workspacePath: mockWsPath,
+      branchName: 'factory/issue-301',
+    });
+
+    const capturedSpecs = [];
+    const baseRunner = createStageContractRunner({ headSha: '64e6a79', impact: 'medium', verdict: 'APPROVE' });
+    const dummyRunner = (spec) => {
+      capturedSpecs.push(spec);
+      return baseRunner({ ...spec, ticketType: 'bug' });
+    };
+
+    const res = dispatchTask({
+      executionKey: execKey,
+      factoryRoot: tmpDir,
+      factoryConfig,
+      workflows,
+      pricesConfig,
+      store,
+      runner: dummyRunner,
+    });
+
+    assert.equal(res.ok, true);
+    assert.ok(capturedSpecs.length > 0);
+    const spec = capturedSpecs[0];
+    assert.match(spec.prompt, /# Task: Fix edge case in YAML parsing/);
+    assert.match(spec.prompt, /## Description & Requirements/);
+    assert.match(spec.prompt, /When YAML contains empty arrays/);
+    assert.match(spec.prompt, /Mandatory Instructions/);
+    assert.equal(spec.cwd, mockWsPath);
+
+    // Verify eliminate silent mock fallback: advanceTicketInPanel with useMockRunner: false
+    const execKey2 = 'brenoacker/agentic-factory#302';
+    store.createTask({
+      executionKey: execKey2,
+      issueNumber: 302,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Real agent task without mocks',
+      type: 'feature',
+      stage: 'plan',
+    });
+    const advRes = advanceTicketInPanel({
+      executionKey: execKey2,
+      factoryRoot: tmpDir,
+      factoryConfig,
+      workflows,
+      pricesConfig,
+      store,
+      useMockRunner: false,
+      runner: (callSpec) => ({
+        status: 0,
+        stdout: JSON.stringify({
+          stage_token: callSpec.stageToken,
+          plan_file: '.specs/features/test/plan.md',
+          status: 'planned',
+        }),
+      }),
+    });
+    const task2 = store.getTask(execKey2);
+    // When useMockRunner is false, synthetic PR is NOT attached automatically
+    assert.equal(Boolean(task2.deliverable_url), false);
+  } finally {
+    store.close();
+    rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});
+
+test('C3: review gates PR creation on commits ahead of origin/main and executes all 5 ticket workflows to completion', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const store = new FactoryStore(dbPath);
+  const { factoryConfig, workflows, pricesConfig } = loadAndValidateFactory(tmpDir);
+
+  try {
+    // 1. Verify review stage gate when no commits ahead of origin/main
+    const gateKey = 'brenoacker/agentic-factory#401';
+    store.createTask({
+      executionKey: gateKey,
+      issueNumber: 401,
+      repo: 'brenoacker/agentic-factory',
+      title: 'Gate PR on missing commits',
+      type: 'feature',
+      stage: 'review',
+    });
+    const ws = provisionTaskWorkspace({
+      factoryRoot: tmpDir,
+      repo: 'brenoacker/agentic-factory',
+      issueNumber: 401,
+      defaultBranch: 'main',
+    });
+    assert.equal(ws.ok, true);
+    store.attachTaskWorkspace(gateKey, {
+      workspacePath: ws.workspacePath,
+      branchName: ws.branchName,
+    });
+
+    try {
+      const reviewGateRes = dispatchTask({
+        executionKey: gateKey,
+        factoryRoot: tmpDir,
+        factoryConfig,
+        workflows,
+        pricesConfig,
+        store,
+        runner: null, // real mode check: no commits ahead of origin/main
+      });
+      assert.equal(reviewGateRes.ok, false);
+      assert.equal(reviewGateRes.status, 'no_commits_authored');
+      const gatedTask = store.getTask(gateKey);
+      assert.equal(gatedTask.needs_human, 1);
+      assert.match(gatedTask.human_question, /No commits authored/);
+    } finally {
+      cleanupTaskWorkspace(ws.workspacePath);
+    }
+
+    // 2. Execute all 5 ticket workflows to completion
+    const testCases = [
+      { num: 501, title: 'Add healthcheck route', type: 'feature', expectPR: true },
+      { num: 502, title: 'Fix off-by-one in index range', type: 'bug', expectPR: true },
+      { num: 503, title: 'Update documentation and tool scripts', type: 'chore', expectPR: true },
+      { num: 504, title: 'Investigate memory footprint of SQLite WAL', type: 'investigation', expectDoc: true },
+      { num: 505, title: 'Discovery: evaluate alternative task runners', type: 'discovery', expectDoc: true },
+    ];
+
+    for (const tc of testCases) {
+      const key = `brenoacker/agentic-factory#${tc.num}`;
+      store.createTask({
+        executionKey: key,
+        issueNumber: tc.num,
+        repo: 'brenoacker/agentic-factory',
+        title: tc.title,
+        type: tc.type,
+        stage: 'triage',
+      });
+
+      const runner = createStageContractRunner({ headSha: '64e6a79', impact: 'low', verdict: 'APPROVE' });
+      let adv = advanceTicketInPanel({
+        executionKey: key,
+        factoryRoot: tmpDir,
+        factoryConfig,
+        workflows,
+        pricesConfig,
+        store,
+        useMockRunner: true,
+        runner,
+      });
+
+      while (adv.ok && adv.task?.stage !== 'done') {
+        adv = advanceTicketInPanel({
+          executionKey: key,
+          factoryRoot: tmpDir,
+          factoryConfig,
+          workflows,
+          pricesConfig,
+          store,
+          approveCurrentStage: true,
+          useMockRunner: true,
+          runner,
+        });
+      }
+
+      assert.equal(adv.ok, true);
+      const finished = store.getTask(key);
+      assert.equal(finished.stage, 'done');
+      if (tc.expectPR) {
+        assert.ok(finished.deliverable_url?.includes('pull/'));
+      }
+      if (tc.expectDoc) {
+        assert.ok(finished.deliverable_url?.includes('docs/research/'));
+      }
+    }
+  } finally {
+    store.close();
+    rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});
+
 
 

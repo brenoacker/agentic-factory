@@ -200,6 +200,7 @@ function ControlPanelApp() {
   const [ctrlRate, setCtrlRate] = useState('10');
   const [ctrlBudget, setCtrlBudget] = useState('25');
   const [ctrlStallMinutes, setCtrlStallMinutes] = useState('30');
+  const [ctrlPlanConfidence, setCtrlPlanConfidence] = useState('0.8');
   const [ctrlKill, setCtrlKill] = useState(false);
   const [controlsFeedback, setControlsFeedback] = useState('');
 
@@ -219,6 +220,7 @@ function ControlPanelApp() {
       setCtrlRate(String(f.limits?.maxTasksPerHour ?? 10));
       setCtrlBudget(String(f.limits?.dailyBudgetUsd ?? 25));
       setCtrlStallMinutes(String(f.limits?.stallThresholdMinutes ?? 30));
+      setCtrlPlanConfidence(String(f.limits?.minPlanConfidence ?? 0.8));
       setCtrlKill(Boolean(f.killSwitch));
     }
     if (data?.scheduler) {
@@ -448,6 +450,52 @@ function ControlPanelApp() {
     }
   };
 
+  const syncTaskPr = async (key) => {
+    if (dispatchingKeys[key]) return;
+    setDispatchingKeys((prev) => ({ ...prev, [key]: true }));
+    try {
+      const res = await fetch('/api/tickets/' + encodeURIComponent(key) + '/sync-pr', { method: 'POST' });
+      const data = await res.json();
+      if (data.merged) {
+        setIntakeFeedback(`PR merged for ${key}! Task moved to Done.`);
+      } else {
+        setIntakeFeedback(`PR state: ${data.prState || 'Open'} (waiting for merge on GitHub).`);
+      }
+      await loadDashboard();
+    } catch (err) {
+      setIntakeFeedback(`Sync PR error: ${err.message}`);
+    } finally {
+      setDispatchingKeys((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }
+  };
+
+  const mergeTaskPr = async (key) => {
+    if (dispatchingKeys[key]) return;
+    setDispatchingKeys((prev) => ({ ...prev, [key]: true }));
+    try {
+      const res = await fetch('/api/tickets/' + encodeURIComponent(key) + '/merge-pr', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok && data.merged) {
+        setIntakeFeedback(`Successfully merged PR on GitHub! Task moved to Done.`);
+      } else {
+        setIntakeFeedback(`Merge failed: ${data.error || 'Unknown error'}`);
+      }
+      await loadDashboard();
+    } catch (err) {
+      setIntakeFeedback(`Merge error: ${err.message}`);
+    } finally {
+      setDispatchingKeys((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }
+  };
+
   const snoozeTaskAlarm = async (key) => {
     await fetch('/api/tasks/' + encodeURIComponent(key) + '/acknowledge', {
       method: 'POST',
@@ -505,6 +553,7 @@ function ControlPanelApp() {
           maxTasksPerHour: Number(ctrlRate),
           dailyBudgetUsd: Number(ctrlBudget),
           stallThresholdMinutes: Number(ctrlStallMinutes),
+          minPlanConfidence: Number(ctrlPlanConfidence),
           killSwitch: ctrlKill,
         }),
       });
@@ -599,7 +648,7 @@ function ControlPanelApp() {
                     item.id === 'board' && (st.needsHuman || []).length > 0 ? (
                       <Badge color="severity-medium">{(st.needsHuman || []).length}</Badge>
                     ) : item.id === 'overview' && stalledList.length > 0 ? (
-                      <Badge color="red">{stalledList.length}</Badge>
+                      <Badge color="grey">{stalledList.length}</Badge>
                     ) : undefined,
                 }))}
                 onFollow={(e) => {
@@ -635,31 +684,19 @@ function ControlPanelApp() {
                       }}
                     >
                       <div>
-                        <Badge color="red">{item.severity.toUpperCase()}</Badge>{' '}
-                        <strong>{item.executionKey}</strong> — {item.title} [{item.type}]
-                        <br />
-                        <small>
-                          Stage: <strong>{item.stage}</strong> · Idle for{' '}
-                          <strong>{item.idleMinutes}m</strong> · {item.reason}
-                        </small>
+                        <Badge color="red">{item.severity || 'CRITICAL'}</Badge>{' '}
+                        <strong>
+                          #{item.issueNumber} [{item.repo}]
+                        </strong>{' '}
+                        — {item.title} ({item.idleMinutes}m idle at {item.stage})
                       </div>
-                      <SpaceBetween direction="horizontal" size="xs">
-                        <Button
-                          variant="primary"
-                          disabled={Boolean(dispatchingKeys[item.executionKey])}
-                          data-testid={`alarm-act-btn-${item.issueNumber}`}
-                          onClick={() => dispatchTicketKey(item.executionKey, item.needsHuman)}
-                        >
-                          {dispatchingKeys[item.executionKey] ? 'Resuming...' : 'Act Now (Approve & Resume)'}
-                        </Button>
-                        <Button
-                          variant="normal"
-                          data-testid={`alarm-snooze-btn-${item.issueNumber}`}
-                          onClick={() => snoozeTaskAlarm(item.executionKey)}
-                        >
-                          Snooze Alarm
-                        </Button>
-                      </SpaceBetween>
+                      <Button
+                        size="small"
+                        data-testid={`alarm-snooze-btn-${item.issueNumber}`}
+                        onClick={() => snoozeTaskAlarm(item.executionKey)}
+                      >
+                        Snooze Alarm
+                      </Button>
                     </div>
                   ))}
                 </SpaceBetween>
@@ -1310,6 +1347,22 @@ function ControlPanelApp() {
                             <div>
                               <strong>{item.executionKey}</strong> [{item.type}] — Stage:{' '}
                               <Badge color="severity-medium">{item.stage}</Badge>
+                              {item.idleMinutes !== undefined && item.idleMinutes > 0 && (
+                                <span
+                                  data-testid={`needs-human-idle-${item.issueNumber}`}
+                                  style={{
+                                    marginLeft: '0.5rem',
+                                    fontSize: '0.75rem',
+                                    color: '#94a3b8',
+                                    background: '#1e293b',
+                                    padding: '0.15rem 0.45rem',
+                                    borderRadius: '4px',
+                                    fontWeight: 500,
+                                  }}
+                                >
+                                  ⏱ Waiting: {item.idleMinutes}m
+                                </span>
+                              )}
                               <br />
                               <span>{item.question}</span>
                             </div>
@@ -1352,6 +1405,11 @@ function ControlPanelApp() {
                         <SpaceBetween size="xs">
                           {items.map((t) => {
                             const stalledInfo = stalledMap[t.execution_key];
+                            const isLinear = t.repo.startsWith('linear:') || t.title.includes('[Linear-');
+                            const wsShortName = t.workspace_path ? t.workspace_path.split(/[\\/]/).filter(Boolean).pop() : '';
+                            const prMatch = t.deliverable_url?.match(/pull\/(\d+)/);
+                            const prNumber = prMatch ? prMatch[1] : null;
+
                             return (
                               <div
                                 key={t.execution_key}
@@ -1360,19 +1418,21 @@ function ControlPanelApp() {
                                   padding: '0.65rem',
                                   background: '#0f172a',
                                   borderRadius: '6px',
-                                  border: stalledInfo ? '2px solid #ef4444' : '1px solid #2b3646',
+                                  border: t.needs_human ? '1px solid #f59e0b' : '1px solid #2b3646',
                                   fontSize: '0.82rem',
                                 }}
                               >
-                                <strong>
-                              #{t.issue_number} {t.title}
-                                </strong>
+                                <div style={{ fontSize: '0.85rem', color: '#f8fafc', fontWeight: 700, lineHeight: 1.3 }}>
+                                  #{t.issue_number} {t.title.replace(/^\[Linear-[^\]]+\]\s*/, '')}
+                                </div>
+
                                 <div
                                   style={{
                                     display: 'flex',
-                                    gap: '0.35rem',
+                                    gap: '0.3rem',
                                     flexWrap: 'wrap',
                                     margin: '0.35rem 0',
+                                    alignItems: 'center',
                                   }}
                                 >
                                   <span
@@ -1386,8 +1446,29 @@ function ControlPanelApp() {
                                       fontWeight: 600,
                                     }}
                                   >
-                                    {t.repo}
+                                    {t.repo.replace(/^linear:\/\//, '')}
                                   </span>
+
+                                  {isLinear && (
+                                    <a
+                                      href={t.ticket_url || `https://linear.app/brenoack/issue/BRE-${t.issue_number}`}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      data-testid={`task-linear-link-${t.issue_number}`}
+                                      style={{
+                                        background: '#4338ca',
+                                        color: '#fff',
+                                        padding: '0.1rem 0.45rem',
+                                        borderRadius: '4px',
+                                        fontSize: '0.72rem',
+                                        fontWeight: 600,
+                                        textDecoration: 'none',
+                                      }}
+                                    >
+                                      Linear BRE-{t.issue_number} ↗
+                                    </a>
+                                  )}
+
                                   <span
                                     data-testid={`task-type-${t.issue_number}`}
                                     style={{
@@ -1401,6 +1482,7 @@ function ControlPanelApp() {
                                   >
                                     {t.type}
                                   </span>
+
                                   <span
                                     data-testid={`task-stage-${t.issue_number}`}
                                     style={{
@@ -1414,52 +1496,129 @@ function ControlPanelApp() {
                                   >
                                     {t.stage}
                                   </span>
+
                                   {stalledInfo && (
                                     <span
                                       data-testid={`task-stalled-badge-${t.issue_number}`}
                                       style={{
-                                        background: '#991b1b',
-                                        color: '#fff',
+                                        background: '#1e293b',
+                                        color: '#94a3b8',
                                         padding: '0.1rem 0.45rem',
                                         borderRadius: '4px',
                                         fontSize: '0.72rem',
-                                        fontWeight: 700,
+                                        fontWeight: 500,
                                       }}
                                     >
-                                      STALLED ({stalledInfo.idleMinutes}m)
+                                      ⏱ {stalledInfo.idleMinutes}m
                                     </span>
                                   )}
                                 </div>
-                                <small style={{ color: '#9ba7b6' }}>
-                                  {t.runtime} / {t.model} · ${Number(t.cost_usd || 0).toFixed(4)}
-                                </small>
-                                {t.branch_name && (
-                                  <div style={{ fontSize: '0.72rem', color: '#9ba7b6', marginTop: '0.2rem' }} data-testid={`task-branch-${t.issue_number}`}>
-                                    🌿 Branch: <code style={{ color: '#38bdf8' }}>{t.branch_name}</code>
-                                  </div>
-                                )}
-                                {t.workspace_path && (
-                                  <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '0.1rem', wordBreak: 'break-all' }} data-testid={`task-ws-${t.issue_number}`}>
-                                    📁 Workspace: <code>{t.workspace_path}</code>
-                                  </div>
-                                )}
+
                                 {t.deliverable_url && (
-                                  <div style={{ marginTop: '0.35rem', padding: '0.25rem 0.4rem', background: '#0f172a', borderRadius: '4px', border: '1px solid #1e293b' }} data-testid={`task-deliverable-${t.issue_number}`}>
-                                    <span style={{ fontSize: '0.72rem', fontWeight: 600, color: t.deliverable_type === 'pull_request' ? '#38bdf8' : '#a78bfa' }}>
-                                      {t.deliverable_type === 'pull_request' ? '🔗 Pull Request: ' : '📄 Research Doc: '}
+                                  <div
+                                    style={{
+                                      margin: '0.35rem 0',
+                                      padding: '0.25rem 0.45rem',
+                                      background: '#090d16',
+                                      borderRadius: '4px',
+                                      border: '1px solid #1e293b',
+                                    }}
+                                    data-testid={`task-deliverable-${t.issue_number}`}
+                                  >
+                                    <span
+                                      style={{
+                                        fontSize: '0.72rem',
+                                        fontWeight: 600,
+                                        color: t.deliverable_type === 'pull_request' ? '#38bdf8' : '#a78bfa',
+                                      }}
+                                    >
+                                      {t.deliverable_type === 'pull_request' ? '🔗 ' : '📄 '}
                                     </span>
                                     <a
-                                      href={t.deliverable_url.startsWith('http') ? t.deliverable_url : `/api/tickets/${encodeURIComponent(t.execution_key)}/deliverable`}
+                                      href={
+                                        t.deliverable_url.startsWith('http')
+                                          ? t.deliverable_url
+                                          : `/api/tickets/${encodeURIComponent(t.execution_key)}/deliverable`
+                                      }
                                       target="_blank"
                                       rel="noreferrer"
-                                      style={{ fontSize: '0.72rem', color: '#38bdf8', textDecoration: 'underline' }}
+                                      style={{
+                                        fontSize: '0.72rem',
+                                        color: '#38bdf8',
+                                        textDecoration: 'underline',
+                                        fontWeight: 600,
+                                      }}
                                     >
-                                      {t.deliverable_ref || t.deliverable_url}
+                                      {t.deliverable_type === 'pull_request'
+                                        ? (prNumber ? `Pull Request: #${prNumber}` : 'Pull Request:')
+                                        : `Research Doc: ${t.deliverable_ref || t.deliverable_url}`}
                                     </a>
                                   </div>
                                 )}
-                                {t.stage !== 'done' && (
+
+                                {t.stage === 'merge' ? (
+                                  <div
+                                    style={{
+                                      marginTop: '0.45rem',
+                                      padding: '0.4rem',
+                                      background: '#172554',
+                                      borderRadius: '4px',
+                                      border: '1px solid #1e40af',
+                                    }}
+                                  >
+                                    <div style={{ fontSize: '0.72rem', color: '#93c5fd', marginBottom: '0.3rem' }}>
+                                      ⏳ <strong>Awaiting GitHub PR Merge</strong>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
+                                      <button
+                                        style={{
+                                          background: '#2563eb',
+                                          color: '#fff',
+                                          border: 'none',
+                                          borderRadius: '4px',
+                                          padding: '0.25rem 0.5rem',
+                                          fontSize: '0.72rem',
+                                          cursor: 'pointer',
+                                          fontWeight: 600,
+                                        }}
+                                        disabled={Boolean(dispatchingKeys[t.execution_key])}
+                                        onClick={() => syncTaskPr(t.execution_key)}
+                                      >
+                                        {dispatchingKeys[t.execution_key] ? 'Checking...' : 'Check PR Status'}
+                                      </button>
+                                      <button
+                                        style={{
+                                          background: '#059669',
+                                          color: '#fff',
+                                          border: 'none',
+                                          borderRadius: '4px',
+                                          padding: '0.25rem 0.5rem',
+                                          fontSize: '0.72rem',
+                                          cursor: 'pointer',
+                                          fontWeight: 600,
+                                        }}
+                                        disabled={Boolean(dispatchingKeys[t.execution_key])}
+                                        onClick={() => mergeTaskPr(t.execution_key)}
+                                      >
+                                        Merge PR
+                                      </button>
+                                      <Button
+                                        variant="primary"
+                                        disabled={Boolean(dispatchingKeys[t.execution_key])}
+                                        data-testid={`dispatch-btn-${t.issue_number}`}
+                                        onClick={() => dispatchTicketKey(t.execution_key, true)}
+                                      >
+                                        Approve & Continue
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ) : t.stage !== 'done' ? (
                                   <div style={{ marginTop: '0.45rem' }}>
+                                    {t.needs_human === 1 && t.human_question && (
+                                      <div style={{ fontSize: '0.72rem', color: '#f59e0b', marginBottom: '0.25rem' }}>
+                                        ⚠ {t.human_question}
+                                      </div>
+                                    )}
                                     <Button
                                       variant={t.needs_human === 1 ? 'primary' : 'normal'}
                                       disabled={Boolean(dispatchingKeys[t.execution_key])}
@@ -1475,7 +1634,56 @@ function ControlPanelApp() {
                                         : `Advance Stage (${t.stage})`}
                                     </Button>
                                   </div>
-                                )}
+                                ) : null}
+
+                                <div
+                                  style={{
+                                    marginTop: '0.45rem',
+                                    paddingTop: '0.35rem',
+                                    borderTop: '1px solid #1e293b',
+                                    fontSize: '0.7rem',
+                                    color: '#64748b',
+                                  }}
+                                >
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span>
+                                      {t.runtime} / {t.model}
+                                    </span>
+                                    <span>${Number(t.cost_usd || 0).toFixed(4)}</span>
+                                  </div>
+
+                                  {t.branch_name && (
+                                    <div
+                                      style={{ marginTop: '0.15rem' }}
+                                      data-testid={`task-branch-${t.issue_number}`}
+                                    >
+                                      🌿 <code style={{ color: '#38bdf8' }}>{t.branch_name}</code>
+                                    </div>
+                                  )}
+
+                                  {t.workspace_path && (
+                                    <details
+                                      style={{ marginTop: '0.15rem', cursor: 'pointer' }}
+                                      data-testid={`task-ws-${t.issue_number}`}
+                                    >
+                                      <summary style={{ color: '#64748b' }}>
+                                        📁 Workspace: <span style={{ color: '#94a3b8' }}>{wsShortName}</span>
+                                      </summary>
+                                      <code
+                                        style={{
+                                          wordBreak: 'break-all',
+                                          display: 'block',
+                                          padding: '0.2rem',
+                                          marginTop: '0.1rem',
+                                          background: '#090d16',
+                                          borderRadius: '3px',
+                                        }}
+                                      >
+                                        {t.workspace_path}
+                                      </code>
+                                    </details>
+                                  )}
+                                </div>
                               </div>
                             );
                           })}
@@ -1915,6 +2123,25 @@ function ControlPanelApp() {
                         id="ctrl-stall-minutes"
                         value={ctrlStallMinutes}
                         onChange={(e) => setCtrlStallMinutes(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '0.45rem',
+                          background: '#0f172a',
+                          color: '#fff',
+                          border: '1px solid #334155',
+                          borderRadius: '4px',
+                        }}
+                      />
+                    </FormField>
+                    <FormField label="Min Plan Confidence (0.0 - 1.0)">
+                      <input
+                        type="number"
+                        id="ctrl-plan-confidence"
+                        step="0.05"
+                        min="0"
+                        max="1"
+                        value={ctrlPlanConfidence}
+                        onChange={(e) => setCtrlPlanConfidence(e.target.value)}
                         style={{
                           width: '100%',
                           padding: '0.45rem',

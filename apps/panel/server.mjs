@@ -37,12 +37,17 @@ function readJsonBody(req) {
 }
 
 function sendJson(res, statusCode, payload) {
-  const body = JSON.stringify(payload);
-  res.writeHead(statusCode, {
-    'Content-Type': 'application/json; charset=utf-8',
-    'Cache-Control': 'no-store',
-  });
-  res.end(body);
+  if (!res || res.destroyed || res.writableEnded) return;
+  try {
+    const body = JSON.stringify(payload);
+    res.writeHead(statusCode, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+    });
+    res.end(body);
+  } catch {
+    // client aborted or closed connection
+  }
 }
 
 /**
@@ -340,6 +345,12 @@ export function createPanelServer({
         if (typeof body.stallThresholdMinutes === 'number') {
           updatedCfg.factory.limits.stallThresholdMinutes = body.stallThresholdMinutes;
         }
+        if (typeof body.minPlanConfidence === 'number' && body.minPlanConfidence >= 0 && body.minPlanConfidence <= 1) {
+          updatedCfg.factory.limits.minPlanConfidence = body.minPlanConfidence;
+        }
+        if (typeof body.requirePlanApproval === 'boolean') {
+          updatedCfg.factory.limits.requirePlanApproval = body.requirePlanApproval;
+        }
         if (typeof body.autonomy === 'string') {
           updatedCfg.factory.autonomy = body.autonomy;
         }
@@ -447,6 +458,104 @@ export function createPanelServer({
           trackerRunner: issuePollRunner,
         });
         sendJson(res, dispatchRes.status, dispatchRes);
+        return;
+      }
+
+      // 10. POST /api/tickets/:key/sync-pr & POST /api/tickets/:key/merge-pr
+      const syncPrMatch = pathname.match(/^\/api\/tickets\/([^/]+)\/sync-pr$/);
+      if (req.method === 'POST' && syncPrMatch) {
+        const executionKey = decodeURIComponent(syncPrMatch[1]);
+        const task = store.getTask(executionKey);
+        if (!task) {
+          sendJson(res, 404, { ok: false, error: `Task not found: ${executionKey}` });
+          return;
+        }
+        const cfg = loadAndValidateFactory(root);
+        const ghRepo =
+          task.repo && task.repo.includes('/') && !task.repo.startsWith('linear:')
+            ? task.repo
+            : cfg.factoryConfig?.factory?.repo || 'brenoacker/agentic-factory';
+        const prMatch = task.deliverable_url?.match(/pull\/(\d+)/);
+        const prNumber = prMatch ? Number(prMatch[1]) : null;
+
+        let isMerged = false;
+        let prState = 'UNKNOWN';
+        if (prNumber) {
+          try {
+            const check = spawnSync(
+              'gh',
+              ['pr', 'view', String(prNumber), '--repo', ghRepo, '--json', 'state,mergedAt'],
+              { encoding: 'utf8' },
+            );
+            if (check.status === 0 && check.stdout) {
+              const prInfo = JSON.parse(check.stdout);
+              prState = prInfo.state;
+              isMerged = prInfo.state === 'MERGED' || Boolean(prInfo.mergedAt);
+            }
+          } catch {
+            // fallback
+          }
+        }
+
+        if (isMerged && task.stage === 'merge') {
+          const adv = advanceTicketInPanel({
+            executionKey,
+            factoryRoot: root,
+            factoryConfig: cfg.factoryConfig,
+            workflows: cfg.workflows,
+            pricesConfig: cfg.pricesConfig,
+            store,
+            approveCurrentStage: true,
+            trackerRunner: issuePollRunner,
+          });
+          sendJson(res, 200, { ok: true, merged: true, prState, task: adv.task });
+          return;
+        }
+
+        sendJson(res, 200, { ok: true, merged: isMerged, prState, task });
+        return;
+      }
+
+      const mergePrMatch = pathname.match(/^\/api\/tickets\/([^/]+)\/merge-pr$/);
+      if (req.method === 'POST' && mergePrMatch) {
+        const executionKey = decodeURIComponent(mergePrMatch[1]);
+        const task = store.getTask(executionKey);
+        if (!task) {
+          sendJson(res, 404, { ok: false, error: `Task not found: ${executionKey}` });
+          return;
+        }
+        const cfg = loadAndValidateFactory(root);
+        const ghRepo =
+          task.repo && task.repo.includes('/') && !task.repo.startsWith('linear:')
+            ? task.repo
+            : cfg.factoryConfig?.factory?.repo || 'brenoacker/agentic-factory';
+        const prMatch = task.deliverable_url?.match(/pull\/(\d+)/);
+        if (!prMatch) {
+          sendJson(res, 400, { ok: false, error: 'No Pull Request associated with this task' });
+          return;
+        }
+        const prNumber = Number(prMatch[1]);
+        const mergeRes = spawnSync(
+          'gh',
+          ['pr', 'merge', String(prNumber), '--repo', ghRepo, '--squash', '--delete-branch'],
+          { encoding: 'utf8' },
+        );
+        if (mergeRes.status !== 0) {
+          sendJson(res, 500, { ok: false, error: `gh pr merge failed: ${mergeRes.stderr || mergeRes.stdout}` });
+          return;
+        }
+
+        const adv = advanceTicketInPanel({
+          executionKey,
+          factoryRoot: root,
+          factoryConfig: cfg.factoryConfig,
+          workflows: cfg.workflows,
+          pricesConfig: cfg.pricesConfig,
+          store,
+          approveCurrentStage: true,
+          trackerRunner: issuePollRunner,
+        });
+        sendJson(res, 200, { ok: true, merged: true, task: adv.task });
         return;
       }
 

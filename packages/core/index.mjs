@@ -11,7 +11,7 @@ export {
   updateGitHubIssue,
   closeGitHubIssue,
 } from './src/github.mjs';
-export { prepareWorktree, provisionTaskWorkspace } from './src/worktree.mjs';
+export { prepareWorktree, provisionTaskWorkspace, cleanupTaskWorkspace } from './src/worktree.mjs';
 export { approveTask, dispatchTask } from './src/dispatcher.mjs';
 export {
   listAgentsCatalog,

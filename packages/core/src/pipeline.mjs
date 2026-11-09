@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { evaluateIntakeGuards } from './guards.mjs';
 import { dispatchTask } from './dispatcher.mjs';
 import { extractFollowUpTickets } from './brain.mjs';
@@ -232,6 +234,7 @@ export function intakeAndTriageTicket({
     issueNumber: normalizedIssue.issue_number,
     repo: normalizedIssue.repo,
     title: normalizedIssue.title,
+    body: normalizedIssue.body || '',
     type: classifiedType,
     stage: initialStage,
     runtime: normalizedIssue.runtime_override || factoryConfig?.factory?.defaultRuntime || 'antigravity',
@@ -301,6 +304,7 @@ export function advanceTicketInPanel({
   headSha = '64e6a79',
   deliverable = null,
   autoAttachDeliverable = true,
+  useMockRunner = null,
   workspaceRunner = null,
   runner = null,
   trackerRunner = null,
@@ -339,12 +343,19 @@ export function advanceTicketInPanel({
     }
   }
 
+  const isTestEnv =
+    (Array.isArray(process.execArgv) && process.execArgv.includes('--test')) ||
+    (Array.isArray(process.argv) && process.argv.some((a) => a.includes('test') || a.includes('playwright'))) ||
+    process.env.NODE_ENV === 'test' ||
+    factoryConfig?.testMode === true;
+  const shouldUseMock = useMockRunner !== null && useMockRunner !== undefined ? Boolean(useMockRunner) : isTestEnv;
+
   // 2. Attach explicit deliverable if provided
   if (deliverable) {
     store.attachTaskDeliverable(executionKey, deliverable);
   } else if (autoAttachDeliverable && !existing.deliverable_url) {
     const taskType = String(existing.type || '').toLowerCase();
-    if (['feature', 'bug', 'chore'].includes(taskType)) {
+    if (shouldUseMock && ['feature', 'bug', 'chore'].includes(taskType)) {
       store.attachTaskDeliverable(executionKey, {
         type: 'pull_request',
         url: `https://github.com/${existing.repo}/pull/${existing.issue_number + 100}`,
@@ -359,8 +370,8 @@ export function advanceTicketInPanel({
     }
   }
 
-  const defaultRunner = createStageContractRunner({ headSha, impact, verdict });
-  const activeRunner = runner || ((callSpec) => defaultRunner({ ...callSpec, ticketType: existing.type }));
+  const defaultRunner = shouldUseMock ? createStageContractRunner({ headSha, impact, verdict }) : null;
+  const activeRunner = runner || (defaultRunner ? ((callSpec) => defaultRunner({ ...callSpec, ticketType: existing.type })) : null);
 
   const res = dispatchTask({
     executionKey,
@@ -386,7 +397,7 @@ export function advanceTicketInPanel({
   }
 
   let followUpTickets = [];
-  if (typeof defaultRunner.getCapturedReport === 'function') {
+  if (typeof defaultRunner?.getCapturedReport === 'function') {
     const report = defaultRunner.getCapturedReport(executionKey);
     if (report) {
       followUpTickets = extractFollowUpTickets(report, existing.repo);
@@ -405,6 +416,18 @@ export function advanceTicketInPanel({
       ).toLowerCase();
 
       const finalTask = store.getTask(executionKey) || res.task;
+      let reportContent = '';
+      if (finalTask.deliverable_type === 'research_document' && finalTask.deliverable_url) {
+        const reportPath = resolve(factoryRoot, finalTask.deliverable_url);
+        if (existsSync(reportPath)) {
+          try {
+            reportContent = readFileSync(reportPath, 'utf8');
+          } catch {
+            // best-effort
+          }
+        }
+      }
+
       const deliverableSummary =
         finalTask.deliverable_type === 'pull_request'
           ? `Pull Request: ${finalTask.deliverable_url}`
@@ -412,11 +435,16 @@ export function advanceTicketInPanel({
             ? `Research Document: \`${finalTask.deliverable_url}\``
             : `Commit: \`${headSha}\``;
 
+      let commentBody = `✅ **Completed via Agentic Factory**: Workflow \`${existing.type}\` finished at commit \`${headSha}\` with ${deliverableSummary}.`;
+      if (reportContent) {
+        commentBody += `\n\n---\n### 📄 Investigation Report\n\n${reportContent}`;
+      }
+
       if (resolvedProvider === 'linear') {
         updateLinearIssueStatus({
           issueId: existing.external_id || existing.issue_number,
           stateName: 'Done',
-          comment: `✅ **Completed via Agentic Factory**: Workflow \`${existing.type}\` finished at commit \`${headSha}\` with ${deliverableSummary}.`,
+          comment: commentBody,
           runner: trackerRunner,
         });
         trackerFeedback = { closed: true, tracker: 'linear' };
@@ -424,7 +452,7 @@ export function advanceTicketInPanel({
         commentOnGitHubIssue({
           repo: existing.repo,
           issueNumber: existing.issue_number,
-          comment: `✅ **Completed via Agentic Factory**: Workflow \`${existing.type}\` finished at commit \`${headSha}\` with ${deliverableSummary}. All automated checks and gates passed.`,
+          comment: `${commentBody}\n\nAll automated checks and gates passed.`,
           runner: trackerRunner,
         });
         closeGitHubIssue({

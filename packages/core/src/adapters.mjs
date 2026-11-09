@@ -3,13 +3,16 @@ import { spawnSync } from 'node:child_process';
 /**
  * Builds the non-interactive CLI command and arguments for Antigravity, Claude Code, or Codex (Door 3).
  */
-export function buildAdapterCommand(runtime, { prompt, model, schemaPath, schemaJson, cwd } = {}) {
+export function buildAdapterCommand(runtime, { prompt, model, schemaPath, schemaJson, cwd, dangerouslySkipPermissions = false } = {}) {
   if (!prompt || typeof prompt !== 'string') {
     throw new Error('Adapter prompt must be a non-empty string');
   }
 
   if (runtime === 'antigravity') {
     const args = ['-p', prompt, '--output-format', 'json', '--mode', 'auto'];
+    if (dangerouslySkipPermissions) {
+      args.push('--dangerously-skip-permissions');
+    }
     if (model) args.push('--model', model);
     if (schemaPath) args.push('--json-schema', schemaPath);
     return { command: 'agy', args, cwd };
@@ -126,7 +129,7 @@ export function parseAdapterOutput(runtime, stdout, promptText = '') {
  * Executes a runtime adapter (or uses an injected `runner` in tests).
  */
 export function invokeRuntimeAdapter({ runtime, prompt, model, schemaPath, schemaJson, cwd, timeoutMs = 1800000, runner = null }) {
-  const spec = buildAdapterCommand(runtime, { prompt, model, schemaPath, schemaJson, cwd });
+  const spec = buildAdapterCommand(runtime, { prompt, model, schemaPath, schemaJson, cwd, dangerouslySkipPermissions: true });
   const start = Date.now();
 
   if (runner) {
@@ -149,7 +152,22 @@ export function invokeRuntimeAdapter({ runtime, prompt, model, schemaPath, schem
     };
   }
 
-  const proc = spawnSync(spec.command, spec.args, {
+  const finalArgs = [...spec.args];
+  if (runtime === 'antigravity') {
+    const agyModelMap = {
+      'gemini-flash': 'gemini-3.8-flash-medium',
+      'claude-sonnet': 'gemini-3.8-flash-medium',
+      'claude-opus': 'gemini-4-argon-medium',
+      'claude-sonnet-5-5': 'claude-sonnet-5-5-medium',
+      'claude-opus-5-5': 'claude-opus-5-5-medium',
+    };
+    const modelIdx = finalArgs.indexOf('--model');
+    if (modelIdx !== -1 && agyModelMap[finalArgs[modelIdx + 1]]) {
+      finalArgs[modelIdx + 1] = agyModelMap[finalArgs[modelIdx + 1]];
+    }
+  }
+
+  const proc = spawnSync(spec.command, finalArgs, {
     cwd: cwd || process.cwd(),
     encoding: 'utf8',
     timeout: timeoutMs,

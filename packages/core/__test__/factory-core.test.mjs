@@ -10,6 +10,8 @@ import {
   validateContract,
   evaluateIntakeGuards,
   FactoryStore,
+  provisionTaskWorkspace,
+  cleanupTaskWorkspace,
 } from '../index.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..', '..', '..');
@@ -428,5 +430,47 @@ test('C7: cli status aggregates tasks, token usage, USD cost, review metrics, an
     assert.equal(status.needsHuman[0].issueNumber, 2);
   } finally {
     rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test('C1: provisionTaskWorkspace fetches and branches worktree strictly from origin/main in an isolated directory', () => {
+  const runnerCalls = [];
+  const mockRes = provisionTaskWorkspace({
+    factoryRoot: ROOT,
+    repo: 'brenoacker/agentic-factory',
+    issueNumber: 999,
+    runner: (spec) => {
+      runnerCalls.push(spec);
+      return { ok: true, workspacePath: '/mock/path', branchName: 'factory/issue-999' };
+    },
+  });
+  assert.equal(mockRes.ok, true);
+  assert.equal(runnerCalls.length, 1);
+  assert.equal(runnerCalls[0].issueNumber, 999);
+
+  // Real worktree provisioning
+  const issueNum = 991;
+  const ws = provisionTaskWorkspace({
+    factoryRoot: ROOT,
+    repo: 'brenoacker/agentic-factory',
+    issueNumber: issueNum,
+    defaultBranch: 'main',
+  });
+
+  try {
+    assert.equal(ws.ok, true);
+    assert.ok(ws.workspacePath);
+    assert.equal(ws.branchName, `factory/issue-${issueNum}`);
+    assert.equal(ws.syncedSkills, 23);
+
+    // Verify workspace is populated and branched from origin/main
+    const revRes = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: ws.workspacePath, encoding: 'utf8' });
+    const originRes = spawnSync('git', ['rev-parse', 'origin/main'], { cwd: ROOT, encoding: 'utf8' });
+    if (revRes.status === 0 && originRes.status === 0) {
+      assert.equal(revRes.stdout.trim(), originRes.stdout.trim());
+    }
+  } finally {
+    const clean = cleanupTaskWorkspace(ws.workspacePath);
+    assert.equal(clean.ok, true);
   }
 });

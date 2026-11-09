@@ -1,7 +1,29 @@
-import { cpSync, existsSync, mkdirSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { syncSkills } from '../../../scripts/lib/skills-sync.mjs';
+
+/**
+ * Safely removes a completed or aborted task workspace from disk and cleans up git worktrees.
+ */
+export function cleanupTaskWorkspace(workspacePath) {
+  if (!workspacePath) return { ok: false, error: 'No workspace path provided' };
+  try {
+    const resolved = resolve(workspacePath);
+    if (existsSync(resolved)) {
+      try {
+        spawnSync('git', ['worktree', 'remove', '--force', resolved], { encoding: 'utf8' });
+      } catch {
+        // Best-effort worktree unregistration
+      }
+      rmSync(resolved, { recursive: true, force: true });
+      return { ok: true, deleted: true, path: resolved };
+    }
+    return { ok: true, deleted: false, reason: 'Path does not exist' };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
 
 /**
  * Prepares an isolated workspace directory (or git worktree when `useGitWorktree` is true),
@@ -56,8 +78,10 @@ export function prepareWorktree({
 
 /**
  * Provisions a clean, isolated workspace for a task from the target repository's default branch.
- * For local git repos it leverages git worktree; for remote repos it clones depth 1.
- * Always establishes a dedicated task branch `factory/issue-<num>` and syncs locked skills.
+ * For local git repos it leverages git worktree starting cleanly from `origin/<defaultBranch>`;
+ * for remote repos it clones depth 1.
+ * Always establishes a dedicated task branch `factory/issue-<num>` in an isolated temporary directory
+ * and syncs locked skills.
  */
 export function provisionTaskWorkspace({
   factoryRoot,
@@ -66,6 +90,8 @@ export function provisionTaskWorkspace({
   defaultBranch = 'main',
   localPath = null,
   branchName = null,
+  timestamp = null,
+  baseWorkspacesDir = null,
   runner = null,
 }) {
   if (runner) {
@@ -76,13 +102,17 @@ export function provisionTaskWorkspace({
       defaultBranch,
       localPath,
       branchName,
+      timestamp,
+      baseWorkspacesDir,
     });
   }
 
   const root = resolve(factoryRoot);
   const safeSlug = String(repo || 'default-repo').replace(/[^a-zA-Z0-9_-]+/g, '_');
   const taskBranch = branchName || `factory/issue-${issueNumber}`;
-  const workspacePath = join(root, '.workspaces', safeSlug, `issue-${issueNumber}`);
+  const nowStamp = (timestamp || new Date().toISOString()).replace(/[^a-zA-Z0-9]+/g, '-');
+  const targetBase = baseWorkspacesDir ? resolve(baseWorkspacesDir) : join(root, 'runs', 'workspaces');
+  const workspacePath = join(targetBase, `${safeSlug}-issue-${issueNumber}-${nowStamp}`);
 
   mkdirSync(workspacePath, { recursive: true });
 
@@ -92,7 +122,19 @@ export function provisionTaskWorkspace({
   if (isFactorySelf || isLocalGit) {
     const gitSource = isLocalGit ? resolve(localPath) : root;
     try {
-      spawnSync('git', ['worktree', 'add', '--force', '-B', taskBranch, workspacePath], {
+      // 1. Fetch latest remote main to guarantee fresh upstream base
+      spawnSync('git', ['fetch', 'origin', defaultBranch], { cwd: gitSource, encoding: 'utf8' });
+
+      // 2. Check if origin/<defaultBranch> exists, fallback to <defaultBranch>
+      const hasOrigin =
+        spawnSync('git', ['rev-parse', '--verify', `origin/${defaultBranch}`], {
+          cwd: gitSource,
+          encoding: 'utf8',
+        }).status === 0;
+      const baseCommit = hasOrigin ? `origin/${defaultBranch}` : defaultBranch;
+
+      // 3. Create fresh worktree starting cleanly from baseCommit
+      spawnSync('git', ['worktree', 'add', '--force', '-B', taskBranch, workspacePath, baseCommit], {
         cwd: gitSource,
         encoding: 'utf8',
       });
