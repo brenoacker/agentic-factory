@@ -16,6 +16,125 @@ async function startTestServer(rootDir, dbPath, issuePollRunner = null) {
   return { panel, baseUrl };
 }
 
+async function navigateTab(page, tabId, expectedLabel = null) {
+  const link = page.locator(`.awsui-side-navigation a[href="#${tabId}"]`);
+  if (!await link.isVisible()) {
+    const navToggle = page.locator('button[aria-label="Open navigation"], [class*="navigation-toggle"]').first();
+    if (await navToggle.isVisible()) {
+      await navToggle.click();
+    }
+  }
+  if (expectedLabel) {
+    await expect(link).toContainText(expectedLabel);
+  }
+  await link.click();
+  await expect(page.locator(`#tab-${tabId}`)).toBeVisible();
+}
+
+test('C1: Kanban board renders 3 unified columns (Triage, In Progress, Done) with accurate stage grouping and badges', async ({ page }) => {
+  const featureCapturesDir = join(REPO_ROOT, '.specs', 'features', 'unified-kanban-board-columns', 'captures');
+  mkdirSync(featureCapturesDir, { recursive: true });
+  mkdirSync(CAPTURES_DIR, { recursive: true });
+
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    await page.goto(baseUrl);
+    await navigateTab(page, 'board');
+
+    // Verify 3 unified columns are present and legacy individual stage columns do not exist
+    const board = page.locator('#kanban-board');
+    await expect(board).toBeVisible();
+
+    const colTriage = page.getByTestId('kanban-col-triage');
+    const colInProgress = page.getByTestId('kanban-col-in_progress');
+    const colDone = page.getByTestId('kanban-col-done');
+
+    await expect(colTriage).toBeVisible();
+    await expect(colInProgress).toBeVisible();
+    await expect(colDone).toBeVisible();
+
+    await expect(colTriage).toContainText('Triage');
+    await expect(colInProgress).toContainText('In Progress');
+    await expect(colDone).toContainText('Done');
+
+    // Legacy stage columns should not exist as separate column containers
+    await expect(page.locator('[data-testid="kanban-col-plan"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="kanban-col-verify"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="kanban-col-merge"]')).toHaveCount(0);
+
+    // Initial counters should be (0)
+    await expect(colTriage.locator('h3')).toContainText('(0)');
+    await expect(colInProgress.locator('h3')).toContainText('(0)');
+    await expect(colDone.locator('h3')).toContainText('(0)');
+
+    // 1. Intake 3 tickets: #401 (feature), #402 (bug), #403 (chore)
+    const tickets = [
+      { num: 401, title: '[feature] Unified Kanban columns', body: 'Consolidate columns', type: 'feature' },
+      { num: 402, title: 'Bug in column wrap', body: 'Fix wrapping', type: 'bug' },
+      { num: 403, title: 'Chore: clean CSS styles', body: 'CSS refactoring', type: 'chore' },
+    ];
+
+    for (const t of tickets) {
+      await page.locator('#intake-issue-number').fill(String(t.num));
+      await page.locator('#intake-title').fill(t.title);
+      await page.locator('#intake-body').fill(t.body);
+      await page.locator('#intake-submit-btn').click();
+      await expect(page.locator('#intake-feedback')).toContainText(`Classified as ${t.type} at stage triage`);
+    }
+
+    // All 3 tickets must be placed in the Triage column with stage badge 'triage'
+    await expect(colTriage.locator('h3')).toContainText('(3)');
+    await expect(colInProgress.locator('h3')).toContainText('(0)');
+    await expect(colDone.locator('h3')).toContainText('(0)');
+
+    for (const t of tickets) {
+      await expect(colTriage.getByTestId(`task-card-${t.num}`)).toBeVisible();
+      await expect(page.getByTestId(`task-stage-${t.num}`)).toHaveText('triage');
+    }
+
+    // 2. Advance #401 (feature): triage -> plan (in_progress)
+    await page.getByTestId('dispatch-btn-401').click();
+    await expect(page.getByTestId('task-stage-401')).toHaveText('plan');
+    await expect(colTriage.locator('h3')).toContainText('(2)');
+    await expect(colInProgress.locator('h3')).toContainText('(1)');
+    await expect(colInProgress.getByTestId('task-card-401')).toBeVisible();
+
+    // 3. Advance #401 through gate to merge (still in_progress)
+    await page.getByTestId('approve-btn-401').click();
+    await expect(page.getByTestId('task-stage-401')).toHaveText('merge');
+    await expect(colInProgress.locator('h3')).toContainText('(1)');
+    await expect(colInProgress.getByTestId('task-card-401')).toBeVisible();
+
+    // 4. Advance #401 from merge to done
+    await page.getByTestId('approve-btn-401').click();
+    await expect(page.getByTestId('task-stage-401')).toHaveText('done');
+    await expect(colTriage.locator('h3')).toContainText('(2)');
+    await expect(colInProgress.locator('h3')).toContainText('(0)');
+    await expect(colDone.locator('h3')).toContainText('(1)');
+    await expect(colDone.getByTestId('task-card-401')).toBeVisible();
+
+    // 5. Advance #402 (bug) to done
+    await page.getByTestId('dispatch-btn-402').click();
+    await expect(page.getByTestId('task-stage-402')).toHaveText('merge');
+    await expect(colInProgress.locator('h3')).toContainText('(1)');
+    await expect(colInProgress.getByTestId('task-card-402')).toBeVisible();
+    await page.getByTestId('approve-btn-402').click();
+    await expect(page.getByTestId('task-stage-402')).toHaveText('done');
+    await expect(colDone.locator('h3')).toContainText('(2)');
+
+    // Capture visual proof of the 3 unified columns
+    const screenshotPath = join(featureCapturesDir, 'kanban-3-columns.png');
+    await page.screenshot({ path: screenshotPath, fullPage: true });
+    await page.screenshot({ path: join(CAPTURES_DIR, 'kanban-3-columns.png'), fullPage: true });
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
 test('C3: Control Panel renders 100% in English across all 6 tabs with zero Portuguese strings', async ({ page }) => {
   const tmpDir = makeTempFactoryClone();
   const dbPath = join(tmpDir, 'factory.db');
@@ -24,6 +143,9 @@ test('C3: Control Panel renders 100% in English across all 6 tabs with zero Port
   try {
     await page.goto(baseUrl);
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page).toHaveTitle('Agentic Factory Control Plane');
+    await expect(page.locator('.awsui-top-navigation')).toContainText('Agentic Factory Control Plane');
+    await expect(page.locator('#tabs')).toHaveCount(0);
     await expect(page.locator('#refresh-telemetry-btn')).toHaveText('Refresh Telemetry');
 
     const tabs = [
@@ -47,10 +169,7 @@ test('C3: Control Panel renders 100% in English across all 6 tabs with zero Port
     ];
 
     for (const tab of tabs) {
-      const btn = page.locator(`#tabs button[data-tab="${tab.id}"]`);
-      await expect(btn).toHaveText(tab.label);
-      await btn.click();
-      await expect(page.locator(`#tab-${tab.id}`)).toBeVisible();
+      await navigateTab(page, tab.id, tab.label);
 
       const bodyText = await page.locator('body').innerText();
       for (const ptToken of forbiddenPortuguese) {
@@ -84,7 +203,7 @@ test('C4: Playwright visual and component tests verify KPIs, Runtimes, Circuit B
     await page.screenshot({ path: join(CAPTURES_DIR, 'overview-tab.png'), fullPage: true });
 
     // Runtimes & Circuit Breaker component test
-    await page.locator('#tabs button[data-tab="runtimes"]').click();
+    await navigateTab(page, 'runtimes');
     const codexRow = page.getByTestId('circuit-row-codex');
     await expect(codexRow).toContainText('OPEN');
     await expect(codexRow).toContainText('429');
@@ -93,7 +212,7 @@ test('C4: Playwright visual and component tests verify KPIs, Runtimes, Circuit B
     await page.screenshot({ path: join(CAPTURES_DIR, 'runtimes-tab.png'), fullPage: true });
 
     // Agents & 23 Locked Skills component test
-    await page.locator('#tabs button[data-tab="agents"]').click();
+    await navigateTab(page, 'agents');
     await expect(page.locator('#agents-grid > .card')).toHaveCount(7);
     await expect(page.locator('#skills-table tbody tr')).toHaveCount(23);
     await expect(page.getByTestId('skill-row-tlc-spec-lean')).toContainText('2.2.0');
@@ -114,7 +233,7 @@ test('C5: Playwright integration tests verify Workflow editor, Operational Contr
     await page.goto(baseUrl);
 
     // 1. Workflow-as-Code Editor validation & persistence
-    await page.locator('#tabs button[data-tab="workflows"]').click();
+    await navigateTab(page, 'workflows');
     await expect(page.locator('#workflows-list > .card')).toHaveCount(5);
 
     const invalidWf = {
@@ -149,7 +268,7 @@ test('C5: Playwright integration tests verify Workflow editor, Operational Contr
     await expect(page.locator('#wf-editor-status')).toContainText('Saved workflow chore (200)');
 
     // 2. Operational Controls & Post-Deploy Rollback
-    await page.locator('#tabs button[data-tab="controls"]').click();
+    await navigateTab(page, 'controls');
     await page.locator('#ctrl-autonomy').selectOption('auto-low');
     await page.locator('#ctrl-budget').fill('40');
     await page.locator('#save-controls-btn').click();
@@ -184,7 +303,7 @@ test('C6: Playwright E2E test triages, advances, approves human gates, and compl
 
   try {
     await page.goto(baseUrl);
-    await page.locator('#tabs button[data-tab="board"]').click();
+    await navigateTab(page, 'board');
 
     const diverseTickets = [
       { num: 301, title: '[feature] Add multi-runtime cost breakdown chart', body: 'New feature on overview tab', expectedType: 'feature' },
@@ -251,7 +370,7 @@ test('C6: Playwright E2E test triages, advances, approves human gates, and compl
     await page.screenshot({ path: join(CAPTURES_DIR, 'board-all-5-done.png'), fullPage: true });
 
     // Verify Overview KPIs reflect 5 completed tickets and positive token/cost telemetry
-    await page.locator('#tabs button[data-tab="overview"]').click();
+    await navigateTab(page, 'overview');
     await expect(page.getByTestId('kpi-total-tickets')).toContainText('5');
     await expect(page.getByTestId('kpi-total-tickets')).toContainText('Completed: 5');
   } finally {
@@ -287,7 +406,7 @@ test('C8: Playwright E2E test configures an external GitHub repository in the UI
 
   try {
     await page.goto(baseUrl);
-    await page.locator('#tabs button[data-tab="board"]').click();
+    await navigateTab(page, 'board');
 
     // 1. Add external GitHub repository in the Control Panel UI
     await page.locator('#proj-repo-input').fill('brenoacker/external-webapp');
@@ -351,12 +470,12 @@ test('C9: Playwright E2E test verifies stalled feature alarm banner, header badg
     await expect(page.getByTestId('alarm-item-601')).toContainText('Stalled payment webhook feature');
 
     // 2. Verify Kanban Board shows the red STALLED badge on card #601
-    await page.locator('#tabs button[data-tab="board"]').click();
+    await navigateTab(page, 'board');
     await expect(page.getByTestId('task-stalled-badge-601')).toContainText('STALLED');
     await page.screenshot({ path: join(CAPTURES_DIR, 'stalled-feature-alarm-active.png'), fullPage: true });
 
     // 3. Configure Stall Alarm Threshold in Operational Controls
-    await page.locator('#tabs button[data-tab="controls"]').click();
+    await navigateTab(page, 'controls');
     await page.locator('#ctrl-stall-minutes').fill('45');
     await page.locator('#save-controls-btn').click();
     await expect(page.locator('#controls-feedback')).toContainText('Controls saved');
@@ -430,7 +549,7 @@ test('C10: Playwright E2E test verifies AWS Cloudscape Design System components 
     await page.screenshot({ path: join(CAPTURES_DIR, 'cloudscape-overview.png'), fullPage: true });
 
     // 2. Navigate to Board & Needs Human tab and configure a Jira tracker source
-    await page.locator('#tabs button[data-tab="board"]').click();
+    await navigateTab(page, 'board');
     await page.locator('#proj-provider-select').selectOption('jira');
     await page.locator('#proj-repo-input').fill('brenoacker/jira-checkout');
     await page.locator('#proj-branch-input').fill('main');
@@ -544,7 +663,7 @@ test('C11: Playwright E2E test customizes combinable pickup triggers (stage + fl
 
   try {
     await page.goto(baseUrl);
-    await page.locator('#tabs button[data-tab="board"]').click();
+    await navigateTab(page, 'board');
 
     // 1. Configure Jira project with combinable triggers in the UI
     await page.locator('#proj-provider-select').selectOption('jira');
@@ -616,7 +735,7 @@ test('C12: Playwright E2E test verifies authentic AWS Cloudscape AppLayout, Side
     await expect(page.locator('.awsui-top-navigation')).toBeVisible();
 
     // 2. Navigate to Workflows tab via SideNavigation
-    await page.locator('.awsui-side-navigation a[href="#workflows"]').click();
+    await navigateTab(page, 'workflows');
     await expect(page.locator('#tab-workflows')).toBeVisible();
 
     // 3. Verify visual Mermaid SVG diagram is rendered dynamically
@@ -694,7 +813,7 @@ test('C13: Playwright E2E test configures Linear tracker in Cloudscape UI, syncs
 
   try {
     await page.goto(baseUrl);
-    await page.locator('#tabs button[data-tab="board"]').click();
+    await navigateTab(page, 'board');
 
     // 1. Configure Linear project with combinable triggers in the UI
     await page.locator('#proj-provider-select').selectOption('linear');
@@ -767,7 +886,7 @@ test('C14: Playwright E2E test verifies isolated workspace provisioning, deliver
     });
 
     await page.goto(baseUrl);
-    await page.locator('#tabs button[data-tab="board"]').click();
+    await navigateTab(page, 'board');
 
     // Verify tasks rendered in triage
     await expect(page.getByTestId('task-stage-950')).toHaveText('triage');
