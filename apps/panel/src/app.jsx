@@ -659,51 +659,7 @@ function ControlPanelApp() {
               />
             </div>
           }
-        notifications={
-          stalledList.length > 0 ? (
-            <div id="stalled-alarm-banner" data-testid="stalled-alarm-banner">
-              <Alert
-                type="error"
-                dismissible={false}
-                header={`STALLED TASK ALARM — ${stalledList.length} TASK(S) IDLE BEYOND ${f.limits?.stallThresholdMinutes || 30} MIN THRESHOLD`}
-              >
-                <SpaceBetween size="xs">
-                  {stalledList.map((item) => (
-                    <div
-                      key={item.executionKey}
-                      data-testid={`alarm-item-${item.issueNumber}`}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        gap: '1rem',
-                        padding: '0.5rem',
-                        background: 'rgba(127, 29, 29, 0.4)',
-                        borderRadius: '6px',
-                        border: '1px solid #ef4444',
-                      }}
-                    >
-                      <div>
-                        <Badge color="red">{String(item.severity || 'CRITICAL').toUpperCase()}</Badge>{' '}
-                        <strong>
-                          #{item.issueNumber} [{item.repo}]
-                        </strong>{' '}
-                        — {item.title} ({item.idleMinutes}m idle at {item.stage})
-                      </div>
-                      <Button
-                        size="small"
-                        data-testid={`alarm-snooze-btn-${item.issueNumber}`}
-                        onClick={() => snoozeTaskAlarm(item.executionKey)}
-                      >
-                        Snooze Alarm
-                      </Button>
-                    </div>
-                  ))}
-                </SpaceBetween>
-              </Alert>
-            </div>
-          ) : undefined
-        }
+        notifications={undefined}
         content={
           <ContentLayout
             header={
@@ -731,13 +687,13 @@ function ControlPanelApp() {
                       style={{
                         padding: '0.2rem 0.6rem',
                         borderRadius: '6px',
-                        fontWeight: 700,
-                        fontSize: '0.78rem',
-                        background: stalledList.length > 0 ? '#991b1b' : '#065f46',
-                        color: '#fff',
+                        fontWeight: 600,
+                        fontSize: '0.75rem',
+                        background: '#1e293b',
+                        color: '#94a3b8',
                       }}
                     >
-                      {stalledList.length > 0 ? `${stalledList.length} STALLED ALARM(S)` : '0 ALARMS'}
+                      IDLE (&gt;{f.limits?.stallThresholdMinutes || 30}m): {stalledList.length}
                     </span>
                     <span
                       id="scheduler-status-badge"
@@ -1501,15 +1457,15 @@ function ControlPanelApp() {
                                     <span
                                       data-testid={`task-stalled-badge-${t.issue_number}`}
                                       style={{
-                                        background: '#991b1b',
-                                        color: '#fff',
+                                        background: '#1e293b',
+                                        color: '#94a3b8',
                                         padding: '0.1rem 0.45rem',
                                         borderRadius: '4px',
                                         fontSize: '0.72rem',
-                                        fontWeight: 700,
+                                        fontWeight: 500,
                                       }}
                                     >
-                                      STALLED ({stalledInfo.idleMinutes}m)
+                                      ⏱ {stalledInfo.idleMinutes}m
                                     </span>
                                   )}
                                 </div>

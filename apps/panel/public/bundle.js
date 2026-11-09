@@ -302285,7 +302285,7 @@ ${isHandDrawn ? "" : `
   });
 
   // apps/panel/src/app.jsx
-  var import_react309 = __toESM(require_react(), 1);
+  var import_react307 = __toESM(require_react(), 1);
   var import_client = __toESM(require_client(), 1);
 
   // node_modules/mermaid/dist/mermaid.core.mjs
@@ -305719,12 +305719,6 @@ ${isHandDrawn ? "" : `
     const processedAttributes = processAttributes(rest, componentName2, nativeAttributes, skipWarnings);
     return import_react16.default.createElement(Tag, { ...processedAttributes, ref: mergedRef }, children2);
   });
-
-  // node_modules/@cloudscape-design/components/alert/index.js
-  var import_react56 = __toESM(require_react());
-
-  // node_modules/@cloudscape-design/components/alert/internal-do-not-use-core.js
-  var import_react55 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/component-toolkit/mjs/internal/analytics-metadata/attributes.js
   var METADATA_ATTRIBUTE = "data-awsui-analytics";
@@ -314015,96 +314009,8 @@ ${isHandDrawn ? "" : `
   });
   var internal_default3 = InternalAlert;
 
-  // node_modules/@cloudscape-design/components/alert/internal-do-not-use-core.js
-  var Alert = import_react55.default.forwardRef(({ type: type3 = "info", visible = true, style: style3, ...props }, ref) => {
-    var _a213, _b;
-    const analyticsMetadata = getAnalyticsMetadataProps(props);
-    const baseComponentProps = useBaseComponent("Alert", {
-      props: { type: type3, visible, dismissible: props.dismissible },
-      metadata: {
-        hasPersistenceConfig: !!((_a213 = props.persistenceConfig) === null || _a213 === void 0 ? void 0 : _a213.uniqueKey),
-        crossServicePersistence: !!((_b = props.persistenceConfig) === null || _b === void 0 ? void 0 : _b.crossServicePersistence)
-      }
-    }, analyticsMetadata);
-    const rootRef = (0, import_react55.useRef)(null);
-    const __internalRootRef = useMergeRefs(rootRef, baseComponentProps.__internalRootRef);
-    const { funnelIdentifier, funnelInteractionId, funnelErrorContext, submissionAttempt, funnelState, errorCount } = useFunnel();
-    const { stepNumber, stepNameSelector, stepIdentifier, subStepCount, stepErrorContext, subStepConfiguration } = useFunnelStep();
-    const { subStepSelector, subStepNameSelector, subStepIdentifier, subStepErrorContext } = useFunnelSubStep();
-    const messageSlotId = useUniqueId("alert-");
-    (0, import_react55.useEffect)(() => {
-      var _a214, _b2, _c, _d, _e2;
-      if (funnelInteractionId && visible && type3 === "error" && funnelState.current !== "complete") {
-        const stepName = getTextFromSelector(stepNameSelector);
-        const subStepName = getTextFromSelector(subStepNameSelector);
-        errorCount.current++;
-        const errorIsVisible = ((_c = (_b2 = (_a214 = rootRef.current) === null || _a214 === void 0 ? void 0 : _a214.getBoundingClientRect()) === null || _b2 === void 0 ? void 0 : _b2.width) !== null && _c !== void 0 ? _c : 0) > 0;
-        if (errorIsVisible) {
-          if (subStepSelector) {
-            FunnelMetrics.funnelSubStepError({
-              funnelInteractionId,
-              funnelIdentifier,
-              stepIdentifier,
-              subStepSelector,
-              subStepName,
-              subStepNameSelector,
-              stepNumber,
-              stepName,
-              stepNameSelector,
-              subStepAllSelector: getSubStepAllSelector(),
-              subStepIdentifier,
-              errorContext: analyticsMetadata.errorContext || subStepErrorContext
-            });
-          } else if (stepNameSelector) {
-            FunnelMetrics.funnelStepError({
-              funnelInteractionId,
-              stepNumber,
-              stepNameSelector,
-              stepName,
-              stepIdentifier,
-              currentDocument: (_d = rootRef.current) === null || _d === void 0 ? void 0 : _d.ownerDocument,
-              totalSubSteps: subStepCount.current,
-              funnelIdentifier,
-              subStepAllSelector: getSubStepAllSelector(),
-              errorContext: analyticsMetadata.errorContext || stepErrorContext,
-              subStepConfiguration: (_e2 = subStepConfiguration.current) === null || _e2 === void 0 ? void 0 : _e2.get(stepNumber),
-              stepErrorSelector: "#" + messageSlotId
-            });
-          } else {
-            FunnelMetrics.funnelError({
-              funnelIdentifier,
-              funnelInteractionId,
-              errorContext: analyticsMetadata.errorContext || funnelErrorContext
-            });
-          }
-        }
-        return () => {
-          errorCount.current--;
-        };
-      }
-    }, [funnelInteractionId, visible, submissionAttempt, errorCount]);
-    const componentAnalyticsMetadata2 = {
-      name: "awsui.Alert",
-      label: `.${styles_css_default17.header}`,
-      properties: {
-        type: type3
-      }
-    };
-    return import_react55.default.createElement(internal_default3, { type: type3, visible, ...props, ...baseComponentProps, __internalRootRef, ref, messageSlotId, style: style3, ...getAnalyticsMetadataAttribute({ component: componentAnalyticsMetadata2 }) });
-  });
-  applyDisplayName(Alert, "Alert");
-  var internal_do_not_use_core_default = Alert;
-
-  // node_modules/@cloudscape-design/components/alert/index.js
-  var Alert2 = import_react56.default.forwardRef((props, ref) => {
-    validateProps("Alert", props, ["persistenceConfig"], {}, "core");
-    return import_react56.default.createElement(internal_do_not_use_core_default, { ref, ...props });
-  });
-  applyDisplayName(Alert2, "Alert");
-  var alert_default = Alert2;
-
   // node_modules/@cloudscape-design/components/box/internal.js
-  var import_react57 = __toESM(require_react());
+  var import_react55 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/box/styles.css.js
   var styles_css_default19 = {
@@ -314333,7 +314239,7 @@ ${isHandDrawn ? "" : `
     const accentAspectRatio = (_a213 = visualAccent === null || visualAccent === void 0 ? void 0 : visualAccent.aspectRatio) !== null && _a213 !== void 0 ? _a213 : "auto";
     const className = clsx_m_default(baseProps.className, styles_css_default19.root, styles_css_default19.box, styles_css_default19[`${variant.replace(/^awsui-/, "")}-variant`], visualAccent && styles_css_default19["visual-accent"], visualAccent && styles_css_default19[`visual-accent-${visualAccent.color}`], visualAccent && styles_css_default19[`visual-accent-aspect-${accentAspectRatio}`], (visualAccent === null || visualAccent === void 0 ? void 0 : visualAccent.borderRadius) && styles_css_default19[`visual-accent-radius-${visualAccent.borderRadius}`], marginsClassNamesSuffices.map((suffix) => styles_css_default19[`m-${suffix}`]), paddingsClassNamesSuffices.map((suffix) => styles_css_default19[`p-${suffix}`]), styles_css_default19[`d-${display}`], styles_css_default19[`f-${float2}`], styles_css_default19[`color-${color2 || "default"}`], styles_css_default19[`font-size-${fontSize || "default"}`], styles_css_default19[`font-weight-${fontWeight || "default"}`], styles_css_default19[`t-${textAlign}`]);
     const tabindex = variant === "h1" ? -1 : void 0;
-    return import_react57.default.createElement(with_native_attributes_default, { ...baseProps, tag: getTag4(variant, tagOverride), componentName: "Box", tabIndex: tabindex, nativeAttributes, className, ref: __internalRootRef }, children2);
+    return import_react55.default.createElement(with_native_attributes_default, { ...baseProps, tag: getTag4(variant, tagOverride), componentName: "Box", tabIndex: tabindex, nativeAttributes, className, ref: __internalRootRef }, children2);
   }
   var getClassNamesSuffixes = (value3) => {
     if (typeof value3 === "string") {
@@ -314364,24 +314270,24 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/space-between/internal.js
-  var import_react61 = __toESM(require_react());
+  var import_react59 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/utils/flatten-children.js
-  var import_react60 = __toESM(require_react());
+  var import_react58 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/vendor/react-keyed-flatten-children/index.js
-  var import_react58 = __toESM(require_react());
+  var import_react56 = __toESM(require_react());
   var import_react_is = __toESM(require_react_is());
   function isFragmentWithChildren(node2) {
     return (0, import_react_is.isFragment)(node2);
   }
   function flattenChildren(children2, depth = 0, keys3 = [], componentName2) {
-    return import_react58.Children.toArray(children2).reduce((acc, node2, nodeIndex) => {
+    return import_react56.Children.toArray(children2).reduce((acc, node2, nodeIndex) => {
       if (isFragmentWithChildren(node2)) {
         warnOnce(componentName2, "React.Fragment children are flattened in React 18 but not in React 19+. Use arrays instead of fragments for consistent behavior.");
         acc.push(...flattenChildren(node2.props.children, depth + 1, keys3.concat(node2.key || nodeIndex), componentName2));
-      } else if ((0, import_react58.isValidElement)(node2)) {
-        acc.push((0, import_react58.cloneElement)(node2, {
+      } else if ((0, import_react56.isValidElement)(node2)) {
+        acc.push((0, import_react56.cloneElement)(node2, {
           key: keys3.concat(String(node2.key)).join(".")
         }));
       } else if (typeof node2 === "string" || typeof node2 === "number") {
@@ -314392,10 +314298,10 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/internal/utils/react-version.js
-  var import_react59 = __toESM(require_react());
+  var import_react57 = __toESM(require_react());
   function getReactMajorVersion() {
     var _a213;
-    const versionString = (_a213 = import_react59.default.version) === null || _a213 === void 0 ? void 0 : _a213.split(".")[0];
+    const versionString = (_a213 = import_react57.default.version) === null || _a213 === void 0 ? void 0 : _a213.split(".")[0];
     return versionString ? parseInt(versionString, 10) : NaN;
   }
 
@@ -314405,7 +314311,7 @@ ${isHandDrawn ? "" : `
     if (!Number.isNaN(majorVersion) && majorVersion < 19) {
       return flattenChildren(children2, 0, [], componentName2);
     }
-    return import_react60.default.Children.toArray(children2);
+    return import_react58.default.Children.toArray(children2);
   }
 
   // node_modules/@cloudscape-design/components/space-between/styles.css.js
@@ -314437,37 +314343,37 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/space-between/internal.js
-  var InternalSpaceBetween = (0, import_react61.forwardRef)(({ direction: direction2 = "vertical", size: size4, children: children2, alignItems, nativeAttributes, __internalRootRef, ...props }, ref) => {
+  var InternalSpaceBetween = (0, import_react59.forwardRef)(({ direction: direction2 = "vertical", size: size4, children: children2, alignItems, nativeAttributes, __internalRootRef, ...props }, ref) => {
     const mergedRef = useMergeRefs(ref, __internalRootRef);
     const baseProps = getBaseProps(props);
     const flattenedChildren = flattenChildren2(children2, "SpaceBetween");
     const propagateAlignment = alignItems && direction2 === "horizontal";
-    return import_react61.default.createElement(with_native_attributes_default, { ...baseProps, tag: "div", componentName: "SpaceBetween", nativeAttributes, className: clsx_m_default(baseProps.className, styles_css_default20.root, styles_css_default20[direction2], styles_css_default20[`${direction2}-${size4}`], alignItems && styles_css_default20[`align-${alignItems}`]), ref: mergedRef }, flattenedChildren.map((child) => {
+    return import_react59.default.createElement(with_native_attributes_default, { ...baseProps, tag: "div", componentName: "SpaceBetween", nativeAttributes, className: clsx_m_default(baseProps.className, styles_css_default20.root, styles_css_default20[direction2], styles_css_default20[`${direction2}-${size4}`], alignItems && styles_css_default20[`align-${alignItems}`]), ref: mergedRef }, flattenedChildren.map((child) => {
       const key2 = child && typeof child === "object" ? child.key : void 0;
-      return import_react61.default.createElement("div", { key: key2 ? String(key2) : void 0, className: clsx_m_default(styles_css_default20.child, propagateAlignment && styles_css_default20["child-aligned"]) }, child);
+      return import_react59.default.createElement("div", { key: key2 ? String(key2) : void 0, className: clsx_m_default(styles_css_default20.child, propagateAlignment && styles_css_default20["child-aligned"]) }, child);
     }));
   });
   var internal_default5 = InternalSpaceBetween;
 
   // node_modules/@cloudscape-design/components/app-layout/index.js
-  var import_react207 = __toESM(require_react());
+  var import_react205 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/hooks/use-controllable/index.js
-  var React35 = __toESM(require_react());
+  var React33 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/is-development.js
   var isDevelopment2 = false;
 
   // node_modules/@cloudscape-design/components/internal/hooks/use-controllable/index.js
   function useControllable2(controlledValue, handler2, defaultValue5, { componentName: componentName2, changeHandler, controlledProp }) {
-    const isControlled = React35.useState(controlledValue !== void 0)[0];
+    const isControlled = React33.useState(controlledValue !== void 0)[0];
     if (isDevelopment2) {
-      React35.useEffect(() => {
+      React33.useEffect(() => {
         if (isControlled && handler2 === void 0) {
           warnOnce(componentName2, `You provided a \`${controlledProp}\` prop without an \`${changeHandler}\` handler. This will render a non-interactive component.`);
         }
       }, [handler2, isControlled, componentName2, changeHandler, controlledProp]);
-      React35.useEffect(() => {
+      React33.useEffect(() => {
         const isControlledNow = controlledValue !== void 0;
         if (isControlled !== isControlledNow) {
           const initialMode = isControlled ? "controlled" : "uncontrolled";
@@ -314476,10 +314382,10 @@ ${isHandDrawn ? "" : `
         }
       }, [isControlled, controlledProp, componentName2, controlledValue]);
     }
-    const [valueState, setValue] = React35.useState(defaultValue5);
-    const [valueHasBeenSet, setValueHasBeenSet] = React35.useState(false);
+    const [valueState, setValue] = React33.useState(defaultValue5);
+    const [valueHasBeenSet, setValueHasBeenSet] = React33.useState(false);
     const currentUncontrolledValue = valueHasBeenSet ? valueState : defaultValue5;
-    const setUncontrolledValue = React35.useCallback((newValue) => {
+    const setUncontrolledValue = React33.useCallback((newValue) => {
       setValue(newValue);
       setValueHasBeenSet(true);
     }, [setValue, setValueHasBeenSet]);
@@ -314636,10 +314542,10 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/internal.js
-  var import_react204 = __toESM(require_react());
+  var import_react202 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/classic.js
-  var import_react117 = __toESM(require_react());
+  var import_react115 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/split-panel/utils/size-utils.js
   var CONSTRAINED_PAGE_HEIGHT = 400;
@@ -314665,7 +314571,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/content-wrapper/index.js
-  var import_react62 = __toESM(require_react());
+  var import_react60 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/content-wrapper/styles.css.js
   var styles_css_default21 = {
@@ -314675,23 +314581,23 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/app-layout/content-wrapper/index.js
-  var ContentWrapper = import_react62.default.forwardRef(({ className, style: style3, contentType, children: children2, toolsPadding, disablePaddings, navigationPadding, isMobile, contentWidthStyles }, ref) => {
+  var ContentWrapper = import_react60.default.forwardRef(({ className, style: style3, contentType, children: children2, toolsPadding, disablePaddings, navigationPadding, isMobile, contentWidthStyles }, ref) => {
     if (disablePaddings) {
-      return import_react62.default.createElement("div", { className, ref, style: style3 }, children2);
+      return import_react60.default.createElement("div", { className, ref, style: style3 }, children2);
     }
-    return import_react62.default.createElement(
+    return import_react60.default.createElement(
       "div",
       { ref, className: clsx_m_default(styles_css_default21["content-wrapper"], !navigationPadding && styles_css_default21["content-wrapper-no-navigation-padding"], !toolsPadding && styles_css_default21["content-wrapper-no-tools-padding"], isMobile && styles_css_default21["content-wrapper-mobile"]), style: style3 },
-      import_react62.default.createElement("div", { style: contentWidthStyles, className: clsx_m_default(className, styles_css_default21[`content-type-${contentType}`]) }, children2)
+      import_react60.default.createElement("div", { style: contentWidthStyles, className: clsx_m_default(className, styles_css_default21[`content-type-${contentType}`]) }, children2)
     );
   });
   var content_wrapper_default = ContentWrapper;
 
   // node_modules/@cloudscape-design/components/app-layout/drawer/index.js
-  var import_react99 = __toESM(require_react());
+  var import_react97 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/toggles/index.js
-  var import_react63 = __toESM(require_react());
+  var import_react61 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/test-classes/styles.css.js
   var styles_css_default22 = {
@@ -314750,32 +314656,32 @@ ${isHandDrawn ? "" : `
       })
     }
   };
-  var ToggleButton = import_react63.default.forwardRef(({ className, ariaLabel, ariaExpanded, ariaControls, iconName, iconSvg, disabled, testId, onClick, badge }, ref) => {
-    return import_react63.default.createElement(
+  var ToggleButton = import_react61.default.forwardRef(({ className, ariaLabel, ariaExpanded, ariaControls, iconName, iconSvg, disabled, testId, onClick, badge }, ref) => {
+    return import_react61.default.createElement(
       "button",
       { ref, className: clsx_m_default(className, styles_css_default23["toggle-button"], {
         [styles_css_default22["drawers-trigger-with-badge"]]: badge
       }), "aria-label": ariaLabel, type: "button", onClick, disabled, "aria-expanded": ariaExpanded, "aria-haspopup": ariaExpanded ? void 0 : true, "aria-controls": ariaControls, "data-testid": testId, "data-awsui-motion-trigger": "hover", "data-awsui-motion-target": "" },
-      import_react63.default.createElement(internal_default, { svg: iconSvg, name: iconName, badge })
+      import_react61.default.createElement(internal_default, { svg: iconSvg, name: iconName, badge })
     );
   });
-  var CloseButton = import_react63.default.forwardRef(({ className, ariaLabel, onClick }, ref) => {
-    return import_react63.default.createElement(
+  var CloseButton = import_react61.default.forwardRef(({ className, ariaLabel, onClick }, ref) => {
+    return import_react61.default.createElement(
       "span",
       { className: styles_css_default23["close-button"] },
-      import_react63.default.createElement(InternalButton, { ref, className, ariaLabel, variant: "icon", formAction: "none", iconName: "close", onClick })
+      import_react61.default.createElement(InternalButton, { ref, className, ariaLabel, variant: "icon", formAction: "none", iconName: "close", onClick })
     );
   });
 
   // node_modules/@cloudscape-design/components/app-layout/utils/use-drawers.js
-  var import_react66 = __toESM(require_react());
+  var import_react64 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/runtime-drawer/index.js
-  var import_react65 = __toESM(require_react());
+  var import_react63 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/utils/visibility-context.js
-  var import_react64 = __toESM(require_react());
-  var ActiveDrawersContext = (0, import_react64.createContext)([]);
+  var import_react62 = __toESM(require_react());
+  var ActiveDrawersContext = (0, import_react62.createContext)([]);
 
   // node_modules/@cloudscape-design/components/app-layout/runtime-drawer/styles.css.js
   var styles_css_default24 = {
@@ -314785,11 +314691,11 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/app-layout/runtime-drawer/index.js
   function RuntimeDrawerWrapper({ mountContent, unmountContent, id: id38 }) {
-    const ref = (0, import_react65.useRef)(null);
-    const visibilityChangeCallback = (0, import_react65.useRef)(null);
-    const activeDrawersIds = (0, import_react65.useContext)(ActiveDrawersContext);
+    const ref = (0, import_react63.useRef)(null);
+    const visibilityChangeCallback = (0, import_react63.useRef)(null);
+    const activeDrawersIds = (0, import_react63.useContext)(ActiveDrawersContext);
     const isVisible2 = !!id38 && activeDrawersIds.includes(id38);
-    (0, import_react65.useEffect)(() => {
+    (0, import_react63.useEffect)(() => {
       const container2 = ref.current;
       mountContent(container2, {
         onVisibilityChange: (cb) => {
@@ -314801,22 +314707,22 @@ ${isHandDrawn ? "" : `
         visibilityChangeCallback.current = null;
       };
     }, []);
-    (0, import_react65.useEffect)(() => {
+    (0, import_react63.useEffect)(() => {
       var _a213;
       (_a213 = visibilityChangeCallback.current) === null || _a213 === void 0 ? void 0 : _a213.call(visibilityChangeCallback, isVisible2);
     }, [isVisible2]);
-    return import_react65.default.createElement("div", { ref, className: styles_css_default24["runtime-content-wrapper"], "data-awsui-runtime-drawer-root-id": id38 });
+    return import_react63.default.createElement("div", { ref, className: styles_css_default24["runtime-content-wrapper"], "data-awsui-runtime-drawer-root-id": id38 });
   }
   function RuntimeDrawerHeader({ mountHeader, unmountHeader }) {
-    const ref = (0, import_react65.useRef)(null);
-    (0, import_react65.useEffect)(() => {
+    const ref = (0, import_react63.useRef)(null);
+    (0, import_react63.useEffect)(() => {
       const container2 = ref.current;
       mountHeader === null || mountHeader === void 0 ? void 0 : mountHeader(container2);
       return () => {
         unmountHeader === null || unmountHeader === void 0 ? void 0 : unmountHeader(container2);
       };
     }, []);
-    return import_react65.default.createElement("div", { className: styles_css_default24["runtime-header-wrapper"], ref });
+    return import_react63.default.createElement("div", { className: styles_css_default24["runtime-header-wrapper"], ref });
   }
   function mapRuntimeHeaderActionsToHeaderActions(runtimeHeaderActions) {
     return runtimeHeaderActions.map((runtimeHeaderAction) => {
@@ -314837,7 +314743,7 @@ ${isHandDrawn ? "" : `
     if (!runtimeTrigger) {
       return void 0;
     }
-    return import_react65.default.createElement("span", { style: { lineHeight: 0 }, dangerouslySetInnerHTML: { __html: runtimeTrigger } });
+    return import_react63.default.createElement("span", { style: { lineHeight: 0 }, dangerouslySetInnerHTML: { __html: runtimeTrigger } });
   };
   var mapRuntimeConfigToDrawer = (runtimeConfig) => {
     var _a213;
@@ -314850,7 +314756,7 @@ ${isHandDrawn ? "" : `
           iconSvg: convertRuntimeTriggerToReactNode(trigger.iconSvg)
         }
       } : void 0,
-      content: import_react65.default.createElement(RuntimeDrawerWrapper, { key: runtimeDrawer.id, mountContent, unmountContent, id: runtimeDrawer.id }),
+      content: import_react63.default.createElement(RuntimeDrawerWrapper, { key: runtimeDrawer.id, mountContent, unmountContent, id: runtimeDrawer.id }),
       onResize: (event3) => {
         fireNonCancelableEvent(runtimeDrawer.onResize, { size: event3.detail.size, id: runtimeDrawer.id });
       },
@@ -314872,9 +314778,9 @@ ${isHandDrawn ? "" : `
       exitExpandedModeTrigger: exitExpandedModeTrigger ? {
         customIcon: convertRuntimeTriggerToReactNode(exitExpandedModeTrigger === null || exitExpandedModeTrigger === void 0 ? void 0 : exitExpandedModeTrigger.customIcon)
       } : void 0,
-      content: import_react65.default.createElement(RuntimeDrawerWrapper, { key: runtimeDrawer.id, mountContent, unmountContent, id: runtimeDrawer.id }),
+      content: import_react63.default.createElement(RuntimeDrawerWrapper, { key: runtimeDrawer.id, mountContent, unmountContent, id: runtimeDrawer.id }),
       ...runtimeDrawer.mountHeader && {
-        header: import_react65.default.createElement(RuntimeDrawerHeader, { mountHeader: runtimeDrawer.mountHeader, unmountHeader: runtimeDrawer.unmountHeader })
+        header: import_react63.default.createElement(RuntimeDrawerHeader, { mountHeader: runtimeDrawer.mountHeader, unmountHeader: runtimeDrawer.unmountHeader })
       },
       onResize: (event3) => {
         fireNonCancelableEvent(runtimeDrawer.onResize, { size: event3.detail.size, id: runtimeDrawer.id });
@@ -314923,18 +314829,18 @@ ${isHandDrawn ? "" : `
   var DRAWERS_LIMIT = 2;
   var DEFAULT_ON_CHANGE_PARAMS = { initiatedByUserAction: true };
   function useRuntimeDrawers(disableRuntimeDrawers, activeDrawerId, onActiveDrawerChange, activeGlobalDrawersIds, onActiveGlobalDrawersChange) {
-    const [runtimeDrawers, setRuntimeDrawers] = (0, import_react66.useState)({
+    const [runtimeDrawers, setRuntimeDrawers] = (0, import_react64.useState)({
       localBefore: [],
       localAfter: [],
       global: []
     });
     const onLocalDrawerChangeStable = useStableCallback(onActiveDrawerChange);
     const onGlobalDrawersChangeStable = useStableCallback(onActiveGlobalDrawersChange);
-    const localDrawerWasOpenRef = (0, import_react66.useRef)(false);
+    const localDrawerWasOpenRef = (0, import_react64.useRef)(false);
     localDrawerWasOpenRef.current = localDrawerWasOpenRef.current || !!activeDrawerId;
-    const activeGlobalDrawersIdsRef = (0, import_react66.useRef)([]);
+    const activeGlobalDrawersIdsRef = (0, import_react64.useRef)([]);
     activeGlobalDrawersIdsRef.current = activeGlobalDrawersIds;
-    (0, import_react66.useEffect)(() => {
+    (0, import_react64.useEffect)(() => {
       if (disableRuntimeDrawers) {
         return;
       }
@@ -314986,13 +314892,13 @@ ${isHandDrawn ? "" : `
         onActiveGlobalDrawersChange(drawerId, params);
       }
     });
-    (0, import_react66.useEffect)(() => {
+    (0, import_react64.useEffect)(() => {
       if (disableRuntimeDrawers) {
         return;
       }
       return awsuiPluginsInternal.appLayout.onDrawerOpened(onDrawerOpened);
     }, [disableRuntimeDrawers, onDrawerOpened]);
-    (0, import_react66.useEffect)(() => {
+    (0, import_react64.useEffect)(() => {
       if (disableRuntimeDrawers) {
         return;
       }
@@ -315003,7 +314909,7 @@ ${isHandDrawn ? "" : `
     const onRuntimeDrawerResize = useStableCallback((drawerId, size4) => {
       onActiveDrawerResize({ id: drawerId, size: size4 });
     });
-    (0, import_react66.useEffect)(() => {
+    (0, import_react64.useEffect)(() => {
       if (disableRuntimeDrawers) {
         return;
       }
@@ -315029,9 +314935,9 @@ ${isHandDrawn ? "" : `
       controlledProp: "activeDrawerId",
       changeHandler: "onChange"
     });
-    const [activeGlobalDrawersIds, setActiveGlobalDrawersIds] = (0, import_react66.useState)([]);
-    const [drawerSizes, setDrawerSizes] = (0, import_react66.useState)({});
-    const drawersOpenQueue = (0, import_react66.useRef)([]);
+    const [activeGlobalDrawersIds, setActiveGlobalDrawersIds] = (0, import_react64.useState)([]);
+    const [drawerSizes, setDrawerSizes] = (0, import_react64.useState)({});
+    const drawersOpenQueue = (0, import_react64.useRef)([]);
     function onActiveDrawerResize({ id: id38, size: size4 }) {
       setDrawerSizes((oldSizes) => ({ ...oldSizes, [id38]: size4 }));
       if ((activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.id) === id38) {
@@ -315153,17 +315059,17 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/drawer/overflow-menu.js
-  var import_react98 = __toESM(require_react());
+  var import_react96 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/button-dropdown/internal.js
-  var import_react97 = __toESM(require_react());
+  var import_react95 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/dropdown/internal.js
-  var import_react69 = __toESM(require_react());
+  var import_react67 = __toESM(require_react());
   var import_react_dom5 = __toESM(require_react_dom());
 
   // node_modules/@cloudscape-design/components/internal/hooks/use-mouse-down-target.js
-  var import_react67 = __toESM(require_react());
+  var import_react65 = __toESM(require_react());
   var useEventListenersSingleton = createSingletonHandler((setTarget) => {
     function handleMouseDown(event3) {
       setTarget(event3.target);
@@ -315179,11 +315085,11 @@ ${isHandDrawn ? "" : `
     };
   });
   function useMouseDownTarget() {
-    const mouseDownTargetRef = (0, import_react67.useRef)(null);
+    const mouseDownTargetRef = (0, import_react65.useRef)(null);
     useEventListenersSingleton((target) => {
       mouseDownTargetRef.current = target;
     });
-    return (0, import_react67.useCallback)(() => mouseDownTargetRef.current, []);
+    return (0, import_react65.useCallback)(() => mouseDownTargetRef.current, []);
   }
 
   // node_modules/@cloudscape-design/components/internal/hooks/use-portal-mode-classes/index.js
@@ -315203,15 +315109,15 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/dropdown/context.js
-  var import_react68 = __toESM(require_react());
-  var DropdownContext = import_react68.default.createContext({
+  var import_react66 = __toESM(require_react());
+  var DropdownContext = import_react66.default.createContext({
     position: "bottom-right"
   });
   function DropdownContextProvider({ children: children2, position: position5 = "bottom-right" }) {
-    return import_react68.default.createElement(DropdownContext.Provider, { value: { position: position5 } }, children2);
+    return import_react66.default.createElement(DropdownContext.Provider, { value: { position: position5 } }, children2);
   }
   function useDropdownContext() {
-    return (0, import_react68.useContext)(DropdownContext);
+    return (0, import_react66.useContext)(DropdownContext);
   }
 
   // node_modules/@cloudscape-design/components/dropdown/styles.css.js
@@ -315487,13 +315393,13 @@ ${isHandDrawn ? "" : `
   var DropdownContainer = ({ triggerRef, children: children2, renderWithPortal, id: id38, referrerId, open: open2 }) => {
     var _a213, _b;
     if (!renderWithPortal) {
-      return import_react69.default.createElement(import_react69.default.Fragment, null, children2);
+      return import_react67.default.createElement(import_react67.default.Fragment, null, children2);
     }
     if (!open2) {
       return null;
     }
     const currentDocument = (_b = (_a213 = triggerRef.current) === null || _a213 === void 0 ? void 0 : _a213.ownerDocument) !== null && _b !== void 0 ? _b : document;
-    return (0, import_react_dom5.createPortal)(import_react69.default.createElement("div", { id: id38, "data-awsui-referrer-id": referrerId }, children2), currentDocument.body);
+    return (0, import_react_dom5.createPortal)(import_react67.default.createElement("div", { id: id38, "data-awsui-referrer-id": referrerId }, children2), currentDocument.body);
   };
   var TransitionContent = ({ state: state5, transitionRef, dropdownClasses, matchTriggerWidth, hideBlockBorder, interior, isRefresh, dropdownRef, verticalContainerRef, expandToViewport, minWidth, maxWidth: maxWidth2, header, content, footer, position: position5, open: open2, onMouseDown, onFocusEnter, onFocusLeave, id: id38, ariaRole, ariaLabel, ariaLabelledby, ariaDescribedby, dropdownStyle, styleClassNames }) => {
     const contentRef = useMergeRefs(dropdownRef, transitionRef);
@@ -315504,7 +315410,7 @@ ${isHandDrawn ? "" : `
     if (maxWidth2) {
       dropdownStyles[custom_css_properties_default.dropdownDefaultMaxWidth] = maxWidth2;
     }
-    return import_react69.default.createElement(
+    return import_react67.default.createElement(
       "div",
       { className: clsx_m_default(styles_css_default25.dropdown, dropdownClasses, {
         [styles_css_default25.open]: open2,
@@ -315515,18 +315421,18 @@ ${isHandDrawn ? "" : `
         [styles_css_default25["use-portal"]]: expandToViewport && !interior,
         [styles_css_default25["use-flexible-width"]]: !matchTriggerWidth && !interior
       }), ref: contentRef, id: id38, role: ariaRole, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, "aria-describedby": ariaDescribedby, "data-open": open2, "data-animating": state5 !== "exited", "aria-hidden": !open2, style: dropdownStyles, onMouseDown, onFocus: onFocusEnter, onBlur: onFocusLeave },
-      import_react69.default.createElement(
+      import_react67.default.createElement(
         "div",
         { className: clsx_m_default(styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.container, styles_css_default25["dropdown-content-wrapper"], !header && !content && styles_css_default25["is-empty"], isRefresh && styles_css_default25.refresh), style: dropdownStyle },
-        import_react69.default.createElement(
+        import_react67.default.createElement(
           "div",
           { ref: verticalContainerRef, className: styles_css_default25["dropdown-content"] },
-          import_react69.default.createElement(
+          import_react67.default.createElement(
             DropdownContextProvider,
             { position: position5 },
-            header && import_react69.default.createElement("div", { className: styles_css_default26.header }, header),
+            header && import_react67.default.createElement("div", { className: styles_css_default26.header }, header),
             content,
-            footer && import_react69.default.createElement("div", { className: styles_css_default26.footer }, footer)
+            footer && import_react67.default.createElement("div", { className: styles_css_default26.footer }, footer)
           )
         )
       )
@@ -315534,18 +315440,18 @@ ${isHandDrawn ? "" : `
   };
   var InternalDropdown = ({ content, trigger, triggerRef: externalTriggerRef, triggerId: externalTriggerId, open: open2, onOutsideClick, onMouseDown, header, footer, dropdownId, stretchTriggerHeight = false, stretchHeight = false, minWidth, maxWidth: maxWidth2, maxHeight, hideBlockBorder = true, expandToViewport = false, preferredAlignment = "start", interior = false, scrollable = true, loopFocus = expandToViewport, onFocus, onBlur, onFocusEnter, onFocusLeave, onEscape, contentKey, dropdownContentId, ariaRole, ariaLabel, ariaLabelledby, ariaDescribedby, style: style3, styleClassNames, __internalRootRef, ...restProps }) => {
     const baseProps = getBaseProps(restProps);
-    const wrapperRef = (0, import_react69.useRef)(null);
+    const wrapperRef = (0, import_react67.useRef)(null);
     const mergedRef = useMergeRefs(wrapperRef, __internalRootRef);
-    const internalTriggerRef = (0, import_react69.useRef)(null);
-    const dropdownRef = (0, import_react69.useRef)(null);
-    const dropdownContainerRef = (0, import_react69.useRef)(null);
-    const verticalContainerRef = (0, import_react69.useRef)(null);
-    const fixedPosition = (0, import_react69.useRef)(null);
+    const internalTriggerRef = (0, import_react67.useRef)(null);
+    const dropdownRef = (0, import_react67.useRef)(null);
+    const dropdownContainerRef = (0, import_react67.useRef)(null);
+    const verticalContainerRef = (0, import_react67.useRef)(null);
+    const fixedPosition = (0, import_react67.useRef)(null);
     const triggerRef = externalTriggerRef || internalTriggerRef;
     const isRefresh = useVisualRefresh();
     const getMouseDownTarget = useMouseDownTarget();
     const dropdownClasses = usePortalModeClasses(triggerRef);
-    const [position5, setPosition] = (0, import_react69.useState)("bottom-right");
+    const [position5, setPosition] = (0, import_react67.useState)("bottom-right");
     const isMobile = useMobile();
     const matchTriggerWidth = minWidth === "trigger" && maxWidth2 === "trigger";
     const preferCenter = preferredAlignment === "center";
@@ -315633,7 +315539,7 @@ ${isHandDrawn ? "" : `
       }
     };
     useResizeObserver(() => dropdownRef.current, fixStretching);
-    (0, import_react69.useLayoutEffect)(() => {
+    (0, import_react67.useLayoutEffect)(() => {
       const onDropdownOpen = () => {
         if (open2 && dropdownRef.current && triggerRef.current && verticalContainerRef.current) {
           if (scrollable) {
@@ -315657,7 +315563,7 @@ ${isHandDrawn ? "" : `
         };
       }
     }, [open2, dropdownRef, triggerRef, verticalContainerRef, interior, matchTriggerWidth, isMobile, contentKey]);
-    (0, import_react69.useEffect)(() => {
+    (0, import_react67.useEffect)(() => {
       if (!open2) {
         return;
       }
@@ -315674,7 +315580,7 @@ ${isHandDrawn ? "" : `
         window.removeEventListener("click", clickListener, true);
       };
     }, [open2, onOutsideClick, triggerRef, externalTriggerRef, getMouseDownTarget]);
-    (0, import_react69.useEffect)(() => {
+    (0, import_react67.useEffect)(() => {
       if (!open2 || !onEscape) {
         return;
       }
@@ -315689,7 +315595,7 @@ ${isHandDrawn ? "" : `
         window.removeEventListener("keydown", keydownListener, true);
       };
     }, [open2, onEscape]);
-    (0, import_react69.useLayoutEffect)(() => {
+    (0, import_react67.useLayoutEffect)(() => {
       if (!expandToViewport || !open2) {
         return;
       }
@@ -315731,26 +315637,26 @@ ${isHandDrawn ? "" : `
       }
       return "100%";
     };
-    return import_react69.default.createElement(
+    return import_react67.default.createElement(
       "div",
       { ...baseProps, className: clsx_m_default(styles_css_default25.root, interior && styles_css_default25.interior, stretchTriggerHeight && styles_css_default25["stretch-trigger-height"], baseProps.className), ref: mergedRef, onFocus: focusHandler, onBlur: blurHandler },
-      !externalTriggerRef && import_react69.default.createElement("div", { id: referrerId, className: clsx_m_default(stretchTriggerHeight && styles_css_default25["stretch-trigger-height"], styles_css_default26.trigger), ref: internalTriggerRef }, trigger),
-      import_react69.default.createElement(TabTrap, { focusNextCallback: () => {
+      !externalTriggerRef && import_react67.default.createElement("div", { id: referrerId, className: clsx_m_default(stretchTriggerHeight && styles_css_default25["stretch-trigger-height"], styles_css_default26.trigger), ref: internalTriggerRef }, trigger),
+      import_react67.default.createElement(TabTrap, { focusNextCallback: () => {
         var _a213;
         return dropdownRef.current && ((_a213 = getFirstFocusable2(dropdownRef.current)) === null || _a213 === void 0 ? void 0 : _a213.focus());
       }, disabled: !open2 || !loopFocus }),
-      import_react69.default.createElement(
+      import_react67.default.createElement(
         DropdownContainer,
         { triggerRef, renderWithPortal: expandToViewport && !interior, id: dropdownId, referrerId, open: open2 },
-        import_react69.default.createElement(Transition4, { in: open2 !== null && open2 !== void 0 ? open2 : false, exit: false }, (state5, ref) => import_react69.default.createElement(
+        import_react67.default.createElement(Transition4, { in: open2 !== null && open2 !== void 0 ? open2 : false, exit: false }, (state5, ref) => import_react67.default.createElement(
           "div",
           { ref: dropdownContainerRef },
-          import_react69.default.createElement(TabTrap, { focusNextCallback: () => {
+          import_react67.default.createElement(TabTrap, { focusNextCallback: () => {
             var _a213;
             return triggerRef.current && ((_a213 = getLastFocusable2(triggerRef.current)) === null || _a213 === void 0 ? void 0 : _a213.focus());
           }, disabled: !open2 || !loopFocus }),
-          import_react69.default.createElement(TransitionContent, { state: state5, transitionRef: ref, dropdownClasses, open: open2, matchTriggerWidth, hideBlockBorder, interior, header, content, expandToViewport, minWidth: getMinWidthCssValue(), maxWidth: getMaxWidthCssValue(), footer, onMouseDown, onFocusEnter: focusEnterHandler, onFocusLeave: focusLeaveHandler, isRefresh, dropdownRef, verticalContainerRef, position: position5, id: dropdownContentId, ariaRole, ariaLabel, ariaLabelledby, ariaDescribedby, dropdownStyle: getDropdownStyles(style3), styleClassNames }),
-          import_react69.default.createElement(TabTrap, { focusNextCallback: () => {
+          import_react67.default.createElement(TransitionContent, { state: state5, transitionRef: ref, dropdownClasses, open: open2, matchTriggerWidth, hideBlockBorder, interior, header, content, expandToViewport, minWidth: getMinWidthCssValue(), maxWidth: getMaxWidthCssValue(), footer, onMouseDown, onFocusEnter: focusEnterHandler, onFocusLeave: focusLeaveHandler, isRefresh, dropdownRef, verticalContainerRef, position: position5, id: dropdownContentId, ariaRole, ariaLabel, ariaLabelledby, ariaDescribedby, dropdownStyle: getDropdownStyles(style3), styleClassNames }),
+          import_react67.default.createElement(TabTrap, { focusNextCallback: () => {
             var _a213;
             return triggerRef.current && ((_a213 = getFirstFocusable2(triggerRef.current)) === null || _a213 === void 0 ? void 0 : _a213.focus());
           }, disabled: !open2 || !loopFocus })
@@ -315762,23 +315668,23 @@ ${isHandDrawn ? "" : `
   var internal_default6 = InternalDropdown;
 
   // node_modules/@cloudscape-design/components/internal/components/dropdown-status/index.js
-  var import_react75 = __toESM(require_react());
+  var import_react73 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/link/internal.js
-  var import_react72 = __toESM(require_react());
+  var import_react70 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/context/info-link-label-context.js
-  var import_react70 = __toESM(require_react());
-  var InfoLinkLabelContext = (0, import_react70.createContext)(void 0);
+  var import_react68 = __toESM(require_react());
+  var InfoLinkLabelContext = (0, import_react68.createContext)(void 0);
 
   // node_modules/@cloudscape-design/components/internal/context/token-inline-context.js
-  var import_react71 = __toESM(require_react());
+  var import_react69 = __toESM(require_react());
   var defaultValue3 = {
     isInlineToken: false
   };
-  var TokenInlineContext = (0, import_react71.createContext)(defaultValue3);
+  var TokenInlineContext = (0, import_react69.createContext)(defaultValue3);
   function useTokenInlineContext() {
-    return (0, import_react71.useContext)(TokenInlineContext);
+    return (0, import_react69.useContext)(TokenInlineContext);
   }
 
   // node_modules/@cloudscape-design/components/link/style.js
@@ -315828,10 +315734,10 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/link/internal.js
-  var InternalLink = import_react72.default.forwardRef(({ variant: providedVariant, fontSize = "body-m", color: color2 = "normal", external = false, target, href, rel: rel2, ariaLabel, externalIconAriaLabel, onFollow, onClick, children: children2, nativeAttributes, __internalRootRef, style: style3, styleClassNames, ...props }, ref) => {
+  var InternalLink = import_react70.default.forwardRef(({ variant: providedVariant, fontSize = "body-m", color: color2 = "normal", external = false, target, href, rel: rel2, ariaLabel, externalIconAriaLabel, onFollow, onClick, children: children2, nativeAttributes, __internalRootRef, style: style3, styleClassNames, ...props }, ref) => {
     checkSafeUrl("Link", href);
     const isButton = !href;
-    const { defaultVariant: defaultVariant2 } = (0, import_react72.useContext)(LinkDefaultVariantContext);
+    const { defaultVariant: defaultVariant2 } = (0, import_react70.useContext)(LinkDefaultVariantContext);
     const variant = providedVariant || defaultVariant2;
     const specialStyles = ["top-navigation", "link", "recovery", "info"];
     const hasSpecialStyle = specialStyles.indexOf(variant) > -1;
@@ -315842,7 +315748,7 @@ ${isHandDrawn ? "" : `
     const uniqueId2 = useUniqueId("link");
     const linkId = useUniqueId("link-self");
     const infoId = useUniqueId("link-info");
-    const infoLinkLabelFromContext = (0, import_react72.useContext)(InfoLinkLabelContext);
+    const infoLinkLabelFromContext = (0, import_react70.useContext)(InfoLinkLabelContext);
     const { funnelIdentifier, funnelInteractionId } = useFunnel();
     const { stepIdentifier, stepNumber, stepNameSelector } = useFunnelStep();
     const { subStepIdentifier, subStepSelector, subStepNameSelector } = useFunnelSubStep();
@@ -315911,7 +315817,7 @@ ${isHandDrawn ? "" : `
         fireClickEvent(event3);
       }
     };
-    const linkRef = (0, import_react72.useRef)(null);
+    const linkRef = (0, import_react70.useRef)(null);
     const isVisualRefresh = useVisualRefresh();
     const { isInlineToken } = useTokenInlineContext();
     useForwardFocus(ref, linkRef);
@@ -315932,27 +315838,27 @@ ${isHandDrawn ? "" : `
       sharedProps["aria-labelledby"] = `${sharedProps.id} ${infoId} ${infoLinkLabelFromContext}`;
     }
     const renderedExternalIconAriaLabel = i18n("externalIconAriaLabel", externalIconAriaLabel);
-    const content = import_react72.default.createElement(
-      import_react72.default.Fragment,
+    const content = import_react70.default.createElement(
+      import_react70.default.Fragment,
       null,
-      import_react72.default.createElement("span", null, children2),
-      external && import_react72.default.createElement(
+      import_react70.default.createElement("span", null, children2),
+      external && import_react70.default.createElement(
         "span",
         { className: styles_css_default27["icon-wrapper"] },
         "\xA0",
-        import_react72.default.createElement(
+        import_react70.default.createElement(
           "span",
           { className: styles_css_default27.icon, "aria-label": renderedExternalIconAriaLabel, role: renderedExternalIconAriaLabel ? "img" : void 0 },
-          import_react72.default.createElement(internal_default, { name: "external", size: "inherit" })
+          import_react70.default.createElement(internal_default, { name: "external", size: "inherit" })
         )
       ),
-      variant === "info" && import_react72.default.createElement("span", { hidden: true, id: infoId }, ":")
+      variant === "info" && import_react70.default.createElement("span", { hidden: true, id: infoId }, ":")
     );
     const { tabIndex } = useSingleTabStopNavigation(linkRef, { tabIndex: isButton ? 0 : void 0 });
     if (isButton) {
-      return import_react72.default.createElement(with_native_attributes_default, { ...sharedProps, tag: "a", componentName: "Link", nativeAttributes, role: "button", tabIndex, onKeyDown: handleButtonKeyDown, onClick: handleButtonClick }, content);
+      return import_react70.default.createElement(with_native_attributes_default, { ...sharedProps, tag: "a", componentName: "Link", nativeAttributes, role: "button", tabIndex, onKeyDown: handleButtonKeyDown, onClick: handleButtonClick }, content);
     }
-    return import_react72.default.createElement(with_native_attributes_default, { ...sharedProps, tag: "a", componentName: "Link", nativeAttributes, tabIndex, target: anchorTarget, rel: anchorRel, href, onClick: handleLinkClick }, content);
+    return import_react70.default.createElement(with_native_attributes_default, { ...sharedProps, tag: "a", componentName: "Link", nativeAttributes, tabIndex, target: anchorTarget, rel: anchorRel, href, onClick: handleLinkClick }, content);
   });
   function getVariantStyle(variant) {
     return `variant-${variant.replace(/^awsui-/, "")}`;
@@ -315973,7 +315879,7 @@ ${isHandDrawn ? "" : `
   var internal_default7 = InternalLink;
 
   // node_modules/@cloudscape-design/components/status-indicator/internal.js
-  var import_react73 = __toESM(require_react());
+  var import_react71 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/status-indicator/styles.css.js
   var styles_css_default28 = {
@@ -316009,47 +315915,47 @@ ${isHandDrawn ? "" : `
   var typeToIcon2 = (size4) => {
     const spinnerSize = size4 === "x-small" ? "x-small" : "normal";
     return {
-      error: import_react73.default.createElement(internal_default, { name: "status-negative", size: size4 }),
-      warning: import_react73.default.createElement(internal_default, { name: "status-warning", size: size4 }),
-      success: import_react73.default.createElement(internal_default, { name: "status-positive", size: size4 }),
-      info: import_react73.default.createElement(internal_default, { name: "status-info", size: size4 }),
-      stopped: import_react73.default.createElement(internal_default, { name: "status-stopped", size: size4 }),
-      pending: import_react73.default.createElement(internal_default, { name: "status-pending", size: size4 }),
-      "in-progress": import_react73.default.createElement(internal_default, { name: "status-in-progress", size: size4 }),
-      loading: import_react73.default.createElement(InternalSpinner, { size: spinnerSize }),
-      "not-started": import_react73.default.createElement(internal_default, { name: "status-not-started", size: size4 }),
-      log: import_react73.default.createElement(internal_default, { name: "dot", size: size4 })
+      error: import_react71.default.createElement(internal_default, { name: "status-negative", size: size4 }),
+      warning: import_react71.default.createElement(internal_default, { name: "status-warning", size: size4 }),
+      success: import_react71.default.createElement(internal_default, { name: "status-positive", size: size4 }),
+      info: import_react71.default.createElement(internal_default, { name: "status-info", size: size4 }),
+      stopped: import_react71.default.createElement(internal_default, { name: "status-stopped", size: size4 }),
+      pending: import_react71.default.createElement(internal_default, { name: "status-pending", size: size4 }),
+      "in-progress": import_react71.default.createElement(internal_default, { name: "status-in-progress", size: size4 }),
+      loading: import_react71.default.createElement(InternalSpinner, { size: spinnerSize }),
+      "not-started": import_react71.default.createElement(internal_default, { name: "status-not-started", size: size4 }),
+      log: import_react71.default.createElement(internal_default, { name: "dot", size: size4 })
     };
   };
   function InternalStatusIcon({ type: type3, iconAriaLabel, animate: animate2, display, size: size4 = "normal" }) {
-    return import_react73.default.createElement(
+    return import_react71.default.createElement(
       "span",
       { className: clsx_m_default(styles_css_default28.icon, animate2 && styles_css_default28["icon-shake"]), "aria-label": iconAriaLabel, role: iconAriaLabel ? "img" : void 0 },
       typeToIcon2(size4)[type3],
-      display === "inline" && import_react73.default.createElement(import_react73.default.Fragment, null, "\xA0")
+      display === "inline" && import_react71.default.createElement(import_react71.default.Fragment, null, "\xA0")
     );
   }
   function StatusIndicator({ type: type3, children: children2, iconAriaLabel, colorOverride, wrapText: wrapText3 = true, nativeAttributes, __animate = false, __internalRootRef, __size = isThemeActive(Theme13.OneTheme) ? "x-small" : "normal", __display = "inline-block", __embedded = false, ...rest }) {
     const baseProps = getBaseProps(rest);
-    return import_react73.default.createElement(
+    return import_react71.default.createElement(
       with_native_attributes_default,
       { ...baseProps, tag: "span", componentName: "StatusIndicator", nativeAttributes, className: clsx_m_default(styles_css_default28.root, styles_css_default28[`status-${type3}`], __embedded && styles_css_default28.embedded, {
         [styles_css_default28[`color-override-${colorOverride}`]]: colorOverride
       }, baseProps.className), ref: __internalRootRef },
-      import_react73.default.createElement(
+      import_react71.default.createElement(
         "span",
         { className: clsx_m_default(styles_css_default28.container, styles_css_default28[`display-${__display}`], wrapText3 === false && styles_css_default28["overflow-ellipsis"], __animate && styles_css_default28["container-fade-in"]) },
-        import_react73.default.createElement(InternalStatusIcon, { type: type3, iconAriaLabel, animate: __animate, display: __display, size: __size }),
-        import_react73.default.createElement("span", null, children2)
+        import_react71.default.createElement(InternalStatusIcon, { type: type3, iconAriaLabel, animate: __animate, display: __display, size: __size }),
+        import_react71.default.createElement("span", null, children2)
       )
     );
   }
 
   // node_modules/@cloudscape-design/components/internal/hooks/use-previous/index.js
-  var import_react74 = __toESM(require_react());
+  var import_react72 = __toESM(require_react());
   var usePrevious = (value3) => {
-    const ref = (0, import_react74.useRef)();
-    (0, import_react74.useEffect)(() => {
+    const ref = (0, import_react72.useRef)();
+    (0, import_react72.useEffect)(() => {
       ref.current = value3;
     });
     return ref.current;
@@ -316063,21 +315969,21 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/internal/components/dropdown-status/index.js
   function DropdownStatus({ children: children2 }) {
-    return import_react75.default.createElement("div", { className: styles_css_default29.root }, children2);
+    return import_react73.default.createElement("div", { className: styles_css_default29.root }, children2);
   }
   var useDropdownStatus = ({ statusType, empty: empty3, loadingText, finishedText, filteringResultsText, errorText, recoveryText, isEmpty: isEmpty4, isNoMatch, noMatch, onRecoveryClick, hasRecoveryCallback = false, errorIconAriaLabel, recoveryButtonId }) => {
     const previousStatusType = usePrevious(statusType);
     const statusResult = { isSticky: true, content: null, hasRecoveryButton: false };
     if (statusType === "loading") {
-      statusResult.content = import_react75.default.createElement(StatusIndicator, { type: "loading" }, loadingText);
+      statusResult.content = import_react73.default.createElement(StatusIndicator, { type: "loading" }, loadingText);
     } else if (statusType === "error") {
       statusResult.hasRecoveryButton = !!recoveryText && hasRecoveryCallback;
-      statusResult.content = import_react75.default.createElement(
+      statusResult.content = import_react73.default.createElement(
         "span",
         null,
-        import_react75.default.createElement(StatusIndicator, { type: "error", __display: "inline", __animate: previousStatusType !== "error", iconAriaLabel: errorIconAriaLabel }, errorText),
+        import_react73.default.createElement(StatusIndicator, { type: "error", __display: "inline", __animate: previousStatusType !== "error", iconAriaLabel: errorIconAriaLabel }, errorText),
         " ",
-        statusResult.hasRecoveryButton && import_react75.default.createElement(internal_default7, { id: recoveryButtonId, onFollow: () => fireNonCancelableEvent(onRecoveryClick), variant: "recovery", className: styles_css_default29.recovery }, recoveryText)
+        statusResult.hasRecoveryButton && import_react73.default.createElement(internal_default7, { id: recoveryButtonId, onFollow: () => fireNonCancelableEvent(onRecoveryClick), variant: "recovery", className: styles_css_default29.recovery }, recoveryText)
       );
     } else if (isEmpty4 && empty3) {
       statusResult.content = empty3;
@@ -316094,7 +316000,7 @@ ${isHandDrawn ? "" : `
   var dropdown_status_default = DropdownStatus;
 
   // node_modules/@cloudscape-design/components/internal/components/options-list/index.js
-  var import_react76 = __toESM(require_react());
+  var import_react74 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/options-list/styles.css.js
   var styles_css_default30 = {
@@ -316112,7 +316018,7 @@ ${isHandDrawn ? "" : `
   };
   var OptionsList = ({ open: open2, statusType, children: children2, nativeAttributes = {}, onKeyDown, onBlur, onFocus, onLoadMore, onMouseUp, onMouseMove, position: position5 = "relative", role = "listbox", tagOverride: Tag = "div", decreaseBlockMargin = false, ariaLabel, ariaLabelledby, ariaDescribedby, ariaRequired, embedded, stickyItemBlockSize, isMultiSelect, customProperties, ...restProps }, ref) => {
     const baseProps = getBaseProps(restProps);
-    const menuRef = (0, import_react76.useRef)(null);
+    const menuRef = (0, import_react74.useRef)(null);
     const handleScroll = useStableCallback(() => {
       const scrollContainer = menuRef === null || menuRef === void 0 ? void 0 : menuRef.current;
       if (scrollContainer) {
@@ -316123,7 +316029,7 @@ ${isHandDrawn ? "" : `
         }
       }
     });
-    (0, import_react76.useEffect)(() => {
+    (0, import_react74.useEffect)(() => {
       if (open2 && statusType === "pending") {
         handleScroll();
       }
@@ -316133,9 +316039,9 @@ ${isHandDrawn ? "" : `
       [styles_css_default30["options-list-embedded"]]: embedded
     });
     const mergedRef = useMergeRefs(ref, menuRef);
-    return import_react76.default.createElement(Tag, { ...baseProps, ...nativeAttributes, className, ref: mergedRef, style: { ...customProperties, position: position5, scrollPaddingBlockStart: stickyItemBlockSize !== null && stickyItemBlockSize !== void 0 ? stickyItemBlockSize : void 0 }, role, onScroll: handleScroll, onKeyDown: (event3) => fireKeyboardEvent(onKeyDown, event3), onMouseMove: (event3) => onMouseMove === null || onMouseMove === void 0 ? void 0 : onMouseMove(getItemIndex(menuRef, event3)), onMouseUp: (event3) => onMouseUp === null || onMouseUp === void 0 ? void 0 : onMouseUp(getItemIndex(menuRef, event3)), onBlur: (event3) => fireNonCancelableEvent(onBlur, { relatedTarget: event3.relatedTarget }), onFocus: () => fireNonCancelableEvent(onFocus), tabIndex: embedded ? 0 : -1, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, "aria-describedby": ariaDescribedby, "aria-multiselectable": role === "listbox" && isMultiSelect ? true : void 0, "aria-required": ariaRequired }, open2 && children2);
+    return import_react74.default.createElement(Tag, { ...baseProps, ...nativeAttributes, className, ref: mergedRef, style: { ...customProperties, position: position5, scrollPaddingBlockStart: stickyItemBlockSize !== null && stickyItemBlockSize !== void 0 ? stickyItemBlockSize : void 0 }, role, onScroll: handleScroll, onKeyDown: (event3) => fireKeyboardEvent(onKeyDown, event3), onMouseMove: (event3) => onMouseMove === null || onMouseMove === void 0 ? void 0 : onMouseMove(getItemIndex(menuRef, event3)), onMouseUp: (event3) => onMouseUp === null || onMouseUp === void 0 ? void 0 : onMouseUp(getItemIndex(menuRef, event3)), onBlur: (event3) => fireNonCancelableEvent(onBlur, { relatedTarget: event3.relatedTarget }), onFocus: () => fireNonCancelableEvent(onFocus), tabIndex: embedded ? 0 : -1, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, "aria-describedby": ariaDescribedby, "aria-multiselectable": role === "listbox" && isMultiSelect ? true : void 0, "aria-required": ariaRequired }, open2 && children2);
   };
-  var options_list_default = import_react76.default.forwardRef(OptionsList);
+  var options_list_default = import_react74.default.forwardRef(OptionsList);
 
   // node_modules/@cloudscape-design/components/internal/styles/motion/utils.js
   var spinWhenOpen = (styles7, className, open2) => clsx_m_default(styles7[className], open2 && styles7[`${className}-open`]);
@@ -316184,30 +316090,30 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/button-dropdown/filter.js
-  var import_react82 = __toESM(require_react());
+  var import_react80 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/input/internal.js
-  var import_react81 = __toESM(require_react());
+  var import_react79 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/context/control-group-context.js
-  var import_react77 = __toESM(require_react());
-  var GroupedControlContext = (0, import_react77.createContext)({
+  var import_react75 = __toESM(require_react());
+  var GroupedControlContext = (0, import_react75.createContext)({
     position: null,
     direction: "horizontal",
     hasAction: false,
     validation: null
   });
   function useGroupedControlContext() {
-    return (0, import_react77.useContext)(GroupedControlContext);
+    return (0, import_react75.useContext)(GroupedControlContext);
   }
   function ResetGroupedControlContext({ children: children2 }) {
     const { direction: direction2 } = useGroupedControlContext();
-    return import_react77.default.createElement(GroupedControlContext.Provider, { value: { position: null, direction: direction2, validation: null } }, children2);
+    return import_react75.default.createElement(GroupedControlContext.Provider, { value: { position: null, direction: direction2, validation: null } }, children2);
   }
 
   // node_modules/@cloudscape-design/components/internal/context/form-field-context.js
-  var import_react78 = __toESM(require_react());
-  var FormFieldContext = (0, import_react78.createContext)({});
+  var import_react76 = __toESM(require_react());
+  var FormFieldContext = (0, import_react76.createContext)({});
   function applyDefault(fields, defaults5, keys3) {
     const result = {};
     keys3.forEach((key2) => {
@@ -316216,7 +316122,7 @@ ${isHandDrawn ? "" : `
     return result;
   }
   function useFormFieldContext(props) {
-    const context = (0, import_react78.useContext)(FormFieldContext);
+    const context = (0, import_react76.useContext)(FormFieldContext);
     return applyDefault(props, context, ["invalid", "warning", "controlId", "ariaLabelledby", "ariaDescribedby"]);
   }
 
@@ -316251,11 +316157,11 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/internal/hooks/use-debounce-callback/index.js
-  var import_react79 = __toESM(require_react());
+  var import_react77 = __toESM(require_react());
   function useDebounceCallback(callback, delay2) {
-    const callbackRef = (0, import_react79.useRef)();
+    const callbackRef = (0, import_react77.useRef)();
     callbackRef.current = callback;
-    return (0, import_react79.useCallback)(debounce2(((...args) => {
+    return (0, import_react77.useCallback)(debounce2(((...args) => {
       if (callbackRef.current) {
         callbackRef.current(...args);
       }
@@ -316311,10 +316217,10 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/input/utils.js
-  var import_react80 = __toESM(require_react());
+  var import_react78 = __toESM(require_react());
   var useSearchProps = (type3, disabled, readOnly, value3, inputRef, onChange) => {
     const searchProps = {};
-    const handleIconClick = (0, import_react80.useCallback)(() => {
+    const handleIconClick = (0, import_react78.useCallback)(() => {
       var _a213;
       (_a213 = inputRef.current) === null || _a213 === void 0 ? void 0 : _a213.focus();
       onChange("");
@@ -316395,7 +316301,7 @@ ${isHandDrawn ? "" : `
       fireDelayedInput(value4);
       fireNonCancelableEvent(onChange, { value: value4 });
     };
-    const inputRef = (0, import_react81.useRef)(null);
+    const inputRef = (0, import_react79.useRef)(null);
     const searchProps = useSearchProps(type3, disabled, readOnly, value3, inputRef, handleChange);
     __startIcon = __startIcon !== null && __startIcon !== void 0 ? __startIcon : searchProps.__startIcon;
     __endIcon = __endIcon !== null && __endIcon !== void 0 ? __endIcon : searchProps.__endIcon;
@@ -316487,14 +316393,14 @@ ${isHandDrawn ? "" : `
         value: value3 || ""
       }
     };
-    const mainInput = import_react81.default.createElement(with_native_attributes_default, { ...attributes, tag: "input", componentName: "Input", nativeAttributes: nativeInputAttributes, skipWarnings: __skipNativeAttributesWarnings, ref: mergedRef, style: nativeInputStyles });
+    const mainInput = import_react79.default.createElement(with_native_attributes_default, { ...attributes, tag: "input", componentName: "Input", nativeAttributes: nativeInputAttributes, skipWarnings: __skipNativeAttributesWarnings, ref: mergedRef, style: nativeInputStyles });
     const renderedId = (_a213 = nativeInputAttributes === null || nativeInputAttributes === void 0 ? void 0 : nativeInputAttributes.id) !== null && _a213 !== void 0 ? _a213 : controlId;
-    const endIcon = __endIcon ? import_react81.default.createElement(
+    const endIcon = __endIcon ? import_react79.default.createElement(
       "span",
       { className: styles_css_default31["input-icon-end"], ...__endIcon === "close" ? getAnalyticsMetadataAttribute({
         action: "clearInput"
       }) : {} },
-      import_react81.default.createElement(
+      import_react79.default.createElement(
         internal_default4,
         {
           // Used for test utils
@@ -316515,63 +316421,63 @@ ${isHandDrawn ? "" : `
       ref: __internalRootRef,
       ...__injectAnalyticsComponentMetadata ? getAnalyticsMetadataAttribute({ component: componentAnalyticsMetadata2 }) : copyAnalyticsMetadataAttribute(rest)
     };
-    const renderInputField = (extraProps = {}) => import_react81.default.createElement(
+    const renderInputField = (extraProps = {}) => import_react79.default.createElement(
       "div",
       { ...extraProps, className: clsx_m_default(extraProps.className, styles_css_default31["input-container"]), dir: type3 === "email" ? "ltr" : void 0 },
-      __startIcon && import_react81.default.createElement(
+      __startIcon && import_react79.default.createElement(
         "span",
         { onClick: __onStartIconClick, className: clsx_m_default(styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.searchIcon, styles_css_default31["input-icon-start"], disabled && styles_css_default31["input-icon-start-disabled"]) },
-        import_react81.default.createElement(internal_default, { name: __startIcon })
+        import_react79.default.createElement(internal_default, { name: __startIcon })
       ),
-      import_react81.default.createElement(
+      import_react79.default.createElement(
         "div",
         { className: clsx_m_default(styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.root, styles_css_default31["input-field"], invalid && styles_css_default31["input-field-invalid"], warning && !invalid && styles_css_default31["input-field-warning"], disabled && styles_css_default31["input-field-disabled"], readOnly && !disabled && styles_css_default31["input-field-readonly"], __noBorderRadius && styles_css_default31["input-field-no-border-radius"], !!__inlineContent && styles_css_default31["input-field-has-inline-content"], groupedControlClasses), "aria-disabled": disabled || void 0, style: fieldStyles },
-        hasPrefix && import_react81.default.createElement(
-          import_react81.default.Fragment,
+        hasPrefix && import_react79.default.createElement(
+          import_react79.default.Fragment,
           null,
-          import_react81.default.createElement(
+          import_react79.default.createElement(
             "span",
             { className: styles_css_default31["input-prefix"], "aria-hidden": "true" },
-            import_react81.default.createElement(
+            import_react79.default.createElement(
               "span",
               { className: styles_css_default31["input-adornment-content"] },
-              import_react81.default.createElement(ResetGroupedControlContext, null, prefix)
+              import_react79.default.createElement(ResetGroupedControlContext, null, prefix)
             )
           ),
-          import_react81.default.createElement("span", { className: styles_css_default31["input-adornment-divider"] })
+          import_react79.default.createElement("span", { className: styles_css_default31["input-adornment-divider"] })
         ),
-        __inlineContent && import_react81.default.createElement(
+        __inlineContent && import_react79.default.createElement(
           "div",
           { className: styles_css_default31["input-inline-content"] },
-          import_react81.default.createElement(ResetGroupedControlContext, null, __inlineContent)
+          import_react79.default.createElement(ResetGroupedControlContext, null, __inlineContent)
         ),
         mainInput,
-        hasSuffix && import_react81.default.createElement(
-          import_react81.default.Fragment,
+        hasSuffix && import_react79.default.createElement(
+          import_react79.default.Fragment,
           null,
-          import_react81.default.createElement("span", { className: styles_css_default31["input-adornment-divider"] }),
-          import_react81.default.createElement(
+          import_react79.default.createElement("span", { className: styles_css_default31["input-adornment-divider"] }),
+          import_react79.default.createElement(
             "span",
             { className: styles_css_default31["input-suffix"], "aria-hidden": "true" },
-            import_react81.default.createElement(
+            import_react79.default.createElement(
               "span",
               { className: styles_css_default31["input-adornment-content"] },
-              import_react81.default.createElement(ResetGroupedControlContext, null, suffix)
+              import_react79.default.createElement(ResetGroupedControlContext, null, suffix)
             )
           )
         )
       ),
       endIcon
     );
-    const inputWithLabel = inlineLabelText ? import_react81.default.createElement(
+    const inputWithLabel = inlineLabelText ? import_react79.default.createElement(
       "div",
       { ...rootProps, className: clsx_m_default(rootProps.className, styles_css_default31["inline-label-wrapper"], __fullWidth && styles_css_default31["inline-label-wrapper-full-width"]) },
-      import_react81.default.createElement("label", { htmlFor: renderedId, className: clsx_m_default(styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.inlineLabel, styles_css_default31["inline-label"], disabled && styles_css_default31["inline-label-disabled"]) }, inlineLabelText),
-      import_react81.default.createElement("div", { className: clsx_m_default(styles_css_default31["inline-label-trigger-wrapper"], __fullWidth && styles_css_default31["inline-label-trigger-wrapper-full-width"]) }, renderInputField())
+      import_react79.default.createElement("label", { htmlFor: renderedId, className: clsx_m_default(styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.inlineLabel, styles_css_default31["inline-label"], disabled && styles_css_default31["inline-label-disabled"]) }, inlineLabelText),
+      import_react79.default.createElement("div", { className: clsx_m_default(styles_css_default31["inline-label-trigger-wrapper"], __fullWidth && styles_css_default31["inline-label-trigger-wrapper-full-width"]) }, renderInputField())
     ) : renderInputField(rootProps);
     return inputWithLabel;
   }
-  var internal_default8 = import_react81.default.forwardRef(InternalInput);
+  var internal_default8 = import_react79.default.forwardRef(InternalInput);
 
   // node_modules/@cloudscape-design/components/button-dropdown/styles.css.js
   var styles_css_default32 = {
@@ -316601,11 +316507,11 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/button-dropdown/filter.js
-  var ButtonDropdownFilter = import_react82.default.forwardRef((props, ref) => {
-    return import_react82.default.createElement(
+  var ButtonDropdownFilter = import_react80.default.forwardRef((props, ref) => {
+    return import_react80.default.createElement(
       "div",
       { className: styles_css_default32.filter },
-      import_react82.default.createElement(internal_default8, { ref, type: "visualSearch", autoComplete: false, disableBrowserAutocorrect: true, invalid: false, __noBorderRadius: true, ...props, nativeInputAttributes: {
+      import_react80.default.createElement(internal_default8, { ref, type: "visualSearch", autoComplete: false, disableBrowserAutocorrect: true, invalid: false, __noBorderRadius: true, ...props, nativeInputAttributes: {
         "aria-expanded": true,
         "aria-haspopup": true,
         role: "combobox",
@@ -316618,10 +316524,10 @@ ${isHandDrawn ? "" : `
   var filter_default3 = ButtonDropdownFilter;
 
   // node_modules/@cloudscape-design/components/button-dropdown/items-list.js
-  var import_react92 = __toESM(require_react());
+  var import_react90 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/button-dropdown/category-elements/category-element.js
-  var import_react83 = __toESM(require_react());
+  var import_react81 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/button-dropdown/category-elements/styles.css.js
   var styles_css_default33 = {
@@ -316659,35 +316565,35 @@ ${isHandDrawn ? "" : `
       expandDirection: "vertical"
     };
     const renderResult = (_a213 = renderItem === null || renderItem === void 0 ? void 0 : renderItem({ item: groupProps, filterText: filteringText })) !== null && _a213 !== void 0 ? _a213 : null;
-    return import_react83.default.createElement(
+    return import_react81.default.createElement(
       "li",
       { className: clsx_m_default(styles_css_default33.category, styles_css_default33[`variant-${variant}`], disabled && styles_css_default33.disabled), role: "presentation" },
-      item.text && import_react83.default.createElement("p", { className: clsx_m_default(styles_css_default33.header, {
+      item.text && import_react81.default.createElement("p", { className: clsx_m_default(styles_css_default33.header, {
         [styles_css_default33.disabled]: disabled,
         [styles_css_default33["no-content-styling"]]: !!renderResult
-      }), "aria-hidden": "true" }, renderResult ? renderResult : import_react83.default.createElement(
+      }), "aria-hidden": "true" }, renderResult ? renderResult : import_react81.default.createElement(
         "span",
         { className: styles_css_default33["header-content"] },
-        (item.iconName || item.iconUrl || item.iconSvg) && import_react83.default.createElement(
+        (item.iconName || item.iconUrl || item.iconSvg) && import_react81.default.createElement(
           "span",
           { className: styles_css_default33["icon-wrapper"] },
-          import_react83.default.createElement(internal_default, { name: item.iconName, url: item.iconUrl, svg: item.iconSvg, alt: item.iconAlt })
+          import_react81.default.createElement(internal_default, { name: item.iconName, url: item.iconUrl, svg: item.iconSvg, alt: item.iconAlt })
         ),
-        import_react83.default.createElement("span", null, item.text)
+        import_react81.default.createElement("span", null, item.text)
       )),
-      import_react83.default.createElement("ul", { className: styles_css_default33["items-list-container"], role: "group", "aria-label": item.text, "aria-disabled": disabled }, item.items && import_react83.default.createElement(ItemsList, { items: item.items, onItemActivate, onGroupToggle, targetItem, isHighlighted, isKeyboardHighlight, isExpanded, lastInDropdown, highlightItem, categoryDisabled: disabled, hasCategoryHeader: !!item.text, variant, position: position5, renderItem, parentProps: groupProps, filteringText, filteringEnabled, menuId, filteringDescriptionId }))
+      import_react81.default.createElement("ul", { className: styles_css_default33["items-list-container"], role: "group", "aria-label": item.text, "aria-disabled": disabled }, item.items && import_react81.default.createElement(ItemsList, { items: item.items, onItemActivate, onGroupToggle, targetItem, isHighlighted, isKeyboardHighlight, isExpanded, lastInDropdown, highlightItem, categoryDisabled: disabled, hasCategoryHeader: !!item.text, variant, position: position5, renderItem, parentProps: groupProps, filteringText, filteringEnabled, menuId, filteringDescriptionId }))
     );
   };
   var category_element_default = CategoryElement;
 
   // node_modules/@cloudscape-design/components/button-dropdown/category-elements/expandable-category-element.js
-  var import_react87 = __toESM(require_react());
-
-  // node_modules/@cloudscape-design/components/button-dropdown/status-footer.js
   var import_react85 = __toESM(require_react());
 
+  // node_modules/@cloudscape-design/components/button-dropdown/status-footer.js
+  var import_react83 = __toESM(require_react());
+
   // node_modules/@cloudscape-design/components/internal/components/dropdown-footer/index.js
-  var import_react84 = __toESM(require_react());
+  var import_react82 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/dropdown-footer/styles.css.js
   var styles_css_default34 = {
@@ -316697,10 +316603,10 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/internal/components/dropdown-footer/index.js
-  var DropdownFooter = ({ content, id: id38, hasItems = true }) => import_react84.default.createElement("div", { className: clsx_m_default(styles_css_default34.root, { [styles_css_default34.hidden]: content === null, [styles_css_default34["no-items"]]: !hasItems }) }, content && import_react84.default.createElement(
+  var DropdownFooter = ({ content, id: id38, hasItems = true }) => import_react82.default.createElement("div", { className: clsx_m_default(styles_css_default34.root, { [styles_css_default34.hidden]: content === null, [styles_css_default34["no-items"]]: !hasItems }) }, content && import_react82.default.createElement(
     internal_default2,
     { id: id38 },
-    import_react84.default.createElement(dropdown_status_default, null, content)
+    import_react82.default.createElement(dropdown_status_default, null, content)
   ));
   var dropdown_footer_default = DropdownFooter;
 
@@ -316718,40 +316624,40 @@ ${isHandDrawn ? "" : `
         event3.stopPropagation();
       }
     };
-    return import_react85.default.createElement(
+    return import_react83.default.createElement(
       "div",
       { className: styles_css_default35[`${scope}-status`], [RECOVERY_FOOTER_ATTRIBUTE]: scope, onClick: (event3) => event3.stopPropagation(), onKeyDown: stopActivationKeys, onKeyUp: stopActivationKeys },
-      import_react85.default.createElement(dropdown_footer_default, { content, id: id38, hasItems })
+      import_react83.default.createElement(dropdown_footer_default, { content, id: id38, hasItems })
     );
   };
   var status_footer_default = StatusFooter;
 
   // node_modules/@cloudscape-design/components/button-dropdown/tooltip.js
-  var import_react86 = __toESM(require_react());
+  var import_react84 = __toESM(require_react());
   var DEFAULT_OPEN_TIMEOUT_IN_MS = 120;
   function Tooltip({ children: children2, content, position: position5 = "right", className, controlledOpen }) {
-    const ref = (0, import_react86.useRef)(null);
+    const ref = (0, import_react84.useRef)(null);
     const isReducedMotion = useReducedMotion(ref);
     const { open: open2, triggerProps } = useTooltipOpen(controlledOpen, isReducedMotion ? 0 : DEFAULT_OPEN_TIMEOUT_IN_MS);
     const portalClasses = usePortalModeClasses(ref);
-    return import_react86.default.createElement(
+    return import_react84.default.createElement(
       "span",
       { ref, ...triggerProps, className },
       children2,
-      open2 && import_react86.default.createElement(
+      open2 && import_react84.default.createElement(
         Portal,
         null,
-        import_react86.default.createElement(
+        import_react84.default.createElement(
           "span",
           { className: portalClasses },
-          import_react86.default.createElement(
+          import_react84.default.createElement(
             PopoverContainer,
-            { size: "small", fixedWidth: false, position: position5, trackRef: ref, arrow: (position6) => import_react86.default.createElement(arrow_default, { position: position6 }), renderWithPortal: true, zIndex: 7e3 },
-            import_react86.default.createElement(
+            { size: "small", fixedWidth: false, position: position5, trackRef: ref, arrow: (position6) => import_react84.default.createElement(arrow_default, { position: position6 }), renderWithPortal: true, zIndex: 7e3 },
+            import_react84.default.createElement(
               body_default,
               { dismissButton: false, dismissAriaLabel: void 0, header: null, onDismiss: () => {
               }, overflowVisible: "both" },
-              import_react86.default.createElement("span", { "data-testid": "button-dropdown-disabled-reason", role: "tooltip" }, content)
+              import_react84.default.createElement("span", { "data-testid": "button-dropdown-disabled-reason", role: "tooltip" }, content)
             )
           )
         )
@@ -316759,28 +316665,28 @@ ${isHandDrawn ? "" : `
     );
   }
   function useTooltipOpen(controlledOpen, timeout3) {
-    const [isOpen, setIsOpen] = (0, import_react86.useState)(false);
-    const timeoutRef = (0, import_react86.useRef)();
-    const timeoutAbortRef = (0, import_react86.useRef)(false);
-    (0, import_react86.useEffect)(() => {
+    const [isOpen, setIsOpen] = (0, import_react84.useState)(false);
+    const timeoutRef = (0, import_react84.useRef)();
+    const timeoutAbortRef = (0, import_react84.useRef)(false);
+    (0, import_react84.useEffect)(() => {
       timeoutAbortRef.current = false;
       return () => {
         timeoutAbortRef.current = true;
       };
     }, []);
-    const close2 = (0, import_react86.useCallback)(() => {
+    const close2 = (0, import_react84.useCallback)(() => {
       clearTimeout(timeoutRef.current);
       setIsOpen(false);
     }, []);
-    const open2 = (0, import_react86.useCallback)(() => {
+    const open2 = (0, import_react84.useCallback)(() => {
       if (!timeoutAbortRef.current) {
         setIsOpen(true);
       }
     }, []);
-    const openDelayed = (0, import_react86.useCallback)(() => {
+    const openDelayed = (0, import_react84.useCallback)(() => {
       timeoutRef.current = setTimeout(open2, timeout3);
     }, [open2, timeout3]);
-    (0, import_react86.useEffect)(() => {
+    (0, import_react84.useEffect)(() => {
       if (controlledOpen === true) {
         openDelayed();
       }
@@ -316827,8 +316733,8 @@ ${isHandDrawn ? "" : `
     const highlighted = isHighlighted(item);
     const expanded = isExpanded(item);
     const isKeyboardHighlighted = isKeyboardHighlight(item);
-    const triggerRef = import_react87.default.useRef(null);
-    const ref = (0, import_react87.useRef)(null);
+    const triggerRef = import_react85.default.useRef(null);
+    const ref = (0, import_react85.useRef)(null);
     const { status: groupDropdownStatus, footerId, hasGroupItems } = useExpandableGroupStatus({
       item,
       asyncLoadingProps,
@@ -316838,7 +316744,7 @@ ${isHandDrawn ? "" : `
       menuId,
       triggerRef
     });
-    (0, import_react87.useEffect)(() => {
+    (0, import_react85.useEffect)(() => {
       if (triggerRef.current && highlighted && !expanded && !filteringEnabled) {
         triggerRef.current.focus();
       }
@@ -316875,7 +316781,7 @@ ${isHandDrawn ? "" : `
       expandDirection: "horizontal"
     };
     const renderResult = (_a213 = renderItem === null || renderItem === void 0 ? void 0 : renderItem({ item: groupProps, filterText: filteringText })) !== null && _a213 !== void 0 ? _a213 : null;
-    const trigger = item.text && import_react87.default.createElement("span", {
+    const trigger = item.text && import_react85.default.createElement("span", {
       id: menuId && item.id ? `${menuId}-${item.id}` : void 0,
       className: clsx_m_default(styles_css_default33.header, styles_css_default33["expandable-header"], styles_css_default33[`variant-${variant}`], {
         [styles_css_default33.disabled]: disabled,
@@ -316902,24 +316808,24 @@ ${isHandDrawn ? "" : `
           id: item.id || ""
         }
       })
-    }, renderResult ? renderResult : import_react87.default.createElement(
-      import_react87.default.Fragment,
+    }, renderResult ? renderResult : import_react85.default.createElement(
+      import_react85.default.Fragment,
       null,
-      (item.iconName || item.iconUrl || item.iconSvg) && import_react87.default.createElement(
+      (item.iconName || item.iconUrl || item.iconSvg) && import_react85.default.createElement(
         "span",
         { className: styles_css_default33["icon-wrapper"] },
-        import_react87.default.createElement(internal_default, { name: item.iconName, url: item.iconUrl, svg: item.iconSvg, alt: item.iconAlt })
+        import_react85.default.createElement(internal_default, { name: item.iconName, url: item.iconUrl, svg: item.iconSvg, alt: item.iconAlt })
       ),
-      import_react87.default.createElement("span", null, item.text),
-      import_react87.default.createElement(
+      import_react85.default.createElement("span", null, item.text),
+      import_react85.default.createElement(
         "span",
         { className: clsx_m_default(styles_css_default33["expand-icon"], styles_css_default33["expand-icon-right"]) },
-        import_react87.default.createElement(internal_default, { name: isOneTheme ? "angle-down" : "caret-down-filled", size: isOneTheme ? "x-small" : "normal", nativeAttributes: { "data-awsui-motion-target": "" } })
+        import_react85.default.createElement(internal_default, { name: isOneTheme ? "angle-down" : "caret-down-filled", size: isOneTheme ? "x-small" : "normal", nativeAttributes: { "data-awsui-motion-target": "" } })
       )
     ));
     let content;
     if (isDisabledWithReason) {
-      content = import_react87.default.createElement(
+      content = import_react85.default.createElement(
         Tooltip,
         { content: item.disabledReason },
         trigger,
@@ -316928,21 +316834,21 @@ ${isHandDrawn ? "" : `
     } else if (disabled) {
       content = trigger;
     } else {
-      content = import_react87.default.createElement(internal_default6, { open: expanded, interior: true, hideBlockBorder: !hasGroupItems, expandToViewport, trigger, footer: expanded && groupDropdownStatus.content && groupDropdownStatus.isSticky ? import_react87.default.createElement(status_footer_default, { content: groupDropdownStatus.content, id: footerId, hasItems: hasGroupItems, scope: "group" }) : void 0, content: expanded && (hasGroupItems || groupDropdownStatus.content) ? import_react87.default.createElement(
+      content = import_react85.default.createElement(internal_default6, { open: expanded, interior: true, hideBlockBorder: !hasGroupItems, expandToViewport, trigger, footer: expanded && groupDropdownStatus.content && groupDropdownStatus.isSticky ? import_react85.default.createElement(status_footer_default, { content: groupDropdownStatus.content, id: footerId, hasItems: hasGroupItems, scope: "group" }) : void 0, content: expanded && (hasGroupItems || groupDropdownStatus.content) ? import_react85.default.createElement(
         "ul",
         { role: "menu", "aria-label": item.text, "aria-describedby": groupDropdownStatus.content ? footerId : void 0, className: clsx_m_default(styles_css_default33["items-list-container"], styles_css_default33["in-dropdown"]) },
-        hasGroupItems ? import_react87.default.createElement(ItemsList, { items: item.items, onItemActivate, onGroupToggle, targetItem, isHighlighted, isKeyboardHighlight, isExpanded, lastInDropdown, highlightItem, variant, position: position5, renderItem, parentProps: groupProps, filteringText, filteringEnabled, menuId, filteringDescriptionId }) : null,
+        hasGroupItems ? import_react85.default.createElement(ItemsList, { items: item.items, onItemActivate, onGroupToggle, targetItem, isHighlighted, isKeyboardHighlight, isExpanded, lastInDropdown, highlightItem, variant, position: position5, renderItem, parentProps: groupProps, filteringText, filteringEnabled, menuId, filteringDescriptionId }) : null,
         groupDropdownStatus.content && !groupDropdownStatus.isSticky ? (
           // Non-sticky status (finished text) follows the items, like in the main dropdown.
-          import_react87.default.createElement(
+          import_react85.default.createElement(
             "li",
             { role: "menuitem", "aria-disabled": "true" },
-            import_react87.default.createElement(status_footer_default, { content: groupDropdownStatus.content, id: footerId, hasItems: hasGroupItems, scope: "group" })
+            import_react85.default.createElement(status_footer_default, { content: groupDropdownStatus.content, id: footerId, hasItems: hasGroupItems, scope: "group" })
           )
         ) : null
       ) : void 0 });
     }
-    return import_react87.default.createElement("li", { className: clsx_m_default(styles_css_default33.category, styles_css_default33[`variant-${variant}`], styles_css_default33.expandable, {
+    return import_react85.default.createElement("li", { className: clsx_m_default(styles_css_default33.category, styles_css_default33[`variant-${variant}`], styles_css_default33.expandable, {
       [styles_css_default33.expanded]: expanded,
       [styles_css_default33.disabled]: disabled,
       [styles_css_default33.highlighted]: highlighted
@@ -316951,10 +316857,10 @@ ${isHandDrawn ? "" : `
   var expandable_category_element_default = ExpandableCategoryElement;
 
   // node_modules/@cloudscape-design/components/button-dropdown/category-elements/mobile-expandable-category-element.js
-  var import_react89 = __toESM(require_react());
+  var import_react87 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/button-dropdown/mobile-expandable-group/mobile-expandable-group.js
-  var import_react88 = __toESM(require_react());
+  var import_react86 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/button-dropdown/mobile-expandable-group/styles.css.js
   var styles_css_default36 = {
@@ -316967,11 +316873,11 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/button-dropdown/mobile-expandable-group/mobile-expandable-group.js
   var MobileExpandableGroup = ({ children: children2, trigger, open: open2 }) => {
-    return import_react88.default.createElement(
+    return import_react86.default.createElement(
       "div",
       { className: styles_css_default36.root },
-      import_react88.default.createElement("div", { className: styles_css_default36.trigger }, trigger),
-      import_react88.default.createElement("div", { className: clsx_m_default(styles_css_default36.dropdown, { [styles_css_default36.open]: open2 }), "data-open": open2 }, children2)
+      import_react86.default.createElement("div", { className: styles_css_default36.trigger }, trigger),
+      import_react86.default.createElement("div", { className: clsx_m_default(styles_css_default36.dropdown, { [styles_css_default36.open]: open2 }), "data-open": open2 }, children2)
     );
   };
   var mobile_expandable_group_default = MobileExpandableGroup;
@@ -316982,7 +316888,7 @@ ${isHandDrawn ? "" : `
     const highlighted = isHighlighted(item);
     const expanded = isExpanded(item);
     const isKeyboardHighlighted = isKeyboardHighlight(item);
-    const triggerRef = import_react89.default.useRef(null);
+    const triggerRef = import_react87.default.useRef(null);
     const { status: groupDropdownStatus, footerId, hasGroupItems } = useExpandableGroupStatus({
       item,
       asyncLoadingProps,
@@ -316992,7 +316898,7 @@ ${isHandDrawn ? "" : `
       menuId,
       triggerRef
     });
-    (0, import_react89.useEffect)(() => {
+    (0, import_react87.useEffect)(() => {
       if (triggerRef.current && highlighted && !expanded && !filteringEnabled) {
         triggerRef.current.focus();
       }
@@ -317019,7 +316925,7 @@ ${isHandDrawn ? "" : `
       expandDirection: "vertical"
     };
     const renderResult = (_a213 = renderItem === null || renderItem === void 0 ? void 0 : renderItem({ item: groupProps, filterText: filteringText })) !== null && _a213 !== void 0 ? _a213 : null;
-    const trigger = item.text && import_react89.default.createElement("span", {
+    const trigger = item.text && import_react87.default.createElement("span", {
       id: menuId && item.id ? `${menuId}-${item.id}` : void 0,
       className: clsx_m_default(styles_css_default33.header, styles_css_default33["expandable-header"], styles_css_default33[`variant-${variant}`], {
         [styles_css_default33.highlighted]: highlighted,
@@ -317046,58 +316952,58 @@ ${isHandDrawn ? "" : `
           expanded: `${!expanded}`
         }
       })
-    }, renderResult ? renderResult : import_react89.default.createElement(
-      import_react89.default.Fragment,
+    }, renderResult ? renderResult : import_react87.default.createElement(
+      import_react87.default.Fragment,
       null,
-      (item.iconName || item.iconUrl || item.iconSvg) && import_react89.default.createElement(
+      (item.iconName || item.iconUrl || item.iconSvg) && import_react87.default.createElement(
         "span",
         { className: styles_css_default33["icon-wrapper"] },
-        import_react89.default.createElement(internal_default, { name: item.iconName, url: item.iconUrl, svg: item.iconSvg, alt: item.iconAlt })
+        import_react87.default.createElement(internal_default, { name: item.iconName, url: item.iconUrl, svg: item.iconSvg, alt: item.iconAlt })
       ),
-      import_react89.default.createElement("span", null, item.text),
-      import_react89.default.createElement(
+      import_react87.default.createElement("span", null, item.text),
+      import_react87.default.createElement(
         "span",
         { className: clsx_m_default(styles_css_default33["expand-icon"], {
           [styles_css_default33["expand-icon-up"]]: expanded
         }) },
-        import_react89.default.createElement(internal_default, { name: isOneTheme ? "angle-down" : "caret-down-filled", size: isOneTheme ? "x-small" : "normal" })
+        import_react87.default.createElement(internal_default, { name: isOneTheme ? "angle-down" : "caret-down-filled", size: isOneTheme ? "x-small" : "normal" })
       )
     ));
     let content;
     if (isDisabledWithReason) {
-      content = import_react89.default.createElement(
-        import_react89.default.Fragment,
+      content = import_react87.default.createElement(
+        import_react87.default.Fragment,
         null,
         descriptionEl,
-        import_react89.default.createElement(Tooltip, { content: item.disabledReason }, trigger)
+        import_react87.default.createElement(Tooltip, { content: item.disabledReason }, trigger)
       );
     } else if (disabled) {
       content = trigger;
     } else {
-      content = import_react89.default.createElement(mobile_expandable_group_default, { open: expanded, trigger }, expanded && (hasGroupItems || groupDropdownStatus.content) && import_react89.default.createElement(
-        import_react89.default.Fragment,
+      content = import_react87.default.createElement(mobile_expandable_group_default, { open: expanded, trigger }, expanded && (hasGroupItems || groupDropdownStatus.content) && import_react87.default.createElement(
+        import_react87.default.Fragment,
         null,
-        import_react89.default.createElement(
+        import_react87.default.createElement(
           "ul",
           { role: "menu", "aria-label": item.text, "aria-describedby": groupDropdownStatus.content ? footerId : void 0, className: styles_css_default33["items-list-container"] },
-          hasGroupItems ? import_react89.default.createElement(ItemsList, { items: item.items, onItemActivate, onGroupToggle, targetItem, isHighlighted, isKeyboardHighlight, isExpanded, lastInDropdown, highlightItem, hasCategoryHeader: true, variant, position: position5, renderItem, parentProps: groupProps, filteringText, filteringEnabled, menuId, filteringDescriptionId }) : null,
+          hasGroupItems ? import_react87.default.createElement(ItemsList, { items: item.items, onItemActivate, onGroupToggle, targetItem, isHighlighted, isKeyboardHighlight, isExpanded, lastInDropdown, highlightItem, hasCategoryHeader: true, variant, position: position5, renderItem, parentProps: groupProps, filteringText, filteringEnabled, menuId, filteringDescriptionId }) : null,
           groupDropdownStatus.content && !groupDropdownStatus.isSticky ? (
             // Finished text has no interactive content, so it follows the items inside the menu, like on desktop.
-            import_react89.default.createElement(
+            import_react87.default.createElement(
               "li",
               { role: "menuitem", "aria-disabled": "true" },
-              import_react89.default.createElement(status_footer_default, { content: groupDropdownStatus.content, id: footerId, hasItems: hasGroupItems, scope: "group" })
+              import_react87.default.createElement(status_footer_default, { content: groupDropdownStatus.content, id: footerId, hasItems: hasGroupItems, scope: "group" })
             )
           ) : null
         ),
         groupDropdownStatus.content && groupDropdownStatus.isSticky ? (
           // Loading, error and empty statuses render outside the group menu, like the desktop sticky footer,
           // so the recovery button is not a child of role="menu".
-          import_react89.default.createElement(status_footer_default, { content: groupDropdownStatus.content, id: footerId, hasItems: hasGroupItems, scope: "group" })
+          import_react87.default.createElement(status_footer_default, { content: groupDropdownStatus.content, id: footerId, hasItems: hasGroupItems, scope: "group" })
         ) : null
       ));
     }
-    return import_react89.default.createElement("li", { className: clsx_m_default(styles_css_default33.category, styles_css_default33[`variant-${variant}`], styles_css_default33.expandable, {
+    return import_react87.default.createElement("li", { className: clsx_m_default(styles_css_default33.category, styles_css_default33[`variant-${variant}`], styles_css_default33.expandable, {
       [styles_css_default33.expanded]: expanded,
       [styles_css_default33.disabled]: disabled,
       [styles_css_default33.highlighted]: highlighted || expanded,
@@ -317107,10 +317013,10 @@ ${isHandDrawn ? "" : `
   var mobile_expandable_category_element_default = MobileExpandableCategoryElement;
 
   // node_modules/@cloudscape-design/components/button-dropdown/item-element/index.js
-  var import_react91 = __toESM(require_react());
+  var import_react89 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/option/highlight-match.js
-  var import_react90 = __toESM(require_react());
+  var import_react88 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/option/styles.css.js
   var styles_css_default37 = {
@@ -317147,24 +317053,24 @@ ${isHandDrawn ? "" : `
     return { noMatches, matches: matches33 };
   };
   function Highlight({ str: str2, labelRef }) {
-    return import_react90.default.createElement("mark", { ref: labelRef, className: styles_css_default37["filtering-match-highlight"] }, str2);
+    return import_react88.default.createElement("mark", { ref: labelRef, className: styles_css_default37["filtering-match-highlight"] }, str2);
   }
   function HighlightMatch({ str: str2, highlightText, labelRef }) {
     if (!str2 || !highlightText) {
-      return import_react90.default.createElement("span", { ref: labelRef }, str2);
+      return import_react88.default.createElement("span", { ref: labelRef }, str2);
     }
     if (str2 === highlightText) {
-      return import_react90.default.createElement(Highlight, { labelRef, str: str2 });
+      return import_react88.default.createElement(Highlight, { labelRef, str: str2 });
     }
     const { noMatches, matches: matches33 } = splitOnFiltering(str2, highlightText);
     const highlighted = [];
     noMatches.forEach((noMatch, idx) => {
-      highlighted.push(import_react90.default.createElement("span", { key: `noMatch-${idx}` }, noMatch));
+      highlighted.push(import_react88.default.createElement("span", { key: `noMatch-${idx}` }, noMatch));
       if (matches33 && idx < matches33.length) {
-        highlighted.push(import_react90.default.createElement(Highlight, { key: `match-${idx}`, str: matches33[idx] }));
+        highlighted.push(import_react88.default.createElement(Highlight, { key: `match-${idx}`, str: matches33[idx] }));
       }
     });
-    return import_react90.default.createElement("span", { ref: labelRef }, highlighted);
+    return import_react88.default.createElement("span", { ref: labelRef }, highlighted);
   }
 
   // node_modules/@cloudscape-design/components/internal/utils/data-attributes.js
@@ -317338,7 +317244,7 @@ ${isHandDrawn ? "" : `
       highlightItem(item);
     };
     const isVisualRefresh = useVisualRefresh();
-    return import_react91.default.createElement(
+    return import_react89.default.createElement(
       "li",
       { className: clsx_m_default(styles_css_default39["item-element"], styles_css_default39[`variant-${variant}`], {
         [styles_css_default39.highlighted]: highlighted,
@@ -317357,15 +317263,15 @@ ${isHandDrawn ? "" : `
           href: item.href || ""
         }
       })) },
-      import_react91.default.createElement(MenuItem, { index: index2, item, disabled, highlighted, linkStyle, renderItem, parentProps, filteringText, filteringEnabled, menuId, filteringDescriptionId })
+      import_react89.default.createElement(MenuItem, { index: index2, item, disabled, highlighted, linkStyle, renderItem, parentProps, filteringText, filteringEnabled, menuId, filteringDescriptionId })
     );
   };
   function MenuItem({ index: index2, item, disabled, highlighted, linkStyle, renderItem, parentProps, filteringText, filteringEnabled, menuId, filteringDescriptionId }) {
     var _a213;
-    const menuItemRef = (0, import_react91.useRef)(null);
+    const menuItemRef = (0, import_react89.useRef)(null);
     const isCheckbox = isCheckboxItem(item);
     const isCurrentBreadcrumb = !isCheckbox && item.isCurrentBreadcrumb;
-    (0, import_react91.useEffect)(() => {
+    (0, import_react89.useEffect)(() => {
       if (highlighted && menuItemRef.current) {
         if (filteringEnabled) {
           scrollElementIntoView(menuItemRef.current);
@@ -317422,10 +317328,10 @@ ${isHandDrawn ? "" : `
       tabIndex: filteringEnabled ? -1 : highlighted ? 0 : -1,
       ...isCheckbox ? getMenuItemCheckboxProps({ disabled, checked: item.checked }) : getMenuItemProps({ disabled })
     };
-    const menuItem = isLinkItem(item) ? import_react91.default.createElement("a", { ...menuItemProps, href: !disabled ? item.href : void 0, download: !disabled && item.download ? item.download : void 0, target: getItemTarget(item), rel: item.external ? "noopener noreferrer" : void 0, "data-awsui-motion-trigger": "hover" }, renderResult ? renderResult : import_react91.default.createElement(MenuItemContent, { item, disabled, highlighted, filteringText })) : import_react91.default.createElement("span", { ...menuItemProps }, renderResult ? renderResult : import_react91.default.createElement(MenuItemContent, { item, disabled, highlighted, filteringText }));
+    const menuItem = isLinkItem(item) ? import_react89.default.createElement("a", { ...menuItemProps, href: !disabled ? item.href : void 0, download: !disabled && item.download ? item.download : void 0, target: getItemTarget(item), rel: item.external ? "noopener noreferrer" : void 0, "data-awsui-motion-trigger": "hover" }, renderResult ? renderResult : import_react89.default.createElement(MenuItemContent, { item, disabled, highlighted, filteringText })) : import_react89.default.createElement("span", { ...menuItemProps }, renderResult ? renderResult : import_react89.default.createElement(MenuItemContent, { item, disabled, highlighted, filteringText }));
     const { position: position5 } = useDropdownContext();
     const tooltipPosition = position5 === "bottom-left" || position5 === "top-left" ? "left" : "right";
-    return isDisabledWithReason ? import_react91.default.createElement(
+    return isDisabledWithReason ? import_react89.default.createElement(
       Tooltip,
       { content: item.disabledReason, position: tooltipPosition, className: styles_css_default39["item-tooltip-wrapper"], controlledOpen: filteringEnabled ? highlighted : void 0 },
       menuItem,
@@ -317436,49 +317342,49 @@ ${isHandDrawn ? "" : `
     const hasIcon = !!(item.iconName || item.iconUrl || item.iconSvg);
     const hasExternal = isLinkItem(item) && item.external;
     const isCheckbox = isCheckboxItem(item);
-    return import_react91.default.createElement(
-      import_react91.default.Fragment,
+    return import_react89.default.createElement(
+      import_react89.default.Fragment,
       null,
-      isCheckbox && import_react91.default.createElement(MenuItemCheckmark, { checked: item.checked, disabled }),
-      hasIcon && import_react91.default.createElement(MenuItemIcon, { name: item.iconName, url: item.iconUrl, svg: item.iconSvg, alt: item.iconAlt, badge: item.badge }),
-      import_react91.default.createElement(
+      isCheckbox && import_react89.default.createElement(MenuItemCheckmark, { checked: item.checked, disabled }),
+      hasIcon && import_react89.default.createElement(MenuItemIcon, { name: item.iconName, url: item.iconUrl, svg: item.iconSvg, alt: item.iconAlt, badge: item.badge }),
+      import_react89.default.createElement(
         "div",
         { className: styles_css_default39["content-wrapper"] },
-        import_react91.default.createElement(
+        import_react89.default.createElement(
           "div",
           { className: styles_css_default39["main-row"] },
-          import_react91.default.createElement(
+          import_react89.default.createElement(
             "div",
             null,
-            import_react91.default.createElement(HighlightMatch, { str: item.text, highlightText: filteringText }),
-            hasExternal && import_react91.default.createElement(ExternalIcon, { disabled, ariaLabel: item.externalIconAriaLabel })
+            import_react89.default.createElement(HighlightMatch, { str: item.text, highlightText: filteringText }),
+            hasExternal && import_react89.default.createElement(ExternalIcon, { disabled, ariaLabel: item.externalIconAriaLabel })
           ),
-          item.labelTag && import_react91.default.createElement(
+          item.labelTag && import_react89.default.createElement(
             "div",
             { className: clsx_m_default(styles_css_default39["label-tag"], disabled && styles_css_default39.disabled) },
-            import_react91.default.createElement(HighlightMatch, { str: item.labelTag, highlightText: filteringText })
+            import_react89.default.createElement(HighlightMatch, { str: item.labelTag, highlightText: filteringText })
           )
         ),
-        item.secondaryText && import_react91.default.createElement(
+        item.secondaryText && import_react89.default.createElement(
           "div",
           { className: clsx_m_default(styles_css_default39["secondary-text"], highlighted && styles_css_default39.highlighted, disabled && styles_css_default39.disabled) },
-          import_react91.default.createElement(HighlightMatch, { str: item.secondaryText, highlightText: filteringText })
+          import_react89.default.createElement(HighlightMatch, { str: item.secondaryText, highlightText: filteringText })
         )
       )
     );
   };
-  var MenuItemIcon = (props) => import_react91.default.createElement(
+  var MenuItemIcon = (props) => import_react89.default.createElement(
     "span",
     { className: styles_css_default39.icon },
-    import_react91.default.createElement(internal_default, { ...props })
+    import_react89.default.createElement(internal_default, { ...props })
   );
   var MenuItemCheckmark = ({ disabled, checked }) => {
-    const checkmark = import_react91.default.createElement(internal_default, { variant: disabled ? "disabled" : "normal", name: "check" });
-    return import_react91.default.createElement("span", { className: clsx_m_default(styles_css_default39.icon, styles_css_default39.checkmark, { [styles_css_default39.disabled]: disabled }), "aria-hidden": "true", style: { visibility: checked ? "visible" : "hidden" } }, checkmark);
+    const checkmark = import_react89.default.createElement(internal_default, { variant: disabled ? "disabled" : "normal", name: "check" });
+    return import_react89.default.createElement("span", { className: clsx_m_default(styles_css_default39.icon, styles_css_default39.checkmark, { [styles_css_default39.disabled]: disabled }), "aria-hidden": "true", style: { visibility: checked ? "visible" : "hidden" } }, checkmark);
   };
   var ExternalIcon = ({ disabled, ariaLabel }) => {
-    const icon2 = import_react91.default.createElement(internal_default, { variant: disabled ? "disabled" : "normal", name: "external", nativeAttributes: { "data-awsui-motion-target": "" } });
-    return import_react91.default.createElement("span", { className: styles_css_default39["external-icon"], role: ariaLabel ? "img" : void 0, "aria-label": ariaLabel }, icon2);
+    const icon2 = import_react89.default.createElement(internal_default, { variant: disabled ? "disabled" : "normal", name: "external", nativeAttributes: { "data-awsui-motion-target": "" } });
+    return import_react89.default.createElement("span", { className: styles_css_default39["external-icon"], role: ariaLabel ? "img" : void 0, "aria-label": ariaLabel }, icon2);
   };
   var item_element_default = ItemElement;
 
@@ -317489,14 +317395,14 @@ ${isHandDrawn ? "" : `
       var _a213, _b, _c, _d;
       if (!isItemGroup(item)) {
         const showDivider = index2 === items.length - 1 && !lastInDropdown || isItemGroup(items[index2 + 1]);
-        return import_react92.default.createElement(item_element_default, { key: index2, index: index2, item, onItemActivate, disabled: (_a213 = item.disabled) !== null && _a213 !== void 0 ? _a213 : categoryDisabled, highlighted: isHighlighted(item), isKeyboardHighlighted: isKeyboardHighlight(item), highlightItem, showDivider, hasCategoryHeader, variant, position: `${position5 ? `${position5},` : ""}${index2 + 1}`, analyticsMetadataTransformer, linkStyle, renderItem, parentProps, filteringText, filteringEnabled, menuId, filteringDescriptionId });
+        return import_react90.default.createElement(item_element_default, { key: index2, index: index2, item, onItemActivate, disabled: (_a213 = item.disabled) !== null && _a213 !== void 0 ? _a213 : categoryDisabled, highlighted: isHighlighted(item), isKeyboardHighlighted: isKeyboardHighlight(item), highlightItem, showDivider, hasCategoryHeader, variant, position: `${position5 ? `${position5},` : ""}${index2 + 1}`, analyticsMetadataTransformer, linkStyle, renderItem, parentProps, filteringText, filteringEnabled, menuId, filteringDescriptionId });
       }
       if (isExpandable(item)) {
-        return item.text ? isMobile ? import_react92.default.createElement(mobile_expandable_category_element_default, { key: index2, index: index2, item, onItemActivate, onGroupToggle, targetItem, isHighlighted, isKeyboardHighlight, isExpanded, lastInDropdown: lastInDropdown && index2 === items.length - 1, highlightItem, disabled: (_b = item.disabled) !== null && _b !== void 0 ? _b : false, variant, position: `${position5 ? `${position5},` : ""}${index2 + 1}`, renderItem, filteringText, filteringEnabled, menuId, filteringDescriptionId, asyncLoadingProps, getExpandableItemsAsyncLoadingState, onGroupRecoveryClick }) : import_react92.default.createElement(expandable_category_element_default, { key: index2, index: index2, item, onItemActivate, onGroupToggle, targetItem, isHighlighted, isKeyboardHighlight, isExpanded, lastInDropdown: true, highlightItem, disabled: (_c = item.disabled) !== null && _c !== void 0 ? _c : false, expandToViewport, variant, position: `${position5 ? `${position5},` : ""}${index2 + 1}`, renderItem, filteringText, filteringEnabled, menuId, filteringDescriptionId, asyncLoadingProps, getExpandableItemsAsyncLoadingState, onGroupRecoveryClick }) : null;
+        return item.text ? isMobile ? import_react90.default.createElement(mobile_expandable_category_element_default, { key: index2, index: index2, item, onItemActivate, onGroupToggle, targetItem, isHighlighted, isKeyboardHighlight, isExpanded, lastInDropdown: lastInDropdown && index2 === items.length - 1, highlightItem, disabled: (_b = item.disabled) !== null && _b !== void 0 ? _b : false, variant, position: `${position5 ? `${position5},` : ""}${index2 + 1}`, renderItem, filteringText, filteringEnabled, menuId, filteringDescriptionId, asyncLoadingProps, getExpandableItemsAsyncLoadingState, onGroupRecoveryClick }) : import_react90.default.createElement(expandable_category_element_default, { key: index2, index: index2, item, onItemActivate, onGroupToggle, targetItem, isHighlighted, isKeyboardHighlight, isExpanded, lastInDropdown: true, highlightItem, disabled: (_c = item.disabled) !== null && _c !== void 0 ? _c : false, expandToViewport, variant, position: `${position5 ? `${position5},` : ""}${index2 + 1}`, renderItem, filteringText, filteringEnabled, menuId, filteringDescriptionId, asyncLoadingProps, getExpandableItemsAsyncLoadingState, onGroupRecoveryClick }) : null;
       }
-      return import_react92.default.createElement(category_element_default, { key: index2, index: index2, item, onItemActivate, onGroupToggle, targetItem, isHighlighted, isKeyboardHighlight, isExpanded, lastInDropdown: lastInDropdown && index2 === items.length - 1, highlightItem, disabled: (_d = item.disabled) !== null && _d !== void 0 ? _d : false, variant, position: `${position5 ? `${position5},` : ""}${index2 + 1}`, renderItem, filteringText, filteringEnabled, menuId, filteringDescriptionId });
+      return import_react90.default.createElement(category_element_default, { key: index2, index: index2, item, onItemActivate, onGroupToggle, targetItem, isHighlighted, isKeyboardHighlight, isExpanded, lastInDropdown: lastInDropdown && index2 === items.length - 1, highlightItem, disabled: (_d = item.disabled) !== null && _d !== void 0 ? _d : false, variant, position: `${position5 ? `${position5},` : ""}${index2 + 1}`, renderItem, filteringText, filteringEnabled, menuId, filteringDescriptionId });
     });
-    return import_react92.default.createElement(import_react92.default.Fragment, null, elements2);
+    return import_react90.default.createElement(import_react90.default.Fragment, null, elements2);
   }
 
   // node_modules/@cloudscape-design/components/button-dropdown/utils/filter-items.js
@@ -317548,13 +317454,13 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/button-dropdown/utils/use-button-dropdown.js
-  var import_react95 = __toESM(require_react());
+  var import_react93 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/options-list/utils/use-open-state.js
-  var import_react93 = __toESM(require_react());
+  var import_react91 = __toESM(require_react());
   var useOpenState = ({ onOpen, onClose, defaultOpen = false }) => {
-    const [isOpen, setIsOpen] = (0, import_react93.useState)(defaultOpen);
-    const [openedWithKeyboard, setOpenedWithKeyboard] = (0, import_react93.useState)(false);
+    const [isOpen, setIsOpen] = (0, import_react91.useState)(defaultOpen);
+    const [openedWithKeyboard, setOpenedWithKeyboard] = (0, import_react91.useState)(false);
     const openDropdown = (isKeyboard) => {
       if (!isOpen) {
         setIsOpen(true);
@@ -317586,7 +317492,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/button-dropdown/utils/use-highlighted-menu.js
-  var import_react94 = __toESM(require_react());
+  var import_react92 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/button-dropdown/utils/move-highlight.js
   function moveHighlight({ startIndex, expandedIndex, getNext, isExpandable, planeOf, isInRestrictedView }) {
@@ -317618,29 +317524,29 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/button-dropdown/utils/use-highlighted-menu.js
   function useHighlightedMenu({ items, isExpandable, isInRestrictedView = false }) {
-    const [targetIndex, setTargetIndex] = (0, import_react94.useState)([]);
-    const [expandedIndex, setExpandedIndex] = (0, import_react94.useState)([]);
-    const [isUsingMouse, setIsUsingMouse] = (0, import_react94.useState)(true);
-    const { getItem, getItemIndex: getItemIndex2, getSequentialIndex, getParentIndex } = (0, import_react94.useMemo)(() => createItemsTree(items), [items]);
-    const targetItem = (0, import_react94.useMemo)(() => getItem(targetIndex), [targetIndex, getItem]);
+    const [targetIndex, setTargetIndex] = (0, import_react92.useState)([]);
+    const [expandedIndex, setExpandedIndex] = (0, import_react92.useState)([]);
+    const [isUsingMouse, setIsUsingMouse] = (0, import_react92.useState)(true);
+    const { getItem, getItemIndex: getItemIndex2, getSequentialIndex, getParentIndex } = (0, import_react92.useMemo)(() => createItemsTree(items), [items]);
+    const targetItem = (0, import_react92.useMemo)(() => getItem(targetIndex), [targetIndex, getItem]);
     const isHighlightPending = targetIndex.length > 0 && !targetItem;
-    const expandedGroup = (0, import_react94.useMemo)(() => {
+    const expandedGroup = (0, import_react92.useMemo)(() => {
       const item = expandedIndex.length > 0 ? getItem(expandedIndex) : null;
       return item && isItemGroup(item) ? item : null;
     }, [expandedIndex, getItem]);
-    const isHighlighted = (0, import_react94.useCallback)((item) => {
+    const isHighlighted = (0, import_react92.useCallback)((item) => {
       const index2 = getItemIndex2(item);
       return indexIncludes(index2, targetIndex);
     }, [targetIndex, getItemIndex2]);
-    const isKeyboardHighlight = (0, import_react94.useCallback)((item) => {
+    const isKeyboardHighlight = (0, import_react92.useCallback)((item) => {
       const index2 = getItemIndex2(item);
       return !isUsingMouse && indexEquals(index2, targetIndex);
     }, [targetIndex, getItemIndex2, isUsingMouse]);
-    const isExpanded = (0, import_react94.useCallback)((group2) => {
+    const isExpanded = (0, import_react92.useCallback)((group2) => {
       const index2 = getItemIndex2(group2);
       return indexIncludes(index2, expandedIndex);
     }, [expandedIndex, getItemIndex2]);
-    const planeOf = (0, import_react94.useCallback)((index2) => {
+    const planeOf = (0, import_react92.useCallback)((index2) => {
       if (index2.length <= 1) {
         return [];
       }
@@ -317648,7 +317554,7 @@ ${isHandDrawn ? "" : `
       const parent4 = getItem(parentIndex);
       return parent4 && isItemGroup(parent4) && isExpandable(parent4) ? parentIndex : [];
     }, [getItem, isExpandable]);
-    const moveHighlight2 = (0, import_react94.useCallback)((direction2, loop) => {
+    const moveHighlight2 = (0, import_react92.useCallback)((direction2, loop) => {
       const getNext = (index2) => {
         const nextIndex2 = getSequentialIndex(index2, direction2, loop);
         const item = getItem(nextIndex2 || [-1]);
@@ -317671,22 +317577,22 @@ ${isHandDrawn ? "" : `
         setTargetIndex(nextIndex);
       }
     }, [targetIndex, expandedIndex, getItem, getSequentialIndex, getParentIndex, isExpandable, planeOf, isInRestrictedView]);
-    const highlightItem = (0, import_react94.useCallback)((item) => {
+    const highlightItem = (0, import_react92.useCallback)((item) => {
       setTargetIndex(getItemIndex2(item));
     }, [getItemIndex2]);
-    const expandGroup = (0, import_react94.useCallback)((group2) => {
+    const expandGroup = (0, import_react92.useCallback)((group2) => {
       const groupIndex = group2 ? getItemIndex2(group2) : targetIndex;
       const firstChildIndex = [...groupIndex, 0];
       setTargetIndex(isInRestrictedView ? groupIndex : firstChildIndex);
       setExpandedIndex(groupIndex);
     }, [targetIndex, getItemIndex2, isInRestrictedView]);
-    const collapseGroup = (0, import_react94.useCallback)(() => {
+    const collapseGroup = (0, import_react92.useCallback)(() => {
       if (expandedIndex.length > 0) {
         setTargetIndex(expandedIndex);
         setExpandedIndex(expandedIndex.slice(0, -1));
       }
     }, [expandedIndex]);
-    const reset5 = (0, import_react94.useCallback)(() => {
+    const reset5 = (0, import_react92.useCallback)(() => {
       setTargetIndex([]);
       setExpandedIndex([]);
     }, []);
@@ -317708,17 +317614,17 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/button-dropdown/utils/use-button-dropdown.js
   function useButtonDropdown({ items, onItemClick, onItemFollow, onReturnFocus, isTriggerElement, hasExpandableGroups, isInRestrictedView = false, expandToViewport = false, filteringType, fireLoadItems, onGroupExpand, hasRecoveryButton, hasRootRecoveryButton, onPendingHighlightActivate }) {
-    const [filteringValue, setFilteringValue] = (0, import_react95.useState)("");
+    const [filteringValue, setFilteringValue] = (0, import_react93.useState)("");
     const hasFiltering = filteringType === "auto" || filteringType === "manual";
-    const filteredItems = (0, import_react95.useMemo)(() => filteringType === "auto" && filteringValue ? filterItems(items, filteringValue) : items, [filteringType, filteringValue, items]);
-    const isExpandable = (0, import_react95.useCallback)((item) => !filteringValue && isGroupExpandable(item, hasExpandableGroups), [filteringValue, hasExpandableGroups]);
+    const filteredItems = (0, import_react93.useMemo)(() => filteringType === "auto" && filteringValue ? filterItems(items, filteringValue) : items, [filteringType, filteringValue, items]);
+    const isExpandable = (0, import_react93.useCallback)((item) => !filteringValue && isGroupExpandable(item, hasExpandableGroups), [filteringValue, hasExpandableGroups]);
     const { targetItem, isHighlightPending, expandedGroup, isHighlighted, isKeyboardHighlight, isExpanded, highlightItem, moveHighlight: moveHighlight2, expandGroup, collapseGroup, reset: reset5, setIsUsingMouse } = useHighlightedMenu({
       items: filteredItems,
       isExpandable,
       isInRestrictedView
     });
-    const prevFilteringValue = (0, import_react95.useRef)(filteringValue);
-    (0, import_react95.useEffect)(() => {
+    const prevFilteringValue = (0, import_react93.useRef)(filteringValue);
+    (0, import_react93.useEffect)(() => {
       if (prevFilteringValue.current !== filteringValue) {
         prevFilteringValue.current = filteringValue;
         reset5();
@@ -317815,7 +317721,7 @@ ${isHandDrawn ? "" : `
       event3.preventDefault();
       actOnParentDropdown(event3);
     };
-    const ignoreNextSpaceKeyUpRef = (0, import_react95.useRef)(false);
+    const ignoreNextSpaceKeyUpRef = (0, import_react93.useRef)(false);
     const isRecoveryTarget = (event3) => isElement(event3.target) && !!event3.target.closest(`[${RECOVERY_FOOTER_ATTRIBUTE}]`);
     const isGroupRecoveryTarget = (event3) => isElement(event3.target) && !!event3.target.closest(`[${RECOVERY_FOOTER_ATTRIBUTE}="group"]`);
     const onKeyDownCapture = (event3) => {
@@ -317949,9 +317855,9 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/internal/hooks/use-load-items/index.js
-  var import_react96 = __toESM(require_react());
+  var import_react94 = __toESM(require_react());
   var useLoadItems = ({ onLoadItems, isEmpty: isEmpty4, statusType }) => {
-    const prevFilteringText = (0, import_react96.useRef)(void 0);
+    const prevFilteringText = (0, import_react94.useRef)(void 0);
     const fireLoadItems = (filteringText) => {
       if (prevFilteringText.current === filteringText) {
         return;
@@ -317999,7 +317905,7 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/button-dropdown/internal.js
-  var InternalButtonDropdown = import_react97.default.forwardRef(({ items, variant = "normal", loading = false, loadingText, disabled = false, disabledReason, expandableGroups = false, children: children2, onItemClick, onItemFollow, customTriggerBuilder, styleClassNames, expandToViewport, ariaLabel, iconName, iconAlt, iconUrl, iconSvg, title: title2, description, preferCenter, mainAction, showMainActionOnly, __internalRootRef, analyticsMetadataTransformer, linkStyle, fullWidth, position: position5, nativeMainActionAttributes, nativeTriggerAttributes, renderItem, filteringType, filteringPlaceholder, filteringAriaLabel, filteringClearAriaLabel, filteringResultsText, noMatch, onLoadItems, asyncLoadingProps, getExpandableItemsAsyncLoadingState, i18nStrings, compactTrigger, ariaDescribedby, ...props }, ref) => {
+  var InternalButtonDropdown = import_react95.default.forwardRef(({ items, variant = "normal", loading = false, loadingText, disabled = false, disabledReason, expandableGroups = false, children: children2, onItemClick, onItemFollow, customTriggerBuilder, styleClassNames, expandToViewport, ariaLabel, iconName, iconAlt, iconUrl, iconSvg, title: title2, description, preferCenter, mainAction, showMainActionOnly, __internalRootRef, analyticsMetadataTransformer, linkStyle, fullWidth, position: position5, nativeMainActionAttributes, nativeTriggerAttributes, renderItem, filteringType, filteringPlaceholder, filteringAriaLabel, filteringClearAriaLabel, filteringResultsText, noMatch, onLoadItems, asyncLoadingProps, getExpandableItemsAsyncLoadingState, i18nStrings, compactTrigger, ariaDescribedby, ...props }, ref) => {
     var _a213, _b, _c, _d, _e2, _f, _g, _h;
     const isInRestrictedView = useMobile();
     const dropdownId = useUniqueId("dropdown");
@@ -318039,8 +317945,8 @@ ${isHandDrawn ? "" : `
       items,
       statusType
     });
-    const hasRecoveryButtonRef = (0, import_react97.useRef)(false);
-    const hasRootRecoveryButtonRef = (0, import_react97.useRef)(false);
+    const hasRecoveryButtonRef = (0, import_react95.useRef)(false);
+    const hasRootRecoveryButtonRef = (0, import_react95.useRef)(false);
     const { isOpen, targetItem, isHighlighted, isKeyboardHighlight, isExpanded, highlightItem, onKeyDown, onKeyUp, onKeyDownCapture, onItemActivate, onGroupToggle, onDropdownFocusLeave, onDropdownBlur, toggleDropdown, closeDropdown, setIsUsingMouse, filteringValue, setFilteringValue, filteredItems, isExpandable, isHighlightPending, expandedGroup } = useButtonDropdown({
       items,
       onItemClick,
@@ -318080,12 +317986,12 @@ ${isHandDrawn ? "" : `
         }
       }
     });
-    const filterRef = (0, import_react97.useRef)(null);
-    const isOpenRef = (0, import_react97.useRef)(isOpen);
+    const filterRef = (0, import_react95.useRef)(null);
+    const isOpenRef = (0, import_react95.useRef)(isOpen);
     isOpenRef.current = isOpen;
-    const filteringValueRef = (0, import_react97.useRef)(filteringValue);
+    const filteringValueRef = (0, import_react95.useRef)(filteringValue);
     filteringValueRef.current = filteringValue;
-    (0, import_react97.useEffect)(() => {
+    (0, import_react95.useEffect)(() => {
       var _a214;
       if (isOpen && hasFiltering) {
         (_a214 = filterRef.current) === null || _a214 === void 0 ? void 0 : _a214.focus();
@@ -318095,10 +318001,10 @@ ${isHandDrawn ? "" : `
       setIsUsingMouse(true);
     };
     const baseProps = getBaseProps(props);
-    const mainActionRef = (0, import_react97.useRef)(null);
-    const triggerRef = (0, import_react97.useRef)(null);
-    const triggerWrapperRef = (0, import_react97.useRef)(null);
-    (0, import_react97.useImperativeHandle)(ref, () => ({
+    const mainActionRef = (0, import_react95.useRef)(null);
+    const triggerRef = (0, import_react95.useRef)(null);
+    const triggerWrapperRef = (0, import_react95.useRef)(null);
+    (0, import_react95.useImperativeHandle)(ref, () => ({
       focus(...args) {
         var _a214;
         (_a214 = (hasMainAction ? mainActionRef : triggerRef).current) === null || _a214 === void 0 ? void 0 : _a214.focus(...args);
@@ -318171,7 +318077,7 @@ ${isHandDrawn ? "" : `
       }
     };
     if (customTriggerBuilder) {
-      trigger = import_react97.default.createElement("div", { ref: triggerWrapperRef, className: styles_css_default32["dropdown-trigger"], ...getAnalyticsMetadataAttribute(analyticsMetadata) }, customTriggerBuilder({
+      trigger = import_react95.default.createElement("div", { ref: triggerWrapperRef, className: styles_css_default32["dropdown-trigger"], ...getAnalyticsMetadataAttribute(analyticsMetadata) }, customTriggerBuilder({
         testUtilsClass: styles_css_default32["test-utils-button-trigger"],
         ariaExpanded: canBeOpened && isOpen,
         onClick: clickHandler,
@@ -318186,11 +318092,11 @@ ${isHandDrawn ? "" : `
       const mainActionIconProps = external ? { iconName: "external", iconAlign: "right", target: "_blank", rel: "noopener noreferrer" } : { iconName: iconName2, iconAlt: iconAlt2, iconSvg: iconSvg2, iconUrl: iconUrl2 };
       const mainActionAriaLabel = externalIconAriaLabel ? `${(_b = mainAction.ariaLabel) !== null && _b !== void 0 ? _b : mainAction.text} ${mainAction.externalIconAriaLabel}` : mainAction.ariaLabel;
       const hasNoText = !text5;
-      const mainActionButton = import_react97.default.createElement(InternalButton, { ref: mainActionRef, ...mainActionProps, ...mainActionIconProps, fullWidth: canBeFullWidth, styleClassNames: { root: styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.mainAction }, className: clsx_m_default(styles_css_default32["trigger-button"], hasNoText && styles_css_default32["has-no-text"], isVisualRefresh && styles_css_default32["visual-refresh"], canBeFullWidth && styles_css_default32["main-action-full-width"]), variant, ariaLabel: mainActionAriaLabel, formAction: "none", nativeAnchorAttributes: nativeMainActionAttributes === null || nativeMainActionAttributes === void 0 ? void 0 : nativeMainActionAttributes.anchor, nativeButtonAttributes: nativeMainActionAttributes === null || nativeMainActionAttributes === void 0 ? void 0 : nativeMainActionAttributes.button }, text5);
-      trigger = import_react97.default.createElement(
+      const mainActionButton = import_react95.default.createElement(InternalButton, { ref: mainActionRef, ...mainActionProps, ...mainActionIconProps, fullWidth: canBeFullWidth, styleClassNames: { root: styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.mainAction }, className: clsx_m_default(styles_css_default32["trigger-button"], hasNoText && styles_css_default32["has-no-text"], isVisualRefresh && styles_css_default32["visual-refresh"], canBeFullWidth && styles_css_default32["main-action-full-width"]), variant, ariaLabel: mainActionAriaLabel, formAction: "none", nativeAnchorAttributes: nativeMainActionAttributes === null || nativeMainActionAttributes === void 0 ? void 0 : nativeMainActionAttributes.anchor, nativeButtonAttributes: nativeMainActionAttributes === null || nativeMainActionAttributes === void 0 ? void 0 : nativeMainActionAttributes.button }, text5);
+      trigger = import_react95.default.createElement(
         "div",
         { role: "group", "aria-label": ariaLabel, className: styles_css_default32["split-trigger-wrapper"] },
-        import_react97.default.createElement("div", {
+        import_react95.default.createElement("div", {
           className: clsx_m_default(styles_css_default32["trigger-item"], styles_css_default32["split-trigger"], styles_css_default32[`variant-${variant}`], mainActionProps.loading && styles_css_default32.loading),
           // Close dropdown upon main action click unless event is cancelled.
           onClick: closeDropdown,
@@ -318204,19 +318110,19 @@ ${isHandDrawn ? "" : `
             }
           })
         }, mainActionButton),
-        !showMainActionOnly && import_react97.default.createElement(
+        !showMainActionOnly && import_react95.default.createElement(
           "div",
           { ref: triggerWrapperRef, className: clsx_m_default(styles_css_default32["trigger-item"], styles_css_default32["dropdown-trigger"], isVisualRefresh && styles_css_default32["visual-refresh"], !!children2 && styles_css_default32["has-trigger-text"], styles_css_default32[`variant-${variant}`], baseTriggerProps.loading && styles_css_default32.loading), ...getAnalyticsMetadataAttribute(analyticsMetadata) },
-          import_react97.default.createElement(InternalButton, { ref: triggerRef, ...baseTriggerProps, className: clsx_m_default(baseTriggerProps.className, {
+          import_react95.default.createElement(InternalButton, { ref: triggerRef, ...baseTriggerProps, className: clsx_m_default(baseTriggerProps.className, {
             [styles_css_default32["main-action-trigger-full-width"]]: canBeFullWidth
           }), __emitPerformanceMarks: false }, children2)
         )
       );
     } else {
-      trigger = import_react97.default.createElement(
+      trigger = import_react95.default.createElement(
         "div",
         { ref: triggerWrapperRef, className: styles_css_default32["dropdown-trigger"], ...getAnalyticsMetadataAttribute(analyticsMetadata) },
-        import_react97.default.createElement(InternalButton, { ref: triggerRef, id: triggerId, ...baseTriggerProps, className: clsx_m_default(baseTriggerProps.className, {
+        import_react95.default.createElement(InternalButton, { ref: triggerRef, id: triggerId, ...baseTriggerProps, className: clsx_m_default(baseTriggerProps.className, {
           [styles_css_default32["full-width"]]: canBeFullWidth,
           [styles_css_default32.loading]: canBeFullWidth && !!loading
         }), __compact: compactTrigger, badge: triggerHasBadge(), fullWidth }, children2)
@@ -318227,8 +318133,8 @@ ${isHandDrawn ? "" : `
     const footerId = useUniqueId("awsui-button-dropdown__footer");
     const isNoMatch = hasFiltering && !!filteringValue && filteredItems.length === 0;
     const isFiltered = hasFiltering && !!filteringValue && filteredItems.length > 0;
-    const totalCount = (0, import_react97.useMemo)(() => countLeafItems(items), [items]);
-    const matchesCount = (0, import_react97.useMemo)(() => countLeafItems(filteredItems), [filteredItems]);
+    const totalCount = (0, import_react95.useMemo)(() => countLeafItems(items), [items]);
+    const matchesCount = (0, import_react95.useMemo)(() => countLeafItems(filteredItems), [filteredItems]);
     const filteredText = isFiltered ? filteringResultsText === null || filteringResultsText === void 0 ? void 0 : filteringResultsText(matchesCount, totalCount) : void 0;
     const isEmpty4 = statusType === "finished" && (!items || items.length === 0) && !filteringValue;
     const hasItems = filteredItems.length > 0;
@@ -318284,7 +318190,7 @@ ${isHandDrawn ? "" : `
         highlightedItemId = hasGroupStatusContent ? statusId : `${menuId}-${groupId}`;
       }
     }
-    const filterElement = hasFiltering ? import_react97.default.createElement(filter_default3, { ref: filterRef, value: filteringValue, onChange: (event3) => setFilteringValue(event3.detail.value), __onDelayedInput: (event3) => {
+    const filterElement = hasFiltering ? import_react95.default.createElement(filter_default3, { ref: filterRef, value: filteringValue, onChange: (event3) => setFilteringValue(event3.detail.value), __onDelayedInput: (event3) => {
       if (isOpenRef.current && event3.detail.value === filteringValueRef.current) {
         fireLoadItems(event3.detail.value);
       }
@@ -318294,7 +318200,7 @@ ${isHandDrawn ? "" : `
       "aria-controls": menuId
     } }) : null;
     const { loadingButtonCount } = useFunnel();
-    (0, import_react97.useEffect)(() => {
+    (0, import_react95.useEffect)(() => {
       if (loading) {
         loadingButtonCount.current++;
         return () => {
@@ -318302,37 +318208,37 @@ ${isHandDrawn ? "" : `
         };
       }
     }, [loading, loadingButtonCount]);
-    return import_react97.default.createElement(
+    return import_react95.default.createElement(
       "div",
       { ...baseProps, onKeyDown, onKeyDownCapture, onKeyUp, onMouseDown: handleMouseEvent, onMouseMove: handleMouseEvent, className: clsx_m_default(styles_css_default32["button-dropdown"], styles_css_default32[`variant-${variant}`], canBeFullWidth && styles_css_default32["full-width"], baseProps.className), "aria-owns": expandToViewport && isOpen ? dropdownId : void 0, ref: __internalRootRef },
-      import_react97.default.createElement(internal_default6, { styleClassNames: { container: styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.dropdown }, open: canBeOpened && isOpen, stretchTriggerHeight: variant === "navigation", minWidth: expandToViewport ? void 0 : "trigger", hideBlockBorder: false, expandToViewport, preferredAlignment: preferCenter ? "center" : "start", onOutsideClick: () => toggleDropdown(), onFocusLeave: onDropdownFocusLeave, onBlur: onDropdownBlur, trigger, dropdownId, header: filterElement, ariaRole: hasFiltering ? "dialog" : void 0, ariaLabel: hasFiltering ? ariaLabel : void 0, footer: dropdownStatus.content && dropdownStatus.isSticky ? import_react97.default.createElement(status_footer_default, { content: isOpen ? dropdownStatus.content : null, id: footerId, hasItems, scope: "root" }) : null, content: import_react97.default.createElement(
-        import_react97.default.Fragment,
+      import_react95.default.createElement(internal_default6, { styleClassNames: { container: styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.dropdown }, open: canBeOpened && isOpen, stretchTriggerHeight: variant === "navigation", minWidth: expandToViewport ? void 0 : "trigger", hideBlockBorder: false, expandToViewport, preferredAlignment: preferCenter ? "center" : "start", onOutsideClick: () => toggleDropdown(), onFocusLeave: onDropdownFocusLeave, onBlur: onDropdownBlur, trigger, dropdownId, header: filterElement, ariaRole: hasFiltering ? "dialog" : void 0, ariaLabel: hasFiltering ? ariaLabel : void 0, footer: dropdownStatus.content && dropdownStatus.isSticky ? import_react95.default.createElement(status_footer_default, { content: isOpen ? dropdownStatus.content : null, id: footerId, hasItems, scope: "root" }) : null, content: import_react95.default.createElement(
+        import_react95.default.Fragment,
         null,
-        hasHeader && import_react97.default.createElement(
+        hasHeader && import_react95.default.createElement(
           "div",
           { className: styles_css_default32.header, id: headerId },
-          title2 && import_react97.default.createElement(
+          title2 && import_react95.default.createElement(
             "div",
             { className: styles_css_default32.title },
-            import_react97.default.createElement(InternalBox, { fontSize: "heading-s", fontWeight: "bold", color: "inherit", tagOverride: "h2", margin: { vertical: "n", horizontal: "n" } }, title2)
+            import_react95.default.createElement(InternalBox, { fontSize: "heading-s", fontWeight: "bold", color: "inherit", tagOverride: "h2", margin: { vertical: "n", horizontal: "n" } }, title2)
           ),
-          description && import_react97.default.createElement(
+          description && import_react95.default.createElement(
             InternalBox,
             { fontSize: "body-s" },
-            import_react97.default.createElement("span", { className: styles_css_default32.description }, description)
+            import_react95.default.createElement("span", { className: styles_css_default32.description }, description)
           )
         ),
-        import_react97.default.createElement(
+        import_react95.default.createElement(
           options_list_default,
           { open: canBeOpened && isOpen, position: "static", role: "menu", nativeAttributes: { id: menuId }, tagOverride: "ul", decreaseBlockMargin: true, ariaLabel, ariaLabelledby: hasHeader ? headerId : shouldLabelWithTrigger ? triggerId : void 0, ariaDescribedby: dropdownStatus.content ? footerId : void 0, statusType, onLoadMore: handleLoadMore },
-          import_react97.default.createElement(ItemsList, { items: filteredItems, onItemActivate, onGroupToggle, isExpandable, targetItem, isHighlighted, isKeyboardHighlight, isExpanded, lastInDropdown: true, highlightItem, expandToViewport, variant, analyticsMetadataTransformer, linkStyle, position: position5, renderItem, filteringText: filteringValue, filteringEnabled: hasFiltering, menuId: hasFiltering ? menuId : void 0, filteringDescriptionId: filteringItemDescription ? filteringDescriptionId : void 0, asyncLoadingProps, getExpandableItemsAsyncLoadingState, onGroupRecoveryClick }),
+          import_react95.default.createElement(ItemsList, { items: filteredItems, onItemActivate, onGroupToggle, isExpandable, targetItem, isHighlighted, isKeyboardHighlight, isExpanded, lastInDropdown: true, highlightItem, expandToViewport, variant, analyticsMetadataTransformer, linkStyle, position: position5, renderItem, filteringText: filteringValue, filteringEnabled: hasFiltering, menuId: hasFiltering ? menuId : void 0, filteringDescriptionId: filteringItemDescription ? filteringDescriptionId : void 0, asyncLoadingProps, getExpandableItemsAsyncLoadingState, onGroupRecoveryClick }),
           dropdownStatus.content && !dropdownStatus.isSticky ? (
             // Non-sticky status (finished text) scrolls together with the items, like the
             // list bottom in Select, instead of covering the last item.
-            import_react97.default.createElement(
+            import_react95.default.createElement(
               "li",
               { role: "menuitem", "aria-disabled": "true" },
-              import_react97.default.createElement(status_footer_default, { content: isOpen ? dropdownStatus.content : null, id: footerId, hasItems, scope: "root" })
+              import_react95.default.createElement(status_footer_default, { content: isOpen ? dropdownStatus.content : null, id: footerId, hasItems, scope: "root" })
             )
           ) : null
         ),
@@ -318364,7 +318270,7 @@ ${isHandDrawn ? "" : `
     } else {
       items = itemsFlatList;
     }
-    return import_react98.default.createElement(internal_default9, { items, className: styles_css_default22["overflow-menu"], onItemClick, ariaLabel, variant: "icon", customTriggerBuilder, expandToViewport: true });
+    return import_react96.default.createElement(internal_default9, { items, className: styles_css_default22["overflow-menu"], onItemClick, ariaLabel, variant: "icon", customTriggerBuilder, expandToViewport: true });
   }
 
   // node_modules/@cloudscape-design/components/app-layout/drawer/styles.css.js
@@ -318386,18 +318292,18 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/app-layout/drawer/index.js
-  var Drawer = import_react99.default.forwardRef(({ id: id38, contentClassName, toggleClassName, closeClassName, width: width3, type: type3, toggleRefs, topOffset, bottomOffset, ariaLabels, children: children2, hideOpenButton, isOpen, isHidden, isMobile, onToggle, onClick, onLoseFocus, resizeHandle }, ref) => {
-    const openButtonWrapperRef = (0, import_react99.useRef)(null);
+  var Drawer = import_react97.default.forwardRef(({ id: id38, contentClassName, toggleClassName, closeClassName, width: width3, type: type3, toggleRefs, topOffset, bottomOffset, ariaLabels, children: children2, hideOpenButton, isOpen, isHidden, isMobile, onToggle, onClick, onLoseFocus, resizeHandle }, ref) => {
+    const openButtonWrapperRef = (0, import_react97.useRef)(null);
     const { TagName, iconName } = togglesConfig[type3];
     const { mainLabel, closeLabel, openLabel } = ariaLabels;
     const drawerContentWidthOpen = isMobile ? void 0 : width3;
     const drawerContentWidth = isOpen ? drawerContentWidthOpen : void 0;
-    const regularOpenButton = import_react99.default.createElement(
+    const regularOpenButton = import_react97.default.createElement(
       TagName,
       { ref: openButtonWrapperRef, "aria-label": mainLabel, className: styles_css_default40.toggle, "aria-hidden": isOpen },
-      import_react99.default.createElement(ToggleButton, { ref: toggleRefs.toggle, className: toggleClassName, iconName, ariaLabel: openLabel, onClick: () => onToggle(true), ariaExpanded: isOpen ? void 0 : false })
+      import_react97.default.createElement(ToggleButton, { ref: toggleRefs.toggle, className: toggleClassName, iconName, ariaLabel: openLabel, onClick: () => onToggle(true), ariaExpanded: isOpen ? void 0 : false })
     );
-    return import_react99.default.createElement(
+    return import_react97.default.createElement(
       "div",
       { ref, className: clsx_m_default(styles_css_default40.drawer, {
         [styles_css_default40.hide]: isHidden,
@@ -318418,19 +318324,19 @@ ${isHandDrawn ? "" : `
           }
         }
       } },
-      import_react99.default.createElement(
+      import_react97.default.createElement(
         "div",
         { id: id38, style: { width: drawerContentWidth, top: topOffset, bottom: bottomOffset }, className: clsx_m_default(styles_css_default40["drawer-content"], styles_css_default40["drawer-content-clickable"], contentClassName, {
           [styles_css_default22["drawer-closed"]]: !isOpen
         }) },
         !isMobile && !hideOpenButton && regularOpenButton,
-        import_react99.default.createElement(
+        import_react97.default.createElement(
           TagName,
           { className: clsx_m_default(resizeHandle && styles_css_default40["drawer-resize-content"], styles_css_default40["drawer-content-wrapper"]), "aria-label": mainLabel, "aria-hidden": !isOpen, style: {
             blockSize: `calc(100vh - ${(topOffset || 0) + (bottomOffset || 0)}px)`
           } },
-          !isMobile && isOpen && import_react99.default.createElement("div", { className: styles_css_default40["resize-handle-wrapper"] }, resizeHandle),
-          import_react99.default.createElement(CloseButton, { ref: toggleRefs.close, className: closeClassName, ariaLabel: closeLabel, onClick: () => {
+          !isMobile && isOpen && import_react97.default.createElement("div", { className: styles_css_default40["resize-handle-wrapper"] }, resizeHandle),
+          import_react97.default.createElement(CloseButton, { ref: toggleRefs.close, className: closeClassName, ariaLabel: closeLabel, onClick: () => {
             onToggle(false);
           } }),
           children2
@@ -318438,14 +318344,14 @@ ${isHandDrawn ? "" : `
       )
     );
   });
-  var DrawerTrigger = import_react99.default.forwardRef(({ testUtilsClassName, ariaLabel, ariaExpanded, ariaControls, badge, itemId, isActive, trigger, onClick }, ref) => import_react99.default.createElement(
+  var DrawerTrigger = import_react97.default.forwardRef(({ testUtilsClassName, ariaLabel, ariaExpanded, ariaControls, badge, itemId, isActive, trigger, onClick }, ref) => import_react97.default.createElement(
     "div",
     { className: clsx_m_default(styles_css_default40["drawer-trigger"], isActive && styles_css_default40["drawer-trigger-active"], isActive && getVisualContextClassname("app-layout-tools-drawer-trigger")), onClick },
-    import_react99.default.createElement(ToggleButton, { ref, className: testUtilsClassName, iconName: trigger.iconName, iconSvg: trigger.iconSvg, ariaLabel, ariaExpanded, ariaControls, badge, testId: itemId && `awsui-app-layout-trigger-${itemId}` })
+    import_react97.default.createElement(ToggleButton, { ref, className: testUtilsClassName, iconName: trigger.iconName, iconSvg: trigger.iconSvg, ariaLabel, ariaExpanded, ariaControls, badge, testId: itemId && `awsui-app-layout-trigger-${itemId}` })
   ));
   var DrawerTriggersBar = ({ isMobile, topOffset, bottomOffset, activeDrawerId, ariaLabels, drawers, drawerRefs, onDrawerChange }) => {
-    const containerRef = import_react99.default.useRef(null);
-    const previousActiveDrawerId = (0, import_react99.useRef)(activeDrawerId);
+    const containerRef = import_react97.default.useRef(null);
+    const previousActiveDrawerId = (0, import_react97.useRef)(activeDrawerId);
     const [containerHeight, triggersContainerRef] = useContainerQuery((rect2) => rect2.contentBoxHeight);
     const isCompactMode = useDensityMode(containerRef) === "compact";
     if (activeDrawerId) {
@@ -318462,28 +318368,28 @@ ${isHandDrawn ? "" : `
     };
     const { visibleItems, overflowItems } = splitItems(drawers, getIndexOfOverflowItem(), activeDrawerId);
     const overflowMenuHasBadge = !!overflowItems.find((item) => item.badge);
-    return import_react99.default.createElement(
+    return import_react97.default.createElement(
       "div",
       { className: clsx_m_default(styles_css_default40.drawer, styles_css_default40["drawer-closed"], styles_css_default22["drawer-closed"], {
         [styles_css_default40["drawer-mobile"]]: isMobile,
         [styles_css_default40.hide]: drawers.length === 1 && !!activeDrawerId
       }), ref: containerRef },
-      import_react99.default.createElement("div", { ref: triggersContainerRef, style: { top: topOffset, bottom: bottomOffset }, className: clsx_m_default(styles_css_default40["drawer-content"], {
+      import_react97.default.createElement("div", { ref: triggersContainerRef, style: { top: topOffset, bottom: bottomOffset }, className: clsx_m_default(styles_css_default40["drawer-content"], {
         [styles_css_default40["drawer-content-clickable"]]: drawers.length === 1
-      }), onClick: drawers.length === 1 ? () => onDrawerChange(drawers[0].id !== activeDrawerId ? drawers[0].id : null) : void 0 }, !isMobile && import_react99.default.createElement(
+      }), onClick: drawers.length === 1 ? () => onDrawerChange(drawers[0].id !== activeDrawerId ? drawers[0].id : null) : void 0 }, !isMobile && import_react97.default.createElement(
         "aside",
         { "aria-label": ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.drawers, role: "region" },
-        import_react99.default.createElement(
+        import_react97.default.createElement(
           "div",
           { className: styles_css_default40["drawer-triggers-wrapper"], "aria-label": ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.drawers, role: "toolbar", "aria-orientation": "vertical" },
           visibleItems.map((item, index2) => {
             var _a213;
-            return import_react99.default.createElement(DrawerTrigger, { key: index2, testUtilsClassName: clsx_m_default(styles_css_default22["drawers-trigger"], item.id === TOOLS_DRAWER_ID && styles_css_default22["tools-toggle"]), ariaExpanded: activeDrawerId === item.id, ref: item.id === previousActiveDrawerId.current ? drawerRefs.toggle : void 0, ariaLabel: (_a213 = item.ariaLabels) === null || _a213 === void 0 ? void 0 : _a213.triggerButton, ariaControls: activeDrawerId === item.id ? item.id : void 0, trigger: item.trigger, badge: item.badge, itemId: item.id, isActive: activeDrawerId === item.id, onClick: drawers.length !== 1 ? () => onDrawerChange(item.id !== activeDrawerId ? item.id : null) : void 0 });
+            return import_react97.default.createElement(DrawerTrigger, { key: index2, testUtilsClassName: clsx_m_default(styles_css_default22["drawers-trigger"], item.id === TOOLS_DRAWER_ID && styles_css_default22["tools-toggle"]), ariaExpanded: activeDrawerId === item.id, ref: item.id === previousActiveDrawerId.current ? drawerRefs.toggle : void 0, ariaLabel: (_a213 = item.ariaLabels) === null || _a213 === void 0 ? void 0 : _a213.triggerButton, ariaControls: activeDrawerId === item.id ? item.id : void 0, trigger: item.trigger, badge: item.badge, itemId: item.id, isActive: activeDrawerId === item.id, onClick: drawers.length !== 1 ? () => onDrawerChange(item.id !== activeDrawerId ? item.id : null) : void 0 });
           }),
-          overflowItems.length > 0 && import_react99.default.createElement(
+          overflowItems.length > 0 && import_react97.default.createElement(
             "div",
             { className: styles_css_default40["drawer-trigger"] },
-            import_react99.default.createElement(OverflowMenu, { ariaLabel: overflowMenuHasBadge ? ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.drawersOverflowWithBadge : ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.drawersOverflow, items: overflowItems, onItemClick: ({ detail }) => onDrawerChange(detail.id) })
+            import_react97.default.createElement(OverflowMenu, { ariaLabel: overflowMenuHasBadge ? ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.drawersOverflowWithBadge : ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.drawersOverflow, items: overflowItems, onItemClick: ({ detail }) => onDrawerChange(detail.id) })
           )
         )
       ))
@@ -318491,19 +318397,19 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/app-layout/drawer/resizable-drawer.js
-  var import_react109 = __toESM(require_react());
-
-  // node_modules/@cloudscape-design/components/internal/components/panel-resize-handle/index.js
   var import_react107 = __toESM(require_react());
 
+  // node_modules/@cloudscape-design/components/internal/components/panel-resize-handle/index.js
+  var import_react105 = __toESM(require_react());
+
   // node_modules/@cloudscape-design/components/internal/components/drag-handle/index.js
-  var import_react106 = __toESM(require_react());
+  var import_react104 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/drag-handle-wrapper/index.js
-  var import_react103 = __toESM(require_react());
+  var import_react101 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/tooltip/index.js
-  var import_react100 = __toESM(require_react());
+  var import_react98 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/tooltip/styles.css.js
   var styles_css_default41 = {
@@ -318515,7 +318421,7 @@ ${isHandDrawn ? "" : `
     if (!trackKey && (typeof value3 === "string" || typeof value3 === "number")) {
       trackKey = value3;
     }
-    (0, import_react100.useEffect)(() => {
+    (0, import_react98.useEffect)(() => {
       const controller = new AbortController();
       window.addEventListener("keydown", (event3) => {
         if (event3.key === "Escape") {
@@ -318533,23 +318439,23 @@ ${isHandDrawn ? "" : `
         controller.abort();
       };
     }, [onDismiss]);
-    return import_react100.default.createElement(
+    return import_react98.default.createElement(
       Portal,
       null,
-      import_react100.default.createElement(
+      import_react98.default.createElement(
         "div",
         { className: `${styles_css_default41.root} ${styles_css_default11.root}`, ...contentAttributes, "data-testid": trackKey },
-        import_react100.default.createElement(Transition4, { in: true }, () => import_react100.default.createElement(
+        import_react98.default.createElement(Transition4, { in: true }, () => import_react98.default.createElement(
           PopoverContainer,
-          { trackRef, trackKey, size: size4, fixedWidth: false, position: position5, zIndex: 7e3, arrow: (position6) => import_react100.default.createElement(arrow_default, { position: position6 }), hideOnOverscroll, className },
-          import_react100.default.createElement(body_default, { dismissButton: false, dismissAriaLabel: void 0, onDismiss: void 0, header: void 0 }, value3)
+          { trackRef, trackKey, size: size4, fixedWidth: false, position: position5, zIndex: 7e3, arrow: (position6) => import_react98.default.createElement(arrow_default, { position: position6 }), hideOnOverscroll, className },
+          import_react98.default.createElement(body_default, { dismissButton: false, dismissAriaLabel: void 0, onDismiss: void 0, header: void 0 }, value3)
         ))
       )
     );
   }
 
   // node_modules/@cloudscape-design/components/internal/components/drag-handle-wrapper/direction-button.js
-  var import_react101 = __toESM(require_react());
+  var import_react99 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/drag-handle-wrapper/styles.css.js
   var styles_css_default42 = {
@@ -318604,14 +318510,14 @@ ${isHandDrawn ? "" : `
     "inline-end": "arrow-right"
   };
   function DirectionButton({ direction: direction2, state: state5, show: show2, onClick, forcedPosition, forcedIndex }) {
-    return import_react101.default.createElement(Transition4, { in: show2 }, (transitionState, ref) => (
+    return import_react99.default.createElement(Transition4, { in: show2 }, (transitionState, ref) => (
       // The wrapper exists to provide a padding around each direction button that
       // prevents any accidental presses around the button from propagating to any
       // interactive elements behind the button.
-      import_react101.default.createElement(
+      import_react99.default.createElement(
         "span",
         { ref, className: clsx_m_default(styles_css_default42["direction-button-wrapper"], !forcedPosition && styles_css_default42[`direction-button-wrapper-${direction2}`], forcedPosition && styles_css_default42["direction-button-wrapper-forced"], forcedPosition && styles_css_default42[`direction-button-wrapper-forced-${forcedPosition}-${forcedIndex}`], transitionState === "exited" && styles_css_default42["direction-button-wrapper-hidden"], styles_css_default42[`direction-button-wrapper-motion-${transitionState}`]) },
-        import_react101.default.createElement(
+        import_react99.default.createElement(
           "span",
           {
             className: clsx_m_default(styles_css_default42["direction-button"], state5 === "disabled" && styles_css_default42["direction-button-disabled"], styles_css_default43[`direction-button-${direction2}`], !["exiting", "exited"].includes(transitionState) && styles_css_default43["direction-button-visible"]),
@@ -318621,18 +318527,18 @@ ${isHandDrawn ? "" : `
             // keeping this button pointer-accessible only.
             onPointerDown: (event3) => event3.preventDefault()
           },
-          import_react101.default.createElement(internal_default, { name: ICON_LOGICAL_PROPERTY_MAP[direction2], size: "small" })
+          import_react99.default.createElement(internal_default, { name: ICON_LOGICAL_PROPERTY_MAP[direction2], size: "small" })
         )
       )
     ));
   }
 
   // node_modules/@cloudscape-design/components/internal/components/drag-handle-wrapper/portal-overlay.js
-  var import_react102 = __toESM(require_react());
+  var import_react100 = __toESM(require_react());
   function PortalOverlay({ track, isDisabled, referrerId, children: children2 }) {
-    const ref = (0, import_react102.useRef)(null);
-    const [container2, setContainer] = (0, import_react102.useState)(null);
-    (0, import_react102.useLayoutEffect)(() => {
+    const ref = (0, import_react100.useRef)(null);
+    const [container2, setContainer] = (0, import_react100.useState)(null);
+    (0, import_react100.useLayoutEffect)(() => {
       if (track.current) {
         const newContainer = track.current.ownerDocument.createElement("div");
         track.current.ownerDocument.body.appendChild(newContainer);
@@ -318640,7 +318546,7 @@ ${isHandDrawn ? "" : `
         return () => newContainer.remove();
       }
     }, [track]);
-    (0, import_react102.useEffect)(() => {
+    (0, import_react100.useEffect)(() => {
       if (track.current === null || isDisabled) {
         return;
       }
@@ -318676,13 +318582,13 @@ ${isHandDrawn ? "" : `
         cleanedUp = true;
       };
     }, [isDisabled, track]);
-    return import_react102.default.createElement(
+    return import_react100.default.createElement(
       Portal,
       { container: container2 },
-      import_react102.default.createElement(
+      import_react100.default.createElement(
         "span",
         { ref, "data-awsui-referrer-id": referrerId, className: clsx_m_default(styles_css_default42["portal-overlay"], isDisabled && styles_css_default42["portal-overlay-disabled"]) },
-        import_react102.default.createElement("span", { className: styles_css_default42["portal-overlay-contents"] }, children2)
+        import_react100.default.createElement("span", { className: styles_css_default42["portal-overlay-contents"] }, children2)
       )
     );
   }
@@ -318692,14 +318598,14 @@ ${isHandDrawn ? "" : `
   var UAP_BUTTON_SIZE_PX = 40;
   var DIRECTIONS_ORDER = ["block-end", "block-start", "inline-end", "inline-start"];
   function DragHandleWrapper({ directions: directions2, tooltipText, children: children2, onDirectionClick, triggerMode = "focus", initialShowButtons = false, controlledShowButtons = false, wrapperClassName, hideButtonsOnDrag, clickDragThreshold }) {
-    const wrapperRef = (0, import_react103.useRef)(null);
-    const dragHandleRef = (0, import_react103.useRef)(null);
+    const wrapperRef = (0, import_react101.useRef)(null);
+    const dragHandleRef = (0, import_react101.useRef)(null);
     const referrerId = useUniqueId("drag-handle");
-    const [showTooltip, setShowTooltip] = (0, import_react103.useState)(false);
-    const [uncontrolledShowButtons, setUncontrolledShowButtons] = (0, import_react103.useState)(initialShowButtons);
-    const isPointerDown = (0, import_react103.useRef)(false);
-    const initialPointerPosition = (0, import_react103.useRef)();
-    const didPointerDrag = (0, import_react103.useRef)(false);
+    const [showTooltip, setShowTooltip] = (0, import_react101.useState)(false);
+    const [uncontrolledShowButtons, setUncontrolledShowButtons] = (0, import_react101.useState)(initialShowButtons);
+    const isPointerDown = (0, import_react101.useRef)(false);
+    const initialPointerPosition = (0, import_react101.useRef)();
+    const didPointerDrag = (0, import_react101.useRef)(false);
     const isDisabled = !directions2["block-start"] && !directions2["block-end"] && !directions2["inline-start"] && !directions2["inline-end"];
     const onWrapperFocusIn = (event3) => {
       if (isKeyboardInteraction(wrapperRef.current) && !nodeContains(wrapperRef.current, event3.relatedTarget)) {
@@ -318714,7 +318620,7 @@ ${isHandDrawn ? "" : `
         setUncontrolledShowButtons(false);
       }
     };
-    (0, import_react103.useEffect)(() => {
+    (0, import_react101.useEffect)(() => {
       const controller = new AbortController();
       document.addEventListener("pointermove", (event3) => {
         if (isPointerDown.current && initialPointerPosition.current && (event3.clientX > initialPointerPosition.current.x + clickDragThreshold || event3.clientX < initialPointerPosition.current.x - clickDragThreshold || event3.clientY > initialPointerPosition.current.y + clickDragThreshold || event3.clientY < initialPointerPosition.current.y - clickDragThreshold)) {
@@ -318763,10 +318669,10 @@ ${isHandDrawn ? "" : `
       }
     };
     const showButtons = triggerMode === "controlled" ? controlledShowButtons : uncontrolledShowButtons;
-    const [forcedPosition, setForcedPosition] = (0, import_react103.useState)(null);
+    const [forcedPosition, setForcedPosition] = (0, import_react101.useState)(null);
     const directionsOrder = forcedPosition === "bottom" ? [...DIRECTIONS_ORDER].reverse() : DIRECTIONS_ORDER;
     const visibleDirections = directionsOrder.filter((dir2) => directions2[dir2]);
-    (0, import_react103.useEffect)(() => {
+    (0, import_react101.useEffect)(() => {
       if (!showButtons || !dragHandleRef.current) {
         if (forcedPosition !== null) {
           setForcedPosition(null);
@@ -318798,30 +318704,30 @@ ${isHandDrawn ? "" : `
         cancelAnimationFrame(frameId);
       };
     }, [forcedPosition, showButtons, visibleDirections]);
-    return import_react103.default.createElement(
-      import_react103.default.Fragment,
+    return import_react101.default.createElement(
+      import_react101.default.Fragment,
       null,
-      import_react103.default.createElement(
+      import_react101.default.createElement(
         "div",
         { className: clsx_m_default(styles_css_default43.root, styles_css_default42.contents), ref: wrapperRef, onFocus: onWrapperFocusIn, onBlur: onWrapperFocusOut },
-        import_react103.default.createElement(
+        import_react101.default.createElement(
           "div",
           { className: styles_css_default42.contents, onPointerEnter: onTooltipGroupPointerEnter, onPointerLeave: onTooltipGroupPointerLeave },
-          import_react103.default.createElement("div", { className: clsx_m_default(styles_css_default42["drag-handle"], wrapperClassName), ref: dragHandleRef, id: referrerId, onPointerDown: onHandlePointerDown, onKeyDown: onDragHandleKeyDown }, children2),
+          import_react101.default.createElement("div", { className: clsx_m_default(styles_css_default42["drag-handle"], wrapperClassName), ref: dragHandleRef, id: referrerId, onPointerDown: onHandlePointerDown, onKeyDown: onDragHandleKeyDown }, children2),
           !isDisabled && !showButtons && showTooltip && tooltipText && // Rendered in a portal but pointerenter/pointerleave events still propagate
           // up the React DOM tree, which is why it's placed in this nested context.
-          import_react103.default.createElement(Tooltip2, { trackRef: dragHandleRef, value: tooltipText, onDismiss: () => setShowTooltip(false) })
+          import_react101.default.createElement(Tooltip2, { trackRef: dragHandleRef, value: tooltipText, onDismiss: () => setShowTooltip(false) })
         )
       ),
-      import_react103.default.createElement(PortalOverlay, { track: dragHandleRef, isDisabled: !showButtons, referrerId }, visibleDirections.map((direction2, index2) => directions2[direction2] && import_react103.default.createElement(DirectionButton, { key: direction2, show: !isDisabled && showButtons, direction: direction2, state: directions2[direction2], onClick: () => onDirectionClick === null || onDirectionClick === void 0 ? void 0 : onDirectionClick(direction2), forcedPosition, forcedIndex: index2 })))
+      import_react101.default.createElement(PortalOverlay, { track: dragHandleRef, isDisabled: !showButtons, referrerId }, visibleDirections.map((direction2, index2) => directions2[direction2] && import_react101.default.createElement(DirectionButton, { key: direction2, show: !isDisabled && showButtons, direction: direction2, state: directions2[direction2], onClick: () => onDirectionClick === null || onDirectionClick === void 0 ? void 0 : onDirectionClick(direction2), forcedPosition, forcedIndex: index2 })))
     );
   }
 
   // node_modules/@cloudscape-design/components/internal/components/drag-handle/button.js
-  var import_react105 = __toESM(require_react());
+  var import_react103 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/drag-handle/resize-icon.js
-  var import_react104 = __toESM(require_react());
+  var import_react102 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/drag-handle/styles.css.js
   var styles_css_default44 = {
@@ -318843,10 +318749,10 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/internal/components/drag-handle/resize-icon.js
   function ResizeIcon({ variant }) {
-    return import_react104.default.createElement(
+    return import_react102.default.createElement(
       "svg",
       { focusable: "false", className: clsx_m_default(styles_css_default44["resize-icon"], styles_css_default44[`resize-icon-${variant}`]), xmlns: "http://www.w3.org/2000/svg", width: "16", height: "16", viewBox: "0 0 16 16", "aria-hidden": true },
-      import_react104.default.createElement("path", { d: "M2 8H14", strokeWidth: "2", strokeLinecap: "round" })
+      import_react102.default.createElement("path", { d: "M2 8H14", strokeWidth: "2", strokeLinecap: "round" })
     );
   }
 
@@ -318856,8 +318762,8 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/internal/components/drag-handle/button.js
-  var DragHandleButton = (0, import_react105.forwardRef)(({ variant = "drag-indicator", size: size4 = "normal", active = false, className, ariaLabel, ariaLabelledBy, ariaDescribedby, ariaValue, disabled, onPointerDown, onClick, onKeyDown }, ref) => {
-    const dragHandleRefObject = (0, import_react105.useRef)(null);
+  var DragHandleButton = (0, import_react103.forwardRef)(({ variant = "drag-indicator", size: size4 = "normal", active = false, className, ariaLabel, ariaLabelledBy, ariaDescribedby, ariaValue, disabled, onPointerDown, onClick, onKeyDown }, ref) => {
+    const dragHandleRefObject = (0, import_react103.useRef)(null);
     const iconProps = (() => {
       const shared = {
         variant: disabled ? "disabled" : void 0,
@@ -318869,9 +318775,9 @@ ${isHandDrawn ? "" : `
         case "resize-area":
           return { ...shared, name: "resize-area" };
         case "resize-horizontal":
-          return { ...shared, svg: import_react105.default.createElement(ResizeIcon, { variant: "horizontal" }) };
+          return { ...shared, svg: import_react103.default.createElement(ResizeIcon, { variant: "horizontal" }) };
         case "resize-vertical":
-          return { ...shared, svg: import_react105.default.createElement(ResizeIcon, { variant: "vertical" }) };
+          return { ...shared, svg: import_react103.default.createElement(ResizeIcon, { variant: "vertical" }) };
       }
     })();
     return (
@@ -318880,13 +318786,13 @@ ${isHandDrawn ? "" : `
       // (See https://bugs.webkit.org/show_bug.cgi?id=22261)
       // Otherwise, we can't reliably catch keyboard events coming from the handle
       // when it is being dragged.
-      import_react105.default.createElement(
+      import_react103.default.createElement(
         "div",
         { ref: useMergeRefs(ref, dragHandleRefObject), role: ariaValue ? "slider" : "button", tabIndex: 0, className: clsx_m_default(className, styles_css_default44.handle, styles_css_default45.root, styles_css_default44[`handle-${variant}`], styles_css_default44[`handle-size-${size4}`], disabled && styles_css_default44["handle-disabled"], active && styles_css_default44.active), "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy, "aria-describedby": ariaDescribedby, "aria-disabled": disabled, "aria-pressed": ariaValue ? void 0 : active, "aria-valuemax": ariaValue === null || ariaValue === void 0 ? void 0 : ariaValue.valueMax, "aria-valuemin": ariaValue === null || ariaValue === void 0 ? void 0 : ariaValue.valueMin, "aria-valuenow": ariaValue === null || ariaValue === void 0 ? void 0 : ariaValue.valueNow, onPointerDown, onClick, onKeyDown, ...variant === "drag-indicator" ? { "data-awsui-motion-trigger": "hover", "data-awsui-motion-target": "" } : {} },
-        import_react105.default.createElement(
+        import_react103.default.createElement(
           "div",
           { className: styles_css_default44["prevent-pointer"] },
-          import_react105.default.createElement(internal_default, { ...iconProps })
+          import_react103.default.createElement(internal_default, { ...iconProps })
         )
       )
     );
@@ -318894,12 +318800,12 @@ ${isHandDrawn ? "" : `
   var button_default = DragHandleButton;
 
   // node_modules/@cloudscape-design/components/internal/components/drag-handle/index.js
-  var InternalDragHandle = (0, import_react106.forwardRef)(({ variant, size: size4, ariaLabel, ariaLabelledBy, ariaDescribedby, tooltipText, ariaValue, disabled, directions: directions2 = {}, onPointerDown, onClick, onKeyDown, onDirectionClick, triggerMode, initialShowButtons, controlledShowButtons, hideButtonsOnDrag = false, clickDragThreshold = 3, active, ...rest }, ref) => {
+  var InternalDragHandle = (0, import_react104.forwardRef)(({ variant, size: size4, ariaLabel, ariaLabelledBy, ariaDescribedby, tooltipText, ariaValue, disabled, directions: directions2 = {}, onPointerDown, onClick, onKeyDown, onDirectionClick, triggerMode, initialShowButtons, controlledShowButtons, hideButtonsOnDrag = false, clickDragThreshold = 3, active, ...rest }, ref) => {
     const baseProps = getBaseProps(rest);
-    return import_react106.default.createElement(
+    return import_react104.default.createElement(
       DragHandleWrapper,
       { directions: !disabled ? directions2 : {}, tooltipText, onDirectionClick, triggerMode, initialShowButtons, controlledShowButtons, hideButtonsOnDrag, clickDragThreshold },
-      import_react106.default.createElement(button_default, { ref, className: baseProps.className, variant, size: size4, ariaLabel, ariaLabelledBy, ariaDescribedby, ariaValue, disabled, active, onPointerDown, onClick, onKeyDown })
+      import_react104.default.createElement(button_default, { ref, className: baseProps.className, variant, size: size4, ariaLabel, ariaLabelledBy, ariaDescribedby, ariaValue, disabled, active, onPointerDown, onClick, onKeyDown })
     );
   });
   var drag_handle_default = InternalDragHandle;
@@ -318912,9 +318818,9 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/internal/components/panel-resize-handle/index.js
-  var panel_resize_handle_default = import_react107.default.forwardRef(function PanelResizeHandle({ className, ariaLabel, tooltipText, ariaValuenow, position: position5, onDirectionClick, onKeyDown, onPointerDown, disabled }, ref) {
+  var panel_resize_handle_default = import_react105.default.forwardRef(function PanelResizeHandle({ className, ariaLabel, tooltipText, ariaValuenow, position: position5, onDirectionClick, onKeyDown, onPointerDown, disabled }, ref) {
     const i18n = useInternalI18n("panel-resize-handle");
-    return import_react107.default.createElement(drag_handle_default, { className: clsx_m_default(className, styles_css_default46.slider, styles_css_default46[`slider-${position5}`]), ariaLabel: i18n("i18nStrings.resizeHandleAriaLabel", ariaLabel), tooltipText: i18n("i18nStrings.resizeHandleTooltipText", tooltipText), ariaValue: { valueMin: 0, valueMax: 100, valueNow: ariaValuenow !== null && ariaValuenow !== void 0 ? ariaValuenow : 0 }, variant: ["side", "side-start"].includes(position5) ? "resize-horizontal" : "resize-vertical", directions: disabled ? {
+    return import_react105.default.createElement(drag_handle_default, { className: clsx_m_default(className, styles_css_default46.slider, styles_css_default46[`slider-${position5}`]), ariaLabel: i18n("i18nStrings.resizeHandleAriaLabel", ariaLabel), tooltipText: i18n("i18nStrings.resizeHandleTooltipText", tooltipText), ariaValue: { valueMin: 0, valueMax: 100, valueNow: ariaValuenow !== null && ariaValuenow !== void 0 ? ariaValuenow : 0 }, variant: ["side", "side-start"].includes(position5) ? "resize-horizontal" : "resize-vertical", directions: disabled ? {
       "inline-start": "disabled",
       "inline-end": "disabled"
     } : position5 === "side" ? {
@@ -319101,7 +319007,7 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/app-layout/utils/use-pointer-events.js
-  var import_react108 = __toESM(require_react());
+  var import_react106 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/resize/styles.css.js
   var styles_css_default47 = {
@@ -319114,7 +319020,7 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/app-layout/utils/use-pointer-events.js
   var usePointerEvents = ({ position: position5, panelRef, handleRef, onResize }) => {
-    const onDocumentPointerMove = (0, import_react108.useCallback)((event3) => {
+    const onDocumentPointerMove = (0, import_react106.useCallback)((event3) => {
       if (!panelRef || !panelRef.current || !handleRef || !handleRef.current) {
         return;
       }
@@ -319136,7 +319042,7 @@ ${isHandDrawn ? "" : `
         onResize(height2);
       }
     }, [position5, panelRef, handleRef, onResize]);
-    const onDocumentPointerUp = (0, import_react108.useCallback)(() => {
+    const onDocumentPointerUp = (0, import_react106.useCallback)(() => {
       const panelElement = panelRef === null || panelRef === void 0 ? void 0 : panelRef.current;
       if (!panelElement) {
         return;
@@ -319147,7 +319053,7 @@ ${isHandDrawn ? "" : `
       currentDocument.removeEventListener("pointerup", onDocumentPointerUp);
       currentDocument.removeEventListener("pointermove", onDocumentPointerMove);
     }, [panelRef, onDocumentPointerMove, position5]);
-    const onSliderPointerDown = (0, import_react108.useCallback)(() => {
+    const onSliderPointerDown = (0, import_react106.useCallback)(() => {
       const panelElement = panelRef === null || panelRef === void 0 ? void 0 : panelRef.current;
       if (!panelElement) {
         return;
@@ -319174,7 +319080,7 @@ ${isHandDrawn ? "" : `
         onResize({ size: size4, id: id38 });
       }
     };
-    const drawerRefObject = (0, import_react109.useRef)(null);
+    const drawerRefObject = (0, import_react107.useRef)(null);
     const sizeControlProps = {
       position: "side",
       panelRef: drawerRefObject,
@@ -319183,20 +319089,20 @@ ${isHandDrawn ? "" : `
     };
     const onSliderPointerDown = usePointerEvents(sizeControlProps);
     const { onKeyDown, onDirectionClick } = useKeyboardEvents(sizeControlProps);
-    return import_react109.default.createElement(
+    return import_react107.default.createElement(
       Drawer,
-      { ...props, id: activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.id, width: clampedWidth, ref: drawerRefObject, isHidden: !activeDrawer, resizeHandle: !isMobile && (activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.resizable) && import_react109.default.createElement(panel_resize_handle_default, { ref: refs.slider, position: "side", className: styles_css_default22["drawers-slider"], ariaLabel: (_a213 = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _a213 === void 0 ? void 0 : _a213.resizeHandle, tooltipText: (_b = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _b === void 0 ? void 0 : _b.resizeHandleTooltipText, ariaValuenow: relativeSize, onKeyDown, onDirectionClick, onPointerDown: onSliderPointerDown }), ariaLabels: {
+      { ...props, id: activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.id, width: clampedWidth, ref: drawerRefObject, isHidden: !activeDrawer, resizeHandle: !isMobile && (activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.resizable) && import_react107.default.createElement(panel_resize_handle_default, { ref: refs.slider, position: "side", className: styles_css_default22["drawers-slider"], ariaLabel: (_a213 = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _a213 === void 0 ? void 0 : _a213.resizeHandle, tooltipText: (_b = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _b === void 0 ? void 0 : _b.resizeHandleTooltipText, ariaValuenow: relativeSize, onKeyDown, onDirectionClick, onPointerDown: onSliderPointerDown }), ariaLabels: {
         openLabel: (_c = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _c === void 0 ? void 0 : _c.triggerButton,
         mainLabel: (_d = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _d === void 0 ? void 0 : _d.drawerName,
         closeLabel: (_e2 = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _e2 === void 0 ? void 0 : _e2.closeButton
       } },
-      toolsContent && import_react109.default.createElement("div", { className: clsx_m_default((activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.id) !== TOOLS_DRAWER_ID && styles_css_default40.hide) }, toolsContent),
+      toolsContent && import_react107.default.createElement("div", { className: clsx_m_default((activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.id) !== TOOLS_DRAWER_ID && styles_css_default40.hide) }, toolsContent),
       (activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.id) !== TOOLS_DRAWER_ID ? children2 : null
     );
   };
 
   // node_modules/@cloudscape-design/components/app-layout/mobile-toolbar/index.js
-  var import_react110 = __toESM(require_react());
+  var import_react108 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/styles.css.js
   var styles_css_default48 = {
@@ -319227,17 +319133,17 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/app-layout/mobile-toolbar/index.js
-  var MobileToggle = import_react110.default.forwardRef(({ className, ariaLabels, type: type3, disabled, onClick }, ref) => {
+  var MobileToggle = import_react108.default.forwardRef(({ className, ariaLabels, type: type3, disabled, onClick }, ref) => {
     const { TagName, iconName, getLabels } = togglesConfig[type3];
     const { mainLabel, openLabel } = getLabels(ariaLabels);
-    return import_react110.default.createElement(
+    return import_react108.default.createElement(
       TagName,
       { className: clsx_m_default(styles_css_default49["mobile-toggle"], styles_css_default49[`mobile-toggle-type-${type3}`]), "aria-hidden": disabled, "aria-label": mainLabel, onClick: (e3) => e3.target === e3.currentTarget && onClick() },
-      import_react110.default.createElement(ToggleButton, { ref, className, iconName, onClick, ariaLabel: openLabel, disabled, ariaExpanded: disabled })
+      import_react108.default.createElement(ToggleButton, { ref, className, iconName, onClick, ariaLabel: openLabel, disabled, ariaExpanded: disabled })
     );
   });
   function MobileToolbar({ ariaLabels, toggleRefs, topOffset, navigationHide, toolsHide, anyPanelOpen, unfocusable, drawers, activeDrawerId, children: children2, onNavigationOpen, onToolsOpen, onDrawerChange, mobileBarRef }) {
-    (0, import_react110.useEffect)(() => {
+    (0, import_react108.useEffect)(() => {
       if (anyPanelOpen) {
         document.body.classList.add(styles_css_default49["block-body-scroll"]);
         return () => {
@@ -319249,30 +319155,30 @@ ${isHandDrawn ? "" : `
     }, [anyPanelOpen]);
     const { overflowItems, visibleItems } = splitItems(drawers, 2, activeDrawerId);
     const overflowMenuHasBadge = !!overflowItems.find((item) => item.badge);
-    return import_react110.default.createElement(
+    return import_react108.default.createElement(
       "div",
       { ref: mobileBarRef, className: clsx_m_default(styles_css_default49["mobile-bar"], styles_css_default22["mobile-bar"], unfocusable && styles_css_default48.unfocusable), style: { top: topOffset } },
-      !navigationHide && import_react110.default.createElement(MobileToggle, { ref: toggleRefs.navigation, type: "navigation", className: styles_css_default22["navigation-toggle"], ariaLabels, disabled: anyPanelOpen, onClick: onNavigationOpen }),
-      import_react110.default.createElement("div", { className: styles_css_default49["mobile-bar-breadcrumbs"] }, children2 && import_react110.default.createElement("div", { className: styles_css_default22.breadcrumbs }, children2)),
-      !toolsHide && !drawers && import_react110.default.createElement(MobileToggle, { ref: toggleRefs.tools, type: "tools", className: styles_css_default22["tools-toggle"], ariaLabels, disabled: anyPanelOpen, onClick: onToolsOpen }),
-      drawers && import_react110.default.createElement(
+      !navigationHide && import_react108.default.createElement(MobileToggle, { ref: toggleRefs.navigation, type: "navigation", className: styles_css_default22["navigation-toggle"], ariaLabels, disabled: anyPanelOpen, onClick: onNavigationOpen }),
+      import_react108.default.createElement("div", { className: styles_css_default49["mobile-bar-breadcrumbs"] }, children2 && import_react108.default.createElement("div", { className: styles_css_default22.breadcrumbs }, children2)),
+      !toolsHide && !drawers && import_react108.default.createElement(MobileToggle, { ref: toggleRefs.tools, type: "tools", className: styles_css_default22["tools-toggle"], ariaLabels, disabled: anyPanelOpen, onClick: onToolsOpen }),
+      drawers && import_react108.default.createElement(
         "aside",
         { "aria-label": ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.drawers, role: "region" },
-        import_react110.default.createElement(
+        import_react108.default.createElement(
           "div",
           { className: styles_css_default49["drawers-container"], "aria-label": ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.drawers, role: "toolbar", "aria-orientation": "horizontal" },
           visibleItems.map((item, index2) => {
             var _a213;
-            return import_react110.default.createElement(
+            return import_react108.default.createElement(
               "div",
               { className: clsx_m_default(styles_css_default49["mobile-toggle"], styles_css_default49["mobile-toggle-type-drawer"]), key: index2, onClick: () => onDrawerChange(item.id) },
-              import_react110.default.createElement(ToggleButton, { className: clsx_m_default(styles_css_default22["drawers-trigger"], item.id === TOOLS_DRAWER_ID && styles_css_default22["tools-toggle"]), iconName: item.trigger.iconName, iconSvg: item.trigger.iconSvg, badge: item.badge, ariaLabel: (_a213 = item.ariaLabels) === null || _a213 === void 0 ? void 0 : _a213.triggerButton, ariaExpanded: activeDrawerId === item.id, testId: `awsui-app-layout-trigger-${item.id}` })
+              import_react108.default.createElement(ToggleButton, { className: clsx_m_default(styles_css_default22["drawers-trigger"], item.id === TOOLS_DRAWER_ID && styles_css_default22["tools-toggle"]), iconName: item.trigger.iconName, iconSvg: item.trigger.iconSvg, badge: item.badge, ariaLabel: (_a213 = item.ariaLabels) === null || _a213 === void 0 ? void 0 : _a213.triggerButton, ariaExpanded: activeDrawerId === item.id, testId: `awsui-app-layout-trigger-${item.id}` })
             );
           }),
-          overflowItems.length > 0 && import_react110.default.createElement(
+          overflowItems.length > 0 && import_react108.default.createElement(
             "div",
             { className: clsx_m_default(styles_css_default49["mobile-toggle"], styles_css_default49["mobile-toggle-type-drawer"]) },
-            import_react110.default.createElement(OverflowMenu, { ariaLabel: overflowMenuHasBadge ? ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.drawersOverflowWithBadge : ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.drawersOverflow, items: overflowItems, onItemClick: ({ detail }) => onDrawerChange(detail.id) })
+            import_react108.default.createElement(OverflowMenu, { ariaLabel: overflowMenuHasBadge ? ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.drawersOverflowWithBadge : ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.drawersOverflow, items: overflowItems, onItemClick: ({ detail }) => onDrawerChange(detail.id) })
           )
         )
       )
@@ -319280,7 +319186,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/notifications/index.js
-  var import_react111 = __toESM(require_react());
+  var import_react109 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/notifications/styles.css.js
   var styles_css_default50 = {
@@ -319290,13 +319196,13 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/app-layout/notifications/index.js
-  var Notifications = import_react111.default.forwardRef(({ sticky, disableContentPaddings, ...props }, ref) => {
+  var Notifications = import_react109.default.forwardRef(({ sticky, disableContentPaddings, ...props }, ref) => {
     var _a213, _b;
-    return sticky ? import_react111.default.createElement(
+    return sticky ? import_react109.default.createElement(
       "div",
       { ref, className: styles_css_default50["notifications-sticky"], style: { top: props.topOffset } },
-      import_react111.default.createElement("div", { role: "region", className: clsx_m_default(props.testUtilsClassName, disableContentPaddings && styles_css_default50["no-content-paddings"]), "aria-label": (_a213 = props.labels) === null || _a213 === void 0 ? void 0 : _a213.notifications }, props.children)
-    ) : import_react111.default.createElement("div", { role: "region", ref, className: clsx_m_default(props.testUtilsClassName, styles_css_default50.notifications, disableContentPaddings && styles_css_default50["no-content-paddings"]), "aria-label": (_b = props.labels) === null || _b === void 0 ? void 0 : _b.notifications }, props.children);
+      import_react109.default.createElement("div", { role: "region", className: clsx_m_default(props.testUtilsClassName, disableContentPaddings && styles_css_default50["no-content-paddings"]), "aria-label": (_a213 = props.labels) === null || _a213 === void 0 ? void 0 : _a213.notifications }, props.children)
+    ) : import_react109.default.createElement("div", { role: "region", ref, className: clsx_m_default(props.testUtilsClassName, styles_css_default50.notifications, disableContentPaddings && styles_css_default50["no-content-paddings"]), "aria-label": (_b = props.labels) === null || _b === void 0 ? void 0 : _b.notifications }, props.children);
   });
 
   // node_modules/@cloudscape-design/components/app-layout/split-panel/constants.js
@@ -319304,14 +319210,14 @@ ${isHandDrawn ? "" : `
   var SPLIT_PANEL_MIN_WIDTH = 280;
 
   // node_modules/@cloudscape-design/components/app-layout/split-panel/drawer.js
-  var import_react113 = __toESM(require_react());
+  var import_react111 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/context/split-panel-context.js
-  var import_react112 = __toESM(require_react());
-  var AppLayoutWidgetSplitPanelContext = awsuiPluginsInternal.sharedReactContexts.createContext(import_react112.default, "AppLayoutWidgetSplitPanelContext");
+  var import_react110 = __toESM(require_react());
+  var AppLayoutWidgetSplitPanelContext = awsuiPluginsInternal.sharedReactContexts.createContext(import_react110.default, "AppLayoutWidgetSplitPanelContext");
   var SplitPanelContextProvider = AppLayoutWidgetSplitPanelContext.Provider;
   function useSplitPanelContext() {
-    const ctx = (0, import_react112.useContext)(AppLayoutWidgetSplitPanelContext);
+    const ctx = (0, import_react110.useContext)(AppLayoutWidgetSplitPanelContext);
     if (!ctx) {
       throw new Error("Split panel can only be used inside app layout");
     }
@@ -319328,18 +319234,18 @@ ${isHandDrawn ? "" : `
   function SideSplitPanelDrawer({ displayed, children: children2 }) {
     const { isOpen, size: size4, topOffset, bottomOffset } = useSplitPanelContext();
     const width3 = isOpen && children2 ? size4 : void 0;
-    return import_react113.default.createElement(
+    return import_react111.default.createElement(
       "div",
       { className: clsx_m_default(displayed && styles_css_default51["drawer-displayed"]), style: { width: width3 }, "data-testid": "side-split-panel-drawer" },
-      import_react113.default.createElement("div", { className: styles_css_default51["drawer-content"], style: { width: width3, top: topOffset, bottom: bottomOffset } }, children2)
+      import_react111.default.createElement("div", { className: styles_css_default51["drawer-content"], style: { width: width3, top: topOffset, bottom: bottomOffset } }, children2)
     );
   }
 
   // node_modules/@cloudscape-design/components/app-layout/split-panel/provider.js
-  var import_react114 = __toESM(require_react());
+  var import_react112 = __toESM(require_react());
   function SplitPanelProvider({ children: children2, size: size4, getMaxHeight, maxWidth: maxWidth2, reportSize, onResize, ...rest }) {
     const { position: position5, isOpen } = rest;
-    const [maxHeight, setMaxHeight] = (0, import_react114.useState)(size4);
+    const [maxHeight, setMaxHeight] = (0, import_react112.useState)(size4);
     const minSize = position5 === "bottom" ? SPLIT_PANEL_MIN_HEIGHT : SPLIT_PANEL_MIN_WIDTH;
     const maxSize = position5 === "bottom" ? maxHeight : maxWidth2;
     const cappedSize = getLimitedValue(minSize, size4, maxSize);
@@ -319351,17 +319257,17 @@ ${isHandDrawn ? "" : `
         onResize(getLimitedValue(minSize, newSize, maxSize2));
       }
     };
-    (0, import_react114.useEffect)(() => {
+    (0, import_react112.useEffect)(() => {
       if (position5 !== "bottom") {
         return;
       }
       const handle = requestAnimationFrame(() => setMaxHeight(getMaxHeight()));
       return () => cancelAnimationFrame(handle);
     }, [size4, minSize, position5, getMaxHeight]);
-    (0, import_react114.useEffect)(() => {
+    (0, import_react112.useEffect)(() => {
       reportSize(cappedSize);
     }, [reportSize, cappedSize]);
-    (0, import_react114.useEffect)(() => {
+    (0, import_react112.useEffect)(() => {
       if (position5 !== "bottom") {
         return;
       }
@@ -319369,7 +319275,7 @@ ${isHandDrawn ? "" : `
       window.addEventListener("resize", handler2);
       return () => window.removeEventListener("resize", handler2);
     }, [position5, getMaxHeight]);
-    return import_react114.default.createElement(SplitPanelContextProvider, { value: { ...rest, size: cappedSize, relativeSize, onResize: onResizeWithValidation } }, children2);
+    return import_react112.default.createElement(SplitPanelContextProvider, { value: { ...rest, size: cappedSize, relativeSize, onResize: onResizeWithValidation } }, children2);
   }
 
   // node_modules/@cloudscape-design/components/app-layout/split-panel/split-panel-forced-position.js
@@ -319405,19 +319311,19 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/utils/use-focus-control.js
-  var import_react115 = __toESM(require_react());
+  var import_react113 = __toESM(require_react());
   function useMultipleFocusControl(restoreFocus, activeDrawersIds) {
-    const refs = (0, import_react115.useRef)({});
+    const refs = (0, import_react113.useRef)({});
     activeDrawersIds.forEach((drawerId) => {
       if (!refs.current[drawerId]) {
         refs.current[drawerId] = {
-          toggle: (0, import_react115.createRef)(),
-          close: (0, import_react115.createRef)(),
-          slider: (0, import_react115.createRef)()
+          toggle: (0, import_react113.createRef)(),
+          close: (0, import_react113.createRef)(),
+          slider: (0, import_react113.createRef)()
         };
       }
     });
-    const doFocus = (0, import_react115.useCallback)((drawerId, open2 = true) => {
+    const doFocus = (0, import_react113.useCallback)((drawerId, open2 = true) => {
       var _a213, _b, _c, _d, _e2, _f;
       const ref = refs.current[drawerId];
       if (open2) {
@@ -319444,12 +319350,12 @@ ${isHandDrawn ? "" : `
         shouldFocus.current = true;
       }
     };
-    const loseFocus = (0, import_react115.useCallback)(() => {
+    const loseFocus = (0, import_react113.useCallback)(() => {
       previousFocusedElement.current = void 0;
     }, []);
-    const previousFocusedElement = (0, import_react115.useRef)();
-    const shouldFocus = (0, import_react115.useRef)(false);
-    (0, import_react115.useEffect)(() => {
+    const previousFocusedElement = (0, import_react113.useRef)();
+    const shouldFocus = (0, import_react113.useRef)(false);
+    (0, import_react113.useEffect)(() => {
       const drawerId = activeDrawersIds[0];
       if (shouldFocus.current) {
         Promise.resolve().then(() => {
@@ -319466,12 +319372,12 @@ ${isHandDrawn ? "" : `
   }
   function useFocusControl(isOpen, restoreFocus = false, activeDrawerId) {
     const refs = {
-      toggle: (0, import_react115.useRef)(null),
-      close: (0, import_react115.useRef)(null),
-      slider: (0, import_react115.useRef)(null)
+      toggle: (0, import_react113.useRef)(null),
+      close: (0, import_react113.useRef)(null),
+      slider: (0, import_react113.useRef)(null)
     };
-    const previousFocusedElement = (0, import_react115.useRef)();
-    const shouldFocus = (0, import_react115.useRef)(false);
+    const previousFocusedElement = (0, import_react113.useRef)();
+    const shouldFocus = (0, import_react113.useRef)(false);
     const doFocus = () => {
       var _a213, _b, _c;
       if (!shouldFocus.current) {
@@ -319502,8 +319408,8 @@ ${isHandDrawn ? "" : `
         shouldFocus.current = true;
       }
     };
-    (0, import_react115.useEffect)(doFocus, [isOpen, activeDrawerId]);
-    const loseFocus = (0, import_react115.useCallback)(() => {
+    (0, import_react113.useEffect)(doFocus, [isOpen, activeDrawerId]);
+    const loseFocus = (0, import_react113.useCallback)(() => {
       previousFocusedElement.current = void 0;
     }, []);
     return {
@@ -319514,12 +319420,12 @@ ${isHandDrawn ? "" : `
   }
   function useAsyncFocusControl(isOpen, restoreFocus = false, activeDrawerId) {
     const refs = {
-      toggle: (0, import_react115.useRef)(null),
-      close: (0, import_react115.useRef)(null),
-      slider: (0, import_react115.useRef)(null)
+      toggle: (0, import_react113.useRef)(null),
+      close: (0, import_react113.useRef)(null),
+      slider: (0, import_react113.useRef)(null)
     };
-    const previousFocusedElement = (0, import_react115.useRef)();
-    const shouldFocus = (0, import_react115.useRef)(false);
+    const previousFocusedElement = (0, import_react113.useRef)();
+    const shouldFocus = (0, import_react113.useRef)(false);
     const doFocus = () => {
       var _a213, _b, _c;
       if (isOpen) {
@@ -319545,7 +319451,7 @@ ${isHandDrawn ? "" : `
         shouldFocus.current = true;
       }
     };
-    (0, import_react115.useEffect)(() => {
+    (0, import_react113.useEffect)(() => {
       if (shouldFocus.current) {
         Promise.resolve().then(() => {
           doFocus();
@@ -319553,7 +319459,7 @@ ${isHandDrawn ? "" : `
         });
       }
     }, [isOpen, activeDrawerId]);
-    const loseFocus = (0, import_react115.useCallback)(() => {
+    const loseFocus = (0, import_react113.useCallback)(() => {
       previousFocusedElement.current = void 0;
     }, []);
     return {
@@ -319564,15 +319470,15 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/utils/use-split-panel-focus-control.js
-  var import_react116 = __toESM(require_react());
+  var import_react114 = __toESM(require_react());
   function useSplitPanelFocusControl(dependencies) {
     const refs = {
-      toggle: (0, import_react116.useRef)(null),
-      slider: (0, import_react116.useRef)(null),
-      preferences: (0, import_react116.useRef)(null)
+      toggle: (0, import_react114.useRef)(null),
+      slider: (0, import_react114.useRef)(null),
+      preferences: (0, import_react114.useRef)(null)
     };
-    const lastInteraction = (0, import_react116.useRef)(null);
-    (0, import_react116.useEffect)(() => {
+    const lastInteraction = (0, import_react114.useRef)(null);
+    (0, import_react114.useEffect)(() => {
       Promise.resolve().then(() => {
         var _a213, _b, _c, _d;
         switch ((_a213 = lastInteraction.current) === null || _a213 === void 0 ? void 0 : _a213.type) {
@@ -319596,10 +319502,10 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/classic.js
-  var ClassicAppLayout = import_react117.default.forwardRef(({ navigation, navigationWidth, navigationHide, navigationOpen, tools, toolsWidth, toolsHide, toolsOpen: controlledToolsOpen, breadcrumbs, notifications: notifications2, stickyNotifications, contentHeader, disableContentHeaderOverlap, content, contentType, disableContentPaddings, disableBodyScroll, maxContentWidth, minContentWidth, placement, ariaLabels, splitPanel, splitPanelSize: controlledSplitPanelSize, splitPanelOpen: controlledSplitPanelOpen, splitPanelPreferences: controlledSplitPanelPreferences, onSplitPanelPreferencesChange, onSplitPanelResize, onSplitPanelToggle, onNavigationChange, onToolsChange, drawers: controlledDrawers, onDrawerChange, activeDrawerId: controlledActiveDrawerId, ...rest }, ref) => {
+  var ClassicAppLayout = import_react115.default.forwardRef(({ navigation, navigationWidth, navigationHide, navigationOpen, tools, toolsWidth, toolsHide, toolsOpen: controlledToolsOpen, breadcrumbs, notifications: notifications2, stickyNotifications, contentHeader, disableContentHeaderOverlap, content, contentType, disableContentPaddings, disableBodyScroll, maxContentWidth, minContentWidth, placement, ariaLabels, splitPanel, splitPanelSize: controlledSplitPanelSize, splitPanelOpen: controlledSplitPanelOpen, splitPanelPreferences: controlledSplitPanelPreferences, onSplitPanelPreferencesChange, onSplitPanelResize, onSplitPanelToggle, onNavigationChange, onToolsChange, drawers: controlledDrawers, onDrawerChange, activeDrawerId: controlledActiveDrawerId, ...rest }, ref) => {
     var _a213, _b, _c, _d, _e2, _f, _g;
     const __embeddedViewMode = Boolean(rest.__embeddedViewMode);
-    const rootRef = (0, import_react117.useRef)(null);
+    const rootRef = (0, import_react115.useRef)(null);
     const isMobile = useMobile();
     const [toolsOpen = false, setToolsOpen] = useControllable2(controlledToolsOpen, onToolsChange, false, {
       componentName: "AppLayout",
@@ -319644,15 +319550,15 @@ ${isHandDrawn ? "" : `
         onNavigationToggle({ isOpen: false, autoFocus: true });
       }
     };
-    (0, import_react117.useEffect)(() => {
+    (0, import_react115.useEffect)(() => {
       if (isMobile) {
         onNavigationToggle({ isOpen: false, autoFocus: false });
       }
     }, [isMobile, onNavigationToggle]);
     const navigationVisible = !navigationHide && navigationOpen;
     const toolsVisible = !toolsHide && toolsOpen;
-    const [headerFooterHeight, setHeaderFooterHeight] = (0, import_react117.useState)(0);
-    (0, import_react117.useEffect)(() => {
+    const [headerFooterHeight, setHeaderFooterHeight] = (0, import_react115.useState)(0);
+    (0, import_react115.useEffect)(() => {
       const id38 = requestAnimationFrame(() => setHeaderFooterHeight(placement.insetBlockStart + placement.insetBlockEnd));
       return () => cancelAnimationFrame(id38);
     }, [placement.insetBlockStart, placement.insetBlockEnd]);
@@ -319674,7 +319580,7 @@ ${isHandDrawn ? "" : `
       changeHandler: "onSplitPanelToggle"
     });
     const splitPanelPosition = (splitPanelPreferences === null || splitPanelPreferences === void 0 ? void 0 : splitPanelPreferences.position) || "bottom";
-    const [splitPanelReportedToggle, setSplitPanelReportedToggle] = (0, import_react117.useState)({
+    const [splitPanelReportedToggle, setSplitPanelReportedToggle] = (0, import_react115.useState)({
       displayed: false,
       ariaLabel: void 0
     });
@@ -319687,22 +319593,22 @@ ${isHandDrawn ? "" : `
       controlledProp: "splitPanelSize",
       changeHandler: "onSplitPanelResize"
     });
-    const mainContentRef = (0, import_react117.useRef)(null);
-    const legacyScrollRootRef = (0, import_react117.useRef)(null);
+    const mainContentRef = (0, import_react115.useRef)(null);
+    const legacyScrollRootRef = (0, import_react115.useRef)(null);
     const { refs: splitPanelRefs, setLastInteraction: setSplitPanelLastInteraction } = useSplitPanelFocusControl([
       splitPanelPreferences,
       splitPanelOpen
     ]);
-    const onSplitPanelPreferencesSet = (0, import_react117.useCallback)((detail) => {
+    const onSplitPanelPreferencesSet = (0, import_react115.useCallback)((detail) => {
       setSplitPanelPreferences(detail);
       setSplitPanelLastInteraction({ type: "position" });
       fireNonCancelableEvent(onSplitPanelPreferencesChange, detail);
     }, [setSplitPanelPreferences, onSplitPanelPreferencesChange, setSplitPanelLastInteraction]);
-    const onSplitPanelSizeSet = (0, import_react117.useCallback)((newSize) => {
+    const onSplitPanelSizeSet = (0, import_react115.useCallback)((newSize) => {
       setSplitPanelSize(newSize);
       fireNonCancelableEvent(onSplitPanelResize, { size: newSize });
     }, [setSplitPanelSize, onSplitPanelResize]);
-    const onSplitPanelToggleHandler = (0, import_react117.useCallback)(() => {
+    const onSplitPanelToggleHandler = (0, import_react115.useCallback)(() => {
       setSplitPanelOpen(!splitPanelOpen);
       setSplitPanelLastInteraction({ type: splitPanelOpen ? "close" : "open" });
       fireNonCancelableEvent(onSplitPanelToggle, { open: !splitPanelOpen });
@@ -319746,8 +319652,8 @@ ${isHandDrawn ? "" : `
     const drawerMaxSize = Math.max(0, resizableSpaceAvailable - sideSplitPanelSize);
     const navigationClosedWidth = navigationHide || isMobile ? 0 : closedDrawerWidth;
     const contentMaxWidthStyle = !isMobile ? { maxWidth: maxContentWidth } : void 0;
-    const [splitPanelReportedSize, setSplitPanelReportedSize] = (0, import_react117.useState)(0);
-    const [splitPanelReportedHeaderHeight, setSplitPanelReportedHeaderHeight] = (0, import_react117.useState)(0);
+    const [splitPanelReportedSize, setSplitPanelReportedSize] = (0, import_react115.useState)(0);
+    const [splitPanelReportedHeaderHeight, setSplitPanelReportedHeaderHeight] = (0, import_react115.useState)(0);
     const splitPanelContextProps = {
       topOffset: placement.insetBlockStart + (finalSplitPanePosition === "bottom" ? stickyNotificationsHeight : 0),
       bottomOffset: placement.insetBlockEnd,
@@ -319769,7 +319675,7 @@ ${isHandDrawn ? "" : `
       reportHeaderHeight: setSplitPanelReportedHeaderHeight,
       refs: splitPanelRefs
     };
-    const splitPanelWrapped = splitPanel && import_react117.default.createElement(SplitPanelProvider, { ...splitPanelContextProps }, finalSplitPanePosition === "side" ? import_react117.default.createElement(SideSplitPanelDrawer, { displayed: splitPanelDisplayed }, splitPanel) : splitPanel);
+    const splitPanelWrapped = splitPanel && import_react115.default.createElement(SplitPanelProvider, { ...splitPanelContextProps }, finalSplitPanePosition === "side" ? import_react115.default.createElement(SideSplitPanelDrawer, { displayed: splitPanelDisplayed }, splitPanel) : splitPanel);
     const contentWrapperProps = {
       contentType,
       navigationPadding: navigationHide || !!navigationOpen,
@@ -319783,7 +319689,7 @@ ${isHandDrawn ? "" : `
       ),
       isMobile
     };
-    (0, import_react117.useImperativeHandle)(ref, () => ({
+    (0, import_react115.useImperativeHandle)(ref, () => ({
       openTools: () => onToolsToggle(true),
       closeNavigationIfNecessary: () => {
         if (isMobile) {
@@ -319805,45 +319711,45 @@ ${isHandDrawn ? "" : `
     }));
     const splitPanelBottomOffset = (_a213 = !splitPanelDisplayed || finalSplitPanePosition !== "bottom" ? void 0 : splitPanelOpen ? splitPanelReportedSize : splitPanelReportedHeaderHeight) !== null && _a213 !== void 0 ? _a213 : void 0;
     const [mobileBarHeight, mobileBarRef] = useContainerQuery((rect2) => rect2.contentBoxHeight);
-    return import_react117.default.createElement(
+    return import_react115.default.createElement(
       "div",
       { className: clsx_m_default(styles_css_default48.root, styles_css_default22.root, disableBodyScroll && styles_css_default48["root-no-scroll"]), ref: rootRef, style: contentHeightStyle },
-      isMobile && !__embeddedViewMode && (!toolsHide || !navigationHide || breadcrumbs) && import_react117.default.createElement(MobileToolbar, { anyPanelOpen, toggleRefs: { navigation: navigationRefs.toggle, tools: toolsRefs.toggle }, topOffset: placement.insetBlockStart, ariaLabels, navigationHide, toolsHide, onNavigationOpen: () => onNavigationToggle({ isOpen: true, autoFocus: true }), onToolsOpen: () => onToolsToggle(true), unfocusable: anyPanelOpen, mobileBarRef, drawers: drawers === null || drawers === void 0 ? void 0 : drawers.filter((drawer) => drawer.trigger), activeDrawerId, onDrawerChange: (newDrawerId) => {
+      isMobile && !__embeddedViewMode && (!toolsHide || !navigationHide || breadcrumbs) && import_react115.default.createElement(MobileToolbar, { anyPanelOpen, toggleRefs: { navigation: navigationRefs.toggle, tools: toolsRefs.toggle }, topOffset: placement.insetBlockStart, ariaLabels, navigationHide, toolsHide, onNavigationOpen: () => onNavigationToggle({ isOpen: true, autoFocus: true }), onToolsOpen: () => onToolsToggle(true), unfocusable: anyPanelOpen, mobileBarRef, drawers: drawers === null || drawers === void 0 ? void 0 : drawers.filter((drawer) => drawer.trigger), activeDrawerId, onDrawerChange: (newDrawerId) => {
         onActiveDrawerChange(newDrawerId, { initiatedByUserAction: true });
         if (newDrawerId !== activeDrawerId) {
           focusToolsButtons();
           focusDrawersButtons();
         }
       } }, breadcrumbs),
-      import_react117.default.createElement(
+      import_react115.default.createElement(
         "div",
         { className: clsx_m_default(styles_css_default48.layout, disableBodyScroll && styles_css_default48["layout-no-scroll"]) },
-        !navigationHide && import_react117.default.createElement(Drawer, { contentClassName: styles_css_default22.navigation, toggleClassName: styles_css_default22["navigation-toggle"], closeClassName: styles_css_default22["navigation-close"], ariaLabels: togglesConfig.navigation.getLabels(ariaLabels), bottomOffset: placement.insetBlockEnd, topOffset: placement.insetBlockStart, isMobile, isOpen: navigationOpen, onClick: isMobile ? onNavigationClick : void 0, onToggle: (isOpen) => onNavigationToggle({ isOpen, autoFocus: true }), toggleRefs: navigationRefs, type: "navigation", width: navigationWidth }, navigation),
-        import_react117.default.createElement(
+        !navigationHide && import_react115.default.createElement(Drawer, { contentClassName: styles_css_default22.navigation, toggleClassName: styles_css_default22["navigation-toggle"], closeClassName: styles_css_default22["navigation-close"], ariaLabels: togglesConfig.navigation.getLabels(ariaLabels), bottomOffset: placement.insetBlockEnd, topOffset: placement.insetBlockStart, isMobile, isOpen: navigationOpen, onClick: isMobile ? onNavigationClick : void 0, onToggle: (isOpen) => onNavigationToggle({ isOpen, autoFocus: true }), toggleRefs: navigationRefs, type: "navigation", width: navigationWidth }, navigation),
+        import_react115.default.createElement(
           "main",
           { ref: legacyScrollRootRef, className: clsx_m_default(styles_css_default48["layout-main"], {
             [styles_css_default48["layout-main-scrollable"]]: disableBodyScroll,
             [styles_css_default22["disable-body-scroll-root"]]: disableBodyScroll,
             [styles_css_default48.unfocusable]: isMobile && anyPanelOpen
           }) },
-          import_react117.default.createElement(
+          import_react115.default.createElement(
             "div",
             { style: {
               marginBottom: splitPanelBottomOffset
             } },
-            notifications2 && import_react117.default.createElement(Notifications, { disableContentPaddings, testUtilsClassName: styles_css_default22.notifications, labels: ariaLabels, topOffset: disableBodyScroll ? 0 : placement.insetBlockStart, sticky: !isMobile && stickyNotifications, ref: notificationsRef }, notifications2),
-            (!isMobile && breadcrumbs || contentHeader) && import_react117.default.createElement(
+            notifications2 && import_react115.default.createElement(Notifications, { disableContentPaddings, testUtilsClassName: styles_css_default22.notifications, labels: ariaLabels, topOffset: disableBodyScroll ? 0 : placement.insetBlockStart, sticky: !isMobile && stickyNotifications, ref: notificationsRef }, notifications2),
+            (!isMobile && breadcrumbs || contentHeader) && import_react115.default.createElement(
               content_wrapper_default,
               { ...contentWrapperProps },
-              !isMobile && breadcrumbs && import_react117.default.createElement("div", { className: clsx_m_default(styles_css_default22.breadcrumbs, styles_css_default48["breadcrumbs-desktop"]) }, breadcrumbs),
-              contentHeader && import_react117.default.createElement("div", { className: clsx_m_default(styles_css_default48["content-header-wrapper"], !hasRenderedNotifications && (isMobile || !breadcrumbs) && styles_css_default48["content-extra-top-padding"], !hasRenderedNotifications && !breadcrumbs && styles_css_default48["content-header-wrapper-first-child"], !disableContentHeaderOverlap && styles_css_default48["content-header-wrapper-overlapped"]) }, contentHeader)
+              !isMobile && breadcrumbs && import_react115.default.createElement("div", { className: clsx_m_default(styles_css_default22.breadcrumbs, styles_css_default48["breadcrumbs-desktop"]) }, breadcrumbs),
+              contentHeader && import_react115.default.createElement("div", { className: clsx_m_default(styles_css_default48["content-header-wrapper"], !hasRenderedNotifications && (isMobile || !breadcrumbs) && styles_css_default48["content-extra-top-padding"], !hasRenderedNotifications && !breadcrumbs && styles_css_default48["content-header-wrapper-first-child"], !disableContentHeaderOverlap && styles_css_default48["content-header-wrapper-overlapped"]) }, contentHeader)
             ),
-            import_react117.default.createElement(content_wrapper_default, { ...contentWrapperProps, ref: mainContentRef, disablePaddings: disableContentPaddings, className: clsx_m_default(!disableContentPaddings && styles_css_default48["content-wrapper"], !disableContentPaddings && (isMobile || !breadcrumbs) && !contentHeader && styles_css_default48["content-extra-top-padding"], styles_css_default22.content, !disableContentHeaderOverlap && contentHeader && styles_css_default48["content-overlapped"], !hasRenderedNotifications && !breadcrumbs && !isMobile && !contentHeader && styles_css_default48["content-wrapper-first-child"]), style: getStickyOffsetVars(placement.insetBlockStart, placement.insetBlockEnd + (splitPanelBottomOffset || 0), `${stickyNotificationsHeight}px`, mobileBarHeight && !disableBodyScroll ? `${mobileBarHeight}px` : "0px", !!disableBodyScroll, isMobile) }, content)
+            import_react115.default.createElement(content_wrapper_default, { ...contentWrapperProps, ref: mainContentRef, disablePaddings: disableContentPaddings, className: clsx_m_default(!disableContentPaddings && styles_css_default48["content-wrapper"], !disableContentPaddings && (isMobile || !breadcrumbs) && !contentHeader && styles_css_default48["content-extra-top-padding"], styles_css_default22.content, !disableContentHeaderOverlap && contentHeader && styles_css_default48["content-overlapped"], !hasRenderedNotifications && !breadcrumbs && !isMobile && !contentHeader && styles_css_default48["content-wrapper-first-child"]), style: getStickyOffsetVars(placement.insetBlockStart, placement.insetBlockEnd + (splitPanelBottomOffset || 0), `${stickyNotificationsHeight}px`, mobileBarHeight && !disableBodyScroll ? `${mobileBarHeight}px` : "0px", !!disableBodyScroll, isMobile) }, content)
           ),
           finalSplitPanePosition === "bottom" && splitPanelWrapped
         ),
         finalSplitPanePosition === "side" && splitPanelWrapped,
-        hasDrawers ? import_react117.default.createElement(ResizableDrawer, { contentClassName: clsx_m_default(activeDrawerId && styles_css_default22["active-drawer"], activeDrawerId === TOOLS_DRAWER_ID && styles_css_default22.tools), toggleClassName: styles_css_default22["tools-toggle"], closeClassName: clsx_m_default(styles_css_default22["active-drawer-close-button"], activeDrawerId === TOOLS_DRAWER_ID && styles_css_default22["tools-close"]), ariaLabels: {
+        hasDrawers ? import_react115.default.createElement(ResizableDrawer, { contentClassName: clsx_m_default(activeDrawerId && styles_css_default22["active-drawer"], activeDrawerId === TOOLS_DRAWER_ID && styles_css_default22.tools), toggleClassName: styles_css_default22["tools-toggle"], closeClassName: clsx_m_default(styles_css_default22["active-drawer-close-button"], activeDrawerId === TOOLS_DRAWER_ID && styles_css_default22["tools-close"]), ariaLabels: {
           openLabel: (_b = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _b === void 0 ? void 0 : _b.triggerButton,
           closeLabel: (_c = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _c === void 0 ? void 0 : _c.closeButton,
           mainLabel: (_d = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _d === void 0 ? void 0 : _d.drawerName,
@@ -319855,8 +319761,8 @@ ${isHandDrawn ? "" : `
             focusDrawersButtons();
             onActiveDrawerChange(null, { initiatedByUserAction: true });
           }
-        }, isOpen: true, hideOpenButton: true, toggleRefs: drawerRefs, type: "tools", onLoseFocus: loseDrawersFocus, activeDrawer, onResize: (changeDetail) => onActiveDrawerResize(changeDetail), refs: drawerRefs, toolsContent: (_g = drawers === null || drawers === void 0 ? void 0 : drawers.find((drawer) => drawer.id === TOOLS_DRAWER_ID)) === null || _g === void 0 ? void 0 : _g.content }, activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.content) : !toolsHide && import_react117.default.createElement(Drawer, { contentClassName: styles_css_default22.tools, toggleClassName: styles_css_default22["tools-toggle"], closeClassName: styles_css_default22["tools-close"], ariaLabels: togglesConfig.tools.getLabels(ariaLabels), width: toolsWidth, bottomOffset: placement.insetBlockEnd, topOffset: placement.insetBlockStart, isMobile, onToggle: onToolsToggle, isOpen: toolsOpen, toggleRefs: toolsRefs, type: "tools", onLoseFocus: loseToolsFocus }, tools),
-        hasDrawers && drawers.length > 0 && import_react117.default.createElement(DrawerTriggersBar, { drawerRefs, bottomOffset: placement.insetBlockEnd, topOffset: placement.insetBlockStart, isMobile, drawers: drawers.filter((drawer) => drawer.trigger), activeDrawerId, onDrawerChange: (newDrawerId) => {
+        }, isOpen: true, hideOpenButton: true, toggleRefs: drawerRefs, type: "tools", onLoseFocus: loseDrawersFocus, activeDrawer, onResize: (changeDetail) => onActiveDrawerResize(changeDetail), refs: drawerRefs, toolsContent: (_g = drawers === null || drawers === void 0 ? void 0 : drawers.find((drawer) => drawer.id === TOOLS_DRAWER_ID)) === null || _g === void 0 ? void 0 : _g.content }, activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.content) : !toolsHide && import_react115.default.createElement(Drawer, { contentClassName: styles_css_default22.tools, toggleClassName: styles_css_default22["tools-toggle"], closeClassName: styles_css_default22["tools-close"], ariaLabels: togglesConfig.tools.getLabels(ariaLabels), width: toolsWidth, bottomOffset: placement.insetBlockEnd, topOffset: placement.insetBlockStart, isMobile, onToggle: onToolsToggle, isOpen: toolsOpen, toggleRefs: toolsRefs, type: "tools", onLoseFocus: loseToolsFocus }, tools),
+        hasDrawers && drawers.length > 0 && import_react115.default.createElement(DrawerTriggersBar, { drawerRefs, bottomOffset: placement.insetBlockEnd, topOffset: placement.insetBlockStart, isMobile, drawers: drawers.filter((drawer) => drawer.trigger), activeDrawerId, onDrawerChange: (newDrawerId) => {
           if (activeDrawerId !== newDrawerId) {
             focusToolsButtons();
             focusDrawersButtons();
@@ -319869,13 +319775,13 @@ ${isHandDrawn ? "" : `
   var classic_default = ClassicAppLayout;
 
   // node_modules/@cloudscape-design/components/app-layout/utils/feature-flags.js
-  var import_react119 = __toESM(require_react());
+  var import_react117 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/contexts.js
-  var import_react118 = __toESM(require_react());
-  var BreadcrumbsSlotContext = awsuiPluginsInternal.sharedReactContexts.createContext(import_react118.default, "BreadcrumbsSlotContext");
-  var AppLayoutVisibilityContext = awsuiPluginsInternal.sharedReactContexts.createContext(import_react118.default, "AppLayoutVisibilityContext");
-  var AppLayoutToolbarPublicContext = awsuiPluginsInternal.sharedReactContexts.createContext(import_react118.default, "AppLayoutToolbarPublicContext");
+  var import_react116 = __toESM(require_react());
+  var BreadcrumbsSlotContext = awsuiPluginsInternal.sharedReactContexts.createContext(import_react116.default, "BreadcrumbsSlotContext");
+  var AppLayoutVisibilityContext = awsuiPluginsInternal.sharedReactContexts.createContext(import_react116.default, "AppLayoutVisibilityContext");
+  var AppLayoutToolbarPublicContext = awsuiPluginsInternal.sharedReactContexts.createContext(import_react116.default, "AppLayoutToolbarPublicContext");
 
   // node_modules/@cloudscape-design/components/app-layout/utils/feature-flags.js
   var useAppLayoutFlagEnabled = () => {
@@ -319885,35 +319791,35 @@ ${isHandDrawn ? "" : `
   var useAppLayoutToolbarDesignEnabled = () => {
     var _a213;
     const isToolbarPrivate = useAppLayoutFlagEnabled();
-    const isToolbarPublic = (_a213 = (0, import_react119.useContext)(AppLayoutToolbarPublicContext)) !== null && _a213 !== void 0 ? _a213 : false;
+    const isToolbarPublic = (_a213 = (0, import_react117.useContext)(AppLayoutToolbarPublicContext)) !== null && _a213 !== void 0 ? _a213 : false;
     return isToolbarPublic || isToolbarPrivate;
   };
   var isAppLayoutHideToolbarBreadcrumbsEnabled = () => !!getGlobalFlag("appLayoutHideToolbarBreadcrumbs");
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/index.js
-  var import_react137 = __toESM(require_react());
+  var import_react135 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/background.js
-  var import_react125 = __toESM(require_react());
+  var import_react123 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/utils/content-header-utils.js
   var highContrastHeaderClassName = "awsui-context-content-header";
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/context.js
-  var import_react124 = __toESM(require_react());
+  var import_react122 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/context/dynamic-overlap-context.js
-  var import_react120 = __toESM(require_react());
-  var DynamicOverlapContext = (0, import_react120.createContext)(() => {
+  var import_react118 = __toESM(require_react());
+  var DynamicOverlapContext = (0, import_react118.createContext)(() => {
   });
 
   // node_modules/@cloudscape-design/components/app-layout/utils/use-resize.js
-  var import_react121 = __toESM(require_react());
+  var import_react119 = __toESM(require_react());
   function useResize(drawerRefObject, { activeDrawer, activeDrawerSize, onActiveDrawerResize, drawersRefs, isToolsOpen, drawersMinWidth, drawersMaxWidth }) {
     var _a213, _b;
-    const [relativeSize, setRelativeSize] = (0, import_react121.useState)(0);
+    const [relativeSize, setRelativeSize] = (0, import_react119.useState)(0);
     const drawerSize = !activeDrawer && !isToolsOpen ? 0 : activeDrawerSize;
-    (0, import_react121.useEffect)(() => {
+    (0, import_react119.useEffect)(() => {
       const handle = requestAnimationFrame(() => {
         const maxSize = drawersMaxWidth;
         setRelativeSize((drawerSize - drawersMinWidth) / (maxSize - drawersMinWidth) * 100);
@@ -319936,13 +319842,13 @@ ${isHandDrawn ? "" : `
     };
     const onSliderPointerDown = usePointerEvents(sizeControlProps);
     const { onKeyDown, onDirectionClick } = useKeyboardEvents(sizeControlProps);
-    const resizeHandle = import_react121.default.createElement(panel_resize_handle_default, { ref: drawersRefs.slider, position: "side", ariaLabel: (_a213 = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _a213 === void 0 ? void 0 : _a213.resizeHandle, tooltipText: (_b = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _b === void 0 ? void 0 : _b.resizeHandleTooltipText, ariaValuenow: relativeSize, className: styles_css_default22["drawers-slider"], onKeyDown, onDirectionClick, onPointerDown: onSliderPointerDown });
+    const resizeHandle = import_react119.default.createElement(panel_resize_handle_default, { ref: drawersRefs.slider, position: "side", ariaLabel: (_a213 = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _a213 === void 0 ? void 0 : _a213.resizeHandle, tooltipText: (_b = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _b === void 0 ? void 0 : _b.resizeHandleTooltipText, ariaValuenow: relativeSize, className: styles_css_default22["drawers-slider"], onKeyDown, onDirectionClick, onPointerDown: onSliderPointerDown });
     return { resizeHandle, drawerSize };
   }
   var use_resize_default = useResize;
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/split-panel.js
-  var import_react122 = __toESM(require_react());
+  var import_react120 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/styles.css.js
   var styles_css_default52 = {
@@ -320059,14 +319965,14 @@ ${isHandDrawn ? "" : `
       setSplitPanelToggle,
       refs: splitPanelRefs
     };
-    return import_react122.default.createElement(SplitPanelProvider, { ...props }, children2);
+    return import_react120.default.createElement(SplitPanelProvider, { ...props }, children2);
   }
   function SplitPanelBottom() {
     const { disableBodyScroll, hasOpenDrawer, navigationOpen, isSplitPanelOpen, splitPanel, splitPanelPosition, splitPanelReportedSize, splitPanelReportedHeaderHeight } = useAppLayoutInternals();
     if (!splitPanel) {
       return null;
     }
-    return import_react122.default.createElement(Transition4, { in: isSplitPanelOpen !== null && isSplitPanelOpen !== void 0 ? isSplitPanelOpen : false, exit: false }, (state5, transitionEventsRef) => import_react122.default.createElement("section", { className: clsx_m_default(styles_css_default52["split-panel-bottom"], styles_css_default52[`position-${splitPanelPosition}`], {
+    return import_react120.default.createElement(Transition4, { in: isSplitPanelOpen !== null && isSplitPanelOpen !== void 0 ? isSplitPanelOpen : false, exit: false }, (state5, transitionEventsRef) => import_react120.default.createElement("section", { className: clsx_m_default(styles_css_default52["split-panel-bottom"], styles_css_default52[`position-${splitPanelPosition}`], {
       [styles_css_default52.animating]: state5 === "entering",
       [styles_css_default52["disable-body-scroll"]]: disableBodyScroll,
       [styles_css_default52["has-open-drawer"]]: hasOpenDrawer,
@@ -320082,7 +319988,7 @@ ${isHandDrawn ? "" : `
     if (!splitPanel) {
       return null;
     }
-    return import_react122.default.createElement("section", { id: splitPanelControlId, "aria-hidden": !isSplitPanelOpen || splitPanelPosition === "bottom" ? true : false, className: clsx_m_default(styles_css_default52["split-panel-side"], styles_css_default52[`position-${splitPanelPosition}`], {
+    return import_react120.default.createElement("section", { id: splitPanelControlId, "aria-hidden": !isSplitPanelOpen || splitPanelPosition === "bottom" ? true : false, className: clsx_m_default(styles_css_default52["split-panel-side"], styles_css_default52[`position-${splitPanelPosition}`], {
       [styles_css_default52["is-split-panel-open"]]: isSplitPanelOpen,
       [styles_css_default52["has-open-drawer"]]: !!activeDrawerId || isToolsOpen
     }), style: {
@@ -320102,11 +320008,11 @@ ${isHandDrawn ? "" : `
   var split_panel_default = SplitPanel;
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/use-background-overlap.js
-  var import_react123 = __toESM(require_react());
+  var import_react121 = __toESM(require_react());
   function useBackgroundOverlap({ contentHeader, disableContentHeaderOverlap, layoutElement }) {
     const hasContentHeader = !!contentHeader;
-    const [hasBackgroundOverlap, setHasBackgroundOverlap] = (0, import_react123.useState)(hasContentHeader);
-    const updateBackgroundOverlapHeight = (0, import_react123.useCallback)((height2) => {
+    const [hasBackgroundOverlap, setHasBackgroundOverlap] = (0, import_react121.useState)(hasContentHeader);
+    const updateBackgroundOverlapHeight = (0, import_react121.useCallback)((height2) => {
       const hasOverlap = hasContentHeader || height2 > 0;
       setHasBackgroundOverlap(hasOverlap);
       const element3 = typeof layoutElement !== "function" && (layoutElement === null || layoutElement === void 0 ? void 0 : layoutElement.current);
@@ -320126,15 +320032,15 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/context.js
-  var AppLayoutInternalsContext = (0, import_react124.createContext)(null);
+  var AppLayoutInternalsContext = (0, import_react122.createContext)(null);
   function useAppLayoutInternals() {
-    const ctx = (0, import_react124.useContext)(AppLayoutInternalsContext);
+    const ctx = (0, import_react122.useContext)(AppLayoutInternalsContext);
     if (!ctx) {
       throw new Error("Invariant violation: this context is only available inside app layout");
     }
     return ctx;
   }
-  var AppLayoutInternalsProvider = import_react124.default.forwardRef((props, forwardRef16) => {
+  var AppLayoutInternalsProvider = import_react122.default.forwardRef((props, forwardRef16) => {
     var _a213, _b, _c, _d, _e2;
     const { toolsHide, toolsOpen: controlledToolsOpen, navigationHide, navigationOpen, contentType, placement, children: children2, splitPanel } = props;
     const isMobile = useMobile();
@@ -320148,7 +320054,7 @@ ${isHandDrawn ? "" : `
       focusNavButtons({ force: false, autoFocus });
       fireNonCancelableEvent(props.onNavigationChange, { open: isOpen });
     });
-    (0, import_react124.useEffect)(() => {
+    (0, import_react122.useEffect)(() => {
       if (isMobile) {
         handleNavigationClick({ isOpen: false, autoFocus: false });
       }
@@ -320160,14 +320066,14 @@ ${isHandDrawn ? "" : `
       changeHandler: "onToolsChange"
     });
     const { refs: toolsRefs, setFocus: focusToolsButtons, loseFocus: loseToolsFocus } = useFocusControl(isToolsOpen, true);
-    const handleToolsClick = (0, import_react124.useCallback)(function handleToolsChange(isOpen, skipFocusControl) {
+    const handleToolsClick = (0, import_react122.useCallback)(function handleToolsChange(isOpen, skipFocusControl) {
       setIsToolsOpen(isOpen);
       if (!skipFocusControl) {
         focusToolsButtons({ force: false });
       }
       fireNonCancelableEvent(props.onToolsChange, { open: isOpen });
     }, [props.onToolsChange, setIsToolsOpen, focusToolsButtons]);
-    const [splitPanelMaxWidth, setSplitPanelMaxWidth] = (0, import_react124.useState)(SPLIT_PANEL_MIN_WIDTH);
+    const [splitPanelMaxWidth, setSplitPanelMaxWidth] = (0, import_react122.useState)(SPLIT_PANEL_MIN_WIDTH);
     const [isSplitPanelOpen, setIsSplitPanelOpen] = useControllable2(props.splitPanelOpen, props.onSplitPanelToggle, false, { componentName: "AppLayout", controlledProp: "splitPanelOpen", changeHandler: "onSplitPanelToggle" });
     const [splitPanelPreferences, setSplitPanelPreferences] = useControllable2(props.splitPanelPreferences, props.onSplitPanelPreferencesChange, void 0, {
       componentName: "AppLayout",
@@ -320178,7 +320084,7 @@ ${isHandDrawn ? "" : `
       splitPanelPreferences,
       isSplitPanelOpen
     ]);
-    const handleSplitPanelClick = (0, import_react124.useCallback)(function handleSplitPanelChange() {
+    const handleSplitPanelClick = (0, import_react122.useCallback)(function handleSplitPanelChange() {
       setIsSplitPanelOpen(!isSplitPanelOpen);
       setSplitPanelLastInteraction({ type: isSplitPanelOpen ? "close" : "open" });
       fireNonCancelableEvent(props.onSplitPanelToggle, { open: !isSplitPanelOpen });
@@ -320188,9 +320094,9 @@ ${isHandDrawn ? "" : `
       availableWidthForSplitPanel: splitPanelMaxWidth
     });
     const splitPanelPosition = getSplitPanelPosition(isSplitPanelForcedPosition, splitPanelPreferences);
-    const [splitPanelReportedSize, setSplitPanelReportedSize] = (0, import_react124.useState)(0);
-    const [splitPanelReportedHeaderHeight, setSplitPanelReportedHeaderHeight] = (0, import_react124.useState)(0);
-    const [splitPanelToggle, setSplitPanelToggle] = (0, import_react124.useState)({
+    const [splitPanelReportedSize, setSplitPanelReportedSize] = (0, import_react122.useState)(0);
+    const [splitPanelReportedHeaderHeight, setSplitPanelReportedHeaderHeight] = (0, import_react122.useState)(0);
+    const [splitPanelToggle, setSplitPanelToggle] = (0, import_react122.useState)({
       displayed: false,
       ariaLabel: void 0
     });
@@ -320198,11 +320104,11 @@ ${isHandDrawn ? "" : `
     const splitPanelControlId = useUniqueId("split-panel-");
     const toolsControlId = useUniqueId("tools-");
     const [splitPanelSize, setSplitPanelSize] = useControllable2(props.splitPanelSize, props.onSplitPanelResize, getSplitPanelDefaultSize(splitPanelPosition), { componentName: "AppLayout", controlledProp: "splitPanelSize", changeHandler: "onSplitPanelResize" });
-    const handleSplitPanelResize = (0, import_react124.useCallback)((size4) => {
+    const handleSplitPanelResize = (0, import_react122.useCallback)((size4) => {
       setSplitPanelSize(size4);
       fireNonCancelableEvent(props.onSplitPanelResize, { size: size4 });
     }, [props.onSplitPanelResize, setSplitPanelSize]);
-    const handleSplitPanelPreferencesChange = (0, import_react124.useCallback)(function handleSplitPanelChange(detail) {
+    const handleSplitPanelPreferencesChange = (0, import_react122.useCallback)(function handleSplitPanelChange(detail) {
       setSplitPanelPreferences(detail);
       setSplitPanelLastInteraction({ type: "position" });
       fireNonCancelableEvent(props.onSplitPanelPreferencesChange, detail);
@@ -320216,10 +320122,10 @@ ${isHandDrawn ? "" : `
       toolsWidth,
       onToolsToggle: handleToolsClick
     });
-    const [drawersMaxWidth, setDrawersMaxWidth] = (0, import_react124.useState)(toolsWidth);
+    const [drawersMaxWidth, setDrawersMaxWidth] = (0, import_react122.useState)(toolsWidth);
     const hasDrawers = !!drawers && drawers.length > 0;
     const { refs: drawersRefs, setFocus: focusDrawersButtons, loseFocus: loseDrawersFocus } = useFocusControl(!!activeDrawerId, true, activeDrawerId);
-    const drawerRef = (0, import_react124.useRef)(null);
+    const drawerRef = (0, import_react122.useRef)(null);
     const { resizeHandle, drawerSize } = use_resize_default(drawerRef, {
       onActiveDrawerResize,
       activeDrawerSize,
@@ -320242,19 +320148,19 @@ ${isHandDrawn ? "" : `
     }
     const hasOpenDrawer = !!activeDrawerId || !toolsHide && isToolsOpen || splitPanelDisplayed && splitPanelPosition === "side" && isSplitPanelOpen;
     const hasDrawerViewportOverlay = isMobile && (!!activeDrawerId || !navigationHide && navigationOpen || !toolsHide && isToolsOpen);
-    const layoutElement = (0, import_react124.useRef)(null);
-    const mainElement = (0, import_react124.useRef)(null);
-    const [mainOffsetLeft, setMainOffsetLeft] = (0, import_react124.useState)(0);
+    const layoutElement = (0, import_react122.useRef)(null);
+    const mainElement = (0, import_react122.useRef)(null);
+    const [mainOffsetLeft, setMainOffsetLeft] = (0, import_react122.useState)(0);
     const { hasBackgroundOverlap, updateBackgroundOverlapHeight } = useBackgroundOverlap({
       contentHeader: props.contentHeader,
       disableContentHeaderOverlap: props.disableContentHeaderOverlap,
       layoutElement
     });
-    (0, import_react124.useLayoutEffect)(function handleMainOffsetLeft() {
+    (0, import_react122.useLayoutEffect)(function handleMainOffsetLeft() {
       const offsetInlineStart = (mainElement === null || mainElement === void 0 ? void 0 : mainElement.current) ? getOffsetInlineStart(mainElement === null || mainElement === void 0 ? void 0 : mainElement.current) : 0;
       setMainOffsetLeft(offsetInlineStart);
     }, [placement.inlineSize, navigationOpen, isToolsOpen, splitPanelReportedSize]);
-    (0, import_react124.useEffect)(function handleBodyScroll() {
+    (0, import_react122.useEffect)(function handleBodyScroll() {
       if (isMobile && (navigationOpen || isToolsOpen || !!activeDrawer)) {
         document.body.classList.add(styles_css_default52["block-body-scroll"]);
       } else {
@@ -320264,7 +320170,7 @@ ${isHandDrawn ? "" : `
         document.body.classList.remove(styles_css_default52["block-body-scroll"]);
       };
     }, [isMobile, navigationOpen, isToolsOpen, activeDrawer]);
-    const [notificationsHeight, setNotificationsHeight] = (0, import_react124.useState)(0);
+    const [notificationsHeight, setNotificationsHeight] = (0, import_react122.useState)(0);
     const hasNotificationsContent = notificationsHeight > 0;
     let offsetBottom = placement.insetBlockEnd;
     if (splitPanelDisplayed && splitPanelPosition === "bottom") {
@@ -320274,7 +320180,7 @@ ${isHandDrawn ? "" : `
         offsetBottom += splitPanelReportedHeaderHeight;
       }
     }
-    (0, import_react124.useLayoutEffect)(function handleSplitPanelMaxWidth() {
+    (0, import_react122.useLayoutEffect)(function handleSplitPanelMaxWidth() {
       const contentGapRight = 50;
       const toolsFormOffsetWidth = 120;
       const getPanelOffsetWidth = () => {
@@ -320296,7 +320202,7 @@ ${isHandDrawn ? "" : `
       minContentWidth,
       toolsWidth
     ]);
-    (0, import_react124.useImperativeHandle)(forwardRef16, function createImperativeHandle() {
+    (0, import_react122.useImperativeHandle)(forwardRef16, function createImperativeHandle() {
       return {
         closeNavigationIfNecessary: function() {
           if (isMobile) {
@@ -320331,7 +320237,7 @@ ${isHandDrawn ? "" : `
       splitPanelRefs.slider,
       hasDrawers
     ]);
-    return import_react124.default.createElement(
+    return import_react122.default.createElement(
       AppLayoutInternalsContext.Provider,
       { value: {
         ...props,
@@ -320399,7 +320305,7 @@ ${isHandDrawn ? "" : `
         toolsRefs,
         __embeddedViewMode
       } },
-      import_react124.default.createElement(DynamicOverlapContext.Provider, { value: updateBackgroundOverlapHeight }, children2)
+      import_react122.default.createElement(DynamicOverlapContext.Provider, { value: updateBackgroundOverlapHeight }, children2)
     );
   });
 
@@ -320409,52 +320315,52 @@ ${isHandDrawn ? "" : `
     if (!hasNotificationsContent && (!breadcrumbs || isMobile) && !hasBackgroundOverlap) {
       return null;
     }
-    return import_react125.default.createElement(
+    return import_react123.default.createElement(
       "div",
       { className: clsx_m_default(styles_css_default52.background, { [highContrastHeaderClassName]: headerVariant === "high-contrast" }) },
-      import_react125.default.createElement("div", { className: styles_css_default52["scrolling-background"] })
+      import_react123.default.createElement("div", { className: styles_css_default52["scrolling-background"] })
     );
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/breadcrumbs.js
-  var import_react126 = __toESM(require_react());
+  var import_react124 = __toESM(require_react());
   function Breadcrumbs() {
     const { breadcrumbs, isMobile, headerVariant } = useAppLayoutInternals();
     if (isMobile || !breadcrumbs) {
       return null;
     }
-    return import_react126.default.createElement("div", { className: clsx_m_default(styles_css_default52.breadcrumbs, styles_css_default22.breadcrumbs, {
+    return import_react124.default.createElement("div", { className: clsx_m_default(styles_css_default52.breadcrumbs, styles_css_default22.breadcrumbs, {
       [highContrastHeaderClassName]: headerVariant === "high-contrast"
     }) }, breadcrumbs);
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/drawers.js
-  var import_react128 = __toESM(require_react());
+  var import_react126 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/trigger-button.js
-  var import_react127 = __toESM(require_react());
+  var import_react125 = __toESM(require_react());
   function TriggerButton({ ariaLabel, className, iconName, iconSvg, ariaExpanded, ariaControls, onClick, testId, disabled = false, badge, selected = false, highContrastHeader }, ref) {
     const { isMobile } = useAppLayoutInternals();
-    return import_react127.default.createElement("div", { className: clsx_m_default(styles_css_default52["trigger-wrapper"], !highContrastHeader && styles_css_default52["remove-high-contrast-header"]) }, isMobile ? import_react127.default.createElement(InternalButton, { ariaExpanded, ariaLabel, ariaControls, className, disabled, ref, formAction: "none", iconName, iconSvg, badge, onClick, variant: "icon", nativeButtonAttributes: {
+    return import_react125.default.createElement("div", { className: clsx_m_default(styles_css_default52["trigger-wrapper"], !highContrastHeader && styles_css_default52["remove-high-contrast-header"]) }, isMobile ? import_react125.default.createElement(InternalButton, { ariaExpanded, ariaLabel, ariaControls, className, disabled, ref, formAction: "none", iconName, iconSvg, badge, onClick, variant: "icon", nativeButtonAttributes: {
       "aria-haspopup": true,
       ...testId && {
         "data-testid": testId
       }
-    } }) : import_react127.default.createElement(
-      import_react127.default.Fragment,
+    } }) : import_react125.default.createElement(
+      import_react125.default.Fragment,
       null,
-      import_react127.default.createElement(
+      import_react125.default.createElement(
         "button",
         { "aria-expanded": ariaExpanded, "aria-controls": ariaControls, "aria-haspopup": true, "aria-label": ariaLabel, "aria-disabled": disabled, disabled, className: clsx_m_default(styles_css_default52.trigger, styles_css_default52["trigger-button-styles"], {
           [styles_css_default52.selected]: selected,
           [styles_css_default52.badge]: badge
         }, className), onClick, ref, type: "button", "data-testid": testId, "data-awsui-motion-trigger": "hover", "data-awsui-motion-target": "" },
-        import_react127.default.createElement("span", { className: clsx_m_default(badge && clsx_m_default(styles_css_default52["trigger-badge-wrapper"], styles_css_default52["trigger-button-styles"])) }, (iconName || iconSvg) && import_react127.default.createElement(internal_default, { name: iconName, svg: iconSvg }))
+        import_react125.default.createElement("span", { className: clsx_m_default(badge && clsx_m_default(styles_css_default52["trigger-badge-wrapper"], styles_css_default52["trigger-button-styles"])) }, (iconName || iconSvg) && import_react125.default.createElement(internal_default, { name: iconName, svg: iconSvg }))
       ),
-      badge && import_react127.default.createElement("div", { className: styles_css_default52.dot })
+      badge && import_react125.default.createElement("div", { className: styles_css_default52.dot })
     ));
   }
-  var trigger_button_default = import_react127.default.forwardRef(TriggerButton);
+  var trigger_button_default = import_react125.default.forwardRef(TriggerButton);
 
   // node_modules/@cloudscape-design/components/split-panel/test-classes/styles.css.js
   var styles_css_default53 = {
@@ -320480,16 +320386,16 @@ ${isHandDrawn ? "" : `
     if (!drawers || drawersTriggerCount === 0) {
       return null;
     }
-    return import_react128.default.createElement(
+    return import_react126.default.createElement(
       "div",
       { className: clsx_m_default(styles_css_default52["drawers-container"], {
         [styles_css_default52["disable-body-scroll"]]: disableBodyScroll,
         [styles_css_default52["has-open-drawer"]]: hasOpenDrawer,
         [styles_css_default52.unfocusable]: isUnfocusable
       }) },
-      import_react128.default.createElement(split_panel_default.Side, null),
-      import_react128.default.createElement(ActiveDrawer, null),
-      !isMobile && import_react128.default.createElement(DesktopTriggers, null)
+      import_react126.default.createElement(split_panel_default.Side, null),
+      import_react126.default.createElement(ActiveDrawer, null),
+      !isMobile && import_react126.default.createElement(DesktopTriggers, null)
     );
   }
   function ActiveDrawer() {
@@ -320505,7 +320411,7 @@ ${isHandDrawn ? "" : `
     const isToolsDrawer = activeDrawerId === TOOLS_DRAWER_ID;
     const toolsContent = (_d = drawers === null || drawers === void 0 ? void 0 : drawers.find((drawer) => drawer.id === TOOLS_DRAWER_ID)) === null || _d === void 0 ? void 0 : _d.content;
     const size4 = getLimitedValue(drawersMinWidth, drawerSize, drawersMaxWidth);
-    return import_react128.default.createElement(
+    return import_react126.default.createElement(
       "aside",
       { id: activeDrawerId !== null && activeDrawerId !== void 0 ? activeDrawerId : void 0, "aria-hidden": isHidden, "aria-label": computedAriaLabels.content, className: clsx_m_default(styles_css_default52.drawer, {
         [styles_css_default52["is-drawer-open"]]: activeDrawerId,
@@ -320519,14 +320425,14 @@ ${isHandDrawn ? "" : `
           loseDrawersFocus();
         }
       } },
-      !isMobile && (activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.resizable) && import_react128.default.createElement("div", { className: styles_css_default52["drawer-slider"] }, resizeHandle),
-      import_react128.default.createElement(
+      !isMobile && (activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.resizable) && import_react126.default.createElement("div", { className: styles_css_default52["drawer-slider"] }, resizeHandle),
+      import_react126.default.createElement(
         "div",
         { className: styles_css_default52["drawer-content-container"] },
-        import_react128.default.createElement(
+        import_react126.default.createElement(
           "div",
           { className: styles_css_default52["drawer-close-button"] },
-          import_react128.default.createElement(InternalButton, { ariaLabel: computedAriaLabels.closeButton, className: clsx_m_default({
+          import_react126.default.createElement(InternalButton, { ariaLabel: computedAriaLabels.closeButton, className: clsx_m_default({
             [styles_css_default22["active-drawer-close-button"]]: activeDrawerId,
             [styles_css_default22["tools-close"]]: isToolsDrawer
           }), formAction: "none", iconName: isMobile ? "close" : "angle-right", onClick: () => {
@@ -320534,8 +320440,8 @@ ${isHandDrawn ? "" : `
             handleToolsClick(false);
           }, ref: drawersRefs.close, variant: "icon" })
         ),
-        toolsContent && import_react128.default.createElement("div", { key: TOOLS_DRAWER_ID, className: clsx_m_default(styles_css_default52["drawer-content"], activeDrawerId !== TOOLS_DRAWER_ID && styles_css_default52["drawer-content-hidden"]) }, toolsContent),
-        activeDrawerId !== TOOLS_DRAWER_ID && import_react128.default.createElement("div", { key: activeDrawerId, className: styles_css_default52["drawer-content"] }, activeDrawerId && (activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.content))
+        toolsContent && import_react126.default.createElement("div", { key: TOOLS_DRAWER_ID, className: clsx_m_default(styles_css_default52["drawer-content"], activeDrawerId !== TOOLS_DRAWER_ID && styles_css_default52["drawer-content-hidden"]) }, toolsContent),
+        activeDrawerId !== TOOLS_DRAWER_ID && import_react126.default.createElement("div", { key: activeDrawerId, className: styles_css_default52["drawer-content"] }, activeDrawerId && (activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.content))
       )
     );
   }
@@ -320543,7 +320449,7 @@ ${isHandDrawn ? "" : `
     const { activeDrawerId, drawers, drawersAriaLabel, drawersOverflowAriaLabel, drawersOverflowWithBadgeAriaLabel, drawersRefs, drawersTriggerCount, handleDrawersClick, handleSplitPanelClick, hasOpenDrawer, isSplitPanelOpen, splitPanel, splitPanelControlId, splitPanelDisplayed, splitPanelPosition, splitPanelRefs, splitPanelToggle, splitPanelReportedHeaderHeight, splitPanelReportedSize, headerVariant } = useAppLayoutInternals();
     const hasMultipleTriggers = drawersTriggerCount > 1;
     const hasSplitPanel = splitPanel && splitPanelDisplayed && splitPanelPosition === "side";
-    const previousActiveDrawerId = (0, import_react128.useRef)(activeDrawerId);
+    const previousActiveDrawerId = (0, import_react126.useRef)(activeDrawerId);
     const [containerHeight, triggersContainerRef] = useContainerQuery((rect2) => rect2.contentBoxHeight);
     if (activeDrawerId) {
       previousActiveDrawerId.current = activeDrawerId;
@@ -320564,13 +320470,13 @@ ${isHandDrawn ? "" : `
     };
     const { visibleItems, overflowItems } = splitItems(drawers !== null && drawers !== void 0 ? drawers : void 0, getIndexOfOverflowItem(), activeDrawerId);
     const overflowMenuHasBadge = !!overflowItems.find((item) => item.badge);
-    return import_react128.default.createElement(
+    return import_react126.default.createElement(
       "aside",
       { className: clsx_m_default(styles_css_default52["drawers-desktop-triggers-container"], {
         [styles_css_default52["has-multiple-triggers"]]: hasMultipleTriggers,
         [styles_css_default52["has-open-drawer"]]: hasOpenDrawer
       }), "aria-label": drawersAriaLabel, ref: triggersContainerRef, role: "region" },
-      import_react128.default.createElement(
+      import_react126.default.createElement(
         "div",
         { className: clsx_m_default(styles_css_default52["drawers-trigger-content"], {
           [styles_css_default52["has-multiple-triggers"]]: hasMultipleTriggers,
@@ -320579,21 +320485,21 @@ ${isHandDrawn ? "" : `
         visibleItems.map((item) => {
           var _a213, _b, _c;
           const isForPreviousActiveDrawer = (previousActiveDrawerId === null || previousActiveDrawerId === void 0 ? void 0 : previousActiveDrawerId.current) === item.id;
-          return import_react128.default.createElement(trigger_button_default, { ariaLabel: (_a213 = item.ariaLabels) === null || _a213 === void 0 ? void 0 : _a213.triggerButton, ariaExpanded: item.id === activeDrawerId, ariaControls: activeDrawerId === item.id ? item.id : void 0, className: clsx_m_default(styles_css_default52["drawers-trigger"], styles_css_default22["drawers-trigger"], {
+          return import_react126.default.createElement(trigger_button_default, { ariaLabel: (_a213 = item.ariaLabels) === null || _a213 === void 0 ? void 0 : _a213.triggerButton, ariaExpanded: item.id === activeDrawerId, ariaControls: activeDrawerId === item.id ? item.id : void 0, className: clsx_m_default(styles_css_default52["drawers-trigger"], styles_css_default22["drawers-trigger"], {
             [styles_css_default22["drawers-trigger-with-badge"]]: item.badge,
             [styles_css_default22["tools-toggle"]]: item.id === TOOLS_DRAWER_ID
           }), iconName: (_b = item === null || item === void 0 ? void 0 : item.trigger) === null || _b === void 0 ? void 0 : _b.iconName, iconSvg: (_c = item === null || item === void 0 ? void 0 : item.trigger) === null || _c === void 0 ? void 0 : _c.iconSvg, key: item.id, onClick: () => handleDrawersClick(item.id), ref: isForPreviousActiveDrawer ? drawersRefs.toggle : void 0, badge: item.badge, testId: `awsui-app-layout-trigger-${item.id}`, highContrastHeader: headerVariant === "high-contrast", selected: item.id === activeDrawerId });
         }),
-        overflowItems.length > 0 && import_react128.default.createElement(OverflowMenu, { items: overflowItems, ariaLabel: overflowMenuHasBadge ? drawersOverflowWithBadgeAriaLabel : drawersOverflowAriaLabel, customTriggerBuilder: ({ onClick, triggerRef, ariaLabel, ariaExpanded, testUtilsClass }) => import_react128.default.createElement(trigger_button_default, { ref: triggerRef, ariaLabel, ariaExpanded, badge: overflowMenuHasBadge, className: clsx_m_default(styles_css_default52["drawers-trigger"], styles_css_default22["drawers-trigger"], testUtilsClass), iconName: "ellipsis", onClick, highContrastHeader: headerVariant === "high-contrast" }), onItemClick: ({ detail }) => {
+        overflowItems.length > 0 && import_react126.default.createElement(OverflowMenu, { items: overflowItems, ariaLabel: overflowMenuHasBadge ? drawersOverflowWithBadgeAriaLabel : drawersOverflowAriaLabel, customTriggerBuilder: ({ onClick, triggerRef, ariaLabel, ariaExpanded, testUtilsClass }) => import_react126.default.createElement(trigger_button_default, { ref: triggerRef, ariaLabel, ariaExpanded, badge: overflowMenuHasBadge, className: clsx_m_default(styles_css_default52["drawers-trigger"], styles_css_default22["drawers-trigger"], testUtilsClass), iconName: "ellipsis", onClick, highContrastHeader: headerVariant === "high-contrast" }), onItemClick: ({ detail }) => {
           handleDrawersClick(detail.id);
         } }),
-        hasSplitPanel && splitPanelToggle.displayed && import_react128.default.createElement(trigger_button_default, { ariaLabel: splitPanelToggle.ariaLabel, ariaControls: splitPanelControlId, ariaExpanded: !!isSplitPanelOpen, className: clsx_m_default(styles_css_default52["drawers-trigger"], styles_css_default53["open-button"]), iconName: "view-vertical", onClick: () => handleSplitPanelClick(), selected: hasSplitPanel && isSplitPanelOpen, ref: splitPanelRefs.toggle, highContrastHeader: headerVariant === "high-contrast" })
+        hasSplitPanel && splitPanelToggle.displayed && import_react126.default.createElement(trigger_button_default, { ariaLabel: splitPanelToggle.ariaLabel, ariaControls: splitPanelControlId, ariaExpanded: !!isSplitPanelOpen, className: clsx_m_default(styles_css_default52["drawers-trigger"], styles_css_default53["open-button"]), iconName: "view-vertical", onClick: () => handleSplitPanelClick(), selected: hasSplitPanel && isSplitPanelOpen, ref: splitPanelRefs.toggle, highContrastHeader: headerVariant === "high-contrast" })
       )
     );
   }
   function MobileTriggers() {
     const { activeDrawerId, drawers, drawersAriaLabel, drawersOverflowAriaLabel, drawersOverflowWithBadgeAriaLabel, drawersRefs, handleDrawersClick, hasDrawerViewportOverlay, headerVariant } = useAppLayoutInternals();
-    const previousActiveDrawerId = (0, import_react128.useRef)(activeDrawerId);
+    const previousActiveDrawerId = (0, import_react126.useRef)(activeDrawerId);
     if (!drawers) {
       return null;
     }
@@ -320602,35 +320508,35 @@ ${isHandDrawn ? "" : `
     }
     const { visibleItems, overflowItems } = splitItems(drawers, VISIBLE_MOBILE_TOOLBAR_TRIGGERS_LIMIT, activeDrawerId);
     const overflowMenuHasBadge = !!overflowItems.find((item) => item.badge);
-    return import_react128.default.createElement(
+    return import_react126.default.createElement(
       "aside",
       { "aria-hidden": hasDrawerViewportOverlay, className: clsx_m_default({
         [styles_css_default52.unfocusable]: hasDrawerViewportOverlay
       }), "aria-label": drawersAriaLabel, role: "region" },
-      import_react128.default.createElement(
+      import_react126.default.createElement(
         "div",
         { className: styles_css_default52["drawers-mobile-triggers-container"], "aria-label": drawersAriaLabel, role: "toolbar", "aria-orientation": "horizontal" },
         visibleItems.map((item) => {
           var _a213, _b, _c;
           const isForPreviousActiveDrawer = (previousActiveDrawerId === null || previousActiveDrawerId === void 0 ? void 0 : previousActiveDrawerId.current) === item.id;
-          return import_react128.default.createElement(trigger_button_default, { ariaExpanded: item.id === activeDrawerId, ariaLabel: (_a213 = item.ariaLabels) === null || _a213 === void 0 ? void 0 : _a213.triggerButton, ariaControls: activeDrawerId === item.id ? item.id : void 0, className: clsx_m_default(styles_css_default52["drawers-trigger"], styles_css_default22["drawers-trigger"], {
+          return import_react126.default.createElement(trigger_button_default, { ariaExpanded: item.id === activeDrawerId, ariaLabel: (_a213 = item.ariaLabels) === null || _a213 === void 0 ? void 0 : _a213.triggerButton, ariaControls: activeDrawerId === item.id ? item.id : void 0, className: clsx_m_default(styles_css_default52["drawers-trigger"], styles_css_default22["drawers-trigger"], {
             [styles_css_default22["drawers-trigger-with-badge"]]: item.badge,
             [styles_css_default22["tools-toggle"]]: item.id === TOOLS_DRAWER_ID
           }), disabled: hasDrawerViewportOverlay, ref: isForPreviousActiveDrawer ? drawersRefs.toggle : void 0, iconName: (_b = item === null || item === void 0 ? void 0 : item.trigger) === null || _b === void 0 ? void 0 : _b.iconName, iconSvg: (_c = item === null || item === void 0 ? void 0 : item.trigger) === null || _c === void 0 ? void 0 : _c.iconSvg, badge: item.badge, key: item.id, onClick: () => handleDrawersClick(item.id), testId: `awsui-app-layout-trigger-${item.id}`, highContrastHeader: headerVariant === "high-contrast", selected: item.id === activeDrawerId });
         }),
-        overflowItems.length > 0 && import_react128.default.createElement(OverflowMenu, { items: overflowItems, ariaLabel: overflowMenuHasBadge ? drawersOverflowWithBadgeAriaLabel : drawersOverflowAriaLabel, onItemClick: ({ detail }) => handleDrawersClick(detail.id) })
+        overflowItems.length > 0 && import_react126.default.createElement(OverflowMenu, { items: overflowItems, ariaLabel: overflowMenuHasBadge ? drawersOverflowWithBadgeAriaLabel : drawersOverflowAriaLabel, onItemClick: ({ detail }) => handleDrawersClick(detail.id) })
       )
     );
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/header.js
-  var import_react129 = __toESM(require_react());
+  var import_react127 = __toESM(require_react());
   function Header() {
     const { breadcrumbs, contentHeader, hasDrawerViewportOverlay, hasNotificationsContent, headerVariant } = useAppLayoutInternals();
     if (!contentHeader) {
       return null;
     }
-    return import_react129.default.createElement("header", { className: clsx_m_default(styles_css_default52.content, {
+    return import_react127.default.createElement("header", { className: clsx_m_default(styles_css_default52.content, {
       [styles_css_default52["has-breadcrumbs"]]: breadcrumbs,
       [styles_css_default52["has-notifications-content"]]: hasNotificationsContent,
       [styles_css_default52.unfocusable]: hasDrawerViewportOverlay,
@@ -320639,12 +320545,12 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/layout.js
-  var import_react131 = __toESM(require_react());
+  var import_react129 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/utils/use-global-scroll-padding.js
-  var import_react130 = __toESM(require_react());
+  var import_react128 = __toESM(require_react());
   function useGlobalScrollPadding(headerHeight) {
-    (0, import_react130.useEffect)(() => {
+    (0, import_react128.useEffect)(() => {
       const scrollingElement = document.scrollingElement;
       if (scrollingElement instanceof HTMLElement) {
         scrollingElement.style.scrollPaddingTop = `${headerHeight}px`;
@@ -320659,7 +320565,7 @@ ${isHandDrawn ? "" : `
     const contentFirstChild = getContentFirstChild(breadcrumbs, contentHeader, hasNotificationsContent, isMobile);
     const hasContentGapLeft = navigationOpen || navigationHide;
     const hasContentGapRight = drawersTriggerCount === 0 || hasOpenDrawer;
-    return import_react131.default.createElement("main", { className: clsx_m_default(styles_css_default52.layout, styles_css_default52[`content-first-child-${contentFirstChild}`], styles_css_default52[`content-type-${contentType}`], styles_css_default52[`split-panel-position-${splitPanelPosition !== null && splitPanelPosition !== void 0 ? splitPanelPosition : "bottom"}`], {
+    return import_react129.default.createElement("main", { className: clsx_m_default(styles_css_default52.layout, styles_css_default52[`content-first-child-${contentFirstChild}`], styles_css_default52[`content-type-${contentType}`], styles_css_default52[`split-panel-position-${splitPanelPosition !== null && splitPanelPosition !== void 0 ? splitPanelPosition : "bottom"}`], {
       [styles_css_default52["disable-body-scroll"]]: disableBodyScroll,
       [styles_css_default22["disable-body-scroll-root"]]: disableBodyScroll,
       [styles_css_default52["disable-content-paddings"]]: disableContentPaddings,
@@ -320696,7 +320602,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/main.js
-  var import_react132 = __toESM(require_react());
+  var import_react130 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/generated/styles/tokens.js
   var spaceScaledS = "var(--space-scaled-s-srzhhj, 12px)";
@@ -320706,7 +320612,7 @@ ${isHandDrawn ? "" : `
   function Main() {
     const { content, disableBodyScroll, disableContentPaddings, footerHeight, hasDrawerViewportOverlay, navigationOpen, placement, isMobile, isSplitPanelOpen, isToolsOpen, mainElement, notificationsHeight, stickyNotifications, offsetBottom, splitPanelDisplayed, splitPanelPosition, activeDrawerId } = useAppLayoutInternals();
     const splitPanelHeight = offsetBottom - footerHeight;
-    return import_react132.default.createElement(
+    return import_react130.default.createElement(
       "div",
       { className: clsx_m_default(styles_css_default52.container, styles_css_default52[`split-panel-position-${splitPanelPosition !== null && splitPanelPosition !== void 0 ? splitPanelPosition : "bottom"}`], {
         [styles_css_default52["disable-content-paddings"]]: disableContentPaddings,
@@ -320720,41 +320626,41 @@ ${isHandDrawn ? "" : `
         [custom_css_properties_default.splitPanelHeight]: `${splitPanelHeight}px`,
         ...getStickyOffsetVars(placement.insetBlockStart, offsetBottom, stickyNotifications && notificationsHeight > 0 ? `${spaceXs} + ${notificationsHeight}px` : "0px", `var(${custom_css_properties_default.mobileBarHeight})`, !!disableBodyScroll, isMobile)
       } },
-      import_react132.default.createElement(BuiltInErrorBoundary, null, content)
+      import_react130.default.createElement(BuiltInErrorBoundary, null, content)
     );
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/mobile-toolbar.js
-  var import_react133 = __toESM(require_react());
+  var import_react131 = __toESM(require_react());
   function MobileToolbar2() {
     var _a213, _b, _c, _d;
     const { ariaLabels, breadcrumbs, drawers, handleNavigationClick, handleToolsClick, hasDrawerViewportOverlay, isMobile, navigationOpen, __embeddedViewMode, isToolsOpen, navigationHide, navigationRefs, toolsHide, toolsRefs, headerVariant } = useAppLayoutInternals();
     if (!isMobile || __embeddedViewMode || navigationHide && !breadcrumbs && toolsHide && (!drawers || drawers.length === 0)) {
       return null;
     }
-    return import_react133.default.createElement(
+    return import_react131.default.createElement(
       "section",
       { className: clsx_m_default(styles_css_default52["mobile-toolbar"], [styles_css_default22["mobile-bar"]], {
         [styles_css_default52["has-breadcrumbs"]]: breadcrumbs,
         [styles_css_default52.unfocusable]: hasDrawerViewportOverlay,
         [highContrastHeaderClassName]: headerVariant === "high-contrast"
       }, styles_css_default22["mobile-bar"], headerVariant !== "high-contrast" && styles_css_default52["remove-high-contrast-header"]) },
-      !navigationHide && import_react133.default.createElement(
+      !navigationHide && import_react131.default.createElement(
         "nav",
         { "aria-hidden": navigationOpen, "aria-label": (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigation) !== null && _a213 !== void 0 ? _a213 : void 0, "aria-orientation": "horizontal", className: clsx_m_default(styles_css_default52["mobile-toolbar-nav"], { [styles_css_default22["drawer-closed"]]: !navigationOpen }) },
-        import_react133.default.createElement(InternalButton, { ariaLabel: (_b = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigationToggle) !== null && _b !== void 0 ? _b : void 0, ariaExpanded: navigationOpen ? void 0 : false, iconName: "menu", formAction: "none", onClick: () => handleNavigationClick(true), variant: "icon", className: styles_css_default22["navigation-toggle"], ref: navigationRefs.toggle, disabled: hasDrawerViewportOverlay, nativeButtonAttributes: { "aria-haspopup": navigationOpen ? void 0 : true } })
+        import_react131.default.createElement(InternalButton, { ariaLabel: (_b = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigationToggle) !== null && _b !== void 0 ? _b : void 0, ariaExpanded: navigationOpen ? void 0 : false, iconName: "menu", formAction: "none", onClick: () => handleNavigationClick(true), variant: "icon", className: styles_css_default22["navigation-toggle"], ref: navigationRefs.toggle, disabled: hasDrawerViewportOverlay, nativeButtonAttributes: { "aria-haspopup": navigationOpen ? void 0 : true } })
       ),
-      breadcrumbs && import_react133.default.createElement("div", { className: clsx_m_default(styles_css_default52["mobile-toolbar-breadcrumbs"], styles_css_default22.breadcrumbs) }, breadcrumbs),
-      drawers ? import_react133.default.createElement(MobileTriggers, null) : !toolsHide && import_react133.default.createElement(
+      breadcrumbs && import_react131.default.createElement("div", { className: clsx_m_default(styles_css_default52["mobile-toolbar-breadcrumbs"], styles_css_default22.breadcrumbs) }, breadcrumbs),
+      drawers ? import_react131.default.createElement(MobileTriggers, null) : !toolsHide && import_react131.default.createElement(
         "aside",
         { "aria-hidden": isToolsOpen, "aria-label": (_c = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.tools) !== null && _c !== void 0 ? _c : void 0, className: clsx_m_default(styles_css_default52["mobile-toolbar-tools"], { [styles_css_default22["drawer-closed"]]: !isToolsOpen }) },
-        import_react133.default.createElement(InternalButton, { className: styles_css_default22["tools-toggle"], ariaExpanded: isToolsOpen, disabled: hasDrawerViewportOverlay, ariaLabel: (_d = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.toolsToggle) !== null && _d !== void 0 ? _d : void 0, iconName: "status-info", formAction: "none", onClick: () => handleToolsClick(true), variant: "icon", ref: toolsRefs.toggle, nativeButtonAttributes: { "aria-haspopup": true } })
+        import_react131.default.createElement(InternalButton, { className: styles_css_default22["tools-toggle"], ariaExpanded: isToolsOpen, disabled: hasDrawerViewportOverlay, ariaLabel: (_d = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.toolsToggle) !== null && _d !== void 0 ? _d : void 0, iconName: "status-info", formAction: "none", onClick: () => handleToolsClick(true), variant: "icon", ref: toolsRefs.toggle, nativeButtonAttributes: { "aria-haspopup": true } })
       )
     );
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/navigation.js
-  var import_react134 = __toESM(require_react());
+  var import_react132 = __toESM(require_react());
   function Navigation() {
     const { ariaLabels, disableBodyScroll, handleNavigationClick, hasDrawerViewportOverlay, isMobile, navigationOpen, isToolsOpen, navigation, navigationHide, navigationRefs, navigationWidth, toolsHide, headerVariant } = useAppLayoutInternals();
     if (navigationHide) {
@@ -320767,36 +320673,36 @@ ${isHandDrawn ? "" : `
       }
     };
     const isUnfocusable = hasDrawerViewportOverlay && (!navigationOpen || isToolsOpen && !toolsHide);
-    return import_react134.default.createElement(Transition4, { in: navigationOpen }, (state5, transitionEventsRef) => {
+    return import_react132.default.createElement(Transition4, { in: navigationOpen }, (state5, transitionEventsRef) => {
       var _a213, _b, _c;
-      return import_react134.default.createElement(
+      return import_react132.default.createElement(
         "div",
         { className: clsx_m_default(styles_css_default52["navigation-container"], {
           [styles_css_default52["disable-body-scroll"]]: disableBodyScroll,
           [styles_css_default52.unfocusable]: isUnfocusable
         }), style: { [custom_css_properties_default.navigationWidth]: `${navigationWidth}px` } },
-        !isMobile && import_react134.default.createElement(
+        !isMobile && import_react132.default.createElement(
           "nav",
           { "aria-hidden": isMobile || navigationOpen, "aria-label": (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigation) !== null && _a213 !== void 0 ? _a213 : void 0, className: clsx_m_default(styles_css_default52["show-navigation"], {
             [styles_css_default52.animating]: state5 === "exiting",
             [styles_css_default52["is-navigation-open"]]: navigationOpen
           }), ref: state5 === "exiting" ? transitionEventsRef : void 0 },
-          import_react134.default.createElement(trigger_button_default, { ariaLabel: ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigationToggle, ariaExpanded: navigationOpen ? void 0 : false, iconName: "menu", className: styles_css_default22["navigation-toggle"], onClick: () => handleNavigationClick(true), ref: navigationRefs.toggle, highContrastHeader: headerVariant === "high-contrast" })
+          import_react132.default.createElement(trigger_button_default, { ariaLabel: ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigationToggle, ariaExpanded: navigationOpen ? void 0 : false, iconName: "menu", className: styles_css_default22["navigation-toggle"], onClick: () => handleNavigationClick(true), ref: navigationRefs.toggle, highContrastHeader: headerVariant === "high-contrast" })
         ),
-        import_react134.default.createElement(
+        import_react132.default.createElement(
           "nav",
           { "aria-label": (_b = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigation) !== null && _b !== void 0 ? _b : void 0, className: clsx_m_default(styles_css_default52.navigation, styles_css_default22.navigation, {
             [styles_css_default22["drawer-closed"]]: !navigationOpen,
             [styles_css_default52.animating]: state5 === "entering",
             [styles_css_default52["is-navigation-open"]]: navigationOpen
           }), ref: state5 !== "exiting" ? transitionEventsRef : void 0, "aria-hidden": !navigationOpen, onClick: onNavigationClick },
-          import_react134.default.createElement(
+          import_react132.default.createElement(
             "div",
             { className: clsx_m_default(styles_css_default52["content-container"], styles_css_default52["animated-content"]) },
-            import_react134.default.createElement(
+            import_react132.default.createElement(
               "div",
               { className: styles_css_default52["hide-navigation"] },
-              import_react134.default.createElement(InternalButton, { ariaLabel: (_c = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigationClose) !== null && _c !== void 0 ? _c : void 0, iconName: isMobile ? "close" : "angle-left", onClick: () => handleNavigationClick(false), variant: "icon", formAction: "none", className: styles_css_default22["navigation-close"], ref: navigationRefs.close })
+              import_react132.default.createElement(InternalButton, { ariaLabel: (_c = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigationClose) !== null && _c !== void 0 ? _c : void 0, iconName: isMobile ? "close" : "angle-left", onClick: () => handleNavigationClick(false), variant: "icon", formAction: "none", className: styles_css_default22["navigation-close"], ref: navigationRefs.close })
             ),
             navigation
           )
@@ -320806,25 +320712,25 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/notifications.js
-  var import_react135 = __toESM(require_react());
+  var import_react133 = __toESM(require_react());
   function Notifications2() {
     const { notifications: notifications2 } = useAppLayoutInternals();
     if (!notifications2) {
       return null;
     }
-    return import_react135.default.createElement(NotificationsImplementation, null);
+    return import_react133.default.createElement(NotificationsImplementation, null);
   }
   function NotificationsImplementation() {
     var _a213;
     const { ariaLabels, hasDrawerViewportOverlay, notifications: notifications2, setNotificationsHeight, stickyNotifications, headerVariant, hasNotificationsContent } = useAppLayoutInternals();
-    const ref = (0, import_react135.useRef)(null);
+    const ref = (0, import_react133.useRef)(null);
     useResizeObserver(ref, (entry) => setNotificationsHeight(entry.contentBoxHeight));
-    (0, import_react135.useEffect)(() => {
+    (0, import_react133.useEffect)(() => {
       return () => {
         setNotificationsHeight(0);
       };
     }, []);
-    return import_react135.default.createElement(
+    return import_react133.default.createElement(
       "div",
       { role: "region", "aria-label": (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.notifications) !== null && _a213 !== void 0 ? _a213 : void 0, className: clsx_m_default(styles_css_default52.notifications, {
         [styles_css_default52["sticky-notifications"]]: stickyNotifications,
@@ -320833,12 +320739,12 @@ ${isHandDrawn ? "" : `
         [highContrastHeaderClassName]: headerVariant === "high-contrast",
         [styles_css_default52["high-contrast"]]: headerVariant === "high-contrast"
       }, styles_css_default22.notifications) },
-      import_react135.default.createElement("div", { ref }, notifications2)
+      import_react133.default.createElement("div", { ref }, notifications2)
     );
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/tools.js
-  var import_react136 = __toESM(require_react());
+  var import_react134 = __toESM(require_react());
   function Tools({ children: children2 }) {
     const { ariaLabels, disableBodyScroll, drawers, handleSplitPanelClick, handleToolsClick, hasDrawerViewportOverlay, isMobile, isSplitPanelOpen, isToolsOpen, loseToolsFocus, splitPanel, splitPanelControlId, splitPanelDisplayed, splitPanelPosition, splitPanelRefs, splitPanelToggle, tools, toolsControlId, toolsHide, toolsRefs, toolsWidth, headerVariant } = useAppLayoutInternals();
     const hasSplitPanel = !!splitPanel && splitPanelPosition === "side";
@@ -320848,9 +320754,9 @@ ${isHandDrawn ? "" : `
     if (toolsHide && !hasSplitPanel || drawers) {
       return null;
     }
-    return import_react136.default.createElement(Transition4, { in: isToolsOpen !== null && isToolsOpen !== void 0 ? isToolsOpen : false }, (state5, transitionEventsRef) => {
+    return import_react134.default.createElement(Transition4, { in: isToolsOpen !== null && isToolsOpen !== void 0 ? isToolsOpen : false }, (state5, transitionEventsRef) => {
       var _a213, _b, _c;
-      return import_react136.default.createElement(
+      return import_react134.default.createElement(
         "div",
         { className: clsx_m_default(styles_css_default52["tools-container"], {
           [styles_css_default52["disable-body-scroll"]]: disableBodyScroll,
@@ -320864,7 +320770,7 @@ ${isHandDrawn ? "" : `
           }
         } },
         children2,
-        !toolsHide && import_react136.default.createElement(
+        !toolsHide && import_react134.default.createElement(
           "aside",
           { id: toolsControlId, "aria-hidden": !isToolsOpen ? true : false, "aria-label": (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.tools) !== null && _a213 !== void 0 ? _a213 : void 0, className: clsx_m_default(styles_css_default52.tools, {
             [styles_css_default52.animating]: state5 === "entering",
@@ -320872,26 +320778,26 @@ ${isHandDrawn ? "" : `
             [styles_css_default52["is-tools-open"]]: isToolsOpen,
             [styles_css_default22["drawer-closed"]]: !isToolsOpen
           }, styles_css_default22.tools), ref: state5 !== "exiting" ? transitionEventsRef : void 0 },
-          import_react136.default.createElement(
+          import_react134.default.createElement(
             "div",
             { className: styles_css_default52["animated-content"] },
-            import_react136.default.createElement(
+            import_react134.default.createElement(
               "div",
               { className: styles_css_default52["hide-tools"] },
-              import_react136.default.createElement(InternalButton, { ariaLabel: (_b = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.toolsClose) !== null && _b !== void 0 ? _b : void 0, iconName: isMobile ? "close" : "angle-right", onClick: () => handleToolsClick(false), variant: "icon", formAction: "none", className: styles_css_default22["tools-close"], ref: toolsRefs.close })
+              import_react134.default.createElement(InternalButton, { ariaLabel: (_b = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.toolsClose) !== null && _b !== void 0 ? _b : void 0, iconName: isMobile ? "close" : "angle-right", onClick: () => handleToolsClick(false), variant: "icon", formAction: "none", className: styles_css_default22["tools-close"], ref: toolsRefs.close })
             ),
             tools
           )
         ),
-        !isMobile && import_react136.default.createElement(
+        !isMobile && import_react134.default.createElement(
           "aside",
           { "aria-hidden": !hasToolsForm ? true : false, "aria-label": (_c = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.tools) !== null && _c !== void 0 ? _c : void 0, className: clsx_m_default(styles_css_default52["show-tools"], {
             [styles_css_default52.animating]: state5 === "exiting",
             [styles_css_default52["has-tools-form"]]: hasToolsForm,
             [styles_css_default52["has-tools-form-persistence"]]: hasToolsFormPersistence
           }), ref: state5 === "exiting" ? transitionEventsRef : void 0, "data-testid": "side-split-panel-drawer" },
-          !toolsHide && import_react136.default.createElement(trigger_button_default, { ariaLabel: ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.toolsToggle, ariaControls: toolsControlId, ariaExpanded: isToolsOpen, iconName: "status-info", onClick: () => handleToolsClick(!isToolsOpen), selected: hasSplitPanel && isToolsOpen, className: styles_css_default22["tools-toggle"], ref: toolsRefs.toggle, highContrastHeader: headerVariant === "high-contrast" }),
-          hasSplitPanel && splitPanelToggle.displayed && import_react136.default.createElement(trigger_button_default, { ariaLabel: splitPanelToggle.ariaLabel, ariaControls: splitPanelControlId, ariaExpanded: !!isSplitPanelOpen, iconName: "view-vertical", onClick: () => handleSplitPanelClick(), selected: hasSplitPanel && isSplitPanelOpen, className: styles_css_default53["open-button"], ref: splitPanelRefs.toggle, highContrastHeader: headerVariant === "high-contrast" })
+          !toolsHide && import_react134.default.createElement(trigger_button_default, { ariaLabel: ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.toolsToggle, ariaControls: toolsControlId, ariaExpanded: isToolsOpen, iconName: "status-info", onClick: () => handleToolsClick(!isToolsOpen), selected: hasSplitPanel && isToolsOpen, className: styles_css_default22["tools-toggle"], ref: toolsRefs.toggle, highContrastHeader: headerVariant === "high-contrast" }),
+          hasSplitPanel && splitPanelToggle.displayed && import_react134.default.createElement(trigger_button_default, { ariaLabel: splitPanelToggle.ariaLabel, ariaControls: splitPanelControlId, ariaExpanded: !!isSplitPanelOpen, iconName: "view-vertical", onClick: () => handleSplitPanelClick(), selected: hasSplitPanel && isSplitPanelOpen, className: styles_css_default53["open-button"], ref: splitPanelRefs.toggle, highContrastHeader: headerVariant === "high-contrast" })
         )
       );
     });
@@ -320920,30 +320826,30 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh/index.js
-  var AppLayoutWithRef = import_react137.default.forwardRef(function AppLayout(props, ref) {
-    return import_react137.default.createElement(
+  var AppLayoutWithRef = import_react135.default.forwardRef(function AppLayout(props, ref) {
+    return import_react135.default.createElement(
       AppLayoutInternalsProvider,
       { ...props, ref },
-      import_react137.default.createElement(
+      import_react135.default.createElement(
         split_panel_default,
         null,
-        import_react137.default.createElement(
+        import_react135.default.createElement(
           Layout2,
           null,
-          import_react137.default.createElement(Background, null),
-          import_react137.default.createElement(Navigation, null),
-          import_react137.default.createElement(MobileToolbar2, null),
-          import_react137.default.createElement(Notifications2, null),
-          import_react137.default.createElement(Breadcrumbs, null),
-          import_react137.default.createElement(Header, null),
-          import_react137.default.createElement(Main, null),
-          import_react137.default.createElement(split_panel_default.Bottom, null),
-          import_react137.default.createElement(
+          import_react135.default.createElement(Background, null),
+          import_react135.default.createElement(Navigation, null),
+          import_react135.default.createElement(MobileToolbar2, null),
+          import_react135.default.createElement(Notifications2, null),
+          import_react135.default.createElement(Breadcrumbs, null),
+          import_react135.default.createElement(Header, null),
+          import_react135.default.createElement(Main, null),
+          import_react135.default.createElement(split_panel_default.Bottom, null),
+          import_react135.default.createElement(
             Tools,
             null,
-            import_react137.default.createElement(split_panel_default.Side, null)
+            import_react135.default.createElement(split_panel_default.Side, null)
           ),
-          import_react137.default.createElement(Drawers, null)
+          import_react135.default.createElement(Drawers, null)
         )
       )
     );
@@ -320951,11 +320857,11 @@ ${isHandDrawn ? "" : `
   var visual_refresh_default = AppLayoutWithRef;
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/index.js
-  var import_react203 = __toESM(require_react());
+  var import_react201 = __toESM(require_react());
   var import_react_dom7 = __toESM(require_react_dom());
 
   // node_modules/@cloudscape-design/components/i18n/providers/remote-provider.js
-  var import_react138 = __toESM(require_react());
+  var import_react136 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/i18n/utils/locales.js
   function determineAppLocale(providedLocale) {
@@ -320970,12 +320876,12 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/i18n/providers/remote-provider.js
   function RemoteI18nProvider({ loadFormatter: loadFormatter2, children: children2 }) {
-    const wrapperContext = (0, import_react138.useContext)(InternalI18nContext);
-    const [formatFunction, setFormatFunction] = (0, import_react138.useState)();
+    const wrapperContext = (0, import_react136.useContext)(InternalI18nContext);
+    const [formatFunction, setFormatFunction] = (0, import_react136.useState)();
     const hasWrapperContext = !!wrapperContext;
-    const [locale3] = (0, import_react138.useState)(() => determineAppLocale());
-    const [staticLoadFormatter] = (0, import_react138.useState)(() => loadFormatter2);
-    (0, import_react138.useEffect)(() => {
+    const [locale3] = (0, import_react136.useState)(() => determineAppLocale());
+    const [staticLoadFormatter] = (0, import_react136.useState)(() => loadFormatter2);
+    (0, import_react136.useEffect)(() => {
       let mounted = true;
       if (hasWrapperContext) {
         return;
@@ -320994,11 +320900,11 @@ ${isHandDrawn ? "" : `
       };
     }, [hasWrapperContext, locale3, staticLoadFormatter]);
     const value3 = wrapperContext || formatFunction && { locale: locale3, format: formatFunction };
-    return import_react138.default.createElement(InternalI18nContext.Provider, { value: value3 }, children2);
+    return import_react136.default.createElement(InternalI18nContext.Provider, { value: value3 }, children2);
   }
 
   // node_modules/@cloudscape-design/components/internal/components/screenreader-only/index.js
-  var import_react139 = __toESM(require_react());
+  var import_react137 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/screenreader-only/styles.css.js
   var styles_css_default54 = {
@@ -321007,7 +320913,7 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/internal/components/screenreader-only/index.js
   function ScreenreaderOnly(props) {
-    return import_react139.default.createElement("span", { ...props, className: clsx_m_default(styles_css_default54.root, props.className) });
+    return import_react137.default.createElement("span", { ...props, className: clsx_m_default(styles_css_default54.root, props.className) });
   }
 
   // node_modules/@cloudscape-design/components/app-layout/utils/use-aria-labels.js
@@ -321028,7 +320934,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/internal/widgets/loader-mock.js
-  var import_react140 = __toESM(require_react());
+  var import_react138 = __toESM(require_react());
   var getCustomFlag = (flagName) => {
     var _a213;
     const flagHolder = typeof window !== "undefined" ? window : globalThis;
@@ -321045,8 +320951,8 @@ ${isHandDrawn ? "" : `
       return;
     }
     return ((props) => {
-      const [mounted, setMounted] = (0, import_react140.useState)(false);
-      (0, import_react140.useEffect)(() => {
+      const [mounted, setMounted] = (0, import_react138.useState)(false);
+      (0, import_react138.useEffect)(() => {
         if (!loadPromise) {
           loadPromise = new Promise((resolve2) => setTimeout(() => resolve2(), 1e3));
         }
@@ -321061,26 +320967,26 @@ ${isHandDrawn ? "" : `
         };
       }, []);
       if (mounted) {
-        return import_react140.default.createElement(Component3, { ...props });
+        return import_react138.default.createElement(Component3, { ...props });
       }
       const { Skeleton } = props;
-      return Skeleton ? import_react140.default.createElement(Skeleton, { ...props }) : import_react140.default.createElement("div", null);
+      return Skeleton ? import_react138.default.createElement(Skeleton, { ...props }) : import_react138.default.createElement("div", null);
     });
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/state/index.js
-  var import_react167 = __toESM(require_react());
+  var import_react165 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/widgets/index.js
-  var import_react141 = __toESM(require_react());
+  var import_react139 = __toESM(require_react());
   function createWidgetizedComponent(Implementation, Skeleton) {
     return (Loader) => {
       return ((props) => {
         const isRefresh = useVisualRefresh();
         if (isRefresh && getGlobalFlag("appLayoutWidget") && Loader) {
-          return import_react141.default.createElement(Loader, { Skeleton, ...props });
+          return import_react139.default.createElement(Loader, { Skeleton, ...props });
         }
-        return import_react141.default.createElement(Implementation, { ...props });
+        return import_react139.default.createElement(Implementation, { ...props });
       });
     };
   }
@@ -321183,14 +321089,14 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/state/use-app-layout.js
-  var import_react166 = __toESM(require_react());
+  var import_react164 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/hooks/use-intersection-observer/index.js
-  var import_react142 = __toESM(require_react());
+  var import_react140 = __toESM(require_react());
   function useIntersectionObserver({ initialState = false } = {}) {
-    const observerRef = (0, import_react142.useRef)(null);
-    const [isIntersecting, setIsIntersecting] = (0, import_react142.useState)(initialState);
-    const ref = (0, import_react142.useCallback)((targetElement) => {
+    const observerRef = (0, import_react140.useRef)(null);
+    const [isIntersecting, setIsIntersecting] = (0, import_react140.useState)(initialState);
+    const ref = (0, import_react140.useCallback)((targetElement) => {
       if (typeof IntersectionObserver === "undefined") {
         return;
       }
@@ -321221,10 +321127,10 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/internal/plugins/helpers/use-global-breadcrumbs.js
-  var import_react143 = __toESM(require_react());
+  var import_react141 = __toESM(require_react());
   function useGetGlobalBreadcrumbs(enabled) {
-    const [discoveredBreadcrumbs, setDiscoveredBreadcrumbs] = (0, import_react143.useState)(null);
-    (0, import_react143.useEffect)(() => {
+    const [discoveredBreadcrumbs, setDiscoveredBreadcrumbs] = (0, import_react141.useState)(null);
+    (0, import_react141.useEffect)(() => {
       if (!enabled) {
         return;
       }
@@ -321309,15 +321215,15 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/state/use-ai-drawer.js
-  var import_react144 = __toESM(require_react());
+  var import_react142 = __toESM(require_react());
   var DEFAULT_ON_CHANGE_PARAMS2 = { initiatedByUserAction: true };
   var MIN_DRAWER_SIZE2 = 400;
   function useAiDrawer({ onAiDrawerFocus, expandedDrawerId, setExpandedDrawerId, getMaxAiDrawerSize }) {
     var _a213, _b;
-    const [runtimeDrawer, setRuntimeDrawer] = (0, import_react144.useState)(null);
-    const [activeAiDrawerId, setActiveAiDrawerId] = (0, import_react144.useState)(null);
-    const [size4, setSize2] = (0, import_react144.useState)(null);
-    const aiDrawerWasOpenRef = (0, import_react144.useRef)(false);
+    const [runtimeDrawer, setRuntimeDrawer] = (0, import_react142.useState)(null);
+    const [activeAiDrawerId, setActiveAiDrawerId] = (0, import_react142.useState)(null);
+    const [size4, setSize2] = (0, import_react142.useState)(null);
+    const aiDrawerWasOpenRef = (0, import_react142.useRef)(false);
     aiDrawerWasOpenRef.current = aiDrawerWasOpenRef.current || !!activeAiDrawerId;
     function onActiveAiDrawerResize(size5) {
       const limitedSize = getLimitedValue(minAiDrawerSize, size5, getMaxAiDrawerSize());
@@ -321377,15 +321283,15 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/state/use-bottom-drawers.js
-  var import_react145 = __toESM(require_react());
+  var import_react143 = __toESM(require_react());
   var DEFAULT_ON_CHANGE_PARAMS3 = { initiatedByUserAction: true };
   var MIN_DRAWER_SIZE3 = 400;
   function useBottomDrawers({ onBottomDrawerFocus, expandedDrawerId, setExpandedDrawerId, drawersOpenQueue }) {
     var _a213, _b, _c;
-    const [activeBottomDrawerId, setActiveBottomDrawerId] = (0, import_react145.useState)(null);
-    const [drawerSizes, setDrawerSizes] = (0, import_react145.useState)({});
-    const [runtimeBottomDrawers, setRuntimeBottomDrawers] = (0, import_react145.useState)([]);
-    const bottomDrawerWasOpenRef = (0, import_react145.useRef)(false);
+    const [activeBottomDrawerId, setActiveBottomDrawerId] = (0, import_react143.useState)(null);
+    const [drawerSizes, setDrawerSizes] = (0, import_react143.useState)({});
+    const [runtimeBottomDrawers, setRuntimeBottomDrawers] = (0, import_react143.useState)([]);
+    const bottomDrawerWasOpenRef = (0, import_react143.useRef)(false);
     bottomDrawerWasOpenRef.current = bottomDrawerWasOpenRef.current || !!activeBottomDrawerId;
     const bottomDrawers = runtimeBottomDrawers.map(mapRuntimeConfigToAiDrawer);
     function onActiveBottomDrawerResize({ id: id38, size: size4 }) {
@@ -321457,43 +321363,43 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/state/use-feature-notifications.js
-  var import_react163 = __toESM(require_react());
+  var import_react161 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/do-not-use/feature-prompt/index.js
-  var import_react149 = __toESM(require_react());
-
-  // node_modules/@cloudscape-design/components/internal/do-not-use/feature-prompt/internal.js
-  var import_react148 = __toESM(require_react());
-
-  // node_modules/@cloudscape-design/components/internal/context/reset-contexts-for-modal.js
   var import_react147 = __toESM(require_react());
 
-  // node_modules/@cloudscape-design/components/internal/context/collection-label-context.js
+  // node_modules/@cloudscape-design/components/internal/do-not-use/feature-prompt/internal.js
   var import_react146 = __toESM(require_react());
-  var CollectionLabelContext = (0, import_react146.createContext)({});
 
   // node_modules/@cloudscape-design/components/internal/context/reset-contexts-for-modal.js
-  var ResetContextsForModal = ({ children: children2 }) => import_react147.default.createElement(
+  var import_react145 = __toESM(require_react());
+
+  // node_modules/@cloudscape-design/components/internal/context/collection-label-context.js
+  var import_react144 = __toESM(require_react());
+  var CollectionLabelContext = (0, import_react144.createContext)({});
+
+  // node_modules/@cloudscape-design/components/internal/context/reset-contexts-for-modal.js
+  var ResetContextsForModal = ({ children: children2 }) => import_react145.default.createElement(
     ButtonContext.Provider,
     { value: { onClick: () => {
     } } },
-    import_react147.default.createElement(
+    import_react145.default.createElement(
       CollectionLabelContext.Provider,
       { value: { assignId: () => {
       } } },
-      import_react147.default.createElement(
+      import_react145.default.createElement(
         FormFieldContext.Provider,
         { value: {} },
-        import_react147.default.createElement(
+        import_react145.default.createElement(
           InfoLinkLabelContext.Provider,
           { value: "" },
-          import_react147.default.createElement(
+          import_react145.default.createElement(
             LinkDefaultVariantContext.Provider,
             { value: defaultValue2 },
-            import_react147.default.createElement(
+            import_react145.default.createElement(
               TokenInlineContext.Provider,
               { value: defaultValue3 },
-              import_react147.default.createElement(SingleTabStopNavigationReset, null, children2)
+              import_react145.default.createElement(SingleTabStopNavigationReset, null, children2)
             )
           )
         )
@@ -321510,9 +321416,9 @@ ${isHandDrawn ? "" : `
   // node_modules/@cloudscape-design/components/internal/do-not-use/feature-prompt/internal.js
   function InternalFeaturePrompt({ onShow, onDismiss, header, content, i18nStrings, size: size4, position: position5, getTrack, trackKey, __internalRootRef, ...restProps }, ref) {
     const baseProps = getBaseProps(restProps);
-    const [show2, setShow] = (0, import_react148.useState)(false);
-    const popoverBodyRef = (0, import_react148.useRef)(null);
-    (0, import_react148.useImperativeHandle)(ref, () => ({
+    const [show2, setShow] = (0, import_react146.useState)(false);
+    const popoverBodyRef = (0, import_react146.useRef)(null);
+    (0, import_react146.useImperativeHandle)(ref, () => ({
       dismiss: () => {
         setShow(false);
         fireNonCancelableEvent(onDismiss);
@@ -321522,7 +321428,7 @@ ${isHandDrawn ? "" : `
         fireNonCancelableEvent(onShow);
       }
     }));
-    (0, import_react148.useEffect)(() => {
+    (0, import_react146.useEffect)(() => {
       if (!show2) {
         return;
       }
@@ -321547,16 +321453,16 @@ ${isHandDrawn ? "" : `
         controller.abort();
       };
     }, [show2, onDismiss]);
-    return import_react148.default.createElement("span", { ...baseProps, className: styles_css_default55.root, ref: __internalRootRef }, show2 && import_react148.default.createElement(
+    return import_react146.default.createElement("span", { ...baseProps, className: styles_css_default55.root, ref: __internalRootRef }, show2 && import_react146.default.createElement(
       Portal,
       null,
-      import_react148.default.createElement(
+      import_react146.default.createElement(
         reset_contexts_for_modal_default,
         null,
-        import_react148.default.createElement(
+        import_react146.default.createElement(
           PopoverContainer,
-          { size: size4, fixedWidth: false, position: position5, getTrack, trackKey, variant: "annotation", arrow: (position6) => import_react148.default.createElement(arrow_default, { position: position6, variant: "info" }), zIndex: 7e3, renderWithPortal: true },
-          import_react148.default.createElement(body_default, { ref: popoverBodyRef, dismissButton: true, dismissAriaLabel: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.dismissAriaLabel, header, onDismiss: (method) => {
+          { size: size4, fixedWidth: false, position: position5, getTrack, trackKey, variant: "annotation", arrow: (position6) => import_react146.default.createElement(arrow_default, { position: position6, variant: "info" }), zIndex: 7e3, renderWithPortal: true },
+          import_react146.default.createElement(body_default, { ref: popoverBodyRef, dismissButton: true, dismissAriaLabel: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.dismissAriaLabel, header, onDismiss: (method) => {
             setShow(false);
             fireNonCancelableEvent(onDismiss, { method });
           }, onBlur: (event3) => {
@@ -321569,21 +321475,21 @@ ${isHandDrawn ? "" : `
       )
     ));
   }
-  var internal_default10 = import_react148.default.forwardRef(InternalFeaturePrompt);
+  var internal_default10 = import_react146.default.forwardRef(InternalFeaturePrompt);
 
   // node_modules/@cloudscape-design/components/internal/do-not-use/feature-prompt/index.js
-  var FeaturePrompt = import_react149.default.forwardRef(({ size: size4 = "medium", position: position5 = "top", ...rest }, ref) => {
+  var FeaturePrompt = import_react147.default.forwardRef(({ size: size4 = "medium", position: position5 = "top", ...rest }, ref) => {
     const baseComponentProps = useBaseComponent("FeaturePrompt", { props: { size: size4, position: position5 } });
     const externalProps = getExternalProps(rest);
-    return import_react149.default.createElement(internal_default10, { ref, size: size4, position: position5, ...externalProps, ...baseComponentProps });
+    return import_react147.default.createElement(internal_default10, { ref, size: size4, position: position5, ...externalProps, ...baseComponentProps });
   });
   applyDisplayName(FeaturePrompt, "FeaturePrompt");
   var feature_prompt_default = FeaturePrompt;
 
   // node_modules/@cloudscape-design/components/internal/utils/promises.js
-  var import_react150 = __toESM(require_react());
+  var import_react148 = __toESM(require_react());
   function useMountRefPromise() {
-    const promiseRef = (0, import_react150.useRef)();
+    const promiseRef = (0, import_react148.useRef)();
     if (!promiseRef.current) {
       let resolve2;
       const promise4 = new Promise((res) => {
@@ -321591,7 +321497,7 @@ ${isHandDrawn ? "" : `
       });
       promiseRef.current = { promise: promise4, resolve: resolve2 };
     }
-    const ref = (0, import_react150.useCallback)((element3) => {
+    const ref = (0, import_react148.useCallback)((element3) => {
       if (element3) {
         promiseRef.current.resolve(element3);
       }
@@ -321600,16 +321506,16 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/drawer/feature-notifications-drawer-content.js
-  var import_react162 = __toESM(require_react());
+  var import_react160 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/drawer/implementation.js
-  var import_react153 = __toESM(require_react());
+  var import_react151 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/runtime-drawer/use-runtime-drawer-context.js
-  var import_react151 = __toESM(require_react());
+  var import_react149 = __toESM(require_react());
   var useRuntimeDrawerContext = ({ rootRef }) => {
-    const [drawerContext, setDrawerContext] = (0, import_react151.useState)(null);
-    (0, import_react151.useEffect)(() => {
+    const [drawerContext, setDrawerContext] = (0, import_react149.useState)(null);
+    (0, import_react149.useEffect)(() => {
       var _a213, _b;
       if (!(rootRef === null || rootRef === void 0 ? void 0 : rootRef.current)) {
         return;
@@ -321633,7 +321539,7 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/drawer/use-sticky-footer.js
-  var import_react152 = __toESM(require_react());
+  var import_react150 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/utils/throttle.js
   function throttle(func, delay2, { trailing = true } = {}) {
@@ -321684,8 +321590,8 @@ ${isHandDrawn ? "" : `
   var MINIMUM_SCROLLABLE_SPACE = 148;
   var STICKY_STATE_CHECK_THROTTLE_DELAY = 100;
   function useStickyFooter({ rootRef, drawerRef, footerRef }) {
-    const [isSticky, setIsSticky] = (0, import_react152.useState)(true);
-    const checkStickyState = throttle((0, import_react152.useCallback)(() => {
+    const [isSticky, setIsSticky] = (0, import_react150.useState)(true);
+    const checkStickyState = throttle((0, import_react150.useCallback)(() => {
       var _a213;
       if (!(drawerRef === null || drawerRef === void 0 ? void 0 : drawerRef.current) || !(footerRef === null || footerRef === void 0 ? void 0 : footerRef.current)) {
         return;
@@ -321820,9 +321726,9 @@ ${isHandDrawn ? "" : `
   // node_modules/@cloudscape-design/components/drawer/implementation.js
   function DrawerImplementation({ header, footer, children: children2, loading, i18nStrings, disableContentPaddings, __internalRootRef, __ref, headerActions, position: position5 = "static", placement = "end", offset, stickyOffset, zIndex, closeAction, hideCloseAction = false, backdrop = false, open: open2, onClose, ariaLabel, ariaLabelledby, focusBehavior, role, ...restProps }) {
     var _a213, _b;
-    const containerRef = (0, import_react153.useRef)(null);
-    const footerRef = (0, import_react153.useRef)(null);
-    const returnFocusTargetRef = (0, import_react153.useRef)(null);
+    const containerRef = (0, import_react151.useRef)(null);
+    const footerRef = (0, import_react151.useRef)(null);
+    const returnFocusTargetRef = (0, import_react151.useRef)(null);
     const baseProps = getBaseProps(restProps);
     const isToolbar = useAppLayoutToolbarDesignEnabled();
     const i18n = useInternalI18n("drawer");
@@ -321855,7 +321761,7 @@ ${isHandDrawn ? "" : `
       }
       returnFocusTargetRef.current = null;
     });
-    const autoFocusRef = (0, import_react153.useRef)(false);
+    const autoFocusRef = (0, import_react151.useRef)(false);
     autoFocusRef.current = (_a213 = focusBehavior === null || focusBehavior === void 0 ? void 0 : focusBehavior.autoFocus) !== null && _a213 !== void 0 ? _a213 : true;
     useEffectOnUpdate2(() => {
       if (open2 === void 0) {
@@ -321869,7 +321775,7 @@ ${isHandDrawn ? "" : `
       }
     }, [open2, focusIn, focusOut]);
     const handleClose = useStableCallback((method) => fireNonCancelableEvent(onClose, { method }));
-    (0, import_react153.useImperativeHandle)(__ref, () => ({ focus: () => {
+    (0, import_react151.useImperativeHandle)(__ref, () => ({ focus: () => {
       var _a214;
       return (_a214 = containerRef.current) === null || _a214 === void 0 ? void 0 : _a214.focus();
     } }), []);
@@ -321882,7 +321788,7 @@ ${isHandDrawn ? "" : `
     });
     const showBackdrop = backdrop && (position5 === "fixed" || position5 === "absolute");
     const trapFocus = (_b = focusBehavior === null || focusBehavior === void 0 ? void 0 : focusBehavior.trapFocus) !== null && _b !== void 0 ? _b : showBackdrop;
-    (0, import_react153.useEffect)(() => {
+    (0, import_react151.useEffect)(() => {
       if (!showBackdrop) {
         return;
       }
@@ -321894,43 +321800,43 @@ ${isHandDrawn ? "" : `
       document.addEventListener("keydown", onKeyDown);
       return () => document.removeEventListener("keydown", onKeyDown);
     }, [showBackdrop, handleClose]);
-    const drawer = import_react153.default.createElement(
+    const drawer = import_react151.default.createElement(
       "div",
       { ...baseProps, className: clsx_m_default(baseProps.className, styles_css_default56.root, styles_css_default57.root, open2 === false && styles_css_default56.hidden), ref: __internalRootRef },
-      showBackdrop && import_react153.default.createElement("div", { className: clsx_m_default(styles_css_default56.backdrop, styles_css_default57.backdrop, styles_css_default56[`backdrop-${position5}`]), style: { zIndex }, onClick: () => handleClose("backdrop-click") }),
-      import_react153.default.createElement(
+      showBackdrop && import_react151.default.createElement("div", { className: clsx_m_default(styles_css_default56.backdrop, styles_css_default57.backdrop, styles_css_default56[`backdrop-${position5}`]), style: { zIndex }, onClick: () => handleClose("backdrop-click") }),
+      import_react151.default.createElement(
         focus_lock_default,
         { disabled: !trapFocus, className: styles_css_default56["focus-trap"] },
-        import_react153.default.createElement("div", { ...containerProps }, loading ? import_react153.default.createElement(
+        import_react151.default.createElement("div", { ...containerProps }, loading ? import_react151.default.createElement(
           StatusIndicator,
           { type: "loading" },
-          import_react153.default.createElement(internal_default2, { tagName: "span" }, i18n("i18nStrings.loadingText", i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.loadingText))
-        ) : import_react153.default.createElement(
-          import_react153.default.Fragment,
+          import_react151.default.createElement(internal_default2, { tagName: "span" }, i18n("i18nStrings.loadingText", i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.loadingText))
+        ) : import_react151.default.createElement(
+          import_react151.default.Fragment,
           null,
-          header && import_react153.default.createElement(
+          header && import_react151.default.createElement(
             "div",
             { className: clsx_m_default(styles_css_default56.header, runtimeDrawerContext && styles_css_default56["with-runtime-context"], hasAdditionalDrawerAction && styles_css_default56["with-additional-action"], hideCloseAction && styles_css_default56["hide-close-action"]) },
-            import_react153.default.createElement("span", { id: headerId }, header),
-            headerActions && import_react153.default.createElement("div", { className: styles_css_default56["header-actions"] }, headerActions)
+            import_react151.default.createElement("span", { id: headerId }, header),
+            headerActions && import_react151.default.createElement("div", { className: styles_css_default56["header-actions"] }, headerActions)
           ),
-          closeAction && !hideCloseAction && import_react153.default.createElement(
+          closeAction && !hideCloseAction && import_react151.default.createElement(
             "div",
             { className: styles_css_default56["close-action"] },
-            import_react153.default.createElement(internal_default4, { variant: "icon", iconName: "close", ...closeAction, className: styles_css_default57["close-action"], onClick: () => handleClose("close-action") })
+            import_react151.default.createElement(internal_default4, { variant: "icon", iconName: "close", ...closeAction, className: styles_css_default57["close-action"], onClick: () => handleClose("close-action") })
           ),
-          import_react153.default.createElement(
+          import_react151.default.createElement(
             "div",
             { className: clsx_m_default(styles_css_default56["test-utils-drawer-content"], styles_css_default56.content, !disableContentPaddings && styles_css_default56["content-with-paddings"]) },
-            import_react153.default.createElement(BuiltInErrorBoundary, null, children2)
+            import_react151.default.createElement(BuiltInErrorBoundary, null, children2)
           ),
-          footer && import_react153.default.createElement("div", { ref: footerRef, className: clsx_m_default(styles_css_default56.footer, {
+          footer && import_react151.default.createElement("div", { ref: footerRef, className: clsx_m_default(styles_css_default56.footer, {
             [styles_css_default56["is-sticky"]]: isFooterSticky
           }) }, footer)
         ))
       )
     );
-    return position5 === "fixed" ? import_react153.default.createElement(Portal, null, drawer) : drawer;
+    return position5 === "fixed" ? import_react151.default.createElement(Portal, null, drawer) : drawer;
   }
   var createWidgetizedDrawer = createWidgetizedComponent(DrawerImplementation);
 
@@ -321949,22 +321855,22 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/list/internal.js
-  var import_react161 = __toESM(require_react());
+  var import_react159 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/sortable-area/index.js
-  var import_react160 = __toESM(require_react());
+  var import_react158 = __toESM(require_react());
 
   // node_modules/@dnd-kit/core/dist/core.esm.js
-  var import_react156 = __toESM(require_react());
+  var import_react154 = __toESM(require_react());
   var import_react_dom6 = __toESM(require_react_dom());
 
   // node_modules/@dnd-kit/utilities/dist/utilities.esm.js
-  var import_react154 = __toESM(require_react());
+  var import_react152 = __toESM(require_react());
   function useCombinedRefs() {
     for (var _len = arguments.length, refs = new Array(_len), _key = 0; _key < _len; _key++) {
       refs[_key] = arguments[_key];
     }
-    return (0, import_react154.useMemo)(
+    return (0, import_react152.useMemo)(
       () => (node2) => {
         refs.forEach((ref) => ref(node2));
       },
@@ -322027,13 +321933,13 @@ ${isHandDrawn ? "" : `
     }
     return document;
   }
-  var useIsomorphicLayoutEffect = canUseDOM ? import_react154.useLayoutEffect : import_react154.useEffect;
+  var useIsomorphicLayoutEffect = canUseDOM ? import_react152.useLayoutEffect : import_react152.useEffect;
   function useEvent(handler2) {
-    const handlerRef = (0, import_react154.useRef)(handler2);
+    const handlerRef = (0, import_react152.useRef)(handler2);
     useIsomorphicLayoutEffect(() => {
       handlerRef.current = handler2;
     });
-    return (0, import_react154.useCallback)(function() {
+    return (0, import_react152.useCallback)(function() {
       for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
         args[_key] = arguments[_key];
       }
@@ -322041,11 +321947,11 @@ ${isHandDrawn ? "" : `
     }, []);
   }
   function useInterval() {
-    const intervalRef = (0, import_react154.useRef)(null);
-    const set5 = (0, import_react154.useCallback)((listener, duration) => {
+    const intervalRef = (0, import_react152.useRef)(null);
+    const set5 = (0, import_react152.useCallback)((listener, duration) => {
       intervalRef.current = setInterval(listener, duration);
     }, []);
-    const clear8 = (0, import_react154.useCallback)(() => {
+    const clear8 = (0, import_react152.useCallback)(() => {
       if (intervalRef.current !== null) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -322057,7 +321963,7 @@ ${isHandDrawn ? "" : `
     if (dependencies === void 0) {
       dependencies = [value3];
     }
-    const valueRef = (0, import_react154.useRef)(value3);
+    const valueRef = (0, import_react152.useRef)(value3);
     useIsomorphicLayoutEffect(() => {
       if (valueRef.current !== value3) {
         valueRef.current = value3;
@@ -322066,8 +321972,8 @@ ${isHandDrawn ? "" : `
     return valueRef;
   }
   function useLazyMemo(callback, dependencies) {
-    const valueRef = (0, import_react154.useRef)();
-    return (0, import_react154.useMemo)(
+    const valueRef = (0, import_react152.useRef)();
+    return (0, import_react152.useMemo)(
       () => {
         const newValue = callback(valueRef.current);
         valueRef.current = newValue;
@@ -322079,8 +321985,8 @@ ${isHandDrawn ? "" : `
   }
   function useNodeRef(onChange) {
     const onChangeHandler = useEvent(onChange);
-    const node2 = (0, import_react154.useRef)(null);
-    const setNodeRef = (0, import_react154.useCallback)(
+    const node2 = (0, import_react152.useRef)(null);
+    const setNodeRef = (0, import_react152.useCallback)(
       (element3) => {
         if (element3 !== node2.current) {
           onChangeHandler == null ? void 0 : onChangeHandler(element3, node2.current);
@@ -322093,15 +321999,15 @@ ${isHandDrawn ? "" : `
     return [node2, setNodeRef];
   }
   function usePrevious2(value3) {
-    const ref = (0, import_react154.useRef)();
-    (0, import_react154.useEffect)(() => {
+    const ref = (0, import_react152.useRef)();
+    (0, import_react152.useEffect)(() => {
       ref.current = value3;
     }, [value3]);
     return ref.current;
   }
   var ids = {};
   function useUniqueId2(prefix, value3) {
-    return (0, import_react154.useMemo)(() => {
+    return (0, import_react152.useMemo)(() => {
       if (value3) {
         return value3;
       }
@@ -322235,7 +322141,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@dnd-kit/accessibility/dist/accessibility.esm.js
-  var import_react155 = __toESM(require_react());
+  var import_react153 = __toESM(require_react());
   var hiddenStyles = {
     display: "none"
   };
@@ -322244,7 +322150,7 @@ ${isHandDrawn ? "" : `
       id: id38,
       value: value3
     } = _ref2;
-    return import_react155.default.createElement("div", {
+    return import_react153.default.createElement("div", {
       id: id38,
       style: hiddenStyles
     }, value3);
@@ -322269,7 +322175,7 @@ ${isHandDrawn ? "" : `
       clipPath: "inset(100%)",
       whiteSpace: "nowrap"
     };
-    return import_react155.default.createElement("div", {
+    return import_react153.default.createElement("div", {
       id: id38,
       style: visuallyHidden,
       role: "status",
@@ -322278,8 +322184,8 @@ ${isHandDrawn ? "" : `
     }, announcement);
   }
   function useAnnouncement() {
-    const [announcement, setAnnouncement] = (0, import_react155.useState)("");
-    const announce = (0, import_react155.useCallback)((value3) => {
+    const [announcement, setAnnouncement] = (0, import_react153.useState)("");
+    const announce = (0, import_react153.useCallback)((value3) => {
       if (value3 != null) {
         setAnnouncement(value3);
       }
@@ -322291,10 +322197,10 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@dnd-kit/core/dist/core.esm.js
-  var DndMonitorContext = /* @__PURE__ */ (0, import_react156.createContext)(null);
+  var DndMonitorContext = /* @__PURE__ */ (0, import_react154.createContext)(null);
   function useDndMonitor(listener) {
-    const registerListener = (0, import_react156.useContext)(DndMonitorContext);
-    (0, import_react156.useEffect)(() => {
+    const registerListener = (0, import_react154.useContext)(DndMonitorContext);
+    (0, import_react154.useEffect)(() => {
       if (!registerListener) {
         throw new Error("useDndMonitor must be used within a children of <DndContext>");
       }
@@ -322303,12 +322209,12 @@ ${isHandDrawn ? "" : `
     }, [listener, registerListener]);
   }
   function useDndMonitorProvider() {
-    const [listeners] = (0, import_react156.useState)(() => /* @__PURE__ */ new Set());
-    const registerListener = (0, import_react156.useCallback)((listener) => {
+    const [listeners] = (0, import_react154.useState)(() => /* @__PURE__ */ new Set());
+    const registerListener = (0, import_react154.useCallback)((listener) => {
       listeners.add(listener);
       return () => listeners.delete(listener);
     }, [listeners]);
-    const dispatch3 = (0, import_react156.useCallback)((_ref2) => {
+    const dispatch3 = (0, import_react154.useCallback)((_ref2) => {
       let {
         type: type3,
         event: event3
@@ -322369,11 +322275,11 @@ ${isHandDrawn ? "" : `
       announcement
     } = useAnnouncement();
     const liveRegionId = useUniqueId2("DndLiveRegion");
-    const [mounted, setMounted] = (0, import_react156.useState)(false);
-    (0, import_react156.useEffect)(() => {
+    const [mounted, setMounted] = (0, import_react154.useState)(false);
+    (0, import_react154.useEffect)(() => {
       setMounted(true);
     }, []);
-    useDndMonitor((0, import_react156.useMemo)(() => ({
+    useDndMonitor((0, import_react154.useMemo)(() => ({
       onDragStart(_ref22) {
         let {
           active
@@ -322428,10 +322334,10 @@ ${isHandDrawn ? "" : `
     if (!mounted) {
       return null;
     }
-    const markup = import_react156.default.createElement(import_react156.default.Fragment, null, import_react156.default.createElement(HiddenText, {
+    const markup = import_react154.default.createElement(import_react154.default.Fragment, null, import_react154.default.createElement(HiddenText, {
       id: hiddenTextDescribedById,
       value: screenReaderInstructions.draggable
-    }), import_react156.default.createElement(LiveRegion, {
+    }), import_react154.default.createElement(LiveRegion, {
       id: liveRegionId,
       announcement
     }));
@@ -322451,7 +322357,7 @@ ${isHandDrawn ? "" : `
   function noop11() {
   }
   function useSensor(sensor, options2) {
-    return (0, import_react156.useMemo)(
+    return (0, import_react154.useMemo)(
       () => ({
         sensor,
         options: options2 != null ? options2 : {}
@@ -322464,7 +322370,7 @@ ${isHandDrawn ? "" : `
     for (var _len = arguments.length, sensors = new Array(_len), _key = 0; _key < _len; _key++) {
       sensors[_key] = arguments[_key];
     }
-    return (0, import_react156.useMemo)(
+    return (0, import_react154.useMemo)(
       () => [...sensors].filter((sensor) => sensor != null),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [...sensors]
@@ -323666,15 +323572,15 @@ ${isHandDrawn ? "" : `
       disabled: !enabled
     });
     const [setAutoScrollInterval, clearAutoScrollInterval] = useInterval();
-    const scrollSpeed = (0, import_react156.useRef)({
+    const scrollSpeed = (0, import_react154.useRef)({
       x: 0,
       y: 0
     });
-    const scrollDirection = (0, import_react156.useRef)({
+    const scrollDirection = (0, import_react154.useRef)({
       x: 0,
       y: 0
     });
-    const rect2 = (0, import_react156.useMemo)(() => {
+    const rect2 = (0, import_react154.useMemo)(() => {
       switch (activator) {
         case AutoScrollActivator.Pointer:
           return pointerCoordinates ? {
@@ -323687,8 +323593,8 @@ ${isHandDrawn ? "" : `
           return draggingRect;
       }
     }, [activator, draggingRect, pointerCoordinates]);
-    const scrollContainerRef = (0, import_react156.useRef)(null);
-    const autoScroll = (0, import_react156.useCallback)(() => {
+    const scrollContainerRef = (0, import_react154.useRef)(null);
+    const autoScroll = (0, import_react154.useCallback)(() => {
       const scrollContainer = scrollContainerRef.current;
       if (!scrollContainer) {
         return;
@@ -323697,8 +323603,8 @@ ${isHandDrawn ? "" : `
       const scrollTop = scrollSpeed.current.y * scrollDirection.current.y;
       scrollContainer.scrollBy(scrollLeft, scrollTop);
     }, []);
-    const sortedScrollableAncestors = (0, import_react156.useMemo)(() => order2 === TraversalOrder.TreeOrder ? [...scrollableAncestors].reverse() : scrollableAncestors, [order2, scrollableAncestors]);
-    (0, import_react156.useEffect)(
+    const sortedScrollableAncestors = (0, import_react154.useMemo)(() => order2 === TraversalOrder.TreeOrder ? [...scrollableAncestors].reverse() : scrollableAncestors, [order2, scrollableAncestors]);
+    (0, import_react154.useEffect)(
       () => {
         if (!enabled || !scrollableAncestors.length || !rect2) {
           clearAutoScrollInterval();
@@ -323811,7 +323717,7 @@ ${isHandDrawn ? "" : `
     }, [node2, id38]);
   }
   function useCombineActivators(sensors, getSyntheticHandler) {
-    return (0, import_react156.useMemo)(() => sensors.reduce((accumulator, sensor) => {
+    return (0, import_react154.useMemo)(() => sensors.reduce((accumulator, sensor) => {
       const {
         sensor: Sensor
       } = sensor;
@@ -323839,16 +323745,16 @@ ${isHandDrawn ? "" : `
       dependencies,
       config: config3
     } = _ref2;
-    const [queue, setQueue] = (0, import_react156.useState)(null);
+    const [queue, setQueue] = (0, import_react154.useState)(null);
     const {
       frequency,
       measure: measure2,
       strategy
     } = config3;
-    const containersRef = (0, import_react156.useRef)(containers);
+    const containersRef = (0, import_react154.useRef)(containers);
     const disabled = isDisabled();
     const disabledRef = useLatestValue(disabled);
-    const measureDroppableContainers = (0, import_react156.useCallback)(function(ids2) {
+    const measureDroppableContainers = (0, import_react154.useCallback)(function(ids2) {
       if (ids2 === void 0) {
         ids2 = [];
       }
@@ -323862,7 +323768,7 @@ ${isHandDrawn ? "" : `
         return value3.concat(ids2.filter((id38) => !value3.includes(id38)));
       });
     }, [disabledRef]);
-    const timeoutId = (0, import_react156.useRef)(null);
+    const timeoutId = (0, import_react154.useRef)(null);
     const droppableRects = useLazyMemo((previousValue) => {
       if (disabled && !dragging) {
         return defaultValue4;
@@ -323888,10 +323794,10 @@ ${isHandDrawn ? "" : `
       }
       return previousValue;
     }, [containers, queue, dragging, disabled, measure2]);
-    (0, import_react156.useEffect)(() => {
+    (0, import_react154.useEffect)(() => {
       containersRef.current = containers;
     }, [containers]);
-    (0, import_react156.useEffect)(
+    (0, import_react154.useEffect)(
       () => {
         if (disabled) {
           return;
@@ -323901,7 +323807,7 @@ ${isHandDrawn ? "" : `
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [dragging, disabled]
     );
-    (0, import_react156.useEffect)(
+    (0, import_react154.useEffect)(
       () => {
         if (queue && queue.length > 0) {
           setQueue(null);
@@ -323910,7 +323816,7 @@ ${isHandDrawn ? "" : `
       //eslint-disable-next-line react-hooks/exhaustive-deps
       [JSON.stringify(queue)]
     );
-    (0, import_react156.useEffect)(
+    (0, import_react154.useEffect)(
       () => {
         if (disabled || typeof frequency !== "number" || timeoutId.current !== null) {
           return;
@@ -323959,7 +323865,7 @@ ${isHandDrawn ? "" : `
       disabled
     } = _ref2;
     const handleMutations = useEvent(callback);
-    const mutationObserver = (0, import_react156.useMemo)(() => {
+    const mutationObserver = (0, import_react154.useMemo)(() => {
       if (disabled || typeof window === "undefined" || typeof window.MutationObserver === "undefined") {
         return void 0;
       }
@@ -323968,7 +323874,7 @@ ${isHandDrawn ? "" : `
       } = window;
       return new MutationObserver2(handleMutations);
     }, [handleMutations, disabled]);
-    (0, import_react156.useEffect)(() => {
+    (0, import_react154.useEffect)(() => {
       return () => mutationObserver == null ? void 0 : mutationObserver.disconnect();
     }, [mutationObserver]);
     return mutationObserver;
@@ -323979,7 +323885,7 @@ ${isHandDrawn ? "" : `
       disabled
     } = _ref2;
     const handleResize = useEvent(callback);
-    const resizeObserver = (0, import_react156.useMemo)(
+    const resizeObserver = (0, import_react154.useMemo)(
       () => {
         if (disabled || typeof window === "undefined" || typeof window.ResizeObserver === "undefined") {
           return void 0;
@@ -323992,7 +323898,7 @@ ${isHandDrawn ? "" : `
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [disabled]
     );
-    (0, import_react156.useEffect)(() => {
+    (0, import_react154.useEffect)(() => {
       return () => resizeObserver == null ? void 0 : resizeObserver.disconnect();
     }, [resizeObserver]);
     return resizeObserver;
@@ -324004,7 +323910,7 @@ ${isHandDrawn ? "" : `
     if (measure2 === void 0) {
       measure2 = defaultMeasure;
     }
-    const [rect2, setRect] = (0, import_react156.useState)(null);
+    const [rect2, setRect] = (0, import_react154.useState)(null);
     function measureRect() {
       setRect((currentRect) => {
         if (!element3) {
@@ -324062,7 +323968,7 @@ ${isHandDrawn ? "" : `
   }
   var defaultValue$1 = [];
   function useScrollableAncestors(node2) {
-    const previousNode = (0, import_react156.useRef)(node2);
+    const previousNode = (0, import_react154.useRef)(node2);
     const ancestors = useLazyMemo((previousValue) => {
       if (!node2) {
         return defaultValue$1;
@@ -324072,15 +323978,15 @@ ${isHandDrawn ? "" : `
       }
       return getScrollableAncestors(node2);
     }, [node2]);
-    (0, import_react156.useEffect)(() => {
+    (0, import_react154.useEffect)(() => {
       previousNode.current = node2;
     }, [node2]);
     return ancestors;
   }
   function useScrollOffsets(elements2) {
-    const [scrollCoordinates, setScrollCoordinates] = (0, import_react156.useState)(null);
-    const prevElements = (0, import_react156.useRef)(elements2);
-    const handleScroll = (0, import_react156.useCallback)((event3) => {
+    const [scrollCoordinates, setScrollCoordinates] = (0, import_react154.useState)(null);
+    const prevElements = (0, import_react154.useRef)(elements2);
+    const handleScroll = (0, import_react154.useCallback)((event3) => {
       const scrollingElement = getScrollableElement(event3.target);
       if (!scrollingElement) {
         return;
@@ -324093,7 +323999,7 @@ ${isHandDrawn ? "" : `
         return new Map(scrollCoordinates2);
       });
     }, []);
-    (0, import_react156.useEffect)(() => {
+    (0, import_react154.useEffect)(() => {
       const previousElements = prevElements.current;
       if (elements2 !== previousElements) {
         cleanup2(previousElements);
@@ -324121,7 +324027,7 @@ ${isHandDrawn ? "" : `
         });
       }
     }, [handleScroll, elements2]);
-    return (0, import_react156.useMemo)(() => {
+    return (0, import_react154.useMemo)(() => {
       if (elements2.length) {
         return scrollCoordinates ? Array.from(scrollCoordinates.values()).reduce((acc, coordinates) => add4(acc, coordinates), defaultCoordinates) : getScrollOffsets(elements2);
       }
@@ -324132,15 +324038,15 @@ ${isHandDrawn ? "" : `
     if (dependencies === void 0) {
       dependencies = [];
     }
-    const initialScrollOffsets = (0, import_react156.useRef)(null);
-    (0, import_react156.useEffect)(
+    const initialScrollOffsets = (0, import_react154.useRef)(null);
+    (0, import_react154.useEffect)(
       () => {
         initialScrollOffsets.current = null;
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
       dependencies
     );
-    (0, import_react156.useEffect)(() => {
+    (0, import_react154.useEffect)(() => {
       const hasScrollOffsets = scrollOffsets !== defaultCoordinates;
       if (hasScrollOffsets && !initialScrollOffsets.current) {
         initialScrollOffsets.current = scrollOffsets;
@@ -324152,7 +324058,7 @@ ${isHandDrawn ? "" : `
     return initialScrollOffsets.current ? subtract(scrollOffsets, initialScrollOffsets.current) : defaultCoordinates;
   }
   function useSensorSetup(sensors) {
-    (0, import_react156.useEffect)(
+    (0, import_react154.useEffect)(
       () => {
         if (!canUseDOM) {
           return;
@@ -324180,7 +324086,7 @@ ${isHandDrawn ? "" : `
     );
   }
   function useSyntheticListeners(listeners, id38) {
-    return (0, import_react156.useMemo)(() => {
+    return (0, import_react154.useMemo)(() => {
       return listeners.reduce((acc, _ref2) => {
         let {
           eventName,
@@ -324194,7 +324100,7 @@ ${isHandDrawn ? "" : `
     }, [listeners, id38]);
   }
   function useWindowRect(element3) {
-    return (0, import_react156.useMemo)(() => element3 ? getWindowClientRect(element3) : null, [element3]);
+    return (0, import_react154.useMemo)(() => element3 ? getWindowClientRect(element3) : null, [element3]);
   }
   var defaultValue$2 = [];
   function useRects(elements2, measure2) {
@@ -324203,7 +324109,7 @@ ${isHandDrawn ? "" : `
     }
     const [firstElement] = elements2;
     const windowRect = useWindowRect(firstElement ? getWindow(firstElement) : null);
-    const [rects, setRects] = (0, import_react156.useState)(defaultValue$2);
+    const [rects, setRects] = (0, import_react154.useState)(defaultValue$2);
     function measureRects() {
       setRects(() => {
         if (!elements2.length) {
@@ -324236,8 +324142,8 @@ ${isHandDrawn ? "" : `
     let {
       measure: measure2
     } = _ref2;
-    const [rect2, setRect] = (0, import_react156.useState)(null);
-    const handleResize = (0, import_react156.useCallback)((entries2) => {
+    const [rect2, setRect] = (0, import_react154.useState)(null);
+    const handleResize = (0, import_react154.useCallback)((entries2) => {
       for (const {
         target
       } of entries2) {
@@ -324257,7 +324163,7 @@ ${isHandDrawn ? "" : `
     const resizeObserver = useResizeObserver2({
       callback: handleResize
     });
-    const handleNodeChange = (0, import_react156.useCallback)((element3) => {
+    const handleNodeChange = (0, import_react154.useCallback)((element3) => {
       const node2 = getMeasurableNode(element3);
       resizeObserver == null ? void 0 : resizeObserver.disconnect();
       if (node2) {
@@ -324266,7 +324172,7 @@ ${isHandDrawn ? "" : `
       setRect(node2 ? measure2(node2) : null);
     }, [measure2, resizeObserver]);
     const [nodeRef, setRef] = useNodeRef(handleNodeChange);
-    return (0, import_react156.useMemo)(() => ({
+    return (0, import_react154.useMemo)(() => ({
       nodeRef,
       rect: rect2,
       setRef
@@ -324354,8 +324260,8 @@ ${isHandDrawn ? "" : `
     over: null,
     measureDroppableContainers: noop11
   };
-  var InternalContext = /* @__PURE__ */ (0, import_react156.createContext)(defaultInternalContext);
-  var PublicContext = /* @__PURE__ */ (0, import_react156.createContext)(defaultPublicContext);
+  var InternalContext = /* @__PURE__ */ (0, import_react154.createContext)(defaultInternalContext);
+  var PublicContext = /* @__PURE__ */ (0, import_react154.createContext)(defaultPublicContext);
   function getInitialState() {
     return {
       draggable: {
@@ -324489,10 +324395,10 @@ ${isHandDrawn ? "" : `
       active,
       activatorEvent,
       draggableNodes
-    } = (0, import_react156.useContext)(InternalContext);
+    } = (0, import_react154.useContext)(InternalContext);
     const previousActivatorEvent = usePrevious2(activatorEvent);
     const previousActiveId = usePrevious2(active == null ? void 0 : active.id);
-    (0, import_react156.useEffect)(() => {
+    (0, import_react154.useEffect)(() => {
       if (disabled) {
         return;
       }
@@ -324543,7 +324449,7 @@ ${isHandDrawn ? "" : `
     }, transform8) : transform8;
   }
   function useMeasuringConfiguration(config3) {
-    return (0, import_react156.useMemo)(
+    return (0, import_react154.useMemo)(
       () => ({
         draggable: {
           ...defaultMeasuringConfiguration.draggable,
@@ -324569,7 +324475,7 @@ ${isHandDrawn ? "" : `
       initialRect,
       config: config3 = true
     } = _ref2;
-    const initialized = (0, import_react156.useRef)(false);
+    const initialized = (0, import_react154.useRef)(false);
     const {
       x: x6,
       y: y6
@@ -324610,7 +324516,7 @@ ${isHandDrawn ? "" : `
       }
     }, [activeNode, x6, y6, initialRect, measure2]);
   }
-  var ActiveDraggableContext = /* @__PURE__ */ (0, import_react156.createContext)({
+  var ActiveDraggableContext = /* @__PURE__ */ (0, import_react154.createContext)({
     ...defaultCoordinates,
     scaleX: 1,
     scaleY: 1
@@ -324621,7 +324527,7 @@ ${isHandDrawn ? "" : `
     Status2[Status2["Initializing"] = 1] = "Initializing";
     Status2[Status2["Initialized"] = 2] = "Initialized";
   })(Status || (Status = {}));
-  var DndContext = /* @__PURE__ */ (0, import_react156.memo)(function DndContext2(_ref2) {
+  var DndContext = /* @__PURE__ */ (0, import_react154.memo)(function DndContext2(_ref2) {
     var _sensorContext$curren, _dragOverlay$nodeRef$, _dragOverlay$rect, _over$rect;
     let {
       id: id38,
@@ -324634,10 +324540,10 @@ ${isHandDrawn ? "" : `
       modifiers,
       ...props
     } = _ref2;
-    const store2 = (0, import_react156.useReducer)(reducer, void 0, getInitialState);
+    const store2 = (0, import_react154.useReducer)(reducer, void 0, getInitialState);
     const [state5, dispatch3] = store2;
     const [dispatchMonitorEvent, registerMonitorListener] = useDndMonitorProvider();
-    const [status, setStatus] = (0, import_react156.useState)(Status.Uninitialized);
+    const [status, setStatus] = (0, import_react154.useState)(Status.Uninitialized);
     const isInitialized = status === Status.Initialized;
     const {
       draggable: {
@@ -324650,11 +324556,11 @@ ${isHandDrawn ? "" : `
       }
     } = state5;
     const node2 = activeId != null ? draggableNodes.get(activeId) : null;
-    const activeRects = (0, import_react156.useRef)({
+    const activeRects = (0, import_react154.useRef)({
       initial: null,
       translated: null
     });
-    const active = (0, import_react156.useMemo)(() => {
+    const active = (0, import_react154.useMemo)(() => {
       var _node$data;
       return activeId != null ? {
         id: activeId,
@@ -324663,12 +324569,12 @@ ${isHandDrawn ? "" : `
         rect: activeRects
       } : null;
     }, [activeId, node2]);
-    const activeRef = (0, import_react156.useRef)(null);
-    const [activeSensor, setActiveSensor] = (0, import_react156.useState)(null);
-    const [activatorEvent, setActivatorEvent] = (0, import_react156.useState)(null);
+    const activeRef = (0, import_react154.useRef)(null);
+    const [activeSensor, setActiveSensor] = (0, import_react154.useState)(null);
+    const [activatorEvent, setActivatorEvent] = (0, import_react154.useState)(null);
     const latestProps = useLatestValue(props, Object.values(props));
     const draggableDescribedById = useUniqueId2("DndDescribedBy", id38);
-    const enabledDroppableContainers = (0, import_react156.useMemo)(() => droppableContainers.getEnabled(), [droppableContainers]);
+    const enabledDroppableContainers = (0, import_react154.useMemo)(() => droppableContainers.getEnabled(), [droppableContainers]);
     const measuringConfiguration = useMeasuringConfiguration(measuring);
     const {
       droppableRects,
@@ -324680,7 +324586,7 @@ ${isHandDrawn ? "" : `
       config: measuringConfiguration.droppable
     });
     const activeNode = useCachedNode(draggableNodes, activeId);
-    const activationCoordinates = (0, import_react156.useMemo)(() => activatorEvent ? getEventCoordinates(activatorEvent) : null, [activatorEvent]);
+    const activationCoordinates = (0, import_react154.useMemo)(() => activatorEvent ? getEventCoordinates(activatorEvent) : null, [activatorEvent]);
     const autoScrollOptions = getAutoScrollerOptions();
     const initialActiveNodeRect = useInitialRect(activeNode, measuringConfiguration.draggable.measure);
     useLayoutShiftScrollCompensation({
@@ -324691,7 +324597,7 @@ ${isHandDrawn ? "" : `
     });
     const activeNodeRect = useRect(activeNode, measuringConfiguration.draggable.measure, initialActiveNodeRect);
     const containerNodeRect = useRect(activeNode ? activeNode.parentElement : null);
-    const sensorContext = (0, import_react156.useRef)({
+    const sensorContext = (0, import_react154.useRef)({
       activatorEvent: null,
       active: null,
       activeNode,
@@ -324749,11 +324655,11 @@ ${isHandDrawn ? "" : `
       pointerCoordinates
     }) : null;
     const overId = getFirstCollision(collisions, "id");
-    const [over, setOver] = (0, import_react156.useState)(null);
+    const [over, setOver] = (0, import_react154.useState)(null);
     const appliedTranslate = usesDragOverlay ? modifiedTranslate : add4(modifiedTranslate, activeNodeScrollDelta);
     const transform8 = adjustScale(appliedTranslate, (_over$rect = over == null ? void 0 : over.rect) != null ? _over$rect : null, activeNodeRect);
-    const activeSensorRef = (0, import_react156.useRef)(null);
-    const instantiateSensor = (0, import_react156.useCallback)(
+    const activeSensorRef = (0, import_react154.useRef)(null);
+    const instantiateSensor = (0, import_react154.useCallback)(
       (event3, _ref22) => {
         let {
           sensor: Sensor,
@@ -324911,7 +324817,7 @@ ${isHandDrawn ? "" : `
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [draggableNodes]
     );
-    const bindActivatorToSensorInstantiator = (0, import_react156.useCallback)((handler2, sensor) => {
+    const bindActivatorToSensorInstantiator = (0, import_react154.useCallback)((handler2, sensor) => {
       return (event3, active2) => {
         const nativeEvent = event3.nativeEvent;
         const activeDraggableNode = draggableNodes.get(active2);
@@ -324943,7 +324849,7 @@ ${isHandDrawn ? "" : `
         setStatus(Status.Initialized);
       }
     }, [activeNodeRect, status]);
-    (0, import_react156.useEffect)(
+    (0, import_react154.useEffect)(
       () => {
         const {
           onDragMove
@@ -324978,7 +324884,7 @@ ${isHandDrawn ? "" : `
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [scrollAdjustedTranslate.x, scrollAdjustedTranslate.y]
     );
-    (0, import_react156.useEffect)(
+    (0, import_react154.useEffect)(
       () => {
         const {
           active: active2,
@@ -325051,7 +324957,7 @@ ${isHandDrawn ? "" : `
       scrollableAncestors,
       scrollableAncestorRects
     });
-    const publicContext = (0, import_react156.useMemo)(() => {
+    const publicContext = (0, import_react154.useMemo)(() => {
       const context = {
         active,
         activeNode,
@@ -325073,7 +324979,7 @@ ${isHandDrawn ? "" : `
       };
       return context;
     }, [active, activeNode, activeNodeRect, activatorEvent, collisions, containerNodeRect, dragOverlay, draggableNodes, droppableContainers, droppableRects, over, measureDroppableContainers, scrollableAncestors, scrollableAncestorRects, measuringConfiguration, measuringScheduled, windowRect]);
-    const internalContext = (0, import_react156.useMemo)(() => {
+    const internalContext = (0, import_react154.useMemo)(() => {
       const context = {
         activatorEvent,
         activators,
@@ -325089,17 +324995,17 @@ ${isHandDrawn ? "" : `
       };
       return context;
     }, [activatorEvent, activators, active, activeNodeRect, dispatch3, draggableDescribedById, draggableNodes, over, measureDroppableContainers]);
-    return import_react156.default.createElement(DndMonitorContext.Provider, {
+    return import_react154.default.createElement(DndMonitorContext.Provider, {
       value: registerMonitorListener
-    }, import_react156.default.createElement(InternalContext.Provider, {
+    }, import_react154.default.createElement(InternalContext.Provider, {
       value: internalContext
-    }, import_react156.default.createElement(PublicContext.Provider, {
+    }, import_react154.default.createElement(PublicContext.Provider, {
       value: publicContext
-    }, import_react156.default.createElement(ActiveDraggableContext.Provider, {
+    }, import_react154.default.createElement(ActiveDraggableContext.Provider, {
       value: transform8
-    }, children2)), import_react156.default.createElement(RestoreFocus, {
+    }, children2)), import_react154.default.createElement(RestoreFocus, {
       disabled: (accessibility == null ? void 0 : accessibility.restoreFocus) === false
-    })), import_react156.default.createElement(Accessibility, {
+    })), import_react154.default.createElement(Accessibility, {
       ...accessibility,
       hiddenTextDescribedById: draggableDescribedById
     }));
@@ -325118,7 +325024,7 @@ ${isHandDrawn ? "" : `
       };
     }
   });
-  var NullContext = /* @__PURE__ */ (0, import_react156.createContext)(null);
+  var NullContext = /* @__PURE__ */ (0, import_react154.createContext)(null);
   var defaultRole = "button";
   var ID_PREFIX = "Draggable";
   function useDraggable(_ref2) {
@@ -325137,14 +325043,14 @@ ${isHandDrawn ? "" : `
       ariaDescribedById,
       draggableNodes,
       over
-    } = (0, import_react156.useContext)(InternalContext);
+    } = (0, import_react154.useContext)(InternalContext);
     const {
       role = defaultRole,
       roleDescription = "draggable",
       tabIndex = 0
     } = attributes != null ? attributes : {};
     const isDragging = (active == null ? void 0 : active.id) === id38;
-    const transform8 = (0, import_react156.useContext)(isDragging ? ActiveDraggableContext : NullContext);
+    const transform8 = (0, import_react154.useContext)(isDragging ? ActiveDraggableContext : NullContext);
     const [node2, setNodeRef] = useNodeRef();
     const [activatorNode, setActivatorNodeRef] = useNodeRef();
     const listeners = useSyntheticListeners(activators, id38);
@@ -325168,7 +325074,7 @@ ${isHandDrawn ? "" : `
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [draggableNodes, id38]
     );
-    const memoizedAttributes = (0, import_react156.useMemo)(() => ({
+    const memoizedAttributes = (0, import_react154.useMemo)(() => ({
       role,
       tabIndex,
       "aria-disabled": disabled,
@@ -325191,7 +325097,7 @@ ${isHandDrawn ? "" : `
     };
   }
   function useDndContext() {
-    return (0, import_react156.useContext)(PublicContext);
+    return (0, import_react154.useContext)(PublicContext);
   }
   var ID_PREFIX$1 = "Droppable";
   var defaultResizeObserverConfig = {
@@ -325210,13 +325116,13 @@ ${isHandDrawn ? "" : `
       dispatch: dispatch3,
       over,
       measureDroppableContainers
-    } = (0, import_react156.useContext)(InternalContext);
-    const previous = (0, import_react156.useRef)({
+    } = (0, import_react154.useContext)(InternalContext);
+    const previous = (0, import_react154.useRef)({
       disabled
     });
-    const resizeObserverConnected = (0, import_react156.useRef)(false);
-    const rect2 = (0, import_react156.useRef)(null);
-    const callbackId = (0, import_react156.useRef)(null);
+    const resizeObserverConnected = (0, import_react154.useRef)(false);
+    const rect2 = (0, import_react154.useRef)(null);
+    const callbackId = (0, import_react154.useRef)(null);
     const {
       disabled: resizeObserverDisabled,
       updateMeasurementsFor,
@@ -325226,7 +325132,7 @@ ${isHandDrawn ? "" : `
       ...resizeObserverConfig
     };
     const ids2 = useLatestValue(updateMeasurementsFor != null ? updateMeasurementsFor : id38);
-    const handleResize = (0, import_react156.useCallback)(
+    const handleResize = (0, import_react154.useCallback)(
       () => {
         if (!resizeObserverConnected.current) {
           resizeObserverConnected.current = true;
@@ -325247,7 +325153,7 @@ ${isHandDrawn ? "" : `
       callback: handleResize,
       disabled: resizeObserverDisabled || !active
     });
-    const handleNodeChange = (0, import_react156.useCallback)((newElement, previousElement) => {
+    const handleNodeChange = (0, import_react154.useCallback)((newElement, previousElement) => {
       if (!resizeObserver) {
         return;
       }
@@ -325261,7 +325167,7 @@ ${isHandDrawn ? "" : `
     }, [resizeObserver]);
     const [nodeRef, setNodeRef] = useNodeRef(handleNodeChange);
     const dataRef = useLatestValue(data6);
-    (0, import_react156.useEffect)(() => {
+    (0, import_react154.useEffect)(() => {
       if (!resizeObserver || !nodeRef.current) {
         return;
       }
@@ -325269,7 +325175,7 @@ ${isHandDrawn ? "" : `
       resizeObserverConnected.current = false;
       resizeObserver.observe(nodeRef.current);
     }, [nodeRef, resizeObserver]);
-    (0, import_react156.useEffect)(
+    (0, import_react154.useEffect)(
       () => {
         dispatch3({
           type: Action2.RegisterDroppable,
@@ -325291,7 +325197,7 @@ ${isHandDrawn ? "" : `
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [id38]
     );
-    (0, import_react156.useEffect)(() => {
+    (0, import_react154.useEffect)(() => {
       if (disabled !== previous.current.disabled) {
         dispatch3({
           type: Action2.SetDroppableDisabled,
@@ -325316,8 +325222,8 @@ ${isHandDrawn ? "" : `
       animation: animation2,
       children: children2
     } = _ref2;
-    const [clonedChildren, setClonedChildren] = (0, import_react156.useState)(null);
-    const [element3, setElement] = (0, import_react156.useState)(null);
+    const [clonedChildren, setClonedChildren] = (0, import_react154.useState)(null);
+    const [element3, setElement] = (0, import_react154.useState)(null);
     const previousChildren = usePrevious2(children2);
     if (!children2 && !clonedChildren && previousChildren) {
       setClonedChildren(previousChildren);
@@ -325336,7 +325242,7 @@ ${isHandDrawn ? "" : `
         setClonedChildren(null);
       });
     }, [animation2, clonedChildren, element3]);
-    return import_react156.default.createElement(import_react156.default.Fragment, null, children2, clonedChildren ? (0, import_react156.cloneElement)(clonedChildren, {
+    return import_react154.default.createElement(import_react154.default.Fragment, null, children2, clonedChildren ? (0, import_react154.cloneElement)(clonedChildren, {
       ref: setElement
     }) : null);
   }
@@ -325350,9 +325256,9 @@ ${isHandDrawn ? "" : `
     let {
       children: children2
     } = _ref2;
-    return import_react156.default.createElement(InternalContext.Provider, {
+    return import_react154.default.createElement(InternalContext.Provider, {
       value: defaultInternalContext
-    }, import_react156.default.createElement(ActiveDraggableContext.Provider, {
+    }, import_react154.default.createElement(ActiveDraggableContext.Provider, {
       value: defaultTransform
     }, children2));
   }
@@ -325364,7 +325270,7 @@ ${isHandDrawn ? "" : `
     const isKeyboardActivator = isKeyboardEvent(activatorEvent);
     return isKeyboardActivator ? "transform 250ms ease" : void 0;
   };
-  var PositionedOverlay = /* @__PURE__ */ (0, import_react156.forwardRef)((_ref2, ref) => {
+  var PositionedOverlay = /* @__PURE__ */ (0, import_react154.forwardRef)((_ref2, ref) => {
     let {
       as,
       activatorEvent,
@@ -325395,7 +325301,7 @@ ${isHandDrawn ? "" : `
       transition: typeof transition2 === "function" ? transition2(activatorEvent) : transition2,
       ...style3
     };
-    return import_react156.default.createElement(as, {
+    return import_react154.default.createElement(as, {
       className,
       style: styles7,
       ref
@@ -325585,7 +325491,7 @@ ${isHandDrawn ? "" : `
   }
   var key = 0;
   function useKey(id38) {
-    return (0, import_react156.useMemo)(() => {
+    return (0, import_react154.useMemo)(() => {
       if (id38 == null) {
         return;
       }
@@ -325593,7 +325499,7 @@ ${isHandDrawn ? "" : `
       return key;
     }, [id38]);
   }
-  var DragOverlay = /* @__PURE__ */ import_react156.default.memo((_ref2) => {
+  var DragOverlay = /* @__PURE__ */ import_react154.default.memo((_ref2) => {
     let {
       adjustScale: adjustScale2 = false,
       children: children2,
@@ -325619,7 +325525,7 @@ ${isHandDrawn ? "" : `
       scrollableAncestorRects,
       windowRect
     } = useDndContext();
-    const transform8 = (0, import_react156.useContext)(ActiveDraggableContext);
+    const transform8 = (0, import_react154.useContext)(ActiveDraggableContext);
     const key2 = useKey(active == null ? void 0 : active.id);
     const modifiedTransform = applyModifiers(modifiers, {
       activatorEvent,
@@ -325642,9 +325548,9 @@ ${isHandDrawn ? "" : `
       measuringConfiguration
     });
     const ref = initialRect ? dragOverlay.setRef : void 0;
-    return import_react156.default.createElement(NullifiedContextProvider, null, import_react156.default.createElement(AnimationManager, {
+    return import_react154.default.createElement(NullifiedContextProvider, null, import_react154.default.createElement(AnimationManager, {
       animation: dropAnimation
-    }, active && key2 ? import_react156.default.createElement(PositionedOverlay, {
+    }, active && key2 ? import_react154.default.createElement(PositionedOverlay, {
       key: key2,
       id: active.id,
       ref,
@@ -325663,7 +325569,7 @@ ${isHandDrawn ? "" : `
   });
 
   // node_modules/@dnd-kit/sortable/dist/sortable.esm.js
-  var import_react157 = __toESM(require_react());
+  var import_react155 = __toESM(require_react());
   function arrayMove(array7, from2, to) {
     const newArray = array7.slice();
     newArray.splice(to < 0 ? newArray.length + to : to, 0, newArray.splice(from2, 1)[0]);
@@ -325786,7 +325692,7 @@ ${isHandDrawn ? "" : `
     return nextRect ? nextRect.top - (currentRect.top + currentRect.height) : previousRect ? currentRect.top - (previousRect.top + previousRect.height) : 0;
   }
   var ID_PREFIX2 = "Sortable";
-  var Context = /* @__PURE__ */ import_react157.default.createContext({
+  var Context = /* @__PURE__ */ import_react155.default.createContext({
     activeIndex: -1,
     containerId: ID_PREFIX2,
     disableTransforms: false,
@@ -325817,11 +325723,11 @@ ${isHandDrawn ? "" : `
     } = useDndContext();
     const containerId = useUniqueId2(ID_PREFIX2, id38);
     const useDragOverlay = Boolean(dragOverlay.rect !== null);
-    const items = (0, import_react157.useMemo)(() => userDefinedItems.map((item) => typeof item === "object" && "id" in item ? item.id : item), [userDefinedItems]);
+    const items = (0, import_react155.useMemo)(() => userDefinedItems.map((item) => typeof item === "object" && "id" in item ? item.id : item), [userDefinedItems]);
     const isDragging = active != null;
     const activeIndex = active ? items.indexOf(active.id) : -1;
     const overIndex = over ? items.indexOf(over.id) : -1;
-    const previousItemsRef = (0, import_react157.useRef)(items);
+    const previousItemsRef = (0, import_react155.useRef)(items);
     const itemsHaveChanged = !itemsEqual(items, previousItemsRef.current);
     const disableTransforms = overIndex !== -1 && activeIndex === -1 || itemsHaveChanged;
     const disabled = normalizeDisabled(disabledProp);
@@ -325830,10 +325736,10 @@ ${isHandDrawn ? "" : `
         measureDroppableContainers(items);
       }
     }, [itemsHaveChanged, items, isDragging, measureDroppableContainers]);
-    (0, import_react157.useEffect)(() => {
+    (0, import_react155.useEffect)(() => {
       previousItemsRef.current = items;
     }, [items]);
-    const contextValue = (0, import_react157.useMemo)(
+    const contextValue = (0, import_react155.useMemo)(
       () => ({
         activeIndex,
         containerId,
@@ -325848,7 +325754,7 @@ ${isHandDrawn ? "" : `
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [activeIndex, containerId, disabled.draggable, disabled.droppable, disableTransforms, items, overIndex, droppableRects, useDragOverlay, strategy]
     );
-    return import_react157.default.createElement(Context.Provider, {
+    return import_react155.default.createElement(Context.Provider, {
       value: contextValue
     }, children2);
   }
@@ -325904,8 +325810,8 @@ ${isHandDrawn ? "" : `
       node: node2,
       rect: rect2
     } = _ref2;
-    const [derivedTransform, setDerivedtransform] = (0, import_react157.useState)(null);
-    const previousIndex = (0, import_react157.useRef)(index2);
+    const [derivedTransform, setDerivedtransform] = (0, import_react155.useState)(null);
+    const previousIndex = (0, import_react155.useRef)(index2);
     useIsomorphicLayoutEffect(() => {
       if (!disabled && index2 !== previousIndex.current && node2.current) {
         const initial2 = rect2.current;
@@ -325928,7 +325834,7 @@ ${isHandDrawn ? "" : `
         previousIndex.current = index2;
       }
     }, [disabled, index2, node2, rect2]);
-    (0, import_react157.useEffect)(() => {
+    (0, import_react155.useEffect)(() => {
       if (derivedTransform) {
         setDerivedtransform(null);
       }
@@ -325957,10 +325863,10 @@ ${isHandDrawn ? "" : `
       overIndex,
       useDragOverlay,
       strategy: globalStrategy
-    } = (0, import_react157.useContext)(Context);
+    } = (0, import_react155.useContext)(Context);
     const disabled = normalizeLocalDisabled(localDisabled, globalDisabled);
     const index2 = items.indexOf(id38);
-    const data6 = (0, import_react157.useMemo)(() => ({
+    const data6 = (0, import_react155.useMemo)(() => ({
       sortable: {
         containerId,
         index: index2,
@@ -325968,7 +325874,7 @@ ${isHandDrawn ? "" : `
       },
       ...customData
     }), [containerId, customData, index2, items]);
-    const itemsAfterCurrentSortable = (0, import_react157.useMemo)(() => items.slice(items.indexOf(id38)), [items, id38]);
+    const itemsAfterCurrentSortable = (0, import_react155.useMemo)(() => items.slice(items.indexOf(id38)), [items, id38]);
     const {
       rect: rect2,
       node: node2,
@@ -326023,7 +325929,7 @@ ${isHandDrawn ? "" : `
       overIndex
     }) : index2;
     const activeId = active == null ? void 0 : active.id;
-    const previous = (0, import_react157.useRef)({
+    const previous = (0, import_react155.useRef)({
       activeId,
       items,
       newIndex,
@@ -326050,7 +325956,7 @@ ${isHandDrawn ? "" : `
       node: node2,
       rect: rect2
     });
-    (0, import_react157.useEffect)(() => {
+    (0, import_react155.useEffect)(() => {
       if (isSorting && previous.current.newIndex !== newIndex) {
         previous.current.newIndex = newIndex;
       }
@@ -326061,7 +325967,7 @@ ${isHandDrawn ? "" : `
         previous.current.items = items;
       }
     }, [isSorting, newIndex, containerId, items]);
-    (0, import_react157.useEffect)(() => {
+    (0, import_react155.useEffect)(() => {
       if (activeId === previous.current.activeId) {
         return;
       }
@@ -326155,7 +326061,7 @@ ${isHandDrawn ? "" : `
   })(EventName2 || (EventName2 = {}));
 
   // node_modules/@cloudscape-design/components/internal/components/sortable-area/use-drag-and-drop-reorder.js
-  var import_react158 = __toESM(require_react());
+  var import_react156 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/sortable-area/keyboard-sensor/defaults.js
   var defaultKeyboardCodes2 = {
@@ -326412,9 +326318,9 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/internal/components/sortable-area/use-drag-and-drop-reorder.js
   function useDragAndDropReorder({ items, itemDefinition }) {
-    const isKeyboard = (0, import_react158.useRef)(false);
-    const positionDelta = (0, import_react158.useRef)(0);
-    const [activeItemId, setActiveItemId] = (0, import_react158.useState)(null);
+    const isKeyboard = (0, import_react156.useRef)(false);
+    const positionDelta = (0, import_react156.useRef)(0);
+    const [activeItemId, setActiveItemId] = (0, import_react156.useState)(null);
     const setActiveItem = (id38) => {
       setActiveItemId(id38);
       if (!id38) {
@@ -326526,7 +326432,7 @@ ${isHandDrawn ? "" : `
   var isEscape2 = (key2) => key2 === "Escape" || key2 === "Esc";
 
   // node_modules/@cloudscape-design/components/internal/components/sortable-area/use-live-announcements.js
-  var import_react159 = __toESM(require_react());
+  var import_react157 = __toESM(require_react());
   var formatDndStarted = (format3) => (position5, total) => format3({ position: position5, total });
   var formatDndItemReordered = (format3) => (initialPosition, currentPosition, total) => format3({ currentPosition, total, isInitialPosition: `${initialPosition === currentPosition}` });
   var formatDndItemCommitted = (format3) => (initialPosition, finalPosition, total) => format3({
@@ -326536,7 +326442,7 @@ ${isHandDrawn ? "" : `
     isInitialPosition: `${initialPosition === finalPosition}`
   });
   function useLiveAnnouncements({ items, itemDefinition, isDragging, liveAnnouncementDndStarted, liveAnnouncementDndItemReordered, liveAnnouncementDndItemCommitted, liveAnnouncementDndDiscarded }) {
-    const isFirstAnnouncement = (0, import_react159.useRef)(true);
+    const isFirstAnnouncement = (0, import_react157.useRef)(true);
     if (!isDragging) {
       isFirstAnnouncement.current = true;
     }
@@ -326597,7 +326503,7 @@ ${isHandDrawn ? "" : `
     const announcements = useLiveAnnouncements({ items, itemDefinition, isDragging, ...i18nStrings });
     const portalContainer = usePortalContainer();
     const { autoScroll, setAutoScrollBoundary } = useScopedAutoScroll();
-    return import_react160.default.createElement(
+    return import_react158.default.createElement(
       DndContext,
       { sensors, collisionDetection, autoScroll, accessibility: {
         announcements,
@@ -326621,11 +326527,11 @@ ${isHandDrawn ? "" : `
         setAutoScrollBoundary(null);
         setActiveItemId(null);
       } },
-      import_react160.default.createElement(SortableContext, { disabled: disableReorder, items: items.map((item) => itemDefinition.id(item)), strategy: verticalListSortingStrategy }, items.map((item) => import_react160.default.createElement(DraggableItem, { key: itemDefinition.id(item), item, itemDefinition, showDirectionButtons: item === activeItem && isKeyboard.current, renderItem, onKeyDown: handleKeyDown, dragHandleAriaLabel: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.dragHandleAriaLabel }))),
-      import_react160.default.createElement(
+      import_react158.default.createElement(SortableContext, { disabled: disableReorder, items: items.map((item) => itemDefinition.id(item)), strategy: verticalListSortingStrategy }, items.map((item) => import_react158.default.createElement(DraggableItem, { key: itemDefinition.id(item), item, itemDefinition, showDirectionButtons: item === activeItem && isKeyboard.current, renderItem, onKeyDown: handleKeyDown, dragHandleAriaLabel: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.dragHandleAriaLabel }))),
+      import_react158.default.createElement(
         Portal,
         { container: portalContainer },
-        import_react160.default.createElement(DragOverlay, { className: clsx_m_default(styles_css_default58["drag-overlay"], styles_css_default58[`drag-overlay-${getBorderRadiusVariant(itemDefinition)}`]), dropAnimation: null, style: { zIndex: 5e3 }, transition: isKeyboard.current ? "transform 250ms" : "" }, activeItem && renderItem({
+        import_react158.default.createElement(DragOverlay, { className: clsx_m_default(styles_css_default58["drag-overlay"], styles_css_default58[`drag-overlay-${getBorderRadiusVariant(itemDefinition)}`]), dropAnimation: null, style: { zIndex: 5e3 }, transition: isKeyboard.current ? "transform 250ms" : "" }, activeItem && renderItem({
           item: activeItem,
           id: activeItemId.toString(),
           style: {},
@@ -326643,7 +326549,7 @@ ${isHandDrawn ? "" : `
     );
   }
   function useScopedAutoScroll() {
-    const boundaryRef = (0, import_react160.useRef)(null);
+    const boundaryRef = (0, import_react158.useRef)(null);
     const autoScroll = {
       order: TraversalOrder.ReversedTreeOrder,
       canScroll: (element3) => !boundaryRef.current || boundaryRef.current.contains(element3)
@@ -326659,8 +326565,8 @@ ${isHandDrawn ? "" : `
     return { autoScroll, setAutoScrollBoundary };
   }
   function usePortalContainer() {
-    const portalContainerRef = (0, import_react160.useRef)(typeof document !== "undefined" ? document.createElement("div") : null);
-    (0, import_react160.useEffect)(() => {
+    const portalContainerRef = (0, import_react158.useRef)(typeof document !== "undefined" ? document.createElement("div") : null);
+    (0, import_react158.useEffect)(() => {
       const container2 = portalContainerRef.current;
       if (container2 && !container2.isConnected) {
         document.body.appendChild(container2);
@@ -326692,8 +326598,8 @@ ${isHandDrawn ? "" : `
       }
     };
     const className = clsx_m_default(isDragging && clsx_m_default(styles_css_default58.placeholder, styles_css_default58[`placeholder-${getBorderRadiusVariant(itemDefinition)}`]), isSorting && styles_css_default58.sorting);
-    const dragHandleRef = (0, import_react160.useRef)(null);
-    return import_react160.default.createElement(import_react160.default.Fragment, null, renderItem({
+    const dragHandleRef = (0, import_react158.useRef)(null);
+    return import_react158.default.createElement(import_react158.default.Fragment, null, renderItem({
       item,
       id: id38,
       ref: setNodeRef,
@@ -326759,7 +326665,7 @@ ${isHandDrawn ? "" : `
     const i18n = useInternalI18n("list");
     let contents;
     if (sortable) {
-      contents = import_react161.default.createElement(SortableArea, { items, disableReorder: sortDisabled, itemDefinition: {
+      contents = import_react159.default.createElement(SortableArea, { items, disableReorder: sortDisabled, itemDefinition: {
         id: (item) => renderItem(item).id,
         label: (item) => {
           var _a213;
@@ -326776,28 +326682,28 @@ ${isHandDrawn ? "" : `
       }, renderItem: ({ ref, item, id: id38, style: style3, className, dragHandleProps, isDragGhost }) => {
         const structuredItemProps = extractValidStructuredItemProps(renderItem(item));
         const itemClass = clsx_m_default(styles_css_default59.item, styles_css_default60.item, disableItemPaddings && styles_css_default59["disable-item-paddings"], styles_css_default59["sortable-item"], className);
-        const content = import_react161.default.createElement(
-          import_react161.default.Fragment,
+        const content = import_react159.default.createElement(
+          import_react159.default.Fragment,
           null,
-          import_react161.default.createElement(drag_handle_default, { ...dragHandleProps }),
-          import_react161.default.createElement(InternalStructuredItem, { ...structuredItemProps, disablePaddings: disableItemPaddings })
+          import_react159.default.createElement(drag_handle_default, { ...dragHandleProps }),
+          import_react159.default.createElement(InternalStructuredItem, { ...structuredItemProps, disablePaddings: disableItemPaddings })
         );
         if (isDragGhost) {
-          return import_react161.default.createElement("div", { className: itemClass }, content);
+          return import_react159.default.createElement("div", { className: itemClass }, content);
         }
-        return import_react161.default.createElement("li", { ref, className: itemClass, style: style3, "data-testid": id38 }, content);
+        return import_react159.default.createElement("li", { ref, className: itemClass, style: style3, "data-testid": id38 }, content);
       } });
     } else {
       contents = items === null || items === void 0 ? void 0 : items.map((item) => {
         const { id: id38, ...structuredItemProps } = renderItem(item);
-        return import_react161.default.createElement(
+        return import_react159.default.createElement(
           "li",
           { key: id38, "data-testid": id38, className: clsx_m_default(styles_css_default59.item, styles_css_default60.item, disablePaddings && styles_css_default59["disable-paddings"], disableItemPaddings && styles_css_default59["disable-item-paddings"]) },
-          import_react161.default.createElement(InternalStructuredItem, { ...extractValidStructuredItemProps(structuredItemProps), disablePaddings: disableItemPaddings })
+          import_react159.default.createElement(InternalStructuredItem, { ...extractValidStructuredItemProps(structuredItemProps), disablePaddings: disableItemPaddings })
         );
       });
     }
-    return import_react161.default.createElement(Tag, { ref: __internalRootRef, ...baseProps, className: clsx_m_default(baseProps.className, styles_css_default59.root, styles_css_default60.root), "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, "aria-describedby": ariaDescribedby }, contents);
+    return import_react159.default.createElement(Tag, { ref: __internalRootRef, ...baseProps, className: clsx_m_default(baseProps.className, styles_css_default59.root, styles_css_default60.root), "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, "aria-describedby": ariaDescribedby }, contents);
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/drawer/styles.css.js
@@ -326838,8 +326744,8 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/drawer/feature-notifications-drawer-content.js
   function RuntimeContentPart({ content, mountContent }) {
-    const ref = (0, import_react162.useRef)(null);
-    (0, import_react162.useEffect)(() => {
+    const ref = (0, import_react160.useRef)(null);
+    (0, import_react160.useEffect)(() => {
       if (!(mountContent && ref.current)) {
         return;
       }
@@ -326849,49 +326755,49 @@ ${isHandDrawn ? "" : `
         destructor === null || destructor === void 0 ? void 0 : destructor();
       };
     }, []);
-    return mountContent ? import_react162.default.createElement("div", { ref }) : import_react162.default.createElement(import_react162.default.Fragment, null, content);
+    return mountContent ? import_react160.default.createElement("div", { ref }) : import_react160.default.createElement(import_react160.default.Fragment, null, content);
   }
   function RuntimeFeaturesNotificationDrawer({ features, mountItem, featuresPageLink, i18nStrings }) {
     const i18n = useInternalI18n("features-notification-drawer");
-    return import_react162.default.createElement(
+    return import_react160.default.createElement(
       InternalDrawer,
       { header: i18n("i18nStrings.title", i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.titleText), disableContentPaddings: true },
-      import_react162.default.createElement(
+      import_react160.default.createElement(
         "div",
         { className: styles_css_default61["runtime-feature-notifications-drawer-content"] },
-        import_react162.default.createElement(
+        import_react160.default.createElement(
           InternalBox,
           { padding: { top: "m", left: "xl", right: "xl", bottom: "m" } },
-          import_react162.default.createElement(InternalList, { items: features, renderItem: (item) => ({
+          import_react160.default.createElement(InternalList, { items: features, renderItem: (item) => ({
             id: item.id,
-            content: import_react162.default.createElement(
+            content: import_react160.default.createElement(
               InternalBox,
               { variant: "h3" },
-              import_react162.default.createElement(RuntimeContentPart, { mountContent: mountItem, content: item.header })
+              import_react160.default.createElement(RuntimeContentPart, { mountContent: mountItem, content: item.header })
             ),
-            secondaryContent: import_react162.default.createElement(
+            secondaryContent: import_react160.default.createElement(
               internal_default5,
               { size: "xs", direction: "vertical" },
-              import_react162.default.createElement(InternalBox, { fontSize: "body-s", color: "text-body-secondary" }, formatDate2(item.releaseDate)),
-              !!item.contentCategory && import_react162.default.createElement(
+              import_react160.default.createElement(InternalBox, { fontSize: "body-s", color: "text-body-secondary" }, formatDate2(item.releaseDate)),
+              !!item.contentCategory && import_react160.default.createElement(
                 InternalBox,
                 null,
-                import_react162.default.createElement(RuntimeContentPart, { mountContent: mountItem, content: item.contentCategory })
+                import_react160.default.createElement(RuntimeContentPart, { mountContent: mountItem, content: item.contentCategory })
               ),
-              import_react162.default.createElement(
+              import_react160.default.createElement(
                 InternalBox,
                 null,
-                import_react162.default.createElement(RuntimeContentPart, { mountContent: mountItem, content: item.content })
+                import_react160.default.createElement(RuntimeContentPart, { mountContent: mountItem, content: item.content })
               )
             )
           }) }),
-          !!featuresPageLink && import_react162.default.createElement(
+          !!featuresPageLink && import_react160.default.createElement(
             "footer",
             { className: styles_css_default61["runtime-feature-notifications-footer"] },
-            import_react162.default.createElement(
+            import_react160.default.createElement(
               InternalBox,
               { padding: { top: "s" } },
-              import_react162.default.createElement(internal_default7, { href: featuresPageLink }, i18n("i18nStrings.viewAll", i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.viewAllText))
+              import_react160.default.createElement(internal_default7, { href: featuresPageLink }, i18n("i18nStrings.viewAll", i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.viewAllText))
             )
           )
         )
@@ -326925,13 +326831,13 @@ ${isHandDrawn ? "" : `
   }
   function useFeatureNotifications() {
     const i18n = useInternalI18n("features-notification-drawer");
-    const [featurePromptDismissed, setFeaturePromptDismissed] = (0, import_react163.useState)(false);
-    const [featureNotificationsData, setFeatureNotificationsData] = (0, import_react163.useState)(null);
-    const [seenFeatures, setSeenFeatures] = (0, import_react163.useState)({});
-    const featurePromptRef = (0, import_react163.useRef)(null);
+    const [featurePromptDismissed, setFeaturePromptDismissed] = (0, import_react161.useState)(false);
+    const [featureNotificationsData, setFeatureNotificationsData] = (0, import_react161.useState)(null);
+    const [seenFeatures, setSeenFeatures] = (0, import_react161.useState)({});
+    const featurePromptRef = (0, import_react161.useRef)(null);
     const { ref: featurePromptMountRef, promise: featurePromptMountPromise } = useMountRefPromise();
     const featurePromptMergedRef = useMergeRefs(featurePromptRef, featurePromptMountRef);
-    const allNotificationsSeen = (0, import_react163.useMemo)(() => {
+    const allNotificationsSeen = (0, import_react161.useMemo)(() => {
       return featureNotificationsData === null || featureNotificationsData === void 0 ? void 0 : featureNotificationsData.features.every((feature) => !!seenFeatures[feature.id]);
     }, [featureNotificationsData, seenFeatures]);
     const defaultFeaturesFilter = (feature) => {
@@ -326944,7 +326850,7 @@ ${isHandDrawn ? "" : `
       var _a213, _b, _c, _d, _e2;
       return {
         id: payload.id,
-        content: import_react163.default.createElement(RuntimeFeaturesNotificationDrawer, { features: payload.features, featuresPageLink: payload.featuresPageLink, mountItem: payload.mountItem, i18nStrings: payload.i18nStrings }),
+        content: import_react161.default.createElement(RuntimeFeaturesNotificationDrawer, { features: payload.features, featuresPageLink: payload.featuresPageLink, mountItem: payload.mountItem, i18nStrings: payload.i18nStrings }),
         trigger: {
           iconName: "announcement"
         },
@@ -327016,7 +326922,7 @@ ${isHandDrawn ? "" : `
       if (!triggerRef.current || !latestFeature) {
         return null;
       }
-      return import_react163.default.createElement(feature_prompt_default, { ref: featurePromptMergedRef, onShow: () => {
+      return import_react161.default.createElement(feature_prompt_default, { ref: featurePromptMergedRef, onShow: () => {
         triggerRef.current.dataset.awsuiSuppressTooltip = "true";
       }, onDismiss: (event3) => {
         var _a213;
@@ -327031,7 +326937,7 @@ ${isHandDrawn ? "" : `
           }
         });
         persistFeaturePromptDismiss(latestFeature);
-      }, header: import_react163.default.createElement(RuntimeContentPart, { mountContent: featureNotificationsData === null || featureNotificationsData === void 0 ? void 0 : featureNotificationsData.mountItem, content: latestFeature.header }), content: import_react163.default.createElement(RuntimeContentPart, { mountContent: featureNotificationsData === null || featureNotificationsData === void 0 ? void 0 : featureNotificationsData.mountItem, content: latestFeature.content }), trackKey: latestFeature.id, position: "left", getTrack: () => triggerRef.current });
+      }, header: import_react161.default.createElement(RuntimeContentPart, { mountContent: featureNotificationsData === null || featureNotificationsData === void 0 ? void 0 : featureNotificationsData.mountItem, content: latestFeature.header }), content: import_react161.default.createElement(RuntimeContentPart, { mountContent: featureNotificationsData === null || featureNotificationsData === void 0 ? void 0 : featureNotificationsData.mountItem, content: latestFeature.content }), trackKey: latestFeature.id, position: "left", getTrack: () => triggerRef.current });
     }
     const setFeaturesToSeenAndPersist = () => {
       var _a213, _b;
@@ -327078,9 +326984,9 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/state/use-own-breadcrumbs-props.js
-  var import_react164 = __toESM(require_react());
+  var import_react162 = __toESM(require_react());
   function useOwnBreadcrumbsProps() {
-    const [breadcrumbs, setBreadcrumbs] = (0, import_react164.useState)(null);
+    const [breadcrumbs, setBreadcrumbs] = (0, import_react162.useState)(null);
     const reportOwnBreadcrumbsProps = useStableCallback((props) => {
       setBreadcrumbs(props);
       return {
@@ -327092,7 +326998,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/state/use-widget-messages.js
-  var import_react165 = __toESM(require_react());
+  var import_react163 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/plugins/widget/core.js
   var storageKeyMessageHandler = /* @__PURE__ */ Symbol.for("awsui-widget-api-message-handler");
@@ -327125,7 +327031,7 @@ ${isHandDrawn ? "" : `
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/state/use-widget-messages.js
   function useWidgetMessages(isEnabled, handler2) {
     const appLayoutMessageHandler = useStableCallback(handler2);
-    (0, import_react165.useEffect)(() => {
+    (0, import_react163.useEffect)(() => {
       if (!isEnabled) {
         return;
       }
@@ -327145,23 +327051,23 @@ ${isHandDrawn ? "" : `
       warnOnce("AppLayout", "`navigationCollapsedWidth` should be smaller than `navigationWidth`. When collapsed width equals or exceeds the expanded width, the ARIA expanded/collapsed semantics become inverted.");
     }
     const splitPanelControlId = useUniqueId("split-panel");
-    const [toolbarState, setToolbarState] = (0, import_react166.useState)("show");
-    const [toolbarHeight, setToolbarHeight] = (0, import_react166.useState)(0);
-    const [notificationsHeight, setNotificationsHeight] = (0, import_react166.useState)(0);
-    const [navigationAnimationDisabled, setNavigationAnimationDisabled] = (0, import_react166.useState)(true);
-    const [splitPanelAnimationDisabled, setSplitPanelAnimationDisabled] = (0, import_react166.useState)(true);
-    const [drawerAnimationDisabled, setDrawerAnimationDisabled] = (0, import_react166.useState)(true);
-    const [isNested, setIsNested] = (0, import_react166.useState)(false);
-    const [expandedDrawerId, setInternalExpandedDrawerId] = (0, import_react166.useState)(null);
-    const rootRefInternal = (0, import_react166.useRef)(null);
-    const onMountRootRef = (0, import_react166.useCallback)((node2) => {
+    const [toolbarState, setToolbarState] = (0, import_react164.useState)("show");
+    const [toolbarHeight, setToolbarHeight] = (0, import_react164.useState)(0);
+    const [notificationsHeight, setNotificationsHeight] = (0, import_react164.useState)(0);
+    const [navigationAnimationDisabled, setNavigationAnimationDisabled] = (0, import_react164.useState)(true);
+    const [splitPanelAnimationDisabled, setSplitPanelAnimationDisabled] = (0, import_react164.useState)(true);
+    const [drawerAnimationDisabled, setDrawerAnimationDisabled] = (0, import_react164.useState)(true);
+    const [isNested, setIsNested] = (0, import_react164.useState)(false);
+    const [expandedDrawerId, setInternalExpandedDrawerId] = (0, import_react164.useState)(null);
+    const rootRefInternal = (0, import_react164.useRef)(null);
+    const onMountRootRef = (0, import_react164.useCallback)((node2) => {
       setIsNested(getIsNestedInAppLayout(node2));
     }, []);
     const { __forceEnableRuntimeMessages: forceEnableRuntimeMessages } = rest;
     const discoveredBreadcrumbsProps = useGetGlobalBreadcrumbs(hasToolbar && !breadcrumbs);
     const { breadcrumbs: ownBreadcrumbsProps, reportOwnBreadcrumbsProps } = useOwnBreadcrumbsProps();
-    const breadcrumbsConsumerRef = (0, import_react166.useRef)(null);
-    const [hasBreadcrumbsConsumer, setHasBreadcrumbsExternalConsumer] = (0, import_react166.useState)(false);
+    const breadcrumbsConsumerRef = (0, import_react164.useRef)(null);
+    const [hasBreadcrumbsConsumer, setHasBreadcrumbsExternalConsumer] = (0, import_react164.useState)(false);
     const [toolsOpen = false, setToolsOpen] = useControllable2(controlledToolsOpen, onToolsChange, false, {
       componentName: "AppLayout",
       controlledProp: "toolsOpen",
@@ -327339,17 +327245,17 @@ ${isHandDrawn ? "" : `
       fireNonCancelableEvent(onSplitPanelPreferencesChange, detail);
     };
     const [splitPanelSize = 0, setSplitPanelSize] = useControllable2(controlledSplitPanelSize, onSplitPanelResize, getSplitPanelDefaultSize((_b = splitPanelPreferences === null || splitPanelPreferences === void 0 ? void 0 : splitPanelPreferences.position) !== null && _b !== void 0 ? _b : "bottom"), { componentName: "AppLayout", controlledProp: "splitPanelSize", changeHandler: "onSplitPanelResize" });
-    const [splitPanelReportedSize, setSplitPanelReportedSize] = (0, import_react166.useState)(0);
-    const [splitPanelHeaderBlockSize, setSplitPanelHeaderBlockSize] = (0, import_react166.useState)(0);
+    const [splitPanelReportedSize, setSplitPanelReportedSize] = (0, import_react164.useState)(0);
+    const [splitPanelHeaderBlockSize, setSplitPanelHeaderBlockSize] = (0, import_react164.useState)(0);
     const onSplitPanelResizeHandler = (size4) => {
       setSplitPanelSize(size4);
       fireNonCancelableEvent(onSplitPanelResize, { size: size4 });
     };
-    const [splitPanelToggleConfig, setSplitPanelToggleConfig] = (0, import_react166.useState)({
+    const [splitPanelToggleConfig, setSplitPanelToggleConfig] = (0, import_react164.useState)({
       ariaLabel: void 0,
       displayed: false
     });
-    const [bottomDrawerReportedSize, setBottomDrawerReportedSize] = (0, import_react166.useState)(0);
+    const [bottomDrawerReportedSize, setBottomDrawerReportedSize] = (0, import_react164.useState)(0);
     const globalDrawersFocusControl = useMultipleFocusControl(true, activeGlobalDrawersIds);
     const drawersFocusControl = useAsyncFocusControl(!!(activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.id), true, activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.id);
     const bottomDrawersFocusControl = useAsyncFocusControl(!!activeGlobalBottomDrawerId, true, activeGlobalBottomDrawerId);
@@ -327360,7 +327266,7 @@ ${isHandDrawn ? "" : `
       navigationFocusControl.setFocus({ force: false, autoFocus });
       fireNonCancelableEvent(onNavigationChange, { open: isOpen });
     });
-    (0, import_react166.useImperativeHandle)(forwardRef16, () => ({
+    (0, import_react164.useImperativeHandle)(forwardRef16, () => ({
       closeNavigationIfNecessary: () => isMobile && onNavigationToggle({ isOpen: false, autoFocus: true }),
       openTools: () => onToolsToggle(true),
       focusToolsClose: () => drawersFocusControl.setFocus({ force: true }),
@@ -327369,7 +327275,7 @@ ${isHandDrawn ? "" : `
       focusNavigation: () => navigationFocusControl.setFocus({ force: true })
     }));
     const resolvedStickyNotifications = !!stickyNotifications && !isMobile;
-    const resolvedNavigation = navigationHide ? null : navigation || import_react166.default.createElement(import_react166.default.Fragment, null);
+    const resolvedNavigation = navigationHide ? null : navigation || import_react164.default.createElement(import_react164.default.Fragment, null);
     const resolvedNavigationOpen = !!resolvedNavigation && navigationOpen;
     const { maxDrawerSize, maxSplitPanelSize, splitPanelForcedPosition, splitPanelPosition, maxGlobalDrawersSizes, resizableSpaceAvailable, maxAiDrawerSize } = computeHorizontalLayout({
       activeDrawerSize: activeDrawer ? activeDrawerSize : 0,
@@ -327396,7 +327302,7 @@ ${isHandDrawn ? "" : `
     const { ref: intersectionObserverRef, isIntersecting } = useIntersectionObserver({ initialState: true });
     const rootRef = useMergeRefs(rootRefInternal, intersectionObserverRef, onMountRootRef);
     const currentBreadcrumbs = breadcrumbs ? ownBreadcrumbsProps : discoveredBreadcrumbsProps;
-    (0, import_react166.useLayoutEffect)(() => {
+    (0, import_react164.useLayoutEffect)(() => {
       var _a214;
       if (!isIntersecting) {
         return;
@@ -327404,7 +327310,7 @@ ${isHandDrawn ? "" : `
       (_a214 = breadcrumbsConsumerRef.current) === null || _a214 === void 0 ? void 0 : _a214.onBreadcrumbsChange(currentBreadcrumbs || null);
     }, [hasBreadcrumbsConsumer, currentBreadcrumbs, isIntersecting]);
     useGlobalScrollPadding((_c = verticalOffsets.header) !== null && _c !== void 0 ? _c : 0);
-    const getMaxGlobalBottomDrawerHeight = (0, import_react166.useCallback)(() => {
+    const getMaxGlobalBottomDrawerHeight = (0, import_react164.useCallback)(() => {
       const splitPanelSize2 = splitPanelOpen && splitPanelPosition === "bottom" ? splitPanelReportedSize : 0;
       const availableHeight = document.documentElement.clientHeight - placement.insetBlockStart - placement.insetBlockEnd - splitPanelSize2;
       if (availableHeight === 0) {
@@ -327473,7 +327379,7 @@ ${isHandDrawn ? "" : `
     };
     const splitPanelInternals = {
       bottomOffset: 0,
-      getMaxHeight: (0, import_react166.useCallback)(() => {
+      getMaxHeight: (0, import_react164.useCallback)(() => {
         const bottomDrawerHeight = activeGlobalBottomDrawerId ? bottomDrawerReportedSize : 0;
         const availableHeight = document.documentElement.clientHeight - placement.insetBlockStart - placement.insetBlockEnd - bottomDrawerHeight;
         return availableHeight < 400 ? availableHeight - 40 : availableHeight - 250;
@@ -327506,7 +327412,7 @@ ${isHandDrawn ? "" : `
         onActiveGlobalDrawersChange(drawerToClose, { initiatedByUserAction: true });
       }
     });
-    (0, import_react166.useEffect)(() => {
+    (0, import_react164.useEffect)(() => {
       if (isMobile) {
         onNavigationToggle({ isOpen: false, autoFocus: false });
       }
@@ -327527,7 +327433,7 @@ ${isHandDrawn ? "" : `
       return result;
     };
     const totalActiveDrawersMinSize = getTotalActiveDrawersMinSize();
-    (0, import_react166.useEffect)(() => {
+    (0, import_react164.useEffect)(() => {
       if (isMobile) {
         return;
       }
@@ -327710,10 +327616,10 @@ ${isHandDrawn ? "" : `
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/state/index.js
   var AppLayoutStateProviderInternal = ({ appLayoutProps, stateManager, forwardRef: forwardRef16 }) => {
     var _a213;
-    const [hasToolbar, setHasToolbar] = (0, import_react167.useState)((_a213 = stateManager.current.hasToolbar) !== null && _a213 !== void 0 ? _a213 : false);
+    const [hasToolbar, setHasToolbar] = (0, import_react165.useState)((_a213 = stateManager.current.hasToolbar) !== null && _a213 !== void 0 ? _a213 : false);
     const appLayoutState = useAppLayout(hasToolbar, appLayoutProps, forwardRef16);
     const skeletonSlotsAttributes = useSkeletonSlotsAttributes(hasToolbar, appLayoutProps, appLayoutState);
-    (0, import_react167.useLayoutEffect)(() => {
+    (0, import_react165.useLayoutEffect)(() => {
       var _a214;
       if (!((_a214 = stateManager.current) === null || _a214 === void 0 ? void 0 : _a214.setState)) {
         console.warn("AppLayout state manager is not found");
@@ -327721,25 +327627,25 @@ ${isHandDrawn ? "" : `
       }
       stateManager.current.setState(appLayoutState, skeletonSlotsAttributes, getPropsToMerge(appLayoutProps, appLayoutState), mergeProps);
     });
-    (0, import_react167.useLayoutEffect)(() => {
+    (0, import_react165.useLayoutEffect)(() => {
       stateManager.current.setToolbar = setHasToolbar;
     }, [stateManager]);
-    return import_react167.default.createElement(import_react167.default.Fragment, null);
+    return import_react165.default.createElement(import_react165.default.Fragment, null);
   };
   var AppLayoutStateProvider = (props) => {
-    return import_react167.default.createElement(
+    return import_react165.default.createElement(
       AppLayoutBuiltInErrorBoundary,
       { appLayoutPart: "app-layout-state" },
-      import_react167.default.createElement(AppLayoutStateProviderInternal, { ...props })
+      import_react165.default.createElement(AppLayoutStateProviderInternal, { ...props })
     );
   };
   var createWidgetizedAppLayoutState = createWidgetizedComponent(AppLayoutStateProvider);
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/widget-areas/after-main-slot.js
-  var import_react183 = __toESM(require_react());
+  var import_react181 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/drawer/local-drawer.js
-  var import_react168 = __toESM(require_react());
+  var import_react166 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/drawer/use-resize.js
   function useResize2({ currentWidth, minWidth, maxWidth: maxWidth2, panelRef, handleRef, onResize, position: position5 }) {
@@ -327766,7 +327672,7 @@ ${isHandDrawn ? "" : `
   function AppLayoutDrawerImplementation({ appLayoutInternals, bottomDrawerReportedSize }) {
     var _a213, _b, _c;
     const { activeDrawer, minDrawerSize, activeDrawerSize, maxDrawerSize, ariaLabels, drawers, drawersFocusControl, isMobile, placement, verticalOffsets, drawersOpenQueue, onActiveDrawerChange, onActiveDrawerResize, drawerAnimationDisabled } = appLayoutInternals;
-    const drawerRef = (0, import_react168.useRef)(null);
+    const drawerRef = (0, import_react166.useRef)(null);
     const activeDrawerId = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.id;
     const computedAriaLabels = {
       closeButton: activeDrawer ? (_a213 = activeDrawer.ariaLabels) === null || _a213 === void 0 ? void 0 : _a213.closeButton : ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.toolsClose,
@@ -327788,9 +327694,9 @@ ${isHandDrawn ? "" : `
     const size4 = getLimitedValue(minDrawerSize, activeDrawerSize, maxDrawerSize);
     const lastOpenedDrawerId = (drawersOpenQueue === null || drawersOpenQueue === void 0 ? void 0 : drawersOpenQueue.length) ? drawersOpenQueue[0] : activeDrawerId;
     const animationDisabled = drawerAnimationDisabled || (activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.defaultActive) && !drawersOpenQueue.includes(activeDrawer.id);
-    return import_react168.default.createElement(Transition_default, { nodeRef: drawerRef, in: !!activeDrawer, appear: true, timeout: 0 }, (state5) => {
+    return import_react166.default.createElement(Transition_default, { nodeRef: drawerRef, in: !!activeDrawer, appear: true, timeout: 0 }, (state5) => {
       var _a214, _b2;
-      return import_react168.default.createElement(
+      return import_react166.default.createElement(
         "aside",
         { id: activeDrawerId, "aria-hidden": !activeDrawer, "aria-label": computedAriaLabels.content, className: clsx_m_default(styles_css_default61.drawer, {
           [styles_css_default47["with-motion-horizontal"]]: !animationDisabled,
@@ -327811,40 +327717,40 @@ ${isHandDrawn ? "" : `
             [custom_css_properties_default.drawerSize]: `${["entering", "entered"].includes(state5) ? size4 : 0}px`
           }
         }, "data-testid": activeDrawerId && `awsui-app-layout-drawer-${activeDrawerId}` },
-        !isMobile && (activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.resizable) && import_react168.default.createElement(
+        !isMobile && (activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.resizable) && import_react166.default.createElement(
           "div",
           { className: styles_css_default61["drawer-slider"] },
-          import_react168.default.createElement(panel_resize_handle_default, { ref: drawersFocusControl.refs.slider, position: "side", className: styles_css_default22["drawers-slider"], ariaLabel: (_a214 = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _a214 === void 0 ? void 0 : _a214.resizeHandle, tooltipText: (_b2 = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _b2 === void 0 ? void 0 : _b2.resizeHandleTooltipText, ariaValuenow: resizeProps.relativeSize, onKeyDown: resizeProps.onKeyDown, onPointerDown: resizeProps.onPointerDown, onDirectionClick: resizeProps.onDirectionClick })
+          import_react166.default.createElement(panel_resize_handle_default, { ref: drawersFocusControl.refs.slider, position: "side", className: styles_css_default22["drawers-slider"], ariaLabel: (_a214 = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _a214 === void 0 ? void 0 : _a214.resizeHandle, tooltipText: (_b2 = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _b2 === void 0 ? void 0 : _b2.resizeHandleTooltipText, ariaValuenow: resizeProps.relativeSize, onKeyDown: resizeProps.onKeyDown, onPointerDown: resizeProps.onPointerDown, onDirectionClick: resizeProps.onDirectionClick })
         ),
-        import_react168.default.createElement(
+        import_react166.default.createElement(
           "div",
           { className: clsx_m_default(styles_css_default61["drawer-content-container"], styles_css_default47["with-motion-horizontal"]) },
-          import_react168.default.createElement(
+          import_react166.default.createElement(
             "div",
             { className: clsx_m_default(styles_css_default61["drawer-close-button"]) },
-            import_react168.default.createElement(InternalButton, { ariaLabel: computedAriaLabels.closeButton, className: clsx_m_default({
+            import_react166.default.createElement(InternalButton, { ariaLabel: computedAriaLabels.closeButton, className: clsx_m_default({
               [styles_css_default22["active-drawer-close-button"]]: !isToolsDrawer && activeDrawerId,
               [styles_css_default22["tools-close"]]: isToolsDrawer
             }), formAction: "none", iconName: isMobile ? "close" : "angle-right", onClick: () => onActiveDrawerChange(null, { initiatedByUserAction: true }), ref: drawersFocusControl.refs.close, variant: "icon", analyticsAction: "close" })
           ),
-          import_react168.default.createElement("div", { key: TOOLS_DRAWER_ID, className: clsx_m_default(styles_css_default61["drawer-content"], activeDrawerId !== TOOLS_DRAWER_ID && styles_css_default61["drawer-content-hidden"]), style: { blockSize: drawerHeight } }, toolsContent),
-          activeDrawerId !== TOOLS_DRAWER_ID && import_react168.default.createElement("div", { key: activeDrawerId, className: styles_css_default61["drawer-content"], style: { blockSize: drawerHeight } }, activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.content)
+          import_react166.default.createElement("div", { key: TOOLS_DRAWER_ID, className: clsx_m_default(styles_css_default61["drawer-content"], activeDrawerId !== TOOLS_DRAWER_ID && styles_css_default61["drawer-content-hidden"]), style: { blockSize: drawerHeight } }, toolsContent),
+          activeDrawerId !== TOOLS_DRAWER_ID && import_react166.default.createElement("div", { key: activeDrawerId, className: styles_css_default61["drawer-content"], style: { blockSize: drawerHeight } }, activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.content)
         )
       );
     });
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/drawer/global-drawers.js
-  var import_react180 = __toESM(require_react());
-
-  // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/drawer/global-drawer.js
-  var import_react179 = __toESM(require_react());
-
-  // node_modules/@cloudscape-design/components/button-group/internal.js
   var import_react178 = __toESM(require_react());
 
+  // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/drawer/global-drawer.js
+  var import_react177 = __toESM(require_react());
+
+  // node_modules/@cloudscape-design/components/button-group/internal.js
+  var import_react176 = __toESM(require_react());
+
   // node_modules/@cloudscape-design/components/navigable-group/internal.js
-  var import_react169 = __toESM(require_react());
+  var import_react167 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/utils/circle-index.js
   function circleIndex2(index2, [from2, to]) {
@@ -327868,13 +327774,13 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/navigable-group/internal.js
-  var InternalNavigableGroup = (0, import_react169.forwardRef)(({ children: children2, getItemKey: getItemKey2, navigationDirection = "horizontal", __internalRootRef, ...props }, ref) => {
+  var InternalNavigableGroup = (0, import_react167.forwardRef)(({ children: children2, getItemKey: getItemKey2, navigationDirection = "horizontal", __internalRootRef, ...props }, ref) => {
     const baseProps = getBaseProps(props);
-    const navigationAPI = (0, import_react169.useRef)(null);
-    const containerObjectRef = (0, import_react169.useRef)(null);
+    const navigationAPI = (0, import_react167.useRef)(null);
+    const containerObjectRef = (0, import_react167.useRef)(null);
     const containerRef = useMergeRefs(containerObjectRef, __internalRootRef);
-    const focusedIdRef = (0, import_react169.useRef)();
-    (0, import_react169.useImperativeHandle)(ref, () => ({
+    const focusedIdRef = (0, import_react167.useRef)();
+    (0, import_react167.useImperativeHandle)(ref, () => ({
       focus: () => {
         const target = getNextFocusTarget();
         if (target) {
@@ -327897,7 +327803,7 @@ ${isHandDrawn ? "" : `
         target.focus();
       }
     }
-    (0, import_react169.useEffect)(() => {
+    (0, import_react167.useEffect)(() => {
       var _a213;
       (_a213 = navigationAPI.current) === null || _a213 === void 0 ? void 0 : _a213.updateFocusTarget();
     });
@@ -327969,19 +327875,19 @@ ${isHandDrawn ? "" : `
       }
       return getAllFocusables2(target).filter((el) => isElementRegistered(el) && !isElementDisabled2(el));
     }
-    return import_react169.default.createElement(
+    return import_react167.default.createElement(
       "div",
       { ...baseProps, className: clsx_m_default(styles_css_default63.root, styles_css_default64.root, baseProps.className), ref: containerRef, onFocus, onBlur, onKeyDown },
-      import_react169.default.createElement(SingleTabStopNavigationProvider, { ref: navigationAPI, navigationActive: true, getNextFocusTarget, onUnregisterActive }, children2)
+      import_react167.default.createElement(SingleTabStopNavigationProvider, { ref: navigationAPI, navigationActive: true, getNextFocusTarget, onUnregisterActive }, children2)
     );
   });
   var internal_default11 = InternalNavigableGroup;
 
   // node_modules/@cloudscape-design/components/button-group/item-element.js
-  var import_react177 = __toESM(require_react());
+  var import_react175 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/button-group/copy-to-clipboard-item.js
-  var import_react170 = __toESM(require_react());
+  var import_react168 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/button-group/test-classes/styles.css.js
   var styles_css_default65 = {
@@ -327993,9 +327899,9 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/button-group/copy-to-clipboard-item.js
-  var CopyToClipboardItem = (0, import_react170.forwardRef)(({ styleClassName, item, showTooltip, showFeedback, onTooltipDismiss, onShowFeedback, onCopyFailure, onCopySuccess }, ref) => {
-    const containerRef = import_react170.default.useRef(null);
-    const [status, setStatus] = (0, import_react170.useState)("success");
+  var CopyToClipboardItem = (0, import_react168.forwardRef)(({ styleClassName, item, showTooltip, showFeedback, onTooltipDismiss, onShowFeedback, onCopyFailure, onCopySuccess }, ref) => {
+    const containerRef = import_react168.default.useRef(null);
+    const [status, setStatus] = (0, import_react168.useState)("success");
     const onClick = () => {
       const reportSuccess = () => {
         setStatus("success");
@@ -328016,20 +327922,20 @@ ${isHandDrawn ? "" : `
     const feedbackText = status === "success" ? item.copySuccessText : item.copyErrorText;
     const canShowTooltip = Boolean(showTooltip && !item.disabled && !showFeedback);
     const canShowFeedback = Boolean(showTooltip && showFeedback && !item.disabled);
-    return import_react170.default.createElement(
+    return import_react168.default.createElement(
       "div",
       { ref: containerRef },
-      import_react170.default.createElement(InternalButton, { styleClassNames: { root: styleClassName }, ref, variant: "icon", iconName: "copy", ariaLabel: item.text, disabled: item.disabled, disabledReason: showFeedback ? void 0 : item.disabledReason, __focusable: canShowFeedback, onClick, "data-testid": item.id, "data-itemid": item.id, className: clsx_m_default(styles_css_default65.item, styles_css_default65["button-group-item"]), __title: "" }),
-      (canShowTooltip || canShowFeedback) && import_react170.default.createElement(InternalTooltip, { className: styles_css_default65["button-group-tooltip"], getTrack: () => containerRef.current, content: canShowFeedback && import_react170.default.createElement(internal_default2, { tagName: "span" }, feedbackText) || item.text, onEscape: onTooltipDismiss })
+      import_react168.default.createElement(InternalButton, { styleClassNames: { root: styleClassName }, ref, variant: "icon", iconName: "copy", ariaLabel: item.text, disabled: item.disabled, disabledReason: showFeedback ? void 0 : item.disabledReason, __focusable: canShowFeedback, onClick, "data-testid": item.id, "data-itemid": item.id, className: clsx_m_default(styles_css_default65.item, styles_css_default65["button-group-item"]), __title: "" }),
+      (canShowTooltip || canShowFeedback) && import_react168.default.createElement(InternalTooltip, { className: styles_css_default65["button-group-tooltip"], getTrack: () => containerRef.current, content: canShowFeedback && import_react168.default.createElement(internal_default2, { tagName: "span" }, feedbackText) || item.text, onEscape: onTooltipDismiss })
     );
   });
   var copy_to_clipboard_item_default = CopyToClipboardItem;
 
   // node_modules/@cloudscape-design/components/button-group/file-input-item.js
-  var import_react172 = __toESM(require_react());
+  var import_react170 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/file-input/internal.js
-  var import_react171 = __toESM(require_react());
+  var import_react169 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/hooks/check-controlled/index.js
   function checkControlled(componentName2, propertyName, propertyValue, handlerName, handlerValue) {
@@ -328048,18 +327954,18 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/file-input/internal.js
-  var InternalFileInput = import_react171.default.forwardRef(({ accept, ariaRequired, ariaLabel, multiple = false, value: value3, onChange, variant = "button", children: children2, __internalRootRef, __inputClassName, styleClassNames, __inputNativeAttributes, __injectAnalyticsComponentMetadata, ...restProps }, ref) => {
+  var InternalFileInput = import_react169.default.forwardRef(({ accept, ariaRequired, ariaLabel, multiple = false, value: value3, onChange, variant = "button", children: children2, __internalRootRef, __inputClassName, styleClassNames, __inputNativeAttributes, __injectAnalyticsComponentMetadata, ...restProps }, ref) => {
     var _a213;
     const baseProps = getBaseProps(restProps);
-    const uploadInputRef = (0, import_react171.useRef)(null);
-    const containerRef = (0, import_react171.useRef)(null);
+    const uploadInputRef = (0, import_react169.useRef)(null);
+    const containerRef = (0, import_react169.useRef)(null);
     const mergedRef = useMergeRefs(__internalRootRef, containerRef);
     const uploadButtonLabelId = useUniqueId("upload-button-label");
     const formFieldContext = useFormFieldContext(restProps);
     const selfControlId = useUniqueId("upload-input");
     const controlId = (_a213 = formFieldContext.controlId) !== null && _a213 !== void 0 ? _a213 : selfControlId;
     useForwardFocus(ref, uploadInputRef);
-    const [isFocused, setIsFocused] = (0, import_react171.useState)(false);
+    const [isFocused, setIsFocused] = (0, import_react169.useState)(false);
     const onUploadButtonClick = () => {
       var _a214;
       return (_a214 = uploadInputRef.current) === null || _a214 === void 0 ? void 0 : _a214.click();
@@ -328087,7 +327993,7 @@ ${isHandDrawn ? "" : `
     if (variant === "icon" && !ariaLabel) {
       warnOnce("FileInput", "Aria label is required with icon variant.");
     }
-    (0, import_react171.useEffect)(() => {
+    (0, import_react169.useEffect)(() => {
       if (window.DataTransfer) {
         const dataTransfer = new DataTransfer();
         for (const file of value3) {
@@ -328109,11 +328015,11 @@ ${isHandDrawn ? "" : `
     if (__injectAnalyticsComponentMetadata) {
       analyticsMetadata.component = componentAnalyticsMetadata2;
     }
-    return import_react171.default.createElement(
+    return import_react169.default.createElement(
       "div",
       { ...baseProps, ref: mergedRef, className: clsx_m_default(baseProps.className, styles_css_default66.root), ...getAnalyticsMetadataAttribute(analyticsMetadata) },
-      import_react171.default.createElement("input", { id: controlId, ref: uploadInputRef, type: "file", hidden: false, multiple, accept, onChange: onUploadInputChange, onFocus: onUploadInputFocus, onBlur: onUploadInputBlur, className: clsx_m_default(styles_css_default66["file-input"], styles_css_default66.hidden, __inputClassName), tabIndex, ...nativeAttributes }),
-      import_react171.default.createElement(internal_default4, { styleClassNames, iconName: "upload", variant: variant === "icon" ? "icon" : void 0, formAction: "none", onClick: onUploadButtonClick, className: clsx_m_default(styles_css_default66["file-input-button"], {
+      import_react169.default.createElement("input", { id: controlId, ref: uploadInputRef, type: "file", hidden: false, multiple, accept, onChange: onUploadInputChange, onFocus: onUploadInputFocus, onBlur: onUploadInputBlur, className: clsx_m_default(styles_css_default66["file-input"], styles_css_default66.hidden, __inputClassName), tabIndex, ...nativeAttributes }),
+      import_react169.default.createElement(internal_default4, { styleClassNames, iconName: "upload", variant: variant === "icon" ? "icon" : void 0, formAction: "none", onClick: onUploadButtonClick, className: clsx_m_default(styles_css_default66["file-input-button"], {
         [styles_css_default66["force-focus-outline-button"]]: isFocused && variant === "button",
         [styles_css_default66["force-focus-outline-icon"]]: isFocused && variant === "icon"
       }), nativeButtonAttributes: {
@@ -328122,54 +328028,54 @@ ${isHandDrawn ? "" : `
         // AWSUI-61771 Prevent focus on the decorative button to avoid aria-hidden focus warning
         onMouseDown: (event3) => event3.preventDefault()
       }, __skipNativeAttributesWarnings: true }, variant === "button" && children2),
-      import_react171.default.createElement(ScreenreaderOnly, { id: uploadButtonLabelId }, ariaLabel || children2)
+      import_react169.default.createElement(ScreenreaderOnly, { id: uploadButtonLabelId }, ariaLabel || children2)
     );
   });
   var internal_default12 = InternalFileInput;
 
   // node_modules/@cloudscape-design/components/button-group/file-input-item.js
-  var FileInputItem = (0, import_react172.forwardRef)(({ styleClassName, item, showTooltip, onTooltipDismiss, onFilesChange }, ref) => {
-    const [files, setFiles] = (0, import_react172.useState)([]);
-    const containerRef = import_react172.default.useRef(null);
+  var FileInputItem = (0, import_react170.forwardRef)(({ styleClassName, item, showTooltip, onTooltipDismiss, onFilesChange }, ref) => {
+    const [files, setFiles] = (0, import_react170.useState)([]);
+    const containerRef = import_react170.default.useRef(null);
     const canShowTooltip = Boolean(showTooltip);
-    return import_react172.default.createElement(
+    return import_react170.default.createElement(
       "div",
       { ref: containerRef },
-      import_react172.default.createElement(internal_default12, { styleClassNames: { root: styleClassName }, className: styles_css_default65["button-group-item"], ref, variant: "icon", ariaLabel: item.text, accept: item.accept, multiple: item.multiple, value: files, onChange: (event3) => {
+      import_react170.default.createElement(internal_default12, { styleClassNames: { root: styleClassName }, className: styles_css_default65["button-group-item"], ref, variant: "icon", ariaLabel: item.text, accept: item.accept, multiple: item.multiple, value: files, onChange: (event3) => {
         fireCancelableEvent(onFilesChange, { id: item.id, files: event3.detail.value });
         setFiles(event3.detail.value);
       }, "data-testid": item.id, __inputNativeAttributes: {
         "data-itemid": item.id
       }, __inputClassName: styles_css_default65.item }),
-      canShowTooltip && import_react172.default.createElement(InternalTooltip, { className: styles_css_default65["button-group-tooltip"], getTrack: () => containerRef.current, content: item.text, onEscape: onTooltipDismiss })
+      canShowTooltip && import_react170.default.createElement(InternalTooltip, { className: styles_css_default65["button-group-tooltip"], getTrack: () => containerRef.current, content: item.text, onEscape: onTooltipDismiss })
     );
   });
   var file_input_item_default = FileInputItem;
 
   // node_modules/@cloudscape-design/components/button-group/icon-button-item.js
-  var import_react173 = __toESM(require_react());
-  var IconButtonItem = (0, import_react173.forwardRef)(({ styleClassName, item, showTooltip, showFeedback, onTooltipDismiss, onItemClick }, ref) => {
-    const containerRef = import_react173.default.useRef(null);
+  var import_react171 = __toESM(require_react());
+  var IconButtonItem = (0, import_react171.forwardRef)(({ styleClassName, item, showTooltip, showFeedback, onTooltipDismiss, onItemClick }, ref) => {
+    const containerRef = import_react171.default.useRef(null);
     const hasIcon = item.iconName || item.iconUrl || item.iconSvg;
     if (!hasIcon) {
       warnOnce("ButtonGroup", `Missing icon for item with id: ${item.id}`);
     }
     const canShowTooltip = Boolean(showTooltip && !item.disabled && !item.loading);
     const canShowFeedback = Boolean(showTooltip && showFeedback && item.popoverFeedback);
-    return import_react173.default.createElement(
+    return import_react171.default.createElement(
       "div",
       { ref: containerRef },
-      import_react173.default.createElement(InternalButton, { styleClassNames: { root: styleClassName }, variant: "icon", loading: item.loading, loadingText: item.loadingText, disabled: item.disabled, disabledReason: showFeedback ? void 0 : item.disabledReason, __focusable: canShowFeedback, iconName: hasIcon ? item.iconName : "close", iconUrl: item.iconUrl, iconSvg: item.iconSvg, iconAlt: item.text, ariaLabel: item.text, href: item.href, target: item.target, rel: item.rel, download: item.download, onClick: (event3) => fireCancelableEvent(onItemClick, { id: item.id }, event3), ref, "data-testid": item.id, "data-itemid": item.id, className: clsx_m_default(styles_css_default65.item, styles_css_default65["button-group-item"]), analyticsAction: item.analyticsAction, __title: "" }, item.text),
-      (canShowTooltip || canShowFeedback) && import_react173.default.createElement(InternalTooltip, { className: styles_css_default65["button-group-tooltip"], getTrack: () => containerRef.current, content: showFeedback && import_react173.default.createElement(internal_default2, { tagName: "span" }, item.popoverFeedback) || item.text, onEscape: onTooltipDismiss })
+      import_react171.default.createElement(InternalButton, { styleClassNames: { root: styleClassName }, variant: "icon", loading: item.loading, loadingText: item.loadingText, disabled: item.disabled, disabledReason: showFeedback ? void 0 : item.disabledReason, __focusable: canShowFeedback, iconName: hasIcon ? item.iconName : "close", iconUrl: item.iconUrl, iconSvg: item.iconSvg, iconAlt: item.text, ariaLabel: item.text, href: item.href, target: item.target, rel: item.rel, download: item.download, onClick: (event3) => fireCancelableEvent(onItemClick, { id: item.id }, event3), ref, "data-testid": item.id, "data-itemid": item.id, className: clsx_m_default(styles_css_default65.item, styles_css_default65["button-group-item"]), analyticsAction: item.analyticsAction, __title: "" }, item.text),
+      (canShowTooltip || canShowFeedback) && import_react171.default.createElement(InternalTooltip, { className: styles_css_default65["button-group-tooltip"], getTrack: () => containerRef.current, content: showFeedback && import_react171.default.createElement(internal_default2, { tagName: "span" }, item.popoverFeedback) || item.text, onEscape: onTooltipDismiss })
     );
   });
   var icon_button_item_default = IconButtonItem;
 
   // node_modules/@cloudscape-design/components/button-group/icon-toggle-button-item.js
-  var import_react175 = __toESM(require_react());
+  var import_react173 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/toggle-button/internal.js
-  var import_react174 = __toESM(require_react());
+  var import_react172 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/toggle-button/util.js
   function getToggleIcon(pressed, defaultIcon, pressedIcon) {
@@ -328188,7 +328094,7 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/toggle-button/internal.js
-  var InternalToggleButton = import_react174.default.forwardRef(({ pressed, iconName: defaultIconName, pressedIconName, iconSvg: defaultIconSvg, pressedIconSvg, iconUrl: defaultIconUrl, pressedIconUrl, variant, nativeButtonAttributes, onChange, className, styleClassNames, analyticsAction = "click", ...rest }, ref) => {
+  var InternalToggleButton = import_react172.default.forwardRef(({ pressed, iconName: defaultIconName, pressedIconName, iconSvg: defaultIconSvg, pressedIconSvg, iconUrl: defaultIconUrl, pressedIconUrl, variant, nativeButtonAttributes, onChange, className, styleClassNames, analyticsAction = "click", ...rest }, ref) => {
     if (isDevelopment2) {
       if (defaultIconName && !pressedIconName) {
         warnOnce("ToggleButton", "`pressedIconName` must be provided for `pressed` state.");
@@ -328200,7 +328106,7 @@ ${isHandDrawn ? "" : `
         warnOnce("ToggleButton", "`pressedIconUrl` must be provided for `pressed` state.");
       }
     }
-    return import_react174.default.createElement(internal_default4, { styleClassNames, className: clsx_m_default(className, styles_css_default67["toggle-button"], styles_css_default67[`variant-${variant}`], {
+    return import_react172.default.createElement(internal_default4, { styleClassNames, className: clsx_m_default(className, styles_css_default67["toggle-button"], styles_css_default67[`variant-${variant}`], {
       [styles_css_default67.pressed]: pressed
     }), variant, formAction: "none", iconName: getToggleIcon(pressed, defaultIconName, pressedIconName), iconUrl: getToggleIcon(pressed, defaultIconUrl, pressedIconUrl), iconSvg: getToggleIcon(pressed, defaultIconSvg, pressedIconSvg), "aria-pressed": pressed, onClick: (event3) => {
       event3.preventDefault();
@@ -328209,9 +328115,9 @@ ${isHandDrawn ? "" : `
   });
 
   // node_modules/@cloudscape-design/components/button-group/icon-toggle-button-item.js
-  var IconToggleButtonItem = (0, import_react175.forwardRef)(({ styleClassName, item, showTooltip, showFeedback, onTooltipDismiss, onItemClick }, ref) => {
+  var IconToggleButtonItem = (0, import_react173.forwardRef)(({ styleClassName, item, showTooltip, showFeedback, onTooltipDismiss, onItemClick }, ref) => {
     var _a213;
-    const containerRef = import_react175.default.useRef(null);
+    const containerRef = import_react173.default.useRef(null);
     const hasIcon = item.iconName || item.iconUrl || item.iconSvg;
     const hasPressedIcon = item.pressedIconName || item.pressedIconUrl || item.pressedIconSvg;
     if (!hasIcon) {
@@ -328223,28 +328129,28 @@ ${isHandDrawn ? "" : `
     const feedbackContent = item.pressed ? (_a213 = item.pressedPopoverFeedback) !== null && _a213 !== void 0 ? _a213 : item.popoverFeedback : item.popoverFeedback;
     const canShowTooltip = showTooltip && !item.disabled && !item.loading;
     const canShowFeedback = showTooltip && showFeedback && feedbackContent;
-    return import_react175.default.createElement(
+    return import_react173.default.createElement(
       "div",
       { ref: containerRef },
-      import_react175.default.createElement(InternalToggleButton, { styleClassNames: { root: styleClassName }, variant: "icon", pressed: item.pressed, loading: item.loading, loadingText: item.loadingText, disabled: item.disabled, disabledReason: showFeedback ? void 0 : item.disabledReason, iconName: hasIcon ? item.iconName : "close", iconUrl: item.iconUrl, iconSvg: item.iconSvg, pressedIconName: hasIcon ? item.pressedIconName : "close", pressedIconUrl: item.pressedIconUrl, pressedIconSvg: item.pressedIconSvg, ariaLabel: item.text, onChange: (event3) => fireCancelableEvent(onItemClick, { id: item.id, pressed: event3.detail.pressed }), ref, "data-testid": item.id, "data-itemid": item.id, className: clsx_m_default(styles_css_default65.item, styles_css_default65["button-group-item"]), analyticsAction: item.analyticsAction, __title: "" }, item.text),
-      (canShowTooltip || canShowFeedback) && import_react175.default.createElement(InternalTooltip, { className: styles_css_default65["button-group-tooltip"], getTrack: () => containerRef.current, content: showFeedback && import_react175.default.createElement(internal_default2, { tagName: "span" }, feedbackContent) || item.text, onEscape: onTooltipDismiss })
+      import_react173.default.createElement(InternalToggleButton, { styleClassNames: { root: styleClassName }, variant: "icon", pressed: item.pressed, loading: item.loading, loadingText: item.loadingText, disabled: item.disabled, disabledReason: showFeedback ? void 0 : item.disabledReason, iconName: hasIcon ? item.iconName : "close", iconUrl: item.iconUrl, iconSvg: item.iconSvg, pressedIconName: hasIcon ? item.pressedIconName : "close", pressedIconUrl: item.pressedIconUrl, pressedIconSvg: item.pressedIconSvg, ariaLabel: item.text, onChange: (event3) => fireCancelableEvent(onItemClick, { id: item.id, pressed: event3.detail.pressed }), ref, "data-testid": item.id, "data-itemid": item.id, className: clsx_m_default(styles_css_default65.item, styles_css_default65["button-group-item"]), analyticsAction: item.analyticsAction, __title: "" }, item.text),
+      (canShowTooltip || canShowFeedback) && import_react173.default.createElement(InternalTooltip, { className: styles_css_default65["button-group-tooltip"], getTrack: () => containerRef.current, content: showFeedback && import_react173.default.createElement(internal_default2, { tagName: "span" }, feedbackContent) || item.text, onEscape: onTooltipDismiss })
     );
   });
   var icon_toggle_button_item_default = IconToggleButtonItem;
 
   // node_modules/@cloudscape-design/components/button-group/menu-dropdown-item.js
-  var import_react176 = __toESM(require_react());
-  var MenuDropdownItem = import_react176.default.forwardRef(({ styleClassName, dropdownClassName, item, showTooltip, onItemClick, onTooltipDismiss, expandToViewport, position: position5 }, ref) => {
-    const containerRef = import_react176.default.useRef(null);
+  var import_react174 = __toESM(require_react());
+  var MenuDropdownItem = import_react174.default.forwardRef(({ styleClassName, dropdownClassName, item, showTooltip, onItemClick, onTooltipDismiss, expandToViewport, position: position5 }, ref) => {
+    const containerRef = import_react174.default.useRef(null);
     const hasCustomIcon = item.iconName || item.iconUrl || item.iconSvg;
     const onClickHandler = (event3) => {
       fireCancelableEvent(onItemClick, { id: event3.detail.id, checked: event3.detail.checked }, event3);
     };
-    return import_react176.default.createElement(internal_default9, { ref, variant: "icon", styleClassNames: { dropdown: dropdownClassName }, items: item.items, onItemClick: onClickHandler, expandToViewport, ariaLabel: item.text, className: styles_css_default65["button-group-item"], position: position5, "data-testid": item.id, disabled: item.disabled, customTriggerBuilder: ({ onClick, isOpen, triggerRef, ariaLabel, ariaExpanded, testUtilsClass }) => import_react176.default.createElement(
+    return import_react174.default.createElement(internal_default9, { ref, variant: "icon", styleClassNames: { dropdown: dropdownClassName }, items: item.items, onItemClick: onClickHandler, expandToViewport, ariaLabel: item.text, className: styles_css_default65["button-group-item"], position: position5, "data-testid": item.id, disabled: item.disabled, customTriggerBuilder: ({ onClick, isOpen, triggerRef, ariaLabel, ariaExpanded, testUtilsClass }) => import_react174.default.createElement(
       "div",
       { ref: containerRef, ...item.disabled ? {} : getAnalyticsMetadataAttribute({ detail: { position: position5 } }) },
-      !isOpen && showTooltip && !item.disabled && !item.loading && import_react176.default.createElement(InternalTooltip, { className: styles_css_default65["button-group-tooltip"], getTrack: () => containerRef.current, content: item.text, onEscape: onTooltipDismiss }),
-      import_react176.default.createElement(internal_default4, { ref: triggerRef, styleClassNames: { root: styleClassName }, variant: "icon", ariaLabel, "data-itemid": item.id, ariaExpanded, className: clsx_m_default(styles_css_default65.item, testUtilsClass), iconName: hasCustomIcon ? item.iconName : "ellipsis", iconAlt: item.iconAlt, iconUrl: item.iconUrl, iconSvg: item.iconSvg, loading: item.loading, loadingText: item.loadingText, disabled: item.disabled, disabledReason: item.disabledReason, onClick, __title: "" })
+      !isOpen && showTooltip && !item.disabled && !item.loading && import_react174.default.createElement(InternalTooltip, { className: styles_css_default65["button-group-tooltip"], getTrack: () => containerRef.current, content: item.text, onEscape: onTooltipDismiss }),
+      import_react174.default.createElement(internal_default4, { ref: triggerRef, styleClassNames: { root: styleClassName }, variant: "icon", ariaLabel, "data-itemid": item.id, ariaExpanded, className: clsx_m_default(styles_css_default65.item, testUtilsClass), iconName: hasCustomIcon ? item.iconName : "ellipsis", iconAlt: item.iconAlt, iconUrl: item.iconUrl, iconSvg: item.iconSvg, loading: item.loading, loadingText: item.loadingText, disabled: item.disabled, disabledReason: item.disabledReason, onClick, __title: "" })
     ) });
   });
   var menu_dropdown_item_default = MenuDropdownItem;
@@ -328306,13 +328212,13 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/button-group/item-element.js
-  var ItemElement2 = (0, import_react177.forwardRef)(({ item, dropdownExpandToViewport, tooltip, setTooltip, onItemClick, onFilesChange, onCopyFailure, onCopySuccess, position: position5, style: style3, styleClassNames }, ref) => {
-    const containerRef = (0, import_react177.useRef)(null);
-    const buttonRef = (0, import_react177.useRef)(null);
-    const fileInputRef = (0, import_react177.useRef)(null);
-    const buttonDropdownRef = (0, import_react177.useRef)(null);
-    const copyToClipboardRef = (0, import_react177.useRef)(null);
-    (0, import_react177.useImperativeHandle)(ref, () => ({
+  var ItemElement2 = (0, import_react175.forwardRef)(({ item, dropdownExpandToViewport, tooltip, setTooltip, onItemClick, onFilesChange, onCopyFailure, onCopySuccess, position: position5, style: style3, styleClassNames }, ref) => {
+    const containerRef = (0, import_react175.useRef)(null);
+    const buttonRef = (0, import_react175.useRef)(null);
+    const fileInputRef = (0, import_react175.useRef)(null);
+    const buttonDropdownRef = (0, import_react175.useRef)(null);
+    const copyToClipboardRef = (0, import_react175.useRef)(null);
+    (0, import_react175.useImperativeHandle)(ref, () => ({
       focus: () => {
         var _a213, _b, _c, _d;
         (_a213 = buttonRef.current) === null || _a213 === void 0 ? void 0 : _a213.focus();
@@ -328321,7 +328227,7 @@ ${isHandDrawn ? "" : `
         (_d = copyToClipboardRef.current) === null || _d === void 0 ? void 0 : _d.focus();
       }
     }));
-    (0, import_react177.useEffect)(() => {
+    (0, import_react175.useEffect)(() => {
       if ((tooltip === null || tooltip === void 0 ? void 0 : tooltip.item) !== item.id) {
         return;
       }
@@ -328378,7 +328284,7 @@ ${isHandDrawn ? "" : `
     };
     const itemStylePropertiesAndVariables = getButtonGroupItemStyles(style3);
     const itemClassName = typeof (styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.item) === "function" ? styleClassNames.item({ item }) : styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.item;
-    return import_react177.default.createElement(
+    return import_react175.default.createElement(
       "div",
       { key: item.id, className: styles_css_default68["item-wrapper"], ref: containerRef, onPointerEnter: () => onShowTooltipSoft(true), onPointerLeave: () => onShowTooltipSoft(false), onFocus: (event3) => {
         if (event3 && event3.relatedTarget && nodeBelongs2(containerRef.current, event3.relatedTarget)) {
@@ -328386,33 +328292,33 @@ ${isHandDrawn ? "" : `
         }
         onShowTooltipHard(true);
       }, onBlur: () => onShowTooltipHard(false), style: itemStylePropertiesAndVariables, ...item.type === "menu-dropdown" || item.disabled ? {} : getAnalyticsMetadataAttribute({ detail: { position: position5, id: item.id } }) },
-      item.type === "icon-button" && import_react177.default.createElement(icon_button_item_default, { styleClassName: itemClassName, ref: buttonRef, item, onItemClick: onClickHandler, showTooltip: (tooltip === null || tooltip === void 0 ? void 0 : tooltip.item) === item.id, showFeedback: !!(tooltip === null || tooltip === void 0 ? void 0 : tooltip.feedback), onTooltipDismiss: () => setTooltip(null) }),
-      item.type === "icon-toggle-button" && import_react177.default.createElement(icon_toggle_button_item_default, { styleClassName: itemClassName, ref: buttonRef, item, onItemClick: onClickHandler, showTooltip: (tooltip === null || tooltip === void 0 ? void 0 : tooltip.item) === item.id, showFeedback: !!(tooltip === null || tooltip === void 0 ? void 0 : tooltip.feedback), onTooltipDismiss: () => setTooltip(null) }),
-      item.type === "icon-file-input" && import_react177.default.createElement(file_input_item_default, { styleClassName: itemClassName, ref: fileInputRef, item, onFilesChange: onFilesChangeHandler, showTooltip: (tooltip === null || tooltip === void 0 ? void 0 : tooltip.item) === item.id, onTooltipDismiss: () => setTooltip(null) }),
-      item.type === "menu-dropdown" && import_react177.default.createElement(menu_dropdown_item_default, { styleClassName: itemClassName, dropdownClassName: styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.dropdown, ref: buttonDropdownRef, item, showTooltip: (tooltip === null || tooltip === void 0 ? void 0 : tooltip.item) === item.id, onItemClick: onClickHandler, expandToViewport: dropdownExpandToViewport, onTooltipDismiss: () => setTooltip(null), position: position5 }),
-      item.type === "icon-copy-to-clipboard" && import_react177.default.createElement(copy_to_clipboard_item_default, { styleClassName: itemClassName, ref: copyToClipboardRef, item, showTooltip: (tooltip === null || tooltip === void 0 ? void 0 : tooltip.item) === item.id, showFeedback: !!(tooltip === null || tooltip === void 0 ? void 0 : tooltip.feedback), onTooltipDismiss: () => setTooltip(null), onShowFeedback: () => setTooltip({ item: item.id, feedback: true }), onCopyFailure: onCopyFailureHandler, onCopySuccess: onCopySuccessHandler })
+      item.type === "icon-button" && import_react175.default.createElement(icon_button_item_default, { styleClassName: itemClassName, ref: buttonRef, item, onItemClick: onClickHandler, showTooltip: (tooltip === null || tooltip === void 0 ? void 0 : tooltip.item) === item.id, showFeedback: !!(tooltip === null || tooltip === void 0 ? void 0 : tooltip.feedback), onTooltipDismiss: () => setTooltip(null) }),
+      item.type === "icon-toggle-button" && import_react175.default.createElement(icon_toggle_button_item_default, { styleClassName: itemClassName, ref: buttonRef, item, onItemClick: onClickHandler, showTooltip: (tooltip === null || tooltip === void 0 ? void 0 : tooltip.item) === item.id, showFeedback: !!(tooltip === null || tooltip === void 0 ? void 0 : tooltip.feedback), onTooltipDismiss: () => setTooltip(null) }),
+      item.type === "icon-file-input" && import_react175.default.createElement(file_input_item_default, { styleClassName: itemClassName, ref: fileInputRef, item, onFilesChange: onFilesChangeHandler, showTooltip: (tooltip === null || tooltip === void 0 ? void 0 : tooltip.item) === item.id, onTooltipDismiss: () => setTooltip(null) }),
+      item.type === "menu-dropdown" && import_react175.default.createElement(menu_dropdown_item_default, { styleClassName: itemClassName, dropdownClassName: styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.dropdown, ref: buttonDropdownRef, item, showTooltip: (tooltip === null || tooltip === void 0 ? void 0 : tooltip.item) === item.id, onItemClick: onClickHandler, expandToViewport: dropdownExpandToViewport, onTooltipDismiss: () => setTooltip(null), position: position5 }),
+      item.type === "icon-copy-to-clipboard" && import_react175.default.createElement(copy_to_clipboard_item_default, { styleClassName: itemClassName, ref: copyToClipboardRef, item, showTooltip: (tooltip === null || tooltip === void 0 ? void 0 : tooltip.item) === item.id, showFeedback: !!(tooltip === null || tooltip === void 0 ? void 0 : tooltip.feedback), onTooltipDismiss: () => setTooltip(null), onShowFeedback: () => setTooltip({ item: item.id, feedback: true }), onCopyFailure: onCopyFailureHandler, onCopySuccess: onCopySuccessHandler })
     );
   });
   var item_element_default2 = ItemElement2;
 
   // node_modules/@cloudscape-design/components/button-group/internal.js
-  var InternalButtonGroup = (0, import_react178.forwardRef)(({ items = [], styleClassNames, onItemClick, onFilesChange, onCopySuccess, onCopyFailure, ariaLabel, dropdownExpandToViewport, style: style3, __internalRootRef, ...props }, ref) => {
+  var InternalButtonGroup = (0, import_react176.forwardRef)(({ items = [], styleClassNames, onItemClick, onFilesChange, onCopySuccess, onCopyFailure, ariaLabel, dropdownExpandToViewport, style: style3, __internalRootRef, ...props }, ref) => {
     const baseProps = getBaseProps(props);
-    const itemsRef = (0, import_react178.useRef)({});
-    const [tooltip, setTooltip] = (0, import_react178.useState)(null);
-    (0, import_react178.useImperativeHandle)(ref, () => ({
+    const itemsRef = (0, import_react176.useRef)({});
+    const [tooltip, setTooltip] = (0, import_react176.useState)(null);
+    (0, import_react176.useImperativeHandle)(ref, () => ({
       focus: (id38) => {
         var _a213;
         (_a213 = itemsRef.current[id38]) === null || _a213 === void 0 ? void 0 : _a213.focus();
       }
     }));
     const stylePropertiesAndVariables = getButtonGroupStyles(style3);
-    return import_react178.default.createElement(
+    return import_react176.default.createElement(
       "div",
       { ...baseProps, ref: __internalRootRef, className: clsx_m_default(styles_css_default68.root, styles_css_default65["button-group"], baseProps.className), role: "toolbar", "aria-label": ariaLabel, style: stylePropertiesAndVariables },
-      import_react178.default.createElement(internal_default11, { getItemKey: (item) => item.dataset.itemid }, items.map((itemOrGroup, index2) => {
+      import_react176.default.createElement(internal_default11, { getItemKey: (item) => item.dataset.itemid }, items.map((itemOrGroup, index2) => {
         var _a213;
-        const itemContent = (item, position5) => import_react178.default.createElement(item_element_default2, { key: item.id, item, dropdownExpandToViewport, tooltip, setTooltip, onItemClick, onFilesChange, onCopySuccess, onCopyFailure, ref: (element3) => itemsRef.current[item.id] = element3, position: position5, style: style3, styleClassNames });
+        const itemContent = (item, position5) => import_react176.default.createElement(item_element_default2, { key: item.id, item, dropdownExpandToViewport, tooltip, setTooltip, onItemClick, onFilesChange, onCopySuccess, onCopyFailure, ref: (element3) => itemsRef.current[item.id] = element3, position: position5, style: style3, styleClassNames });
         const isGroupBefore = ((_a213 = items[index2 - 1]) === null || _a213 === void 0 ? void 0 : _a213.type) === "group";
         const currentItem = items[index2];
         const isGroupNow = (currentItem === null || currentItem === void 0 ? void 0 : currentItem.type) === "group";
@@ -328420,11 +328326,11 @@ ${isHandDrawn ? "" : `
         if (isGroupNow && currentItem.items.length === 0) {
           warnOnce("ButtonGroup", "Empty group detected. Empty groups are not allowed.");
         }
-        return import_react178.default.createElement(
-          import_react178.default.Fragment,
+        return import_react176.default.createElement(
+          import_react176.default.Fragment,
           { key: itemOrGroup.type === "group" ? index2 : itemOrGroup.id },
-          shouldAddDivider && import_react178.default.createElement("div", { className: clsx_m_default(styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.divider, styles_css_default68.divider) }),
-          itemOrGroup.type === "group" ? import_react178.default.createElement("div", { key: index2, role: "group", "aria-label": itemOrGroup.text, className: styles_css_default68.group }, itemOrGroup.items.map((item, subIndex) => itemContent(item, `${index2 + 1},${subIndex + 1}`))) : itemContent(itemOrGroup, `${index2 + 1}`)
+          shouldAddDivider && import_react176.default.createElement("div", { className: clsx_m_default(styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.divider, styles_css_default68.divider) }),
+          itemOrGroup.type === "group" ? import_react176.default.createElement("div", { key: index2, role: "group", "aria-label": itemOrGroup.text, className: styles_css_default68.group }, itemOrGroup.items.map((item, subIndex) => itemContent(item, `${index2 + 1},${subIndex + 1}`))) : itemContent(itemOrGroup, `${index2 + 1}`)
         );
       }))
     );
@@ -328435,7 +328341,7 @@ ${isHandDrawn ? "" : `
   function AppLayoutGlobalDrawerImplementation({ appLayoutInternals, show: show2, activeGlobalDrawer }) {
     var _a213, _b, _c, _d, _e2, _f, _g, _h, _j;
     const { ariaLabels, globalDrawersFocusControl, isMobile, placement, onActiveGlobalDrawersChange, onActiveDrawerResize, minGlobalDrawersSizes, maxGlobalDrawersSizes, activeGlobalDrawersSizes, activeGlobalDrawers, verticalOffsets, drawersOpenQueue, expandedDrawerId, setExpandedDrawerId, activeAiDrawer, drawerAnimationDisabled } = appLayoutInternals;
-    const drawerRef = (0, import_react179.useRef)(null);
+    const drawerRef = (0, import_react177.useRef)(null);
     const activeDrawerId = (_a213 = activeGlobalDrawer === null || activeGlobalDrawer === void 0 ? void 0 : activeGlobalDrawer.id) !== null && _a213 !== void 0 ? _a213 : "";
     const computedAriaLabels = {
       closeButton: activeGlobalDrawer ? (_b = activeGlobalDrawer.ariaLabels) === null || _b === void 0 ? void 0 : _b.closeButton : ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.toolsClose,
@@ -328491,12 +328397,12 @@ ${isHandDrawn ? "" : `
         ...drawerActions
       ];
     }
-    return import_react179.default.createElement(
+    return import_react177.default.createElement(
       AppLayoutBuiltInErrorBoundary,
       { appLayoutPart: "global-drawer" },
-      import_react179.default.createElement(Transition_default, { nodeRef: drawerRef, in: show2 || isExpanded, appear: show2 || isExpanded, timeout: 0 }, (state5) => {
+      import_react177.default.createElement(Transition_default, { nodeRef: drawerRef, in: show2 || isExpanded, appear: show2 || isExpanded, timeout: 0 }, (state5) => {
         var _a214, _b2;
-        return import_react179.default.createElement(
+        return import_react177.default.createElement(
           "aside",
           { id: activeDrawerId, "aria-hidden": !show2, "aria-label": computedAriaLabels.content, className: clsx_m_default(styles_css_default61.drawer, styles_css_default61["drawer-global"], styles_css_default61[state5], !animationDisabled && styles_css_default47["with-motion-horizontal"], !animationDisabled && isExpanded && styles_css_default61["with-expanded-motion"], {
             [styles_css_default61["drawer-hidden"]]: !show2,
@@ -328518,22 +328424,22 @@ ${isHandDrawn ? "" : `
               [custom_css_properties_default.drawerSize]: `${["entering", "entered"].includes(state5) ? isExpanded ? "100%" : size4 + "px" : 0}`
             }
           }, "data-testid": `awsui-app-layout-drawer-${activeDrawerId}` },
-          import_react179.default.createElement(
+          import_react177.default.createElement(
             "div",
             { className: clsx_m_default(styles_css_default61["global-drawer-wrapper"]) },
-            !isMobile && import_react179.default.createElement("div", { className: styles_css_default61["drawer-gap"] }),
-            !isMobile && (activeGlobalDrawer === null || activeGlobalDrawer === void 0 ? void 0 : activeGlobalDrawer.resizable) && !isExpanded && import_react179.default.createElement(
+            !isMobile && import_react177.default.createElement("div", { className: styles_css_default61["drawer-gap"] }),
+            !isMobile && (activeGlobalDrawer === null || activeGlobalDrawer === void 0 ? void 0 : activeGlobalDrawer.resizable) && !isExpanded && import_react177.default.createElement(
               "div",
               { className: styles_css_default61["drawer-slider"] },
-              import_react179.default.createElement(panel_resize_handle_default, { ref: refs === null || refs === void 0 ? void 0 : refs.slider, position: "side", className: styles_css_default22["drawers-slider"], ariaLabel: (_a214 = activeGlobalDrawer === null || activeGlobalDrawer === void 0 ? void 0 : activeGlobalDrawer.ariaLabels) === null || _a214 === void 0 ? void 0 : _a214.resizeHandle, tooltipText: (_b2 = activeGlobalDrawer === null || activeGlobalDrawer === void 0 ? void 0 : activeGlobalDrawer.ariaLabels) === null || _b2 === void 0 ? void 0 : _b2.resizeHandleTooltipText, ariaValuenow: resizeProps.relativeSize, onKeyDown: resizeProps.onKeyDown, onDirectionClick: resizeProps.onDirectionClick, onPointerDown: resizeProps.onPointerDown })
+              import_react177.default.createElement(panel_resize_handle_default, { ref: refs === null || refs === void 0 ? void 0 : refs.slider, position: "side", className: styles_css_default22["drawers-slider"], ariaLabel: (_a214 = activeGlobalDrawer === null || activeGlobalDrawer === void 0 ? void 0 : activeGlobalDrawer.ariaLabels) === null || _a214 === void 0 ? void 0 : _a214.resizeHandle, tooltipText: (_b2 = activeGlobalDrawer === null || activeGlobalDrawer === void 0 ? void 0 : activeGlobalDrawer.ariaLabels) === null || _b2 === void 0 ? void 0 : _b2.resizeHandleTooltipText, ariaValuenow: resizeProps.relativeSize, onKeyDown: resizeProps.onKeyDown, onDirectionClick: resizeProps.onDirectionClick, onPointerDown: resizeProps.onPointerDown })
             ),
-            import_react179.default.createElement(
+            import_react177.default.createElement(
               "div",
               { className: clsx_m_default(styles_css_default61["drawer-content-container"], styles_css_default47["with-motion-horizontal"]), "data-testid": `awsui-app-layout-drawer-content-${activeDrawerId}` },
-              import_react179.default.createElement(
+              import_react177.default.createElement(
                 "div",
                 { className: styles_css_default61["drawer-actions"] },
-                import_react179.default.createElement(internal_default13, { dropdownExpandToViewport: false, variant: "icon", onItemClick: (event3) => {
+                import_react177.default.createElement(internal_default13, { dropdownExpandToViewport: false, variant: "icon", onItemClick: (event3) => {
                   var _a215;
                   switch (event3.detail.id) {
                     case "close":
@@ -328552,7 +328458,7 @@ ${isHandDrawn ? "" : `
                   refs.close = { current: root4.querySelector('[data-itemid="close"]') };
                 } })
               ),
-              import_react179.default.createElement("div", { className: styles_css_default61["drawer-content"], style: { blockSize: drawerHeight } }, activeGlobalDrawer === null || activeGlobalDrawer === void 0 ? void 0 : activeGlobalDrawer.content)
+              import_react177.default.createElement("div", { className: styles_css_default61["drawer-content"], style: { blockSize: drawerHeight } }, activeGlobalDrawer === null || activeGlobalDrawer === void 0 ? void 0 : activeGlobalDrawer.content)
             )
           )
         );
@@ -328564,28 +328470,28 @@ ${isHandDrawn ? "" : `
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/drawer/global-drawers.js
   function AppLayoutGlobalDrawersImplementation({ appLayoutInternals }) {
     const { globalDrawers, activeGlobalDrawersIds, expandedDrawerId } = appLayoutInternals;
-    const openDrawersHistory = (0, import_react180.useRef)(/* @__PURE__ */ new Set());
+    const openDrawersHistory = (0, import_react178.useRef)(/* @__PURE__ */ new Set());
     if (!globalDrawers.length) {
-      return import_react180.default.createElement(import_react180.default.Fragment, null);
+      return import_react178.default.createElement(import_react178.default.Fragment, null);
     }
-    return import_react180.default.createElement(import_react180.default.Fragment, null, globalDrawers.filter((drawer) => drawer.position !== "bottom" && activeGlobalDrawersIds.includes(drawer.id) || drawer.preserveInactiveContent && openDrawersHistory.current.has(drawer.id)).map((drawer) => {
+    return import_react178.default.createElement(import_react178.default.Fragment, null, globalDrawers.filter((drawer) => drawer.position !== "bottom" && activeGlobalDrawersIds.includes(drawer.id) || drawer.preserveInactiveContent && openDrawersHistory.current.has(drawer.id)).map((drawer) => {
       openDrawersHistory.current.add(drawer.id);
-      return import_react180.default.createElement(global_drawer_default, { key: drawer.id, show: activeGlobalDrawersIds.includes(drawer.id) && (!expandedDrawerId || drawer.id === expandedDrawerId), activeGlobalDrawer: drawer, appLayoutInternals });
+      return import_react178.default.createElement(global_drawer_default, { key: drawer.id, show: activeGlobalDrawersIds.includes(drawer.id) && (!expandedDrawerId || drawer.id === expandedDrawerId), activeGlobalDrawer: drawer, appLayoutInternals });
     }));
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/drawer/global-bottom-drawer.js
-  var import_react181 = __toESM(require_react());
+  var import_react179 = __toESM(require_react());
   function AppLayoutBottomDrawerWrapper({ widgetizedState }) {
     const { activeGlobalBottomDrawerId, bottomDrawers } = widgetizedState;
-    const openBottomDrawersHistory = (0, import_react181.useRef)(/* @__PURE__ */ new Set());
-    (0, import_react181.useEffect)(() => {
+    const openBottomDrawersHistory = (0, import_react179.useRef)(/* @__PURE__ */ new Set());
+    (0, import_react179.useEffect)(() => {
       if (activeGlobalBottomDrawerId) {
         openBottomDrawersHistory.current.add(activeGlobalBottomDrawerId);
       }
     }, [activeGlobalBottomDrawerId]);
-    return import_react181.default.createElement(import_react181.default.Fragment, null, bottomDrawers.map((drawer) => {
-      return import_react181.default.createElement(AppLayoutGlobalBottomDrawerImplementation, { key: drawer.id, activeDrawer: activeGlobalBottomDrawerId === drawer.id || drawer.preserveInactiveContent && openBottomDrawersHistory.current.has(drawer.id) ? drawer : void 0, show: activeGlobalBottomDrawerId === drawer.id, widgetizedState });
+    return import_react179.default.createElement(import_react179.default.Fragment, null, bottomDrawers.map((drawer) => {
+      return import_react179.default.createElement(AppLayoutGlobalBottomDrawerImplementation, { key: drawer.id, activeDrawer: activeGlobalBottomDrawerId === drawer.id || drawer.preserveInactiveContent && openBottomDrawersHistory.current.has(drawer.id) ? drawer : void 0, show: activeGlobalBottomDrawerId === drawer.id, widgetizedState });
     }));
   }
   var GAP_HEIGHT = 10;
@@ -328593,8 +328499,8 @@ ${isHandDrawn ? "" : `
   function AppLayoutGlobalBottomDrawerImplementation({ widgetizedState, show: show2, activeDrawer }) {
     var _a213, _b, _c, _d, _e2, _f;
     const { ariaLabels, isMobile, onActiveGlobalBottomDrawerChange, onActiveBottomDrawerResize, minGlobalBottomDrawerSize, activeGlobalBottomDrawerSize, drawersOpenQueue, expandedDrawerId, setExpandedDrawerId, activeAiDrawer, bottomDrawersFocusControl, getMaxGlobalBottomDrawerHeight, reportBottomDrawerSize, verticalOffsets, placement, drawerAnimationDisabled } = widgetizedState;
-    const drawerRef = (0, import_react181.useRef)(null);
-    const headerRef = (0, import_react181.useRef)(null);
+    const drawerRef = (0, import_react179.useRef)(null);
+    const headerRef = (0, import_react179.useRef)(null);
     const activeDrawerId = (_a213 = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.id) !== null && _a213 !== void 0 ? _a213 : "";
     const computedAriaLabels = {
       closeButton: activeDrawer ? (_b = activeDrawer.ariaLabels) === null || _b === void 0 ? void 0 : _b.closeButton : ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.toolsClose,
@@ -328620,7 +328526,7 @@ ${isHandDrawn ? "" : `
     const isExpanded = (activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.isExpandable) && expandedDrawerId === activeDrawerId;
     const wasExpanded = usePrevious(isExpanded);
     const animationDisabled = drawerAnimationDisabled || (activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.defaultActive) && !drawersOpenQueue.includes(activeDrawer.id) || wasExpanded && !isExpanded;
-    (0, import_react181.useEffect)(() => {
+    (0, import_react179.useEffect)(() => {
       if (show2 && drawerRef.current) {
         const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
         const abortController = new AbortController();
@@ -328677,15 +328583,15 @@ ${isHandDrawn ? "" : `
         ...drawerActions
       ];
     }
-    (0, import_react181.useEffect)(() => {
+    (0, import_react179.useEffect)(() => {
       reportBottomDrawerSize(size4);
     }, [reportBottomDrawerSize, size4]);
-    return import_react181.default.createElement(
+    return import_react179.default.createElement(
       AppLayoutBuiltInErrorBoundary,
       { appLayoutPart: "bottom-drawer" },
-      import_react181.default.createElement(Transition_default, { nodeRef: drawerRef, in: show2 || isExpanded, appear: show2 || isExpanded, mountOnEnter: true, timeout: 250 }, (state5) => {
+      import_react179.default.createElement(Transition_default, { nodeRef: drawerRef, in: show2 || isExpanded, appear: show2 || isExpanded, mountOnEnter: true, timeout: 250 }, (state5) => {
         var _a214, _b2, _c2, _d2, _e3;
-        return import_react181.default.createElement(
+        return import_react179.default.createElement(
           "aside",
           { id: activeDrawerId, "aria-hidden": !show2, "aria-label": computedAriaLabels.content, className: clsx_m_default(styles_css_default61.drawer, styles_css_default61["bottom-drawer"], styles_css_default61[state5], !animationDisabled && styles_css_default47["with-motion-vertical"], !animationDisabled && isExpanded && styles_css_default61["with-expanded-motion"], {
             [styles_css_default61["drawer-hidden"]]: !show2 && state5 === "exited",
@@ -328708,27 +328614,27 @@ ${isHandDrawn ? "" : `
               [custom_css_properties_default.bottomDrawerSize]: `${["entering", "entered"].includes(state5) ? isExpanded ? drawerFullScreenHeight : size4 + "px" : 0}`
             }
           }, "data-testid": `awsui-app-layout-drawer-${activeDrawerId}` },
-          import_react181.default.createElement(
+          import_react179.default.createElement(
             "div",
             { className: clsx_m_default(styles_css_default61["global-drawer-wrapper"]) },
-            !isMobile && !isExpanded && import_react181.default.createElement("div", { className: styles_css_default61["drawer-gap"] }),
+            !isMobile && !isExpanded && import_react179.default.createElement("div", { className: styles_css_default61["drawer-gap"] }),
             !isMobile && (activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.resizable) && !isExpanded && // Prevents receiving focus in Firefox
-            import_react181.default.createElement(
+            import_react179.default.createElement(
               "div",
               { className: styles_css_default61["drawer-slider"], tabIndex: -1 },
-              import_react181.default.createElement(panel_resize_handle_default, { ref: refs === null || refs === void 0 ? void 0 : refs.slider, position: "bottom", className: styles_css_default22["drawers-slider"], ariaLabel: (_a214 = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _a214 === void 0 ? void 0 : _a214.resizeHandle, tooltipText: (_b2 = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _b2 === void 0 ? void 0 : _b2.resizeHandleTooltipText, ariaValuenow: resizeProps.relativeSize, onKeyDown: resizeProps.onKeyDown, onDirectionClick: resizeProps.onDirectionClick, onPointerDown: resizeProps.onPointerDown })
+              import_react179.default.createElement(panel_resize_handle_default, { ref: refs === null || refs === void 0 ? void 0 : refs.slider, position: "bottom", className: styles_css_default22["drawers-slider"], ariaLabel: (_a214 = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _a214 === void 0 ? void 0 : _a214.resizeHandle, tooltipText: (_b2 = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.ariaLabels) === null || _b2 === void 0 ? void 0 : _b2.resizeHandleTooltipText, ariaValuenow: resizeProps.relativeSize, onKeyDown: resizeProps.onKeyDown, onDirectionClick: resizeProps.onDirectionClick, onPointerDown: resizeProps.onPointerDown })
             ),
-            import_react181.default.createElement(
+            import_react179.default.createElement(
               "header",
               { className: styles_css_default61["bottom-drawer-content-header"], ref: headerRef },
-              import_react181.default.createElement(
+              import_react179.default.createElement(
                 "div",
                 { className: styles_css_default61["bottom-drawer-content-header-content"] },
-                (_c2 = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.header) !== null && _c2 !== void 0 ? _c2 : import_react181.default.createElement("div", null),
-                import_react181.default.createElement(
+                (_c2 = activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.header) !== null && _c2 !== void 0 ? _c2 : import_react179.default.createElement("div", null),
+                import_react179.default.createElement(
                   "div",
                   { className: styles_css_default61["bottom-drawer-actions"] },
-                  import_react181.default.createElement(internal_default13, { dropdownExpandToViewport: false, variant: "icon", onItemClick: (event3) => {
+                  import_react179.default.createElement(internal_default13, { dropdownExpandToViewport: false, variant: "icon", onItemClick: (event3) => {
                     var _a215;
                     switch (event3.detail.id) {
                       case "close":
@@ -328751,10 +328657,10 @@ ${isHandDrawn ? "" : `
                 )
               )
             ),
-            import_react181.default.createElement(
+            import_react179.default.createElement(
               "div",
               { className: clsx_m_default(styles_css_default61["drawer-content-container"], styles_css_default47["with-motion-horizontal"]), "data-testid": `awsui-app-layout-drawer-content-${activeDrawerId}` },
-              import_react181.default.createElement("div", { className: styles_css_default61["drawer-content"], style: {
+              import_react179.default.createElement("div", { className: styles_css_default61["drawer-content"], style: {
                 blockSize: isMobile || isExpanded ? drawerFullScreenHeight : `${size4 - GAP_HEIGHT - RESIZE_HANDLER_HEIGHT - ((_e3 = (_d2 = headerRef === null || headerRef === void 0 ? void 0 : headerRef.current) === null || _d2 === void 0 ? void 0 : _d2.clientHeight) !== null && _e3 !== void 0 ? _e3 : 0)}px`
               } }, activeDrawer === null || activeDrawer === void 0 ? void 0 : activeDrawer.content)
             )
@@ -328765,7 +328671,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/split-panel/index.js
-  var import_react182 = __toESM(require_react());
+  var import_react180 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/split-panel/styles.css.js
   var styles_css_default69 = {
@@ -328776,10 +328682,10 @@ ${isHandDrawn ? "" : `
   function AppLayoutSplitPanelDrawerSideImplementation({ children: children2, appLayoutInternals, splitPanelInternals, bottomDrawerReportedSize }) {
     const { splitPanelControlId, placement, verticalOffsets, isMobile, splitPanelAnimationDisabled } = appLayoutInternals;
     const { drawerTopOffset, drawerHeight } = getDrawerStyles(verticalOffsets, isMobile, placement, isMobile ? 0 : bottomDrawerReportedSize !== null && bottomDrawerReportedSize !== void 0 ? bottomDrawerReportedSize : 0);
-    return import_react182.default.createElement(
+    return import_react180.default.createElement(
       SplitPanelProvider,
       { ...splitPanelInternals, animationDisabled: splitPanelAnimationDisabled },
-      import_react182.default.createElement("section", { id: splitPanelControlId, className: styles_css_default69["split-panel-side"], style: {
+      import_react180.default.createElement("section", { id: splitPanelControlId, className: styles_css_default69["split-panel-side"], style: {
         blockSize: drawerHeight,
         insetBlockStart: drawerTopOffset
       } }, children2)
@@ -328787,10 +328693,10 @@ ${isHandDrawn ? "" : `
   }
   function AppLayoutSplitPanelDrawerBottomImplementation({ children: children2, splitPanelInternals, appLayoutInternals }) {
     const { splitPanelControlId, splitPanelAnimationDisabled } = appLayoutInternals;
-    return import_react182.default.createElement(
+    return import_react180.default.createElement(
       SplitPanelProvider,
       { ...splitPanelInternals, animationDisabled: splitPanelAnimationDisabled },
-      import_react182.default.createElement("section", { id: splitPanelControlId }, children2)
+      import_react180.default.createElement("section", { id: splitPanelControlId }, children2)
     );
   }
 
@@ -328808,56 +328714,56 @@ ${isHandDrawn ? "" : `
     const drawerExpandedMode = !!expandedDrawerId;
     const toolsOpen = !!activeDrawer;
     const globalToolsOpen = !!(activeGlobalDrawersIds === null || activeGlobalDrawersIds === void 0 ? void 0 : activeGlobalDrawersIds.length);
-    return import_react183.default.createElement(
-      import_react183.default.Fragment,
+    return import_react181.default.createElement(
+      import_react181.default.Fragment,
       null,
-      !!bottomDrawers.length && import_react183.default.createElement(
+      !!bottomDrawers.length && import_react181.default.createElement(
         "div",
         { className: styles_css_default62["bottom-tool"] },
-        import_react183.default.createElement(
+        import_react181.default.createElement(
           ActiveDrawersContext.Provider,
           { value: activeGlobalBottomDrawerId ? [activeGlobalBottomDrawerId] : [] },
-          import_react183.default.createElement(AppLayoutBottomDrawerWrapper, { widgetizedState: appLayoutState.widgetizedState })
+          import_react181.default.createElement(AppLayoutBottomDrawerWrapper, { widgetizedState: appLayoutState.widgetizedState })
         )
       ),
-      splitPanelPosition === "side" && import_react183.default.createElement(
+      splitPanelPosition === "side" && import_react181.default.createElement(
         "div",
         { className: clsx_m_default(styles_css_default62["split-panel-side"], !splitPanelOpen && styles_css_default62["panel-hidden"], drawerExpandedMode && styles_css_default62.hidden) },
-        import_react183.default.createElement(AppLayoutSplitPanelDrawerSideImplementation, { appLayoutInternals: appLayoutState.appLayoutInternals, splitPanelInternals: appLayoutState.splitPanelInternals, bottomDrawerReportedSize }, appLayoutProps.splitPanel)
+        import_react181.default.createElement(AppLayoutSplitPanelDrawerSideImplementation, { appLayoutInternals: appLayoutState.appLayoutInternals, splitPanelInternals: appLayoutState.splitPanelInternals, bottomDrawerReportedSize }, appLayoutProps.splitPanel)
       ),
-      import_react183.default.createElement(
+      import_react181.default.createElement(
         AppLayoutBuiltInErrorBoundary,
         { appLayoutPart: "tools" },
-        import_react183.default.createElement("div", { className: clsx_m_default(styles_css_default62.tools, !toolsOpen && styles_css_default62["panel-hidden"], styles_css_default47["with-motion-horizontal"], navigationOpen && !toolsOpen && styles_css_default62["unfocusable-mobile"], toolsOpen && styles_css_default62["tools-open"], drawerExpandedMode && styles_css_default62.hidden) }, drawers && drawers.length > 0 && import_react183.default.createElement(AppLayoutDrawerImplementation, { appLayoutInternals: appLayoutState.appLayoutInternals, bottomDrawerReportedSize: activeGlobalBottomDrawerId ? bottomDrawerReportedSize : 0 }))
+        import_react181.default.createElement("div", { className: clsx_m_default(styles_css_default62.tools, !toolsOpen && styles_css_default62["panel-hidden"], styles_css_default47["with-motion-horizontal"], navigationOpen && !toolsOpen && styles_css_default62["unfocusable-mobile"], toolsOpen && styles_css_default62["tools-open"], drawerExpandedMode && styles_css_default62.hidden) }, drawers && drawers.length > 0 && import_react181.default.createElement(AppLayoutDrawerImplementation, { appLayoutInternals: appLayoutState.appLayoutInternals, bottomDrawerReportedSize: activeGlobalBottomDrawerId ? bottomDrawerReportedSize : 0 }))
       ),
-      import_react183.default.createElement(
+      import_react181.default.createElement(
         "div",
         { className: clsx_m_default(styles_css_default62["global-tools"], !globalToolsOpen && styles_css_default62["panel-hidden"]) },
-        import_react183.default.createElement(
+        import_react181.default.createElement(
           ActiveDrawersContext.Provider,
           { value: activeGlobalDrawersIds !== null && activeGlobalDrawersIds !== void 0 ? activeGlobalDrawersIds : [] },
-          import_react183.default.createElement(AppLayoutGlobalDrawersImplementation, { appLayoutInternals: appLayoutState.appLayoutInternals })
+          import_react181.default.createElement(AppLayoutGlobalDrawersImplementation, { appLayoutInternals: appLayoutState.appLayoutInternals })
         )
       )
     );
   };
-  var AfterMainSlotImplementation = (props) => import_react183.default.createElement(
+  var AfterMainSlotImplementation = (props) => import_react181.default.createElement(
     AppLayoutBuiltInErrorBoundary,
     { appLayoutPart: "after-main-slot" },
-    import_react183.default.createElement(AfterMainSlotImplementationInternal, { ...props })
+    import_react181.default.createElement(AfterMainSlotImplementationInternal, { ...props })
   );
   var createWidgetizedAppLayoutAfterMainSlot = createWidgetizedComponent(AfterMainSlotImplementation);
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/widget-areas/before-main-slot.js
-  var import_react197 = __toESM(require_react());
+  var import_react195 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/drawer/global-ai-drawer.js
-  var import_react184 = __toESM(require_react());
+  var import_react182 = __toESM(require_react());
   function AppLayoutGlobalAiDrawerImplementation({ appLayoutInternals, show: show2, activeAiDrawer, aiDrawerProps }) {
     var _a213, _b, _c, _d;
     const { activeAiDrawerSize, minAiDrawerSize, maxAiDrawerSize, ariaLabels, aiDrawerFocusControl, isMobile, drawersOpenQueue, onActiveAiDrawerChange, onActiveDrawerResize, expandedDrawerId, setExpandedDrawerId } = aiDrawerProps;
     const { verticalOffsets, placement, drawerAnimationDisabled } = appLayoutInternals;
-    const drawerRef = (0, import_react184.useRef)(null);
+    const drawerRef = (0, import_react182.useRef)(null);
     const activeDrawerId = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.id;
     const computedAriaLabels = {
       closeButton: activeAiDrawer ? (_a213 = activeAiDrawer.ariaLabels) === null || _a213 === void 0 ? void 0 : _a213.closeButton : ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.toolsClose,
@@ -328911,13 +328817,13 @@ ${isHandDrawn ? "" : `
         ...drawerActions
       ];
     }
-    return import_react184.default.createElement(
+    return import_react182.default.createElement(
       AppLayoutBuiltInErrorBoundary,
       { appLayoutPart: "left-drawer" },
-      import_react184.default.createElement(Transition_default, { nodeRef: drawerRef, in: show2, appear: show2, mountOnEnter: true, timeout: 250 }, (drawerTransitionState) => {
-        return import_react184.default.createElement(Transition_default, { nodeRef: drawerRef, in: isExpanded, timeout: 250 }, (expandedTransitionState) => {
+      import_react182.default.createElement(Transition_default, { nodeRef: drawerRef, in: show2, appear: show2, mountOnEnter: true, timeout: 250 }, (drawerTransitionState) => {
+        return import_react182.default.createElement(Transition_default, { nodeRef: drawerRef, in: isExpanded, timeout: 250 }, (expandedTransitionState) => {
           var _a214, _b2, _c2, _d2, _e2, _f, _g, _h, _j;
-          return import_react184.default.createElement(
+          return import_react182.default.createElement(
             "aside",
             { id: activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.id, "aria-hidden": !activeAiDrawer, "aria-label": computedAriaLabels.content, className: clsx_m_default(styles_css_default61.drawer, styles_css_default61["ai-drawer"], !animationDisabled && isExpanded && styles_css_default61["with-expanded-motion"], {
               [styles_css_default47["with-motion-horizontal"]]: !animationDisabled,
@@ -328937,28 +328843,28 @@ ${isHandDrawn ? "" : `
                 [custom_css_properties_default.drawerSize]: `${["entering", "entered"].includes(drawerTransitionState) ? size4 : 0}px`
               }
             }, "data-testid": activeDrawerId && `awsui-app-layout-drawer-${activeDrawerId}` },
-            !isMobile && (activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.resizable) && (!isExpanded || expandedTransitionState !== "entered") && import_react184.default.createElement(
+            !isMobile && (activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.resizable) && (!isExpanded || expandedTransitionState !== "entered") && import_react182.default.createElement(
               "div",
               { className: styles_css_default61["drawer-slider"] },
-              import_react184.default.createElement(panel_resize_handle_default, { ref: aiDrawerFocusControl === null || aiDrawerFocusControl === void 0 ? void 0 : aiDrawerFocusControl.refs.slider, position: "side-start", className: clsx_m_default(styles_css_default22["drawers-slider"], styles_css_default61["ai-drawer-slider-handle"]), ariaLabel: (_a214 = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.ariaLabels) === null || _a214 === void 0 ? void 0 : _a214.resizeHandle, tooltipText: (_b2 = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.ariaLabels) === null || _b2 === void 0 ? void 0 : _b2.resizeHandleTooltipText, ariaValuenow: resizeProps.relativeSize, onKeyDown: resizeProps.onKeyDown, onPointerDown: resizeProps.onPointerDown, onDirectionClick: resizeProps.onDirectionClick, disabled: isResizingDisabled })
+              import_react182.default.createElement(panel_resize_handle_default, { ref: aiDrawerFocusControl === null || aiDrawerFocusControl === void 0 ? void 0 : aiDrawerFocusControl.refs.slider, position: "side-start", className: clsx_m_default(styles_css_default22["drawers-slider"], styles_css_default61["ai-drawer-slider-handle"]), ariaLabel: (_a214 = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.ariaLabels) === null || _a214 === void 0 ? void 0 : _a214.resizeHandle, tooltipText: (_b2 = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.ariaLabels) === null || _b2 === void 0 ? void 0 : _b2.resizeHandleTooltipText, ariaValuenow: resizeProps.relativeSize, onKeyDown: resizeProps.onKeyDown, onPointerDown: resizeProps.onPointerDown, onDirectionClick: resizeProps.onDirectionClick, disabled: isResizingDisabled })
             ),
-            import_react184.default.createElement(
+            import_react182.default.createElement(
               "div",
               { className: clsx_m_default(styles_css_default61["drawer-content-container"], styles_css_default47["with-motion-horizontal"]) },
-              import_react184.default.createElement(
+              import_react182.default.createElement(
                 "div",
                 { className: styles_css_default61["drawer-content"] },
-                import_react184.default.createElement(
+                import_react182.default.createElement(
                   "header",
                   { className: styles_css_default61["drawer-content-header"] },
-                  import_react184.default.createElement(
+                  import_react182.default.createElement(
                     "div",
                     { className: styles_css_default61["drawer-content-header-content"] },
-                    import_react184.default.createElement(AppLayoutBuiltInErrorBoundary, { renderFallback: () => import_react184.default.createElement("div", null), appLayoutPart: "left-drawer-header" }, (_c2 = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.header) !== null && _c2 !== void 0 ? _c2 : import_react184.default.createElement("div", null)),
-                    import_react184.default.createElement(
+                    import_react182.default.createElement(AppLayoutBuiltInErrorBoundary, { renderFallback: () => import_react182.default.createElement("div", null), appLayoutPart: "left-drawer-header" }, (_c2 = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.header) !== null && _c2 !== void 0 ? _c2 : import_react182.default.createElement("div", null)),
+                    import_react182.default.createElement(
                       "div",
                       { className: styles_css_default61["drawer-actions"] },
-                      import_react184.default.createElement(internal_default13, { dropdownExpandToViewport: false, variant: "icon", onItemClick: (event3) => {
+                      import_react182.default.createElement(internal_default13, { dropdownExpandToViewport: false, variant: "icon", onItemClick: (event3) => {
                         var _a215;
                         switch (event3.detail.id) {
                           case "close":
@@ -328973,16 +328879,16 @@ ${isHandDrawn ? "" : `
                       }, ariaLabel: "Left panel actions", items: drawerActions })
                     )
                   ),
-                  !isMobile && isExpanded && ((_d2 = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.ariaLabels) === null || _d2 === void 0 ? void 0 : _d2.exitExpandedModeButton) && import_react184.default.createElement(
+                  !isMobile && isExpanded && ((_d2 = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.ariaLabels) === null || _d2 === void 0 ? void 0 : _d2.exitExpandedModeButton) && import_react182.default.createElement(
                     "div",
                     { className: styles_css_default61["drawer-back-to-console-slot"] },
-                    import_react184.default.createElement("div", { className: styles_css_default61["drawer-back-to-console-button-wrapper"] }, ((_e2 = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.exitExpandedModeTrigger) === null || _e2 === void 0 ? void 0 : _e2.customIcon) ? import_react184.default.createElement("button", { className: clsx_m_default(styles_css_default22["active-ai-drawer-leave-expanded-mode-custom-button"], styles_css_default61["drawer-back-to-console-custom-button"]), formAction: "none", onClick: () => setExpandedDrawerId(null), "aria-label": (_f = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.ariaLabels) === null || _f === void 0 ? void 0 : _f.exitExpandedModeButton }, (_g = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.exitExpandedModeTrigger) === null || _g === void 0 ? void 0 : _g.customIcon) : import_react184.default.createElement("button", { className: clsx_m_default(styles_css_default22["active-ai-drawer-leave-expanded-mode-custom-button"], styles_css_default61["drawer-back-to-console-button"]), formAction: "none", onClick: () => setExpandedDrawerId(null), "aria-label": (_h = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.ariaLabels) === null || _h === void 0 ? void 0 : _h.exitExpandedModeButton }, (_j = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.ariaLabels) === null || _j === void 0 ? void 0 : _j.exitExpandedModeButton))
+                    import_react182.default.createElement("div", { className: styles_css_default61["drawer-back-to-console-button-wrapper"] }, ((_e2 = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.exitExpandedModeTrigger) === null || _e2 === void 0 ? void 0 : _e2.customIcon) ? import_react182.default.createElement("button", { className: clsx_m_default(styles_css_default22["active-ai-drawer-leave-expanded-mode-custom-button"], styles_css_default61["drawer-back-to-console-custom-button"]), formAction: "none", onClick: () => setExpandedDrawerId(null), "aria-label": (_f = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.ariaLabels) === null || _f === void 0 ? void 0 : _f.exitExpandedModeButton }, (_g = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.exitExpandedModeTrigger) === null || _g === void 0 ? void 0 : _g.customIcon) : import_react182.default.createElement("button", { className: clsx_m_default(styles_css_default22["active-ai-drawer-leave-expanded-mode-custom-button"], styles_css_default61["drawer-back-to-console-button"]), formAction: "none", onClick: () => setExpandedDrawerId(null), "aria-label": (_h = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.ariaLabels) === null || _h === void 0 ? void 0 : _h.exitExpandedModeButton }, (_j = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.ariaLabels) === null || _j === void 0 ? void 0 : _j.exitExpandedModeButton))
                   )
                 ),
-                import_react184.default.createElement(
+                import_react182.default.createElement(
                   AppLayoutBuiltInErrorBoundary,
                   { appLayoutPart: "left-drawer-content" },
-                  import_react184.default.createElement("div", { className: styles_css_default61["drawer-content-content"] }, activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.content)
+                  import_react182.default.createElement("div", { className: styles_css_default61["drawer-content-content"] }, activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.content)
                 )
               )
             )
@@ -328993,7 +328899,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/navigation/index.js
-  var import_react185 = __toESM(require_react());
+  var import_react183 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/navigation/styles.css.js
   var styles_css_default70 = {
@@ -329026,7 +328932,7 @@ ${isHandDrawn ? "" : `
       }
       return navigationCollapsed ? "angle-right" : "angle-left";
     };
-    return import_react185.default.createElement(
+    return import_react183.default.createElement(
       "div",
       { className: clsx_m_default(styles_css_default70["navigation-container"], styles_css_default47["with-motion-horizontal"], {
         [styles_css_default70["is-navigation-open"]]: navigationOpen,
@@ -329035,17 +328941,17 @@ ${isHandDrawn ? "" : `
         blockSize: drawerHeight,
         insetBlockStart: drawerTopOffset
       } },
-      import_react185.default.createElement(
+      import_react183.default.createElement(
         "nav",
         { "aria-label": (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigation) !== null && _a213 !== void 0 ? _a213 : void 0, className: clsx_m_default(styles_css_default70.navigation, {
           [styles_css_default22["drawer-closed"]]: !navigationOpen
         }, styles_css_default22.navigation), "aria-hidden": !navigationOpen && !navigationCollapsed, onClick: onNavigationClick },
-        import_react185.default.createElement(
+        import_react183.default.createElement(
           "div",
           { className: clsx_m_default(styles_css_default70["hide-navigation"], {
             [styles_css_default70["expand-navigation-toggle"]]: navigationCollapsed
           }) },
-          import_react185.default.createElement(InternalButton, { ariaLabel: navigationCollapsed ? (_b = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigationToggle) !== null && _b !== void 0 ? _b : void 0 : (_c = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigationClose) !== null && _c !== void 0 ? _c : void 0, ariaExpanded: navigationCollapsible && !isMobile ? navigationOpen : void 0, iconName: getNavIconName(), onClick: () => onNavigationToggle(navigationCollapsible ? !navigationOpen : false), variant: "icon", formAction: "none", className: styles_css_default22["navigation-close"], ref: navigationFocusControl.refs.close, analyticsAction: navigationCollapsed ? "open" : "close" })
+          import_react183.default.createElement(InternalButton, { ariaLabel: navigationCollapsed ? (_b = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigationToggle) !== null && _b !== void 0 ? _b : void 0 : (_c = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigationClose) !== null && _c !== void 0 ? _c : void 0, ariaExpanded: navigationCollapsible && !isMobile ? navigationOpen : void 0, iconName: getNavIconName(), onClick: () => onNavigationToggle(navigationCollapsible ? !navigationOpen : false), variant: "icon", formAction: "none", className: styles_css_default22["navigation-close"], ref: navigationFocusControl.refs.close, analyticsAction: navigationCollapsed ? "open" : "close" })
         ),
         navigation
       )
@@ -329053,16 +328959,16 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/skeleton/skeleton-parts.js
-  var import_react194 = __toESM(require_react());
+  var import_react192 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/skeleton/slots.js
-  var import_react191 = __toESM(require_react());
+  var import_react189 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/breadcrumb-group/implementation.js
-  var import_react190 = __toESM(require_react());
+  var import_react188 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/breadcrumb-group/all-items-dropdown.js
-  var import_react186 = __toESM(require_react());
+  var import_react184 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/breadcrumb-group/styles.css.js
   var styles_css_default71 = {
@@ -329088,10 +328994,10 @@ ${isHandDrawn ? "" : `
   };
   var AllItemsDropdown = ({ items, onItemClick, onItemFollow }) => {
     var _a213;
-    return import_react186.default.createElement(
-      import_react186.default.Fragment,
+    return import_react184.default.createElement(
+      import_react184.default.Fragment,
       null,
-      import_react186.default.createElement(internal_default9, { items: items.map((item, index2) => {
+      import_react184.default.createElement(internal_default9, { items: items.map((item, index2) => {
         const isCurrentBreadcrumb = index2 === items.length - 1;
         return {
           id: index2.toString(),
@@ -329109,26 +329015,26 @@ ${isHandDrawn ? "" : `
         }
         return metadata;
       } }),
-      items.length > 1 && import_react186.default.createElement("span", { className: styles_css_default71.hidden, ...metadataTypeAttribute }, items[1].text)
+      items.length > 1 && import_react184.default.createElement("span", { className: styles_css_default71.hidden, ...metadataTypeAttribute }, items[1].text)
     );
   };
   var getDropdownTrigger = (currentPage) => ({ ariaLabel, triggerRef, testUtilsClass, isOpen, onClick }) => {
     const metadataAttributes = {
       [DATA_ATTR_FUNNEL_KEY]: FUNNEL_KEY_FUNNEL_NAME
     };
-    return import_react186.default.createElement(
+    return import_react184.default.createElement(
       "button",
       { ref: triggerRef, ...metadataAttributes, className: clsx_m_default(styles_css_default71["collapsed-button"], testUtilsClass), onClick: (event3) => {
         event3.preventDefault();
         onClick();
       }, "aria-expanded": isOpen, "aria-haspopup": true, "aria-label": ariaLabel, formAction: "none", "data-awsui-motion-trigger": "hover" },
-      import_react186.default.createElement(internal_default, { name: "caret-down-filled", className: spinWhenOpen(styles_css_default71, "button-icon", isOpen), nativeAttributes: { "data-awsui-motion-target": "" } }),
-      import_react186.default.createElement("span", null, currentPage)
+      import_react184.default.createElement(internal_default, { name: "caret-down-filled", className: spinWhenOpen(styles_css_default71, "button-icon", isOpen), nativeAttributes: { "data-awsui-motion-target": "" } }),
+      import_react184.default.createElement("span", null, currentPage)
     );
   };
 
   // node_modules/@cloudscape-design/components/breadcrumb-group/item/item.js
-  var import_react188 = __toESM(require_react());
+  var import_react186 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/breadcrumb-group/utils.js
   var getEventDetail = (item) => ({
@@ -329165,7 +329071,7 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/breadcrumb-group/item/funnel.js
-  var import_react187 = __toESM(require_react());
+  var import_react185 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/breadcrumb-group/analytics-metadata/styles.css.js
   var styles_css_default72 = {
@@ -329173,7 +329079,7 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/breadcrumb-group/item/funnel.js
-  var FunnelBreadcrumbItem = import_react187.default.forwardRef(({ className, text: text5, itemIndex, totalCount, disableAnalytics }, ref) => {
+  var FunnelBreadcrumbItem = import_react185.default.forwardRef(({ className, text: text5, itemIndex, totalCount, disableAnalytics }, ref) => {
     const funnelAttributes = {};
     if (!disableAnalytics) {
       if (itemIndex === totalCount - 1) {
@@ -329183,7 +329089,7 @@ ${isHandDrawn ? "" : `
         funnelAttributes[DATA_ATTR_RESOURCE_TYPE] = "true";
       }
     }
-    return import_react187.default.createElement("span", { ...funnelAttributes, className: clsx_m_default(className, !disableAnalytics && styles_css_default72["breadcrumb-item"]), ref }, text5);
+    return import_react185.default.createElement("span", { ...funnelAttributes, className: clsx_m_default(className, !disableAnalytics && styles_css_default72["breadcrumb-item"]), ref }, text5);
   });
 
   // node_modules/@cloudscape-design/components/breadcrumb-group/item/styles.css.js
@@ -329199,9 +329105,9 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/breadcrumb-group/item/item.js
   var BreadcrumbItemWithPopover = ({ item, isLast, anchorAttributes, itemAttributes, children: children2 }) => {
-    const [showTooltip, setShowTooltip] = (0, import_react188.useState)(false);
-    const textRef = (0, import_react188.useRef)(null);
-    return import_react188.default.createElement(
+    const [showTooltip, setShowTooltip] = (0, import_react186.useState)(false);
+    const textRef = (0, import_react186.useRef)(null);
+    return import_react186.default.createElement(
       Item2,
       { ref: textRef, isLast, onFocus: () => {
         setShowTooltip(true);
@@ -329209,11 +329115,11 @@ ${isHandDrawn ? "" : `
         setShowTooltip(true);
       }, onMouseLeave: () => setShowTooltip(false), anchorAttributes, ...itemAttributes },
       children2,
-      showTooltip && import_react188.default.createElement(InternalTooltip, { getTrack: () => textRef.current, content: item.text, onEscape: () => setShowTooltip(false) })
+      showTooltip && import_react186.default.createElement(InternalTooltip, { getTrack: () => textRef.current, content: item.text, onEscape: () => setShowTooltip(false) })
     );
   };
-  var Item2 = import_react188.default.forwardRef(({ anchorAttributes, children: children2, isLast, ...itemAttributes }, ref) => {
-    return isLast ? import_react188.default.createElement("span", { ref, className: styles_css_default73.anchor, ...itemAttributes }, children2) : import_react188.default.createElement("a", { ref, className: styles_css_default73.anchor, ...itemAttributes, ...anchorAttributes }, children2);
+  var Item2 = import_react186.default.forwardRef(({ anchorAttributes, children: children2, isLast, ...itemAttributes }, ref) => {
+    return isLast ? import_react186.default.createElement("span", { ref, className: styles_css_default73.anchor, ...itemAttributes }, children2) : import_react186.default.createElement("a", { ref, className: styles_css_default73.anchor, ...itemAttributes, ...anchorAttributes }, children2);
   });
   function BreadcrumbItem({ item, itemIndex, totalCount, onClick, onFollow, isGhost = false, isTruncated = false }) {
     const isLast = itemIndex === totalCount - 1;
@@ -329239,27 +329145,27 @@ ${isHandDrawn ? "" : `
       itemAttributes.tabIndex = 0;
       itemAttributes.role = "link";
     }
-    const breadcrumbItem = import_react188.default.createElement(FunnelBreadcrumbItem, { className: styles_css_default73.text, itemIndex, totalCount, text: item.text, disableAnalytics: isGhost });
-    return import_react188.default.createElement(
+    const breadcrumbItem = import_react186.default.createElement(FunnelBreadcrumbItem, { className: styles_css_default73.text, itemIndex, totalCount, text: item.text, disableAnalytics: isGhost });
+    return import_react186.default.createElement(
       "div",
       { className: clsx_m_default(!isGhost && styles_css_default73.breadcrumb, isGhost && styles_css_default73["ghost-breadcrumb"], isLast && styles_css_default73.last) },
-      isTruncated && !isGhost ? import_react188.default.createElement(BreadcrumbItemWithPopover, { item, isLast, anchorAttributes, itemAttributes }, breadcrumbItem) : import_react188.default.createElement(Item2, { isLast, anchorAttributes, ...itemAttributes }, breadcrumbItem),
-      !isLast ? import_react188.default.createElement(
+      isTruncated && !isGhost ? import_react186.default.createElement(BreadcrumbItemWithPopover, { item, isLast, anchorAttributes, itemAttributes }, breadcrumbItem) : import_react186.default.createElement(Item2, { isLast, anchorAttributes, ...itemAttributes }, breadcrumbItem),
+      !isLast ? import_react186.default.createElement(
         "span",
         { className: styles_css_default73.icon },
-        import_react188.default.createElement(internal_default, { name: isThemeActive(Theme13.OneTheme) ? "slash-divider" : "angle-right" })
+        import_react186.default.createElement(internal_default, { name: isThemeActive(Theme13.OneTheme) ? "slash-divider" : "angle-right" })
       ) : null
     );
   }
 
   // node_modules/@cloudscape-design/components/breadcrumb-group/skeleton.js
-  var import_react189 = __toESM(require_react());
-  var BreadcrumbGroupSkeleton = import_react189.default.forwardRef(({ items }, ref) => import_react189.default.createElement("div", { ref, className: styles_css_default71["breadcrumbs-skeleton"] }, items.map((item, index2) => import_react189.default.createElement(FunnelBreadcrumbItem, { itemIndex: index2, totalCount: items.length, text: item.text, key: index2 }))));
+  var import_react187 = __toESM(require_react());
+  var BreadcrumbGroupSkeleton = import_react187.default.forwardRef(({ items }, ref) => import_react187.default.createElement("div", { ref, className: styles_css_default71["breadcrumbs-skeleton"] }, items.map((item, index2) => import_react187.default.createElement(FunnelBreadcrumbItem, { itemIndex: index2, totalCount: items.length, text: item.text, key: index2 }))));
 
   // node_modules/@cloudscape-design/components/breadcrumb-group/implementation.js
   var DEFAULT_EXPAND_ARIA_LABEL = "Show path";
   var getEllipsisDropdownTrigger = ({ ariaLabel, triggerRef, testUtilsClass, isOpen, onClick }) => {
-    return import_react190.default.createElement(InternalButton, { ref: triggerRef, className: testUtilsClass, onClick: (event3) => {
+    return import_react188.default.createElement(InternalButton, { ref: triggerRef, className: testUtilsClass, onClick: (event3) => {
       event3.preventDefault();
       onClick();
     }, ariaExpanded: isOpen, "aria-haspopup": true, ariaLabel, variant: "breadcrumb-group", formAction: "none" }, "...");
@@ -329267,10 +329173,10 @@ ${isHandDrawn ? "" : `
   var EllipsisDropdown = ({ ariaLabel, dropdownItems, onDropdownItemClick, onDropdownItemFollow, visible }) => {
     var _a213;
     const i18n = useInternalI18n("breadcrumb-group");
-    return import_react190.default.createElement(
+    return import_react188.default.createElement(
       "li",
       { className: clsx_m_default(styles_css_default71.ellipsis, visible && styles_css_default71.visible) },
-      import_react190.default.createElement(internal_default9, { ariaLabel: (_a213 = i18n("expandAriaLabel", ariaLabel)) !== null && _a213 !== void 0 ? _a213 : DEFAULT_EXPAND_ARIA_LABEL, items: dropdownItems, onItemClick: onDropdownItemClick, onItemFollow: onDropdownItemFollow, customTriggerBuilder: getEllipsisDropdownTrigger, linkStyle: true, analyticsMetadataTransformer: (metadata) => {
+      import_react188.default.createElement(internal_default9, { ariaLabel: (_a213 = i18n("expandAriaLabel", ariaLabel)) !== null && _a213 !== void 0 ? _a213 : DEFAULT_EXPAND_ARIA_LABEL, items: dropdownItems, onItemClick: onDropdownItemClick, onItemFollow: onDropdownItemFollow, customTriggerBuilder: getEllipsisDropdownTrigger, linkStyle: true, analyticsMetadataTransformer: (metadata) => {
         var _a214, _b;
         if ((_a214 = metadata.detail) === null || _a214 === void 0 ? void 0 : _a214.id) {
           delete metadata.detail.id;
@@ -329280,10 +329186,10 @@ ${isHandDrawn ? "" : `
         }
         return metadata;
       } }),
-      import_react190.default.createElement(
+      import_react188.default.createElement(
         "span",
         { className: styles_css_default71.icon },
-        import_react190.default.createElement(internal_default, { name: isThemeActive(Theme13.OneTheme) ? "slash-divider" : "angle-right" })
+        import_react188.default.createElement(internal_default, { name: isThemeActive(Theme13.OneTheme) ? "slash-divider" : "angle-right" })
       )
     );
   };
@@ -329295,7 +329201,7 @@ ${isHandDrawn ? "" : `
   };
   function BreadcrumbGroupImplementation({ items = [], ariaLabel, expandAriaLabel, onClick, onFollow, __internalRootRef, __injectAnalyticsComponentMetadata, ...props }) {
     var _a213;
-    const { reportOwnBreadcrumbsProps } = (_a213 = (0, import_react190.useContext)(BreadcrumbsSlotContext)) !== null && _a213 !== void 0 ? _a213 : {};
+    const { reportOwnBreadcrumbsProps } = (_a213 = (0, import_react188.useContext)(BreadcrumbsSlotContext)) !== null && _a213 !== void 0 ? _a213 : {};
     const reportedProps = {
       ...props,
       items,
@@ -329304,8 +329210,8 @@ ${isHandDrawn ? "" : `
       onClick,
       onFollow
     };
-    const breadcrumbsReportingRef = (0, import_react190.useRef)(null);
-    (0, import_react190.useLayoutEffect)(() => {
+    const breadcrumbsReportingRef = (0, import_react188.useRef)(null);
+    (0, import_react188.useLayoutEffect)(() => {
       if (!reportOwnBreadcrumbsProps) {
         return;
       }
@@ -329316,7 +329222,7 @@ ${isHandDrawn ? "" : `
         reporting.cleanup();
       };
     }, [reportOwnBreadcrumbsProps]);
-    (0, import_react190.useLayoutEffect)(() => {
+    (0, import_react188.useLayoutEffect)(() => {
       var _a214;
       (_a214 = breadcrumbsReportingRef.current) === null || _a214 === void 0 ? void 0 : _a214.update(reportedProps);
     });
@@ -329326,7 +329232,7 @@ ${isHandDrawn ? "" : `
     const baseProps = getBaseProps(props);
     const [navWidth, navRef] = useContainerQuery((rect2) => rect2.borderBoxWidth);
     const mergedRef = useMergeRefs(navRef, __internalRootRef);
-    const itemsRefs = (0, import_react190.useRef)({ ghost: {}, real: {} });
+    const itemsRefs = (0, import_react188.useRef)({ ghost: {}, real: {} });
     const setBreadcrumb = (type3, index2, node2) => {
       if (node2) {
         itemsRefs.current[type3][index2] = node2;
@@ -329334,8 +329240,8 @@ ${isHandDrawn ? "" : `
         delete itemsRefs.current[type3][index2];
       }
     };
-    const [itemsWidths, setItemsWidths] = (0, import_react190.useState)({ ghost: [], real: [] });
-    (0, import_react190.useEffect)(() => {
+    const [itemsWidths, setItemsWidths] = (0, import_react188.useState)({ ghost: [], real: [] });
+    (0, import_react188.useEffect)(() => {
       if (itemsRefs.current) {
         const newItemsWidths = { ghost: [], real: [] };
         for (const node2 of Object.values(itemsRefs.current.ghost)) {
@@ -329367,16 +329273,16 @@ ${isHandDrawn ? "" : `
           href: item.href || ""
         }
       };
-      return import_react190.default.createElement(
+      return import_react188.default.createElement(
         "li",
         { className: clsx_m_default(styles_css_default71.item, !isDisplayed && styles_css_default71.hide), key: index2, ...isLast ? {} : getAnalyticsMetadataAttribute(clickAnalyticsMetadata), ref: (node2) => setBreadcrumb("real", `${index2}`, node2) },
-        import_react190.default.createElement(BreadcrumbItem, { item, onClick, onFollow, itemIndex: index2, totalCount: items.length, isTruncated: itemsWidths.ghost[index2] - itemsWidths.real[index2] > 0 })
+        import_react188.default.createElement(BreadcrumbItem, { item, onClick, onFollow, itemIndex: index2, totalCount: items.length, isTruncated: itemsWidths.ghost[index2] - itemsWidths.real[index2] > 0 })
       );
     });
-    const hiddenBreadcrumbItems = items.map((item, index2) => import_react190.default.createElement(
+    const hiddenBreadcrumbItems = items.map((item, index2) => import_react188.default.createElement(
       "li",
       { className: styles_css_default71["ghost-item"], key: index2, ref: (node2) => setBreadcrumb("ghost", `${index2}`, node2) },
-      import_react190.default.createElement(BreadcrumbItem, { item, itemIndex: index2, totalCount: items.length, isGhost: true })
+      import_react188.default.createElement(BreadcrumbItem, { item, itemIndex: index2, totalCount: items.length, isGhost: true })
     ));
     const getEventItem = (e3) => {
       const { id: id38 } = e3.detail;
@@ -329391,7 +329297,7 @@ ${isHandDrawn ? "" : `
       }));
       breadcrumbItems = [
         breadcrumbItems[0],
-        import_react190.default.createElement(EllipsisDropdown, { key: "ellipsis", visible: collapsed > 0, ariaLabel: expandAriaLabel, dropdownItems, onDropdownItemClick: (e3) => fireCancelableEvent(onClick, getEventDetail(getEventItem(e3)), e3), onDropdownItemFollow: (e3) => fireCancelableEvent(onFollow, getEventDetail(getEventItem(e3)), e3) }),
+        import_react188.default.createElement(EllipsisDropdown, { key: "ellipsis", visible: collapsed > 0, ariaLabel: expandAriaLabel, dropdownItems, onDropdownItemClick: (e3) => fireCancelableEvent(onClick, getEventDetail(getEventItem(e3)), e3), onDropdownItemFollow: (e3) => fireCancelableEvent(onFollow, getEventDetail(getEventItem(e3)), e3) }),
         ...breadcrumbItems.slice(1)
       ];
     }
@@ -329399,15 +329305,15 @@ ${isHandDrawn ? "" : `
       name: "awsui.BreadcrumbGroup",
       label: { root: "self" }
     };
-    return import_react190.default.createElement(
+    return import_react188.default.createElement(
       "nav",
       { ...baseProps, className: clsx_m_default(styles_css_default71["breadcrumb-group"], baseProps.className), "aria-label": ariaLabel || void 0, ref: mergedRef, ...__injectAnalyticsComponentMetadata ? {
         ...getAnalyticsMetadataAttribute({
           component: componentAnalyticsMetadata2
         })
       } : {} },
-      collapsed > 0 && collapsed === items.length - 1 ? import_react190.default.createElement(AllItemsDropdown, { items, onItemClick: (e3) => e3.detail.id !== (items.length - 1).toString() && fireCancelableEvent(onClick, getEventDetail(getEventItem(e3)), e3), onItemFollow: (e3) => e3.detail.id !== (items.length - 1).toString() && fireCancelableEvent(onFollow, getEventDetail(getEventItem(e3)), e3) }) : import_react190.default.createElement("ol", { className: styles_css_default71["breadcrumb-group-list"] }, breadcrumbItems),
-      import_react190.default.createElement("ol", { className: clsx_m_default(styles_css_default71["breadcrumb-group-list"], styles_css_default71.ghost), "aria-hidden": true, tabIndex: -1 }, hiddenBreadcrumbItems)
+      collapsed > 0 && collapsed === items.length - 1 ? import_react188.default.createElement(AllItemsDropdown, { items, onItemClick: (e3) => e3.detail.id !== (items.length - 1).toString() && fireCancelableEvent(onClick, getEventDetail(getEventItem(e3)), e3), onItemFollow: (e3) => e3.detail.id !== (items.length - 1).toString() && fireCancelableEvent(onFollow, getEventDetail(getEventItem(e3)), e3) }) : import_react188.default.createElement("ol", { className: styles_css_default71["breadcrumb-group-list"] }, breadcrumbItems),
+      import_react188.default.createElement("ol", { className: clsx_m_default(styles_css_default71["breadcrumb-group-list"], styles_css_default71.ghost), "aria-hidden": true, tabIndex: -1 }, hiddenBreadcrumbItems)
     );
   }
   var createWidgetizedBreadcrumbGroup = createWidgetizedComponent(BreadcrumbGroupImplementation, BreadcrumbGroupSkeleton);
@@ -329432,43 +329338,43 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/skeleton/slots.js
-  var ToolbarSlot = import_react191.default.forwardRef(({ className, style: style3, children: children2 }, ref) => {
+  var ToolbarSlot = import_react189.default.forwardRef(({ className, style: style3, children: children2 }, ref) => {
     var _a213;
-    return import_react191.default.createElement("section", { ref, className: clsx_m_default(styles_css_default62["toolbar-container"], styles_css_default74["universal-toolbar"], styles_css_default22.toolbar, className), style: {
+    return import_react189.default.createElement("section", { ref, className: clsx_m_default(styles_css_default62["toolbar-container"], styles_css_default74["universal-toolbar"], styles_css_default22.toolbar, className), style: {
       insetBlockStart: (_a213 = style3 === null || style3 === void 0 ? void 0 : style3.insetBlockStart) !== null && _a213 !== void 0 ? _a213 : 0,
       ...style3
     } }, children2);
   });
-  var NotificationsSlot = import_react191.default.forwardRef(({ className, style: style3, children: children2 }, ref) => import_react191.default.createElement("div", { ref, className: clsx_m_default(styles_css_default62["notifications-container"], className), style: style3 }, children2));
+  var NotificationsSlot = import_react189.default.forwardRef(({ className, style: style3, children: children2 }, ref) => import_react189.default.createElement("div", { ref, className: clsx_m_default(styles_css_default62["notifications-container"], className), style: style3 }, children2));
   var breadcrumbsSlotContextValue = { isInToolbar: true };
   function BreadcrumbsSlot({ ownBreadcrumbs, discoveredBreadcrumbs, reportOwnBreadcrumbsProps }) {
     const isSSR = typeof window === "undefined";
-    const ownBreadcrumbsSlotContextValue = import_react191.default.useMemo(() => ({ isInToolbar: true, reportOwnBreadcrumbsProps }), [reportOwnBreadcrumbsProps]);
-    return import_react191.default.createElement(
-      import_react191.default.Fragment,
+    const ownBreadcrumbsSlotContextValue = import_react189.default.useMemo(() => ({ isInToolbar: true, reportOwnBreadcrumbsProps }), [reportOwnBreadcrumbsProps]);
+    return import_react189.default.createElement(
+      import_react189.default.Fragment,
       null,
-      import_react191.default.createElement(
+      import_react189.default.createElement(
         BreadcrumbsSlotContext.Provider,
         { value: ownBreadcrumbsSlotContextValue },
-        import_react191.default.createElement("div", { className: styles_css_default62["breadcrumbs-own"] }, ownBreadcrumbs)
+        import_react189.default.createElement("div", { className: styles_css_default62["breadcrumbs-own"] }, ownBreadcrumbs)
       ),
-      discoveredBreadcrumbs && !isSSR && import_react191.default.createElement(
+      discoveredBreadcrumbs && !isSSR && import_react189.default.createElement(
         BreadcrumbsSlotContext.Provider,
         { value: breadcrumbsSlotContextValue },
-        import_react191.default.createElement(
+        import_react189.default.createElement(
           "div",
           { className: styles_css_default62["breadcrumbs-discovered"] },
-          import_react191.default.createElement(BreadcrumbGroupImplementation, { ...discoveredBreadcrumbs, "data-awsui-discovered-breadcrumbs": true, __injectAnalyticsComponentMetadata: true })
+          import_react189.default.createElement(BreadcrumbGroupImplementation, { ...discoveredBreadcrumbs, "data-awsui-discovered-breadcrumbs": true, __injectAnalyticsComponentMetadata: true })
         )
       )
     );
   }
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/skeleton/toolbar-container.js
-  var import_react193 = __toESM(require_react());
+  var import_react191 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/toolbar/trigger-button/index.js
-  var import_react192 = __toESM(require_react());
+  var import_react190 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/toolbar/trigger-button/styles.css.js
   var styles_css_default75 = {
@@ -329482,10 +329388,10 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/toolbar/trigger-button/index.js
   function TriggerButton2({ ariaLabel, className, iconName, iconSvg, customSvg, ariaExpanded, ariaControls, onClick, testId, disabled = false, badge, selected = false, hasTooltip = false, tooltipText, hasOpenDrawer = false, isMobile = false, isForPreviousActiveDrawer = false, isForSplitPanel = false, variant = "default" }, ref) {
-    const containerRef = (0, import_react192.useRef)(null);
+    const containerRef = (0, import_react190.useRef)(null);
     const tooltipValue = tooltipText ? tooltipText : ariaLabel ? ariaLabel : "";
-    const [showTooltip, setShowTooltip] = (0, import_react192.useState)(false);
-    const [suppressTooltip, setSupressTooltip] = (0, import_react192.useState)(false);
+    const [showTooltip, setShowTooltip] = (0, import_react190.useState)(false);
+    const [suppressTooltip, setSupressTooltip] = (0, import_react190.useState)(false);
     const handleTriggerClick = (event3) => {
       event3.stopPropagation();
       setShowTooltip(false);
@@ -329505,7 +329411,7 @@ ${isHandDrawn ? "" : `
       setSupressTooltip(false);
       setShowTooltip(true);
     };
-    const handleOnFocus = (0, import_react192.useCallback)((event3) => {
+    const handleOnFocus = (0, import_react190.useCallback)((event3) => {
       var _a213, _b, _c;
       let shouldShowTooltip = false;
       const eventWithRelatedTarget = event3;
@@ -329527,10 +329433,10 @@ ${isHandDrawn ? "" : `
       isForPreviousActiveDrawer,
       isForSplitPanel
     ]);
-    const tooltipVisible = (0, import_react192.useMemo)(() => {
+    const tooltipVisible = (0, import_react190.useMemo)(() => {
       return hasTooltip && showTooltip && !suppressTooltip && !!(containerRef === null || containerRef === void 0 ? void 0 : containerRef.current) && tooltipValue && !(isMobile && hasOpenDrawer);
     }, [hasTooltip, showTooltip, containerRef, tooltipValue, isMobile, hasOpenDrawer, suppressTooltip]);
-    (0, import_react192.useEffect)(() => {
+    (0, import_react190.useEffect)(() => {
       if (hasTooltip && tooltipValue) {
         const close2 = () => {
           setShowTooltip(false);
@@ -329568,7 +329474,7 @@ ${isHandDrawn ? "" : `
       action: selected ? "close" : "open",
       detail: { label: { root: "self" } }
     };
-    return import_react192.default.createElement(
+    return import_react190.default.createElement(
       "div",
       { ref: containerRef, ...hasTooltip && {
         onPointerEnter: (event3) => handlePointerEnter(event3),
@@ -329576,74 +329482,74 @@ ${isHandDrawn ? "" : `
         onFocus: (e3) => handleOnFocus(e3),
         onBlur: () => handleBlur(true)
       }, className: styles_css_default75["trigger-wrapper"] },
-      import_react192.default.createElement("button", { "aria-expanded": ariaExpanded, "aria-controls": ariaControls, "aria-haspopup": true, "aria-label": ariaLabel, "aria-disabled": disabled, disabled, className: clsx_m_default(styles_css_default75.trigger, styles_css_default75[variant], {
+      import_react190.default.createElement("button", { "aria-expanded": ariaExpanded, "aria-controls": ariaControls, "aria-haspopup": true, "aria-label": ariaLabel, "aria-disabled": disabled, disabled, className: clsx_m_default(styles_css_default75.trigger, styles_css_default75[variant], {
         [styles_css_default75.selected]: selected,
         [styles_css_default22["drawers-trigger-with-badge"]]: badge
-      }, className), onClick: handleTriggerClick, ref, type: "button", "data-testid": testId, "data-shift-focus": "awsui-layout-drawer-trigger", "data-awsui-motion-trigger": "hover", "data-awsui-motion-target": "", ...getAnalyticsMetadataAttribute(triggerEventMetadata) }, customSvg !== null && customSvg !== void 0 ? customSvg : (iconName || iconSvg) && import_react192.default.createElement(internal_default, { name: iconName, svg: iconSvg })),
-      badge && import_react192.default.createElement("div", { className: styles_css_default75.dot }),
-      tooltipVisible && import_react192.default.createElement(InternalTooltip, { getTrack: () => containerRef.current, className: styles_css_default22["trigger-tooltip"], content: tooltipValue, onEscape: () => {
+      }, className), onClick: handleTriggerClick, ref, type: "button", "data-testid": testId, "data-shift-focus": "awsui-layout-drawer-trigger", "data-awsui-motion-trigger": "hover", "data-awsui-motion-target": "", ...getAnalyticsMetadataAttribute(triggerEventMetadata) }, customSvg !== null && customSvg !== void 0 ? customSvg : (iconName || iconSvg) && import_react190.default.createElement(internal_default, { name: iconName, svg: iconSvg })),
+      badge && import_react190.default.createElement("div", { className: styles_css_default75.dot }),
+      tooltipVisible && import_react190.default.createElement(InternalTooltip, { getTrack: () => containerRef.current, className: styles_css_default22["trigger-tooltip"], content: tooltipValue, onEscape: () => {
         setShowTooltip(false);
         setSupressTooltip(false);
       } })
     );
   }
-  var trigger_button_default2 = import_react192.default.forwardRef(TriggerButton2);
+  var trigger_button_default2 = import_react190.default.forwardRef(TriggerButton2);
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/skeleton/toolbar-container.js
   function ToolbarContainer({ children: children2, hasAiDrawer }) {
-    return import_react193.default.createElement("div", { className: clsx_m_default(styles_css_default74["toolbar-container"], hasAiDrawer && styles_css_default74["with-ai-drawer"]) }, children2);
+    return import_react191.default.createElement("div", { className: clsx_m_default(styles_css_default74["toolbar-container"], hasAiDrawer && styles_css_default74["with-ai-drawer"]) }, children2);
   }
   function ToolbarBreadcrumbsSection({ ownBreadcrumbs, discoveredBreadcrumbs, hideBreadcrumbsInToolbar, reportOwnBreadcrumbsProps, includeTestUtils = false }) {
-    return import_react193.default.createElement(
+    return import_react191.default.createElement(
       "div",
       { className: clsx_m_default(styles_css_default74["universal-toolbar-breadcrumbs"], hideBreadcrumbsInToolbar && styles_css_default74["external-breadcrumbs"], includeTestUtils && styles_css_default22.breadcrumbs), "data-awsui-external-breadcrumbs": hideBreadcrumbsInToolbar || void 0 },
-      import_react193.default.createElement(BreadcrumbsSlot, { ownBreadcrumbs, discoveredBreadcrumbs, reportOwnBreadcrumbsProps })
+      import_react191.default.createElement(BreadcrumbsSlot, { ownBreadcrumbs, discoveredBreadcrumbs, reportOwnBreadcrumbsProps })
     );
   }
-  var ToolbarSkeletonStructure = import_react193.default.forwardRef(({ ariaLabels, expandedDrawerId, hasNavigation, navigationOpen, ownBreadcrumbs, discoveredBreadcrumbs }, ref) => {
+  var ToolbarSkeletonStructure = import_react191.default.forwardRef(({ ariaLabels, expandedDrawerId, hasNavigation, navigationOpen, ownBreadcrumbs, discoveredBreadcrumbs }, ref) => {
     var _a213;
     const drawerExpandedMode = !!expandedDrawerId;
     const noop14 = () => {
     };
-    return import_react193.default.createElement(
+    return import_react191.default.createElement(
       ToolbarSlot,
       { ref },
-      import_react193.default.createElement(
+      import_react191.default.createElement(
         ToolbarContainer,
         null,
-        hasNavigation && import_react193.default.createElement(
+        hasNavigation && import_react191.default.createElement(
           "nav",
           { className: styles_css_default74["universal-toolbar-nav"] },
-          import_react193.default.createElement(trigger_button_default2, { ariaLabel: (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigationToggle) !== null && _a213 !== void 0 ? _a213 : void 0, ariaExpanded: !drawerExpandedMode && navigationOpen, iconName: "menu", className: styles_css_default22["navigation-toggle"], onClick: noop14, selected: !drawerExpandedMode && navigationOpen })
+          import_react191.default.createElement(trigger_button_default2, { ariaLabel: (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigationToggle) !== null && _a213 !== void 0 ? _a213 : void 0, ariaExpanded: !drawerExpandedMode && navigationOpen, iconName: "menu", className: styles_css_default22["navigation-toggle"], onClick: noop14, selected: !drawerExpandedMode && navigationOpen })
         ),
-        import_react193.default.createElement(ToolbarBreadcrumbsSection, { ownBreadcrumbs, discoveredBreadcrumbs, includeTestUtils: true }),
-        import_react193.default.createElement("div", { className: styles_css_default74["universal-toolbar-drawers"] })
+        import_react191.default.createElement(ToolbarBreadcrumbsSection, { ownBreadcrumbs, discoveredBreadcrumbs, includeTestUtils: true }),
+        import_react191.default.createElement("div", { className: styles_css_default74["universal-toolbar-drawers"] })
       )
     );
   });
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/skeleton/skeleton-parts.js
-  var BeforeMainSlotSkeleton = import_react194.default.forwardRef(({ toolbarProps, appLayoutProps }, ref) => {
+  var BeforeMainSlotSkeleton = import_react192.default.forwardRef(({ toolbarProps, appLayoutProps }, ref) => {
     var _a213;
     const hasNavigation = !!(toolbarProps === null || toolbarProps === void 0 ? void 0 : toolbarProps.hasNavigation) || !!appLayoutProps.navigation && !appLayoutProps.navigationHide;
     const navigationOpen = !!((_a213 = toolbarProps === null || toolbarProps === void 0 ? void 0 : toolbarProps.navigationOpen) !== null && _a213 !== void 0 ? _a213 : appLayoutProps.navigationOpen);
-    return import_react194.default.createElement(
-      import_react194.default.Fragment,
+    return import_react192.default.createElement(
+      import_react192.default.Fragment,
       null,
-      !!toolbarProps && import_react194.default.createElement(ToolbarSkeletonStructure, { ref, ariaLabels: toolbarProps.ariaLabels, hasNavigation: toolbarProps.hasNavigation, navigationOpen: toolbarProps.navigationOpen, ownBreadcrumbs: appLayoutProps.breadcrumbs }),
-      hasNavigation && import_react194.default.createElement(
+      !!toolbarProps && import_react192.default.createElement(ToolbarSkeletonStructure, { ref, ariaLabels: toolbarProps.ariaLabels, hasNavigation: toolbarProps.hasNavigation, navigationOpen: toolbarProps.navigationOpen, ownBreadcrumbs: appLayoutProps.breadcrumbs }),
+      hasNavigation && import_react192.default.createElement(
         "div",
         { className: clsx_m_default(styles_css_default62.navigation, !navigationOpen && !(toolbarProps === null || toolbarProps === void 0 ? void 0 : toolbarProps.navigationCollapsible) && styles_css_default62["panel-hidden"], !navigationOpen && (toolbarProps === null || toolbarProps === void 0 ? void 0 : toolbarProps.navigationCollapsible) && styles_css_default62["navigation-collapsed"], !!(toolbarProps === null || toolbarProps === void 0 ? void 0 : toolbarProps.activeDrawerId) && styles_css_default62["unfocusable-mobile"]) },
-        import_react194.default.createElement(
+        import_react192.default.createElement(
           "div",
           { className: clsx_m_default(styles_css_default70["navigation-container"], navigationOpen && styles_css_default70["is-navigation-open"], !navigationOpen && (toolbarProps === null || toolbarProps === void 0 ? void 0 : toolbarProps.navigationCollapsible) && styles_css_default70["is-navigation-collapsed"]) },
-          import_react194.default.createElement(
+          import_react192.default.createElement(
             "nav",
             { className: styles_css_default70.navigation },
-            import_react194.default.createElement(
+            import_react192.default.createElement(
               "div",
               { className: styles_css_default70["hide-navigation"] },
-              import_react194.default.createElement(InternalButton, { iconName: "angle-left", variant: "icon", formAction: "none" })
+              import_react192.default.createElement(InternalButton, { iconName: "angle-left", variant: "icon", formAction: "none" })
             ),
             appLayoutProps.navigation
           )
@@ -329651,23 +329557,23 @@ ${isHandDrawn ? "" : `
       )
     );
   });
-  var ToolbarSkeleton = import_react194.default.forwardRef(({ appLayoutInternals }, ref) => import_react194.default.createElement(ToolbarSkeletonStructure, { ref, ariaLabels: appLayoutInternals.ariaLabels, expandedDrawerId: appLayoutInternals.expandedDrawerId, navigationOpen: appLayoutInternals.navigationOpen, ownBreadcrumbs: appLayoutInternals.breadcrumbs, discoveredBreadcrumbs: appLayoutInternals.discoveredBreadcrumbs }));
-  var NotificationsSkeleton = import_react194.default.forwardRef((props, ref) => import_react194.default.createElement(NotificationsSlot, { ref }));
+  var ToolbarSkeleton = import_react192.default.forwardRef(({ appLayoutInternals }, ref) => import_react192.default.createElement(ToolbarSkeletonStructure, { ref, ariaLabels: appLayoutInternals.ariaLabels, expandedDrawerId: appLayoutInternals.expandedDrawerId, navigationOpen: appLayoutInternals.navigationOpen, ownBreadcrumbs: appLayoutInternals.breadcrumbs, discoveredBreadcrumbs: appLayoutInternals.discoveredBreadcrumbs }));
+  var NotificationsSkeleton = import_react192.default.forwardRef((props, ref) => import_react192.default.createElement(NotificationsSlot, { ref }));
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/toolbar/index.js
-  var import_react196 = __toESM(require_react());
+  var import_react194 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/toolbar/drawer-triggers.js
-  var import_react195 = __toESM(require_react());
+  var import_react193 = __toESM(require_react());
   function DrawerTriggers({ ariaLabels, activeDrawerId, drawers, drawersFocusRef, onActiveDrawerChange, splitPanelOpen, splitPanelPosition = "bottom", splitPanelFocusRef, splitPanelToggleProps, onSplitPanelToggle, disabled, activeGlobalDrawersIds, globalDrawers, globalDrawersFocusControl, onActiveGlobalDrawersChange, expandedDrawerId, setExpandedDrawerId, activeGlobalBottomDrawerId, onActiveGlobalBottomDrawerChange, bottomDrawersFocusRef, bottomDrawers, featureNotificationsProps }) {
     var _a213;
     const isMobile = useMobile();
     const hasMultipleTriggers = drawers.length > 1;
-    const previousActiveLocalDrawerId = (0, import_react195.useRef)(activeDrawerId);
-    const previousActiveGlobalBottomDrawerId = (0, import_react195.useRef)(activeGlobalBottomDrawerId);
-    const previousActiveGlobalDrawersIds = (0, import_react195.useRef)(activeGlobalDrawersIds);
+    const previousActiveLocalDrawerId = (0, import_react193.useRef)(activeDrawerId);
+    const previousActiveGlobalBottomDrawerId = (0, import_react193.useRef)(activeGlobalBottomDrawerId);
+    const previousActiveGlobalDrawersIds = (0, import_react193.useRef)(activeGlobalDrawersIds);
     const [containerWidth, triggersContainerRef] = useContainerQuery((rect2) => rect2.contentBoxWidth);
-    const featureNotificationTriggerRef = (0, import_react195.useRef)(null);
+    const featureNotificationTriggerRef = (0, import_react193.useRef)(null);
     if (!drawers.length && !globalDrawers.length && !(bottomDrawers === null || bottomDrawers === void 0 ? void 0 : bottomDrawers.length) && !splitPanelToggleProps) {
       return null;
     }
@@ -329708,34 +329614,34 @@ ${isHandDrawn ? "" : `
         setExpandedDrawerId(null);
       }
     };
-    return import_react195.default.createElement(
+    return import_react193.default.createElement(
       "aside",
       { className: styles_css_default74[`drawers-${isMobile ? "mobile" : "desktop"}-triggers-container`], "aria-label": ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.drawers, ref: triggersContainerRef, role: "region" },
       (_a213 = featureNotificationsProps === null || featureNotificationsProps === void 0 ? void 0 : featureNotificationsProps.renderLatestFeaturePrompt) === null || _a213 === void 0 ? void 0 : _a213.call(featureNotificationsProps, { triggerRef: featureNotificationTriggerRef }),
-      import_react195.default.createElement(
+      import_react193.default.createElement(
         "div",
         { className: styles_css_default74["drawers-trigger-content"], "aria-label": ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.drawers, role: "toolbar", "aria-orientation": "horizontal" },
-        splitPanelToggleProps && import_react195.default.createElement(
-          import_react195.default.Fragment,
+        splitPanelToggleProps && import_react193.default.createElement(
+          import_react193.default.Fragment,
           null,
-          import_react195.default.createElement(trigger_button_default2, { ariaLabel: splitPanelToggleProps.ariaLabel, ariaControls: splitPanelToggleProps.controlId, ariaExpanded: !expandedDrawerId && splitPanelToggleProps.active, className: clsx_m_default(styles_css_default74["drawers-trigger"], styles_css_default22["drawers-trigger"], styles_css_default53["open-button"]), iconName: splitPanelResolvedPosition === "side" ? "view-vertical" : "view-horizontal", onClick: () => {
+          import_react193.default.createElement(trigger_button_default2, { ariaLabel: splitPanelToggleProps.ariaLabel, ariaControls: splitPanelToggleProps.controlId, ariaExpanded: !expandedDrawerId && splitPanelToggleProps.active, className: clsx_m_default(styles_css_default74["drawers-trigger"], styles_css_default22["drawers-trigger"], styles_css_default53["open-button"]), iconName: splitPanelResolvedPosition === "side" ? "view-vertical" : "view-horizontal", onClick: () => {
             exitExpandedMode();
             if (!!expandedDrawerId && splitPanelToggleProps.active) {
               return;
             }
             onSplitPanelToggle === null || onSplitPanelToggle === void 0 ? void 0 : onSplitPanelToggle();
           }, selected: !expandedDrawerId && splitPanelToggleProps.active, ref: splitPanelResolvedPosition === "side" ? splitPanelFocusRef : void 0, hasTooltip: true, isMobile, isForSplitPanel: true, disabled }),
-          hasMultipleTriggers ? import_react195.default.createElement("div", { className: styles_css_default74["group-divider"] }) : null
+          hasMultipleTriggers ? import_react193.default.createElement("div", { className: styles_css_default74["group-divider"] }) : null
         ),
         visibleItems.slice(0, globalDrawersStartIndex).map((item) => {
           var _a214, _b, _c;
           const isForPreviousActiveDrawer = (previousActiveLocalDrawerId === null || previousActiveLocalDrawerId === void 0 ? void 0 : previousActiveLocalDrawerId.current) === item.id;
           const selected = !expandedDrawerId && item.id === activeDrawerId;
           const isFeatureNotificationsDrawer = ((_a214 = featureNotificationsProps === null || featureNotificationsProps === void 0 ? void 0 : featureNotificationsProps.drawer) === null || _a214 === void 0 ? void 0 : _a214.id) === item.id;
-          return import_react195.default.createElement(
+          return import_react193.default.createElement(
             AppLayoutBuiltInErrorBoundary,
             { key: item.id, appLayoutPart: "toolbar-trigger-drawer" },
-            import_react195.default.createElement(trigger_button_default2, { ariaLabel: (_b = item.ariaLabels) === null || _b === void 0 ? void 0 : _b.triggerButton, ariaExpanded: selected, ariaControls: activeDrawerId === item.id ? item.id : void 0, className: clsx_m_default(styles_css_default74["drawers-trigger"], !toolsOnlyMode && styles_css_default22["drawers-trigger"], item.id === TOOLS_DRAWER_ID && styles_css_default22["tools-toggle"]), iconName: item.trigger.iconName, iconSvg: item.trigger.iconSvg, key: item.id, onClick: () => {
+            import_react193.default.createElement(trigger_button_default2, { ariaLabel: (_b = item.ariaLabels) === null || _b === void 0 ? void 0 : _b.triggerButton, ariaExpanded: selected, ariaControls: activeDrawerId === item.id ? item.id : void 0, className: clsx_m_default(styles_css_default74["drawers-trigger"], !toolsOnlyMode && styles_css_default22["drawers-trigger"], item.id === TOOLS_DRAWER_ID && styles_css_default22["tools-toggle"]), iconName: item.trigger.iconName, iconSvg: item.trigger.iconSvg, key: item.id, onClick: () => {
               exitExpandedMode();
               if (!!expandedDrawerId && activeDrawerId === item.id) {
                 return;
@@ -329744,7 +329650,7 @@ ${isHandDrawn ? "" : `
             }, ref: item.id === previousActiveLocalDrawerId.current ? drawersFocusRef : isFeatureNotificationsDrawer ? featureNotificationTriggerRef : null, selected, badge: item.badge, testId: `awsui-app-layout-trigger-${item.id}`, hasTooltip: true, hasOpenDrawer, tooltipText: (_c = item.ariaLabels) === null || _c === void 0 ? void 0 : _c.drawerName, isForPreviousActiveDrawer, isMobile, disabled })
           );
         }),
-        globalDrawersStartIndex > 0 && visibleItems.length > globalDrawersStartIndex && import_react195.default.createElement("div", { className: styles_css_default74["group-divider"] }),
+        globalDrawersStartIndex > 0 && visibleItems.length > globalDrawersStartIndex && import_react193.default.createElement("div", { className: styles_css_default74["group-divider"] }),
         visibleItems.slice(globalDrawersStartIndex).map((item) => {
           var _a214, _b, _c;
           let isForPreviousActiveDrawer = previousActiveGlobalDrawersIds === null || previousActiveGlobalDrawersIds === void 0 ? void 0 : previousActiveGlobalDrawersIds.current.includes(item.id);
@@ -329754,10 +329660,10 @@ ${isHandDrawn ? "" : `
             selected = item.id === activeGlobalBottomDrawerId && (!expandedDrawerId || item.id === expandedDrawerId);
             isForPreviousActiveDrawer = previousActiveGlobalBottomDrawerId.current === item.id;
           }
-          return import_react195.default.createElement(
+          return import_react193.default.createElement(
             AppLayoutBuiltInErrorBoundary,
             { key: item.id, appLayoutPart: "toolbar-trigger-drawer" },
-            import_react195.default.createElement(trigger_button_default2, { ariaLabel: (_a214 = item.ariaLabels) === null || _a214 === void 0 ? void 0 : _a214.triggerButton, ariaExpanded: selected, ariaControls: selected ? item.id : void 0, className: clsx_m_default(styles_css_default74["drawers-trigger"], styles_css_default22["drawers-trigger"], styles_css_default22["drawers-trigger-global"]), iconName: item.trigger.iconName, iconSvg: item.trigger.iconSvg, key: item.id, onClick: () => {
+            import_react193.default.createElement(trigger_button_default2, { ariaLabel: (_a214 = item.ariaLabels) === null || _a214 === void 0 ? void 0 : _a214.triggerButton, ariaExpanded: selected, ariaControls: selected ? item.id : void 0, className: clsx_m_default(styles_css_default74["drawers-trigger"], styles_css_default22["drawers-trigger"], styles_css_default22["drawers-trigger-global"]), iconName: item.trigger.iconName, iconSvg: item.trigger.iconSvg, key: item.id, onClick: () => {
               exitExpandedMode();
               if (!!expandedDrawerId && item.id !== expandedDrawerId && activeGlobalDrawersIds.includes(item.id)) {
                 return;
@@ -329770,10 +329676,10 @@ ${isHandDrawn ? "" : `
             }, ref: isBottom ? bottomDrawersFocusRef : (_b = globalDrawersFocusControl === null || globalDrawersFocusControl === void 0 ? void 0 : globalDrawersFocusControl.refs[item.id]) === null || _b === void 0 ? void 0 : _b.toggle, selected, badge: item.badge, testId: `awsui-app-layout-trigger-${item.id}`, hasTooltip: true, hasOpenDrawer, tooltipText: (_c = item.ariaLabels) === null || _c === void 0 ? void 0 : _c.drawerName, isForPreviousActiveDrawer, isMobile, disabled })
           );
         }),
-        overflowItems.length > 0 && import_react195.default.createElement(
+        overflowItems.length > 0 && import_react193.default.createElement(
           AppLayoutBuiltInErrorBoundary,
           { appLayoutPart: "toolbar-trigger-overflow-menu" },
-          import_react195.default.createElement(OverflowMenu, { items: overflowItems.map((item) => {
+          import_react193.default.createElement(OverflowMenu, { items: overflowItems.map((item) => {
             const isBottom = (item === null || item === void 0 ? void 0 : item.position) === "bottom";
             let active = activeGlobalDrawersIds.includes(item.id) && (!expandedDrawerId || item.id === expandedDrawerId);
             if (isBottom) {
@@ -329784,7 +329690,7 @@ ${isHandDrawn ? "" : `
               active
             };
           }), ariaLabel: overflowMenuHasBadge ? ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.drawersOverflowWithBadge : ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.drawersOverflow, customTriggerBuilder: ({ onClick, triggerRef, ariaLabel, ariaExpanded, testUtilsClass }) => {
-            return import_react195.default.createElement(trigger_button_default2, { ref: triggerRef, ariaLabel, ariaExpanded, badge: overflowMenuHasBadge, className: clsx_m_default(styles_css_default74["drawers-trigger"], styles_css_default22["drawers-trigger"], styles_css_default22["drawers-trigger-global"], testUtilsClass), iconName: "ellipsis", onClick, disabled });
+            return import_react193.default.createElement(trigger_button_default2, { ref: triggerRef, ariaLabel, ariaExpanded, badge: overflowMenuHasBadge, className: clsx_m_default(styles_css_default74["drawers-trigger"], styles_css_default22["drawers-trigger"], styles_css_default22["drawers-trigger-global"], testUtilsClass), iconName: "ellipsis", onClick, disabled });
           }, onItemClick: (event3) => {
             const id38 = event3.detail.id;
             exitExpandedMode();
@@ -329823,17 +329729,17 @@ ${isHandDrawn ? "" : `
     const { breadcrumbs, discoveredBreadcrumbs, verticalOffsets, isMobile, setToolbarHeight, aiDrawer, activeAiDrawer, onActiveAiDrawerChange } = appLayoutInternals;
     const { ariaLabels, activeDrawerId, drawers, drawersFocusRef, onActiveDrawerChange, globalDrawersFocusControl, globalDrawers, activeGlobalDrawersIds, onActiveGlobalDrawersChange, hasNavigation, navigationOpen, navigationFocusRef, onNavigationToggle, hasSplitPanel, splitPanelFocusRef, splitPanelToggleProps, onSplitPanelToggle, expandedDrawerId, setExpandedDrawerId, aiDrawerFocusRef, onActiveGlobalBottomDrawerChange, activeGlobalBottomDrawerId, bottomDrawersFocusRef, bottomDrawers } = toolbarProps;
     const drawerExpandedMode = !!expandedDrawerId;
-    const ref = (0, import_react196.useRef)(null);
-    const aiDrawerTransitionRef = (0, import_react196.useRef)(null);
+    const ref = (0, import_react194.useRef)(null);
+    const aiDrawerTransitionRef = (0, import_react194.useRef)(null);
     const activeAiDrawerId = activeAiDrawer === null || activeAiDrawer === void 0 ? void 0 : activeAiDrawer.id;
     useResizeObserver(ref, (entry) => setToolbarHeight(entry.borderBoxHeight));
-    (0, import_react196.useEffect)(() => {
+    (0, import_react194.useEffect)(() => {
       return () => {
         setToolbarHeight(0);
       };
     }, []);
     const anyPanelOpenInMobile = !!isMobile && (!!activeDrawerId || !!(activeGlobalDrawersIds === null || activeGlobalDrawersIds === void 0 ? void 0 : activeGlobalDrawersIds.length) || !!activeAiDrawerId || !!activeGlobalBottomDrawerId || !!navigationOpen && !!hasNavigation);
-    (0, import_react196.useEffect)(() => {
+    (0, import_react194.useEffect)(() => {
       if (anyPanelOpenInMobile) {
         document.body.classList.add(styles_css_default74["block-body-scroll"]);
       } else {
@@ -329845,26 +329751,26 @@ ${isHandDrawn ? "" : `
     }, [anyPanelOpenInMobile]);
     const navLandmarkAttributes = navigationOpen ? { role: "presentation" } : { role: "navigation", "aria-label": ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigation };
     const isOneTheme = isThemeActive(Theme13.OneTheme);
-    return import_react196.default.createElement(
+    return import_react194.default.createElement(
       ToolbarSlot,
       { ref, className: clsx_m_default(((aiDrawer === null || aiDrawer === void 0 ? void 0 : aiDrawer.trigger) || !!activeAiDrawerId) && styles_css_default74["with-ai-drawer"], {
         [styles_css_default22["mobile-bar"]]: isMobile
       }), style: {
         insetBlockStart: verticalOffsets.toolbar
       } },
-      import_react196.default.createElement(
+      import_react194.default.createElement(
         AppLayoutBuiltInErrorBoundary,
         { appLayoutPart: "left-drawer-trigger" },
-        import_react196.default.createElement(Transition_default, { in: !!((aiDrawer === null || aiDrawer === void 0 ? void 0 : aiDrawer.trigger) && !activeAiDrawerId), timeout: { enter: 0, exit: 165 }, mountOnEnter: true, unmountOnExit: true, nodeRef: aiDrawerTransitionRef }, (state5) => {
+        import_react194.default.createElement(Transition_default, { in: !!((aiDrawer === null || aiDrawer === void 0 ? void 0 : aiDrawer.trigger) && !activeAiDrawerId), timeout: { enter: 0, exit: 165 }, mountOnEnter: true, unmountOnExit: true, nodeRef: aiDrawerTransitionRef }, (state5) => {
           var _a214, _b2, _c2;
-          return import_react196.default.createElement(
+          return import_react194.default.createElement(
             "div",
             { className: clsx_m_default(!!((_a214 = aiDrawer === null || aiDrawer === void 0 ? void 0 : aiDrawer.trigger) === null || _a214 === void 0 ? void 0 : _a214.customIcon) && styles_css_default74["universal-toolbar-ai-custom"], [
               styles_css_default47["with-motion-horizontal"]
             ]), style: {
               opacity: ["entering", "exiting"].includes(state5) ? 0 : 1
             } },
-            import_react196.default.createElement(trigger_button_default2, { ariaLabel: (_b2 = aiDrawer === null || aiDrawer === void 0 ? void 0 : aiDrawer.ariaLabels) === null || _b2 === void 0 ? void 0 : _b2.triggerButton, ariaExpanded: !!activeAiDrawerId, iconName: aiDrawer === null || aiDrawer === void 0 ? void 0 : aiDrawer.trigger.iconName, iconSvg: aiDrawer === null || aiDrawer === void 0 ? void 0 : aiDrawer.trigger.iconSvg, customSvg: aiDrawer === null || aiDrawer === void 0 ? void 0 : aiDrawer.trigger.customIcon, className: styles_css_default22["ai-drawer-toggle"], onClick: () => {
+            import_react194.default.createElement(trigger_button_default2, { ariaLabel: (_b2 = aiDrawer === null || aiDrawer === void 0 ? void 0 : aiDrawer.ariaLabels) === null || _b2 === void 0 ? void 0 : _b2.triggerButton, ariaExpanded: !!activeAiDrawerId, iconName: aiDrawer === null || aiDrawer === void 0 ? void 0 : aiDrawer.trigger.iconName, iconSvg: aiDrawer === null || aiDrawer === void 0 ? void 0 : aiDrawer.trigger.iconSvg, customSvg: aiDrawer === null || aiDrawer === void 0 ? void 0 : aiDrawer.trigger.customIcon, className: styles_css_default22["ai-drawer-toggle"], onClick: () => {
               var _a215;
               if (setExpandedDrawerId) {
                 setExpandedDrawerId(null);
@@ -329874,16 +329780,16 @@ ${isHandDrawn ? "" : `
           );
         })
       ),
-      import_react196.default.createElement(
+      import_react194.default.createElement(
         ToolbarContainer,
         { hasAiDrawer: !!activeAiDrawerId },
-        hasNavigation && import_react196.default.createElement(
+        hasNavigation && import_react194.default.createElement(
           "nav",
           { ...navLandmarkAttributes, className: clsx_m_default(styles_css_default74["universal-toolbar-nav"]) },
-          import_react196.default.createElement(
+          import_react194.default.createElement(
             AppLayoutBuiltInErrorBoundary,
             { appLayoutPart: "toolbar-trigger-nav" },
-            import_react196.default.createElement(trigger_button_default2, { ariaLabel: (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigationToggle) !== null && _a213 !== void 0 ? _a213 : void 0, ariaExpanded: !drawerExpandedMode && navigationOpen, iconName: isOneTheme ? "side-bar" : "menu", className: styles_css_default22["navigation-toggle"], onClick: () => {
+            import_react194.default.createElement(trigger_button_default2, { ariaLabel: (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.navigationToggle) !== null && _a213 !== void 0 ? _a213 : void 0, ariaExpanded: !drawerExpandedMode && navigationOpen, iconName: isOneTheme ? "side-bar" : "menu", className: styles_css_default22["navigation-toggle"], onClick: () => {
               if (setExpandedDrawerId) {
                 setExpandedDrawerId(null);
               }
@@ -329894,18 +329800,18 @@ ${isHandDrawn ? "" : `
             }, ref: navigationFocusRef, selected: !drawerExpandedMode && navigationOpen, disabled: anyPanelOpenInMobile })
           )
         ),
-        (breadcrumbs || discoveredBreadcrumbs) && import_react196.default.createElement(
+        (breadcrumbs || discoveredBreadcrumbs) && import_react194.default.createElement(
           AppLayoutBuiltInErrorBoundary,
           { appLayoutPart: "breadcrumbs" },
-          import_react196.default.createElement(ToolbarBreadcrumbsSection, { ownBreadcrumbs: appLayoutInternals.breadcrumbs, discoveredBreadcrumbs: appLayoutInternals.discoveredBreadcrumbs, hideBreadcrumbsInToolbar, reportOwnBreadcrumbsProps, includeTestUtils: true })
+          import_react194.default.createElement(ToolbarBreadcrumbsSection, { ownBreadcrumbs: appLayoutInternals.breadcrumbs, discoveredBreadcrumbs: appLayoutInternals.discoveredBreadcrumbs, hideBreadcrumbsInToolbar, reportOwnBreadcrumbsProps, includeTestUtils: true })
         ),
-        ((drawers === null || drawers === void 0 ? void 0 : drawers.length) || (globalDrawers === null || globalDrawers === void 0 ? void 0 : globalDrawers.length) || (bottomDrawers === null || bottomDrawers === void 0 ? void 0 : bottomDrawers.length) || hasSplitPanel && (splitPanelToggleProps === null || splitPanelToggleProps === void 0 ? void 0 : splitPanelToggleProps.displayed)) && import_react196.default.createElement(
+        ((drawers === null || drawers === void 0 ? void 0 : drawers.length) || (globalDrawers === null || globalDrawers === void 0 ? void 0 : globalDrawers.length) || (bottomDrawers === null || bottomDrawers === void 0 ? void 0 : bottomDrawers.length) || hasSplitPanel && (splitPanelToggleProps === null || splitPanelToggleProps === void 0 ? void 0 : splitPanelToggleProps.displayed)) && import_react194.default.createElement(
           "div",
           { className: clsx_m_default(styles_css_default74["universal-toolbar-drawers"]) },
-          import_react196.default.createElement(
+          import_react194.default.createElement(
             AppLayoutBuiltInErrorBoundary,
             { appLayoutPart: "toolbar-triggers" },
-            import_react196.default.createElement(DrawerTriggers, { ariaLabels, activeDrawerId: activeDrawerId !== null && activeDrawerId !== void 0 ? activeDrawerId : null, drawers: (_b = drawers === null || drawers === void 0 ? void 0 : drawers.filter((item) => !!item.trigger)) !== null && _b !== void 0 ? _b : [], drawersFocusRef, onActiveDrawerChange, splitPanelToggleProps: (splitPanelToggleProps === null || splitPanelToggleProps === void 0 ? void 0 : splitPanelToggleProps.displayed) ? splitPanelToggleProps : void 0, splitPanelFocusRef, onSplitPanelToggle, disabled: anyPanelOpenInMobile, globalDrawersFocusControl, bottomDrawersFocusRef, globalDrawers: (_c = globalDrawers === null || globalDrawers === void 0 ? void 0 : globalDrawers.filter((item) => !!item.trigger)) !== null && _c !== void 0 ? _c : [], activeGlobalDrawersIds: activeGlobalDrawersIds !== null && activeGlobalDrawersIds !== void 0 ? activeGlobalDrawersIds : [], onActiveGlobalDrawersChange, expandedDrawerId, setExpandedDrawerId, bottomDrawers, onActiveGlobalBottomDrawerChange, activeGlobalBottomDrawerId, featureNotificationsProps })
+            import_react194.default.createElement(DrawerTriggers, { ariaLabels, activeDrawerId: activeDrawerId !== null && activeDrawerId !== void 0 ? activeDrawerId : null, drawers: (_b = drawers === null || drawers === void 0 ? void 0 : drawers.filter((item) => !!item.trigger)) !== null && _b !== void 0 ? _b : [], drawersFocusRef, onActiveDrawerChange, splitPanelToggleProps: (splitPanelToggleProps === null || splitPanelToggleProps === void 0 ? void 0 : splitPanelToggleProps.displayed) ? splitPanelToggleProps : void 0, splitPanelFocusRef, onSplitPanelToggle, disabled: anyPanelOpenInMobile, globalDrawersFocusControl, bottomDrawersFocusRef, globalDrawers: (_c = globalDrawers === null || globalDrawers === void 0 ? void 0 : globalDrawers.filter((item) => !!item.trigger)) !== null && _c !== void 0 ? _c : [], activeGlobalDrawersIds: activeGlobalDrawersIds !== null && activeGlobalDrawersIds !== void 0 ? activeGlobalDrawersIds : [], onActiveGlobalDrawersChange, expandedDrawerId, setExpandedDrawerId, bottomDrawers, onActiveGlobalBottomDrawerChange, activeGlobalBottomDrawerId, featureNotificationsProps })
           )
         )
       )
@@ -329916,34 +329822,34 @@ ${isHandDrawn ? "" : `
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/widget-areas/before-main-slot.js
   var BeforeMainSlotImplementationInternal = ({ toolbarProps, appLayoutState, appLayoutProps }) => {
     var _a213, _b;
-    const wasAiDrawerOpenRef = (0, import_react197.useRef)(false);
+    const wasAiDrawerOpenRef = (0, import_react195.useRef)(false);
     if (!isWidgetReady(appLayoutState)) {
-      return import_react197.default.createElement(BeforeMainSlotSkeleton, { toolbarProps, appLayoutProps, appLayoutState });
+      return import_react195.default.createElement(BeforeMainSlotSkeleton, { toolbarProps, appLayoutProps, appLayoutState });
     }
     const { activeDrawer, navigationOpen, navigationCollapsible, navigation, expandedDrawerId, setExpandedDrawerId, navigationAnimationDisabled, activeAiDrawerId, aiDrawerExpandedMode, aiDrawer, activeAiDrawerSize, minAiDrawerSize, maxAiDrawerSize, onActiveAiDrawerResize, aiDrawerFocusControl, ariaLabels, isMobile, drawersOpenQueue, onActiveAiDrawerChange, activeAiDrawer, bottomDrawerReportedSize, featureNotificationsProps, hideBreadcrumbsInToolbar, reportOwnBreadcrumbsProps } = appLayoutState.widgetizedState;
     const drawerExpandedMode = !!expandedDrawerId;
     const toolsOpen = !!activeDrawer;
     const drawerExpandedModeInChildLayout = !!(toolbarProps === null || toolbarProps === void 0 ? void 0 : toolbarProps.expandedDrawerId);
     const { __embeddedViewMode: embeddedViewMode } = appLayoutProps;
-    return import_react197.default.createElement(
-      import_react197.default.Fragment,
+    return import_react195.default.createElement(
+      import_react195.default.Fragment,
       null,
-      !!toolbarProps && !embeddedViewMode && !aiDrawerExpandedMode && import_react197.default.createElement(AppLayoutToolbarImplementation, { appLayoutInternals: appLayoutState.appLayoutInternals, hideBreadcrumbsInToolbar, reportOwnBreadcrumbsProps, toolbarProps, featureNotificationsProps }),
-      !toolbarProps && !!activeAiDrawerId && import_react197.default.createElement(
+      !!toolbarProps && !embeddedViewMode && !aiDrawerExpandedMode && import_react195.default.createElement(AppLayoutToolbarImplementation, { appLayoutInternals: appLayoutState.appLayoutInternals, hideBreadcrumbsInToolbar, reportOwnBreadcrumbsProps, toolbarProps, featureNotificationsProps }),
+      !toolbarProps && !!activeAiDrawerId && import_react195.default.createElement(
         "div",
         { className: styles_css_default62["pseudo-toolbar"], style: {
           insetBlockStart: (_b = (_a213 = appLayoutState.appLayoutInternals) === null || _a213 === void 0 ? void 0 : _a213.verticalOffsets) === null || _b === void 0 ? void 0 : _b.toolbar
         } },
-        import_react197.default.createElement("div", { className: styles_css_default62["pseudo-toolbar-content"] })
+        import_react195.default.createElement("div", { className: styles_css_default62["pseudo-toolbar-content"] })
       ),
-      aiDrawer && import_react197.default.createElement(
+      aiDrawer && import_react195.default.createElement(
         "div",
         { className: clsx_m_default(styles_css_default62["ai-drawer"], (drawerExpandedMode || drawerExpandedModeInChildLayout) && !aiDrawerExpandedMode && styles_css_default62.hidden) },
-        import_react197.default.createElement(ActiveDrawersContext.Provider, { value: activeAiDrawer ? [activeAiDrawer.id] : [] }, (!!activeAiDrawerId || (aiDrawer === null || aiDrawer === void 0 ? void 0 : aiDrawer.preserveInactiveContent) && wasAiDrawerOpenRef.current) && import_react197.default.createElement(
-          import_react197.default.Fragment,
+        import_react195.default.createElement(ActiveDrawersContext.Provider, { value: activeAiDrawer ? [activeAiDrawer.id] : [] }, (!!activeAiDrawerId || (aiDrawer === null || aiDrawer === void 0 ? void 0 : aiDrawer.preserveInactiveContent) && wasAiDrawerOpenRef.current) && import_react195.default.createElement(
+          import_react195.default.Fragment,
           null,
           wasAiDrawerOpenRef.current = true,
-          import_react197.default.createElement(AppLayoutGlobalAiDrawerImplementation, { show: !!activeAiDrawerId, activeAiDrawer: aiDrawer !== null && aiDrawer !== void 0 ? aiDrawer : null, appLayoutInternals: appLayoutState.appLayoutInternals, aiDrawerProps: {
+          import_react195.default.createElement(AppLayoutGlobalAiDrawerImplementation, { show: !!activeAiDrawerId, activeAiDrawer: aiDrawer !== null && aiDrawer !== void 0 ? aiDrawer : null, appLayoutInternals: appLayoutState.appLayoutInternals, aiDrawerProps: {
             activeAiDrawerSize,
             minAiDrawerSize,
             maxAiDrawerSize,
@@ -329959,53 +329865,53 @@ ${isHandDrawn ? "" : `
           } })
         ))
       ),
-      navigation && import_react197.default.createElement(
+      navigation && import_react195.default.createElement(
         "div",
         { className: clsx_m_default(styles_css_default62.navigation, !navigationOpen && (!navigationCollapsible || isMobile) && styles_css_default62["panel-hidden"], !navigationOpen && navigationCollapsible && !isMobile && styles_css_default62["navigation-collapsed"], toolsOpen && styles_css_default62["unfocusable-mobile"], !navigationAnimationDisabled && styles_css_default47["with-motion-horizontal"], (drawerExpandedMode || drawerExpandedModeInChildLayout) && styles_css_default62.hidden) },
-        import_react197.default.createElement(
+        import_react195.default.createElement(
           AppLayoutBuiltInErrorBoundary,
           { appLayoutPart: "nav" },
-          import_react197.default.createElement(AppLayoutNavigationImplementation, { appLayoutInternals: appLayoutState.appLayoutInternals, bottomDrawerReportedSize, navigationCollapsible })
+          import_react195.default.createElement(AppLayoutNavigationImplementation, { appLayoutInternals: appLayoutState.appLayoutInternals, bottomDrawerReportedSize, navigationCollapsible })
         )
       )
     );
   };
-  var BeforeMainSlotImplementation = (props) => import_react197.default.createElement(
+  var BeforeMainSlotImplementation = (props) => import_react195.default.createElement(
     AppLayoutBuiltInErrorBoundary,
     { appLayoutPart: "before-main-slot" },
-    import_react197.default.createElement(BeforeMainSlotImplementationInternal, { ...props })
+    import_react195.default.createElement(BeforeMainSlotImplementationInternal, { ...props })
   );
   var createWidgetizedAppLayoutBeforeMainSlot = createWidgetizedComponent(BeforeMainSlotImplementation, BeforeMainSlotSkeleton);
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/widget-areas/bottom-content-slot.js
-  var import_react198 = __toESM(require_react());
+  var import_react196 = __toESM(require_react());
   var BottomContentSlotImplementationInternal = ({ appLayoutState, appLayoutProps }) => {
     if (!isWidgetReady(appLayoutState)) {
       return null;
     }
     const { splitPanelPosition, placement, activeGlobalBottomDrawerId, bottomDrawerReportedSize, isMobile } = appLayoutState.widgetizedState;
-    return import_react198.default.createElement(import_react198.default.Fragment, null, splitPanelPosition === "bottom" && import_react198.default.createElement(
+    return import_react196.default.createElement(import_react196.default.Fragment, null, splitPanelPosition === "bottom" && import_react196.default.createElement(
       "div",
       { className: clsx_m_default(styles_css_default62["split-panel-bottom"], styles_css_default47["with-motion-vertical"]), style: {
         insetBlockEnd: placement.insetBlockEnd + (activeGlobalBottomDrawerId && !isMobile ? bottomDrawerReportedSize : 0)
       } },
-      import_react198.default.createElement(AppLayoutSplitPanelDrawerBottomImplementation, { appLayoutInternals: appLayoutState.appLayoutInternals, splitPanelInternals: appLayoutState.splitPanelInternals }, appLayoutProps.splitPanel)
+      import_react196.default.createElement(AppLayoutSplitPanelDrawerBottomImplementation, { appLayoutInternals: appLayoutState.appLayoutInternals, splitPanelInternals: appLayoutState.splitPanelInternals }, appLayoutProps.splitPanel)
     ));
   };
   var BottomContentSlotImplementation = (props) => {
-    return import_react198.default.createElement(
+    return import_react196.default.createElement(
       AppLayoutBuiltInErrorBoundary,
       { appLayoutPart: "bottom-content-slot" },
-      import_react198.default.createElement(BottomContentSlotImplementationInternal, { ...props })
+      import_react196.default.createElement(BottomContentSlotImplementationInternal, { ...props })
     );
   };
   var createWidgetizedAppLayoutBottomContentSlot = createWidgetizedComponent(BottomContentSlotImplementation);
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/widget-areas/top-content-slot.js
-  var import_react200 = __toESM(require_react());
+  var import_react198 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/notifications/index.js
-  var import_react199 = __toESM(require_react());
+  var import_react197 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/notifications/styles.css.js
   var styles_css_default76 = {
@@ -330017,24 +329923,24 @@ ${isHandDrawn ? "" : `
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/notifications/index.js
   function AppLayoutNotificationsImplementation({ appLayoutInternals, children: children2 }) {
     const { ariaLabels, stickyNotifications, setNotificationsHeight, verticalOffsets } = appLayoutInternals;
-    const [hasNotificationsContent, setHasNotificationsContent] = (0, import_react199.useState)(false);
-    const rootRef = (0, import_react199.useRef)(null);
+    const [hasNotificationsContent, setHasNotificationsContent] = (0, import_react197.useState)(false);
+    const rootRef = (0, import_react197.useRef)(null);
     useResizeObserver(rootRef, (entry) => {
       const hasContent = entry.contentBoxHeight > 0;
       setNotificationsHeight(hasContent ? entry.borderBoxHeight : 0);
       setHasNotificationsContent(hasContent);
     });
-    (0, import_react199.useEffect)(() => {
+    (0, import_react197.useEffect)(() => {
       return () => {
         setNotificationsHeight(0);
       };
     }, []);
-    return import_react199.default.createElement(
+    return import_react197.default.createElement(
       NotificationsSlot,
       { ref: rootRef, className: clsx_m_default(appLayoutInternals.headerVariant === "high-contrast" && highContrastHeaderClassName, stickyNotifications && styles_css_default76["sticky-notifications"], hasNotificationsContent && styles_css_default76["has-notifications-content"], appLayoutInternals.headerVariant !== "high-contrast" && styles_css_default76["sticky-notifications-with-background"]), style: {
         insetBlockStart: stickyNotifications ? verticalOffsets.notifications : void 0
       } },
-      import_react199.default.createElement("div", { className: styles_css_default22.notifications, role: "region", "aria-label": ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.notifications }, children2)
+      import_react197.default.createElement("div", { className: styles_css_default22.notifications, role: "region", "aria-label": ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.notifications }, children2)
     );
   }
 
@@ -330043,17 +329949,17 @@ ${isHandDrawn ? "" : `
     if (!isWidgetReady(appLayoutState)) {
       return null;
     }
-    return import_react200.default.createElement(
-      import_react200.default.Fragment,
+    return import_react198.default.createElement(
+      import_react198.default.Fragment,
       null,
-      appLayoutProps.notifications && import_react200.default.createElement("div", { className: clsx_m_default(styles_css_default62["notifications-background"], appLayoutProps.headerVariant === "high-contrast" && highContrastHeaderClassName) }),
-      appLayoutProps.notifications && import_react200.default.createElement(AppLayoutNotificationsImplementation, { appLayoutInternals: appLayoutState.appLayoutInternals }, appLayoutProps.notifications)
+      appLayoutProps.notifications && import_react198.default.createElement("div", { className: clsx_m_default(styles_css_default62["notifications-background"], appLayoutProps.headerVariant === "high-contrast" && highContrastHeaderClassName) }),
+      appLayoutProps.notifications && import_react198.default.createElement(AppLayoutNotificationsImplementation, { appLayoutInternals: appLayoutState.appLayoutInternals }, appLayoutProps.notifications)
     );
   };
-  var TopContentSlotImplementation = (props) => import_react200.default.createElement(
+  var TopContentSlotImplementation = (props) => import_react198.default.createElement(
     AppLayoutBuiltInErrorBoundary,
     { appLayoutPart: "top-content-slot" },
-    import_react200.default.createElement(TopContentSlotImplementationInternal, { ...props })
+    import_react198.default.createElement(TopContentSlotImplementationInternal, { ...props })
   );
   var createWidgetizedAppLayoutTopContentSlot = createWidgetizedComponent(TopContentSlotImplementation);
 
@@ -330066,7 +329972,7 @@ ${isHandDrawn ? "" : `
   var loadFormatter = () => Promise.resolve(null);
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/skeleton/index.js
-  var import_react201 = __toESM(require_react());
+  var import_react199 = __toESM(require_react());
   var componentAnalyticsMetadata = {
     name: "awsui.AppLayoutToolbar",
     label: {
@@ -330086,10 +329992,10 @@ ${isHandDrawn ? "" : `
     };
     const { wrapperElAttributes, mainElAttributes, contentWrapperElAttributes, contentHeaderElAttributes, contentElAttributes } = skeletonSlotsAttributes;
     const isWidgetLoaded = isWidgetReady(appLayoutState);
-    return import_react201.default.createElement(
+    return import_react199.default.createElement(
       VisualContext,
       { contextName: "app-layout-toolbar" },
-      import_react201.default.createElement(
+      import_react199.default.createElement(
         "div",
         { ...getAnalyticsMetadataAttribute({ component: componentAnalyticsMetadata }), ref: appLayoutState.rootRef, "data-awsui-app-layout-widget-loaded": isWidgetLoaded, ...wrapperElAttributes, className: (_a213 = wrapperElAttributes === null || wrapperElAttributes === void 0 ? void 0 : wrapperElAttributes.className) !== null && _a213 !== void 0 ? _a213 : clsx_m_default(styles_css_default62.root, styles_css_default22.root, {
           [styles_css_default62["has-adaptive-widths-default"]]: !contentTypeCustomWidths2.includes(contentType),
@@ -330099,30 +330005,30 @@ ${isHandDrawn ? "" : `
           [custom_css_properties_default.navigationWidth]: `${navigationWidth}px`,
           [custom_css_properties_default.maxContentWidth]: isMaxWidth ? "100%" : maxContentWidth ? `${maxContentWidth}px` : ""
         } },
-        import_react201.default.createElement(AppLayoutBeforeMainSlot, { ...mergedProps }),
-        import_react201.default.createElement(
+        import_react199.default.createElement(AppLayoutBeforeMainSlot, { ...mergedProps }),
+        import_react199.default.createElement(
           "main",
           { ...mainElAttributes, className: (_c = mainElAttributes === null || mainElAttributes === void 0 ? void 0 : mainElAttributes.className) !== null && _c !== void 0 ? _c : styles_css_default62["main-landmark"] },
-          import_react201.default.createElement(AppLayoutTopContentSlot, { ...mergedProps }),
-          import_react201.default.createElement(
+          import_react199.default.createElement(AppLayoutTopContentSlot, { ...mergedProps }),
+          import_react199.default.createElement(
             "div",
             { ...contentWrapperElAttributes, className: (_d = contentWrapperElAttributes === null || contentWrapperElAttributes === void 0 ? void 0 : contentWrapperElAttributes.className) !== null && _d !== void 0 ? _d : clsx_m_default(styles_css_default62.main, { [styles_css_default62["main-disable-paddings"]]: appLayoutProps.disableContentPaddings }) },
-            contentHeader && import_react201.default.createElement("div", { ...contentHeaderElAttributes }, contentHeader),
-            import_react201.default.createElement("div", { ...contentElAttributes, className: (_e2 = contentElAttributes === null || contentElAttributes === void 0 ? void 0 : contentElAttributes.className) !== null && _e2 !== void 0 ? _e2 : styles_css_default22.content }, registered ? import_react201.default.createElement(BuiltInErrorBoundary, null, content) : null)
+            contentHeader && import_react199.default.createElement("div", { ...contentHeaderElAttributes }, contentHeader),
+            import_react199.default.createElement("div", { ...contentElAttributes, className: (_e2 = contentElAttributes === null || contentElAttributes === void 0 ? void 0 : contentElAttributes.className) !== null && _e2 !== void 0 ? _e2 : styles_css_default22.content }, registered ? import_react199.default.createElement(BuiltInErrorBoundary, null, content) : null)
           ),
-          import_react201.default.createElement(AppLayoutBottomContentSlot, { ...mergedProps })
+          import_react199.default.createElement(AppLayoutBottomContentSlot, { ...mergedProps })
         ),
-        import_react201.default.createElement(AppLayoutAfterMainSlot, { ...mergedProps })
+        import_react199.default.createElement(AppLayoutAfterMainSlot, { ...mergedProps })
       )
     );
   };
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/skeleton/multi-layout.js
-  var import_react202 = __toESM(require_react());
+  var import_react200 = __toESM(require_react());
   function useMultiAppLayout(forceDeduplicationType, isEnabled, props, mergeProps2) {
-    const [registration, setRegistration] = (0, import_react202.useState)(null);
+    const [registration, setRegistration] = (0, import_react200.useState)(null);
     const isToolbar = useAppLayoutFlagEnabled();
-    (0, import_react202.useLayoutEffect)(() => {
+    (0, import_react200.useLayoutEffect)(() => {
       if (!isEnabled || forceDeduplicationType === "suspended" || !isToolbar) {
         return;
       }
@@ -330136,17 +330042,17 @@ ${isHandDrawn ? "" : `
         setRegistration({ type: "suspended" });
       };
     }, [forceDeduplicationType, isEnabled, isToolbar]);
-    (0, import_react202.useLayoutEffect)(() => {
+    (0, import_react200.useLayoutEffect)(() => {
       if ((registration === null || registration === void 0 ? void 0 : registration.type) === "secondary") {
         registration.update(props);
       }
     });
-    (0, import_react202.useEffect)(() => {
+    (0, import_react200.useEffect)(() => {
       if (registration) {
         reportMultiLayoutMetric(registration);
       }
     }, [registration]);
-    const isPublicAppLayout = (0, import_react202.useContext)(AppLayoutToolbarPublicContext);
+    const isPublicAppLayout = (0, import_react200.useContext)(AppLayoutToolbarPublicContext);
     const isPublicToolbarInSSR = isPublicAppLayout && typeof window === "undefined";
     if (!isToolbar || isPublicToolbarInSSR) {
       return {
@@ -330175,12 +330081,12 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/app-layout/visual-refresh-toolbar/index.js
   var AppLayoutStateProvider2 = ({ forceDeduplicationType, appLayoutProps, stateManager, children: children2 }) => {
-    const [appLayoutState, setAppLayoutState] = (0, import_react203.useState)({ isIntersecting: true });
-    const [skeletonAttributes, setSkeletonAttributes] = (0, import_react203.useState)({});
-    const [deduplicator, setDeduplicator] = (0, import_react203.useState)({ fn: mergeProps });
-    const [deduplicationProps, setDeduplicationProps] = (0, import_react203.useState)(void 0);
+    const [appLayoutState, setAppLayoutState] = (0, import_react201.useState)({ isIntersecting: true });
+    const [skeletonAttributes, setSkeletonAttributes] = (0, import_react201.useState)({});
+    const [deduplicator, setDeduplicator] = (0, import_react201.useState)({ fn: mergeProps });
+    const [deduplicationProps, setDeduplicationProps] = (0, import_react201.useState)(void 0);
     const { registered, toolbarProps } = useMultiAppLayout(forceDeduplicationType, appLayoutState.isIntersecting, deduplicationProps !== null && deduplicationProps !== void 0 ? deduplicationProps : getPropsToMerge(appLayoutProps, appLayoutState), deduplicator.fn);
-    (0, import_react203.useLayoutEffect)(() => {
+    (0, import_react201.useLayoutEffect)(() => {
       stateManager.current.setState = (appLayoutState2, skeletonAttributes2, deduplicationProps2, mergeProps2) => {
         (0, import_react_dom7.unstable_batchedUpdates)(() => {
           setAppLayoutState(appLayoutState2);
@@ -330191,84 +330097,84 @@ ${isHandDrawn ? "" : `
       };
     }, [stateManager]);
     const hasToolbar = !!toolbarProps;
-    (0, import_react203.useEffect)(() => {
+    (0, import_react201.useEffect)(() => {
       var _a213, _b;
       stateManager.current.hasToolbar = hasToolbar;
       (_b = (_a213 = stateManager.current).setToolbar) === null || _b === void 0 ? void 0 : _b.call(_a213, hasToolbar);
     }, [stateManager, hasToolbar]);
-    return import_react203.default.createElement(import_react203.default.Fragment, null, children2(registered, appLayoutState, toolbarProps, skeletonAttributes));
+    return import_react201.default.createElement(import_react201.default.Fragment, null, children2(registered, appLayoutState, toolbarProps, skeletonAttributes));
   };
-  var AppLayoutVisualRefreshToolbar = import_react203.default.forwardRef((props, forwardRef16) => {
-    const stateManagerRef = (0, import_react203.useRef)({ setState: void 0, hasToolbar: false, setToolbar: void 0 });
-    return import_react203.default.createElement(
+  var AppLayoutVisualRefreshToolbar = import_react201.default.forwardRef((props, forwardRef16) => {
+    const stateManagerRef = (0, import_react201.useRef)({ setState: void 0, hasToolbar: false, setToolbar: void 0 });
+    return import_react201.default.createElement(
       RemoteI18nProvider,
       { loadFormatter },
-      import_react203.default.createElement(AppLayoutVisualRefreshToolbarWithI18n, { appLayoutRef: forwardRef16, stateManagerRef, appLayoutProps: props })
+      import_react201.default.createElement(AppLayoutVisualRefreshToolbarWithI18n, { appLayoutRef: forwardRef16, stateManagerRef, appLayoutProps: props })
     );
   });
   function AppLayoutVisualRefreshToolbarWithI18n({ appLayoutRef, stateManagerRef, appLayoutProps }) {
     const { __forceDeduplicationType: forceDeduplicationType, __embeddedViewMode: embeddedViewMode } = appLayoutProps;
     const ariaLabels = useAriaLabels(appLayoutProps.ariaLabels);
     const appLayoutPropsWithI18n = { ...appLayoutProps, ariaLabels };
-    return import_react203.default.createElement(
-      import_react203.default.Fragment,
+    return import_react201.default.createElement(
+      import_react201.default.Fragment,
       null,
-      import_react203.default.createElement(AppLayoutStateProvider2, { forceDeduplicationType, appLayoutProps: appLayoutPropsWithI18n, stateManager: stateManagerRef }, (registered, appLayoutState, toolbarProps, skeletonAttributes) => import_react203.default.createElement(
+      import_react201.default.createElement(AppLayoutStateProvider2, { forceDeduplicationType, appLayoutProps: appLayoutPropsWithI18n, stateManager: stateManagerRef }, (registered, appLayoutState, toolbarProps, skeletonAttributes) => import_react201.default.createElement(
         AppLayoutVisibilityContext.Provider,
         { value: appLayoutState.isIntersecting },
-        (embeddedViewMode || !toolbarProps) && appLayoutPropsWithI18n.breadcrumbs ? import_react203.default.createElement(
+        (embeddedViewMode || !toolbarProps) && appLayoutPropsWithI18n.breadcrumbs ? import_react201.default.createElement(
           AppLayoutBuiltInErrorBoundary,
           { appLayoutPart: "screenreader-only-breadcrumbs" },
-          import_react203.default.createElement(ScreenreaderOnly, null, appLayoutPropsWithI18n.breadcrumbs)
+          import_react201.default.createElement(ScreenreaderOnly, null, appLayoutPropsWithI18n.breadcrumbs)
         ) : null,
-        import_react203.default.createElement(SkeletonLayout, { registered, toolbarProps, appLayoutProps: appLayoutPropsWithI18n, appLayoutState, skeletonSlotsAttributes: skeletonAttributes })
+        import_react201.default.createElement(SkeletonLayout, { registered, toolbarProps, appLayoutProps: appLayoutPropsWithI18n, appLayoutState, skeletonSlotsAttributes: skeletonAttributes })
       )),
-      import_react203.default.createElement(AppLayoutWidgetizedState, { forwardRef: appLayoutRef, appLayoutProps: appLayoutPropsWithI18n, stateManager: stateManagerRef })
+      import_react201.default.createElement(AppLayoutWidgetizedState, { forwardRef: appLayoutRef, appLayoutProps: appLayoutPropsWithI18n, stateManager: stateManagerRef })
     );
   }
   var visual_refresh_toolbar_default = AppLayoutVisualRefreshToolbar;
 
   // node_modules/@cloudscape-design/components/app-layout/internal.js
-  var AppLayoutInternal = import_react204.default.forwardRef((props, ref) => {
+  var AppLayoutInternal = import_react202.default.forwardRef((props, ref) => {
     const isRefresh = useVisualRefresh();
     const isToolbar = useAppLayoutFlagEnabled();
     if (isRefresh) {
       if (isToolbar) {
-        return import_react204.default.createElement(visual_refresh_toolbar_default, { ref, ...props });
+        return import_react202.default.createElement(visual_refresh_toolbar_default, { ref, ...props });
       } else {
-        return import_react204.default.createElement(visual_refresh_default, { ref, ...props });
+        return import_react202.default.createElement(visual_refresh_default, { ref, ...props });
       }
     }
-    return import_react204.default.createElement(classic_default, { ref, ...props });
+    return import_react202.default.createElement(classic_default, { ref, ...props });
   });
 
   // node_modules/@cloudscape-design/components/app-layout/utils/use-app-layout-placement.js
-  var import_react206 = __toESM(require_react());
+  var import_react204 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/app-layout/utils/use-observed-element.js
-  var import_react205 = __toESM(require_react());
+  var import_react203 = __toESM(require_react());
   function useObservedElement(rootElementRef, selector2) {
-    const getElement = (0, import_react205.useCallback)(() => {
+    const getElement = (0, import_react203.useCallback)(() => {
       var _a213, _b;
       const document2 = (_b = (_a213 = rootElementRef.current) === null || _a213 === void 0 ? void 0 : _a213.ownerDocument) !== null && _b !== void 0 ? _b : window.document;
       return document2.querySelector(selector2);
     }, [rootElementRef, selector2]);
-    const [height2, setHeight2] = (0, import_react205.useState)(0);
+    const [height2, setHeight2] = (0, import_react203.useState)(0);
     useResizeObserver(getElement, (entry) => setHeight2(entry.borderBoxHeight));
     return height2;
   }
 
   // node_modules/@cloudscape-design/components/app-layout/utils/use-app-layout-placement.js
   function useAppLayoutPlacement(headerSelector, footerSelector) {
-    const mainElementRef = (0, import_react206.useRef)(null);
+    const mainElementRef = (0, import_react204.useRef)(null);
     const headerHeight = useObservedElement(mainElementRef, headerSelector);
     const footerHeight = useObservedElement(mainElementRef, footerSelector);
-    const [offsets, setOffsets] = (0, import_react206.useState)({
+    const [offsets, setOffsets] = (0, import_react204.useState)({
       insetInlineStart: 0,
       insetInlineEnd: 0,
       inlineSize: Number.POSITIVE_INFINITY
     });
-    const updatePosition2 = (0, import_react206.useCallback)(() => {
+    const updatePosition2 = (0, import_react204.useCallback)(() => {
       if (!mainElementRef.current) {
         return;
       }
@@ -330278,7 +330184,7 @@ ${isHandDrawn ? "" : `
       }
       setOffsets({ insetInlineStart, insetInlineEnd: inlineSize - insetInlineEnd, inlineSize });
     }, []);
-    (0, import_react206.useEffect)(() => {
+    (0, import_react204.useEffect)(() => {
       window.addEventListener("resize", updatePosition2);
       return () => window.removeEventListener("resize", updatePosition2);
     }, [updatePosition2]);
@@ -330287,7 +330193,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/app-layout/index.js
-  var AppLayout2 = import_react207.default.forwardRef(({ contentType = "default", headerSelector = "#b #h", footerSelector = "#b #f", navigationWidth = 280, navigationCollapsedWidth = 54, toolsWidth = 290, maxContentWidth, minContentWidth, navigationOpen: controlledNavigationOpen, onNavigationChange: controlledOnNavigationChange, analyticsMetadata, ...rest }, ref) => {
+  var AppLayout2 = import_react205.default.forwardRef(({ contentType = "default", headerSelector = "#b #h", footerSelector = "#b #f", navigationWidth = 280, navigationCollapsedWidth = 54, toolsWidth = 290, maxContentWidth, minContentWidth, navigationOpen: controlledNavigationOpen, onNavigationChange: controlledOnNavigationChange, analyticsMetadata, ...rest }, ref) => {
     var _a213, _b;
     if (isDevelopment2) {
       if (rest.toolsOpen && rest.toolsHide) {
@@ -330336,17 +330242,17 @@ ${isHandDrawn ? "" : `
       placement
     };
     const baseProps = getBaseProps(rest);
-    return import_react207.default.createElement(
+    return import_react205.default.createElement(
       "div",
       { ref: useMergeRefs(__internalRootRef, rootRef), ...baseProps },
-      import_react207.default.createElement(AppLayoutInternal, { ref, ...props })
+      import_react205.default.createElement(AppLayoutInternal, { ref, ...props })
     );
   });
   applyDisplayName(AppLayout2, "AppLayout");
   var app_layout_default = AppLayout2;
 
   // node_modules/@cloudscape-design/components/area-chart/async-store/index.js
-  var import_react208 = __toESM(require_react());
+  var import_react206 = __toESM(require_react());
   var import_react_dom8 = __toESM(require_react_dom());
   var AsyncStore = class {
     constructor(state5) {
@@ -330384,25 +330290,25 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/expandable-section/internal.js
-  var import_react222 = __toESM(require_react());
+  var import_react220 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/chart-series-details/series-details-text.js
   var screenReaderTextClass = "awsui-screenreader-text";
 
   // node_modules/@cloudscape-design/components/expandable-section/expandable-section-container.js
-  var import_react215 = __toESM(require_react());
-
-  // node_modules/@cloudscape-design/components/container/internal.js
   var import_react213 = __toESM(require_react());
 
+  // node_modules/@cloudscape-design/components/container/internal.js
+  var import_react211 = __toESM(require_react());
+
   // node_modules/@cloudscape-design/components/internal/context/container-header.js
-  var import_react209 = __toESM(require_react());
-  var ContainerHeaderContext = (0, import_react209.createContext)({ isInContainer: false });
+  var import_react207 = __toESM(require_react());
+  var ContainerHeaderContext = (0, import_react207.createContext)({ isInContainer: false });
   var ContainerHeaderContextProvider = ({ children: children2 }) => {
-    return import_react209.default.createElement(ContainerHeaderContext.Provider, { value: { isInContainer: true } }, children2);
+    return import_react207.default.createElement(ContainerHeaderContext.Provider, { value: { isInContainer: true } }, children2);
   };
   var useContainerHeader = () => {
-    const { isInContainer } = (0, import_react209.useContext)(ContainerHeaderContext);
+    const { isInContainer } = (0, import_react207.useContext)(ContainerHeaderContext);
     return isInContainer;
   };
 
@@ -330472,17 +330378,17 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/container/use-sticky-header.js
-  var import_react212 = __toESM(require_react());
+  var import_react210 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/sticky-header/use-sticky-position.js
-  var import_react211 = __toESM(require_react());
+  var import_react209 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/sticky-header/use-header-stuck.js
-  var import_react210 = __toESM(require_react());
+  var import_react208 = __toESM(require_react());
   function useHeaderStuck(rootRef, headerRef, isSticky) {
-    const [isStuck, setIsStuck] = (0, import_react210.useState)(false);
-    const [isStuckAtBottom, setIsStuckAtBottom] = (0, import_react210.useState)(false);
-    const checkIfStuck = (0, import_react210.useCallback)(({ isTrusted, target, type: type3 }) => {
+    const [isStuck, setIsStuck] = (0, import_react208.useState)(false);
+    const [isStuckAtBottom, setIsStuckAtBottom] = (0, import_react208.useState)(false);
+    const checkIfStuck = (0, import_react208.useCallback)(({ isTrusted, target, type: type3 }) => {
       if (type3 === "resize" && target === window && !isTrusted) {
         return;
       }
@@ -330496,7 +330402,7 @@ ${isHandDrawn ? "" : `
         setIsStuckAtBottom(rootBottom <= headerBottom);
       }
     }, [rootRef, headerRef]);
-    (0, import_react210.useEffect)(() => {
+    (0, import_react208.useEffect)(() => {
       if (isSticky) {
         const controller = new AbortController();
         window.addEventListener("scroll", checkIfStuck, { capture: true, signal: controller.signal });
@@ -330522,8 +330428,8 @@ ${isHandDrawn ? "" : `
     const isMobile = useMobile();
     const disableSticky = isMobile && disableMobile;
     const isSticky = !disableSticky && !!sticky;
-    const [hasInnerOverflowParents, setHasInnerOverflowParents] = (0, import_react211.useState)(false);
-    (0, import_react211.useLayoutEffect)(() => {
+    const [hasInnerOverflowParents, setHasInnerOverflowParents] = (0, import_react209.useState)(false);
+    (0, import_react209.useLayoutEffect)(() => {
       if (rootRef.current) {
         const overflowParents = getOverflowParents(rootRef.current);
         const mainElement = findUpUntil(rootRef.current, (elem) => elem.tagName === "MAIN");
@@ -330552,7 +330458,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/container/use-sticky-header.js
-  var StickyHeaderContext = (0, import_react212.createContext)({
+  var StickyHeaderContext = (0, import_react210.createContext)({
     isStuck: false,
     isStuckAtBottom: false
   });
@@ -330617,20 +330523,20 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/container/internal.js
-  var InternalContainerAsSubstep = import_react213.default.forwardRef((props, ref) => {
+  var InternalContainerAsSubstep = import_react211.default.forwardRef((props, ref) => {
     const { subStepRef, funnelSubStepProps } = useFunnelSubStep();
     const modalContext = useModalContext();
-    return import_react213.default.createElement(InternalContainer, { ...props, ref, __subStepRef: (modalContext === null || modalContext === void 0 ? void 0 : modalContext.isInModal) ? { current: null } : subStepRef, __funnelSubStepProps: (modalContext === null || modalContext === void 0 ? void 0 : modalContext.isInModal) ? {} : funnelSubStepProps });
+    return import_react211.default.createElement(InternalContainer, { ...props, ref, __subStepRef: (modalContext === null || modalContext === void 0 ? void 0 : modalContext.isInModal) ? { current: null } : subStepRef, __funnelSubStepProps: (modalContext === null || modalContext === void 0 ? void 0 : modalContext.isInModal) ? {} : funnelSubStepProps });
   });
-  var InternalContainer = import_react213.default.forwardRef(function InternalContainer2({ header, footer, children: children2, variant = "default", disableHeaderPaddings = false, disableContentPaddings = false, disableFooterPaddings = false, fitHeight, media, style: style3, __stickyOffset, __mobileStickyOffset, __stickyHeader = false, __internalRootRef, __disableFooterDivider = false, __hiddenContent = false, __headerRef, __fullPage = false, __disableStickyMobile = true, __funnelSubStepProps, __subStepRef, __contentKey, styleClassNames, __nativeAttributes, ...restProps }, ref) {
+  var InternalContainer = import_react211.default.forwardRef(function InternalContainer2({ header, footer, children: children2, variant = "default", disableHeaderPaddings = false, disableContentPaddings = false, disableFooterPaddings = false, fitHeight, media, style: style3, __stickyOffset, __mobileStickyOffset, __stickyHeader = false, __internalRootRef, __disableFooterDivider = false, __hiddenContent = false, __headerRef, __fullPage = false, __disableStickyMobile = true, __funnelSubStepProps, __subStepRef, __contentKey, styleClassNames, __nativeAttributes, ...restProps }, ref) {
     var _a213;
     const isMobile = useMobile();
     const isRefresh = useVisualRefresh();
     const baseProps = getBaseProps(restProps);
-    const rootRef = (0, import_react213.useRef)(null);
-    const headerRef = (0, import_react213.useRef)(null);
-    const [showFocusRing, setShowFocusRing] = (0, import_react213.useState)(false);
-    (0, import_react213.useImperativeHandle)(ref, () => ({
+    const rootRef = (0, import_react211.useRef)(null);
+    const headerRef = (0, import_react211.useRef)(null);
+    const [showFocusRing, setShowFocusRing] = (0, import_react211.useState)(false);
+    (0, import_react211.useImperativeHandle)(ref, () => ({
       focus: () => {
         if (rootRef.current) {
           rootRef.current.tabIndex = -1;
@@ -330663,26 +330569,26 @@ ${isHandDrawn ? "" : `
     const shouldHaveStickyStyles = isSticky && !isMobile;
     const hasMedia = !!(media === null || media === void 0 ? void 0 : media.content);
     const mediaPosition = (_a213 = media === null || media === void 0 ? void 0 : media.position) !== null && _a213 !== void 0 ? _a213 : "top";
-    return import_react213.default.createElement(
+    return import_react211.default.createElement(
       "div",
       { ...baseProps, ...__funnelSubStepProps, ...__nativeAttributes, className: clsx_m_default(styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.root, baseProps.className, styles_css_default79.root, styles_css_default79[`variant-${variant}`], fitHeight && styles_css_default79["fit-height"], hasMedia && (mediaPosition === "side" ? styles_css_default79["with-side-media"] : styles_css_default79["with-top-media"]), shouldHaveStickyStyles && [styles_css_default79["sticky-enabled"]], shouldHaveStickyStyles && isStuck && isStuckAtBottom && [styles_css_default79["with-stuck-sticky-header-at-bottom"]], showFocusRing && styles_css_default79["focus-ring"], isRefresh && styles_css_default79.refresh), ref: mergedRef, onBlur: onRootBlur, ...getAnalyticsLabelAttribute(
         // heading-text covers Header titles rendered outside h1-h3 via headingTagOverride.
         `.${styles_css_default78.header} :is(h1, h2, h3, .${styles_css_default77["heading-text"]})`
       ), style: getRootStyles(style3) },
-      hasMedia && import_react213.default.createElement("div", { className: clsx_m_default(styles_css_default79[`media-${mediaPosition === "side" ? "side" : "top"}`], styles_css_default79.media), style: mediaPosition === "top" ? { ...getMediaStyles(mediaPosition, style3), height: (media === null || media === void 0 ? void 0 : media.height) || "" } : { ...getMediaStyles(mediaPosition, style3), width: (media === null || media === void 0 ? void 0 : media.width) || "" } }, media.content),
-      import_react213.default.createElement(
+      hasMedia && import_react211.default.createElement("div", { className: clsx_m_default(styles_css_default79[`media-${mediaPosition === "side" ? "side" : "top"}`], styles_css_default79.media), style: mediaPosition === "top" ? { ...getMediaStyles(mediaPosition, style3), height: (media === null || media === void 0 ? void 0 : media.height) || "" } : { ...getMediaStyles(mediaPosition, style3), width: (media === null || media === void 0 ? void 0 : media.width) || "" } }, media.content),
+      import_react211.default.createElement(
         "div",
         { id: contentId, ref: __subStepRef, className: clsx_m_default(styles_css_default79["content-wrapper"], fitHeight && styles_css_default79["content-wrapper-fit-height"]) },
-        import_react213.default.createElement(
+        import_react211.default.createElement(
           BuiltInErrorBoundary,
-          { wrapper: (content) => import_react213.default.createElement(InternalBox, { padding: "m" }, content) },
-          header && import_react213.default.createElement(
+          { wrapper: (content) => import_react211.default.createElement(InternalBox, { padding: "m" }, content) },
+          header && import_react211.default.createElement(
             ContainerHeaderContextProvider,
             null,
-            import_react213.default.createElement(
+            import_react211.default.createElement(
               StickyHeaderContext.Provider,
               { value: { isStuck, isStuckAtBottom } },
-              import_react213.default.createElement(
+              import_react211.default.createElement(
                 "div",
                 { id: headerId, className: clsx_m_default(styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.header, isRefresh && styles_css_default79.refresh, styles_css_default79.header, styles_css_default78.header, styles_css_default79[`header-variant-${variant}`], {
                   [styles_css_default79["header-sticky-disabled"]]: __stickyHeader && !isSticky,
@@ -330697,24 +330603,24 @@ ${isHandDrawn ? "" : `
                   ...stickyStyles.style,
                   ...getHeaderStyles(style3)
                 } },
-                isStuck && !isMobile && isRefresh && __fullPage && import_react213.default.createElement("div", { className: styles_css_default79["header-cover"] }),
+                isStuck && !isMobile && isRefresh && __fullPage && import_react211.default.createElement("div", { className: styles_css_default79["header-cover"] }),
                 header
               )
             )
           ),
-          import_react213.default.createElement(
+          import_react211.default.createElement(
             "div",
             { key: __contentKey, className: clsx_m_default(styles_css_default79.content, fitHeight && styles_css_default79["content-fit-height"]) },
-            import_react213.default.createElement(
+            import_react211.default.createElement(
               "div",
               { className: clsx_m_default(styles_css_default79["content-inner"], styles_css_default80["content-inner"], {
                 [styles_css_default79["with-paddings"]]: !disableContentPaddings,
                 [styles_css_default79["with-header"]]: !!header
               }), style: getContentStyles(style3) },
-              import_react213.default.createElement(BuiltInErrorBoundary, { wrapper: (content) => import_react213.default.createElement(InternalBox, { padding: disableContentPaddings ? "m" : void 0 }, content) }, children2)
+              import_react211.default.createElement(BuiltInErrorBoundary, { wrapper: (content) => import_react211.default.createElement(InternalBox, { padding: disableContentPaddings ? "m" : void 0 }, content) }, children2)
             )
           ),
-          footer && import_react213.default.createElement("div", { className: clsx_m_default(styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.footer, styles_css_default79.footer, {
+          footer && import_react211.default.createElement("div", { className: clsx_m_default(styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.footer, styles_css_default79.footer, {
             [styles_css_default79["with-divider"]]: !__disableFooterDivider,
             [styles_css_default79["with-paddings"]]: !disableFooterPaddings
           }), style: getFooterStyles(style3) }, footer)
@@ -330725,16 +330631,16 @@ ${isHandDrawn ? "" : `
   var internal_default14 = InternalContainer;
 
   // node_modules/@cloudscape-design/components/internal/analytics/components/analytics-funnel.js
-  var import_react214 = __toESM(require_react());
+  var import_react212 = __toESM(require_react());
   var AnalyticsFunnelSubStep = ({ children: children2, subStepIdentifier, subStepErrorContext }) => {
     const subStepId = useUniqueId("substep");
     const subStepSelector = getSubStepSelector(subStepId);
     const subStepNameSelector = getSubStepNameSelector(subStepId);
-    const subStepRef = (0, import_react214.useRef)(null);
+    const subStepRef = (0, import_react212.useRef)(null);
     const { subStepCount, onStepChange } = useFunnelStep();
-    const mousePressed = (0, import_react214.useRef)(false);
-    const isFocusedSubStep = (0, import_react214.useRef)(false);
-    const focusCleanupFunction = (0, import_react214.useRef)(void 0);
+    const mousePressed = (0, import_react212.useRef)(false);
+    const isFocusedSubStep = (0, import_react212.useRef)(false);
+    const focusCleanupFunction = (0, import_react212.useRef)(void 0);
     const { funnelState, funnelInteractionId } = useFunnel();
     const { stepNumber, stepNameSelector } = useFunnelStep();
     const newContext = {
@@ -330749,9 +330655,9 @@ ${isHandDrawn ? "" : `
       focusCleanupFunction,
       isNestedSubStep: false
     };
-    const inheritedContext = { ...(0, import_react214.useContext)(FunnelSubStepContext), isNestedSubStep: true };
+    const inheritedContext = { ...(0, import_react212.useContext)(FunnelSubStepContext), isNestedSubStep: true };
     const isNested = Boolean(inheritedContext.subStepId);
-    (0, import_react214.useEffect)(() => {
+    (0, import_react212.useEffect)(() => {
       if (!isNested) {
         subStepCount.current++;
         onStepChange();
@@ -330762,7 +330668,7 @@ ${isHandDrawn ? "" : `
       }
     }, [isNested, subStepCount, onStepChange]);
     const context = isNested ? inheritedContext : newContext;
-    (0, import_react214.useEffect)(() => {
+    (0, import_react212.useEffect)(() => {
       if (isNested || !subStepRef.current) {
         return;
       }
@@ -330796,7 +330702,7 @@ ${isHandDrawn ? "" : `
       isNested,
       subStepRef
     ]);
-    return import_react214.default.createElement(FunnelSubStepContext.Provider, { value: context }, typeof children2 === "function" ? children2(context) : children2);
+    return import_react212.default.createElement(FunnelSubStepContext.Provider, { value: context }, typeof children2 === "function" ? children2(context) : children2);
   };
 
   // node_modules/@cloudscape-design/components/expandable-section/analytics-metadata/styles.css.js
@@ -330816,13 +330722,13 @@ ${isHandDrawn ? "" : `
     const metadataAttribute = __injectAnalyticsComponentMetadata ? getAnalyticsMetadataAttribute({ component: analyticsComponentMetadata }) : {};
     const ariaProps = { role, ["aria-label"]: ariaLabel, ["aria-labelledby"]: ariaLabelledby };
     if (variant === "container" || variant === "stacked") {
-      return import_react215.default.createElement(
+      return import_react213.default.createElement(
         AnalyticsFunnelSubStep,
         { subStepIdentifier: analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.instanceIdentifier, subStepErrorContext: analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.errorContext },
-        import_react215.default.createElement(InternalContainerAsSubstep, { ...rest, className, header, variant: variant === "stacked" ? "stacked" : "default", disableContentPaddings: true, disableHeaderPaddings: true, __hiddenContent: !expanded, __internalRootRef, __nativeAttributes: ariaProps, ...metadataAttribute }, children2)
+        import_react213.default.createElement(InternalContainerAsSubstep, { ...rest, className, header, variant: variant === "stacked" ? "stacked" : "default", disableContentPaddings: true, disableHeaderPaddings: true, __hiddenContent: !expanded, __internalRootRef, __nativeAttributes: ariaProps, ...metadataAttribute }, children2)
       );
     }
-    return import_react215.default.createElement(
+    return import_react213.default.createElement(
       "div",
       { className, ...rest, ...ariaProps, ref: __internalRootRef, ...metadataAttribute, ...getAnalyticsLabelAttribute(`.${styles_css_default81["header-label"]}`) },
       header,
@@ -330831,13 +330737,13 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/expandable-section/expandable-section-header.js
-  var import_react221 = __toESM(require_react());
+  var import_react219 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/header/internal.js
-  var import_react218 = __toESM(require_react());
+  var import_react216 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/header/analytics/use-table-integration.js
-  var import_react217 = __toESM(require_react());
+  var import_react215 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/analytics/utils/parse-count-text.js
   var parseCountValue = (countText) => {
@@ -330850,25 +330756,25 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/internal/context/table-component-context.js
-  var import_react216 = __toESM(require_react());
-  var TableComponentsContext = (0, import_react216.createContext)(null);
+  var import_react214 = __toESM(require_react());
+  var TableComponentsContext = (0, import_react214.createContext)(null);
   var TableComponentsContextProvider = TableComponentsContext.Provider;
   var useTableComponentsContext = () => {
-    const tableComponentContext = (0, import_react216.useContext)(TableComponentsContext);
+    const tableComponentContext = (0, import_react214.useContext)(TableComponentsContext);
     return tableComponentContext;
   };
 
   // node_modules/@cloudscape-design/components/header/analytics/use-table-integration.js
   var useTableIntegration = (countText) => {
     const tableComponentContext = useTableComponentsContext();
-    const countValue = (0, import_react217.useMemo)(() => {
+    const countValue = (0, import_react215.useMemo)(() => {
       if (typeof countText === "string") {
         return parseCountValue(countText);
       } else {
         return void 0;
       }
     }, [countText]);
-    (0, import_react217.useEffect)(() => {
+    (0, import_react215.useEffect)(() => {
       var _a213;
       if (((_a213 = tableComponentContext === null || tableComponentContext === void 0 ? void 0 : tableComponentContext.headerRef) === null || _a213 === void 0 ? void 0 : _a213.current) && countValue !== void 0) {
         tableComponentContext.headerRef.current.totalCount = countValue;
@@ -330924,10 +330830,10 @@ ${isHandDrawn ? "" : `
   function InternalHeader({ variant, headingTagOverride, children: children2, actions, counter: counter2, description, info: info2, __internalRootRef, __disableActionsWrapping, __headingTagRef, __headingTagTabIndex, __inExpandableSection, __additionalTitleContent, ...restProps }) {
     const isMobile = useMobile();
     const HeadingTag = headingTagOverride !== null && headingTagOverride !== void 0 ? headingTagOverride : variant === "awsui-h1-sticky" ? "h1" : variant;
-    const { isStuck } = (0, import_react218.useContext)(StickyHeaderContext);
+    const { isStuck } = (0, import_react216.useContext)(StickyHeaderContext);
     const baseProps = getBaseProps(restProps);
     const isRefresh = useVisualRefresh();
-    const assignHeaderId = (0, import_react218.useContext)(CollectionLabelContext).assignId;
+    const assignHeaderId = (0, import_react216.useContext)(CollectionLabelContext).assignId;
     const isInContainer = useContainerHeader();
     const headingId = useUniqueId("heading");
     useTableIntegration(counter2);
@@ -330936,57 +330842,57 @@ ${isHandDrawn ? "" : `
     }
     const dynamicVariant = !isMobile && isStuck ? "h2" : "h1";
     const variantOverride = variant === "awsui-h1-sticky" ? isRefresh ? dynamicVariant : "h2" : variant;
-    return import_react218.default.createElement(
+    return import_react216.default.createElement(
       "div",
       { ...baseProps, className: clsx_m_default(styles_css_default82.root, baseProps.className, styles_css_default82[`root-variant-${variantOverride}`], isRefresh && styles_css_default82.refresh, !actions && [styles_css_default82[`root-no-actions`]], description && [styles_css_default82[`root-has-description`]]), ref: __internalRootRef },
-      import_react218.default.createElement(
+      import_react216.default.createElement(
         "div",
         { className: clsx_m_default(styles_css_default82.main, styles_css_default82[`main-variant-${variantOverride}`], isRefresh && styles_css_default82.refresh, __disableActionsWrapping && [styles_css_default82["no-wrap"]]) },
-        import_react218.default.createElement(
+        import_react216.default.createElement(
           "div",
           { className: clsx_m_default(styles_css_default82.title, styles_css_default82[`title-variant-${variantOverride}`], isRefresh && styles_css_default82.refresh, __inExpandableSection && styles_css_default82["title-in-expandable-section"]) },
-          import_react218.default.createElement(
+          import_react216.default.createElement(
             HeadingTag,
             { className: clsx_m_default(styles_css_default82.heading, styles_css_default82[`heading-variant-${variantOverride}`]), ref: __headingTagRef, tabIndex: __headingTagTabIndex, ...getAnalyticsLabelAttribute(`.${styles_css_default77["heading-text"]}`) },
-            import_react218.default.createElement("span", { ...isInContainer ? { [DATA_ATTR_FUNNEL_KEY]: FUNNEL_KEY_SUBSTEP_NAME } : {}, className: clsx_m_default(styles_css_default82["heading-text"], styles_css_default77["heading-text"], styles_css_default82[`heading-text-variant-${variantOverride}`]), id: headingId }, children2),
-            counter2 !== void 0 && import_react218.default.createElement(
+            import_react216.default.createElement("span", { ...isInContainer ? { [DATA_ATTR_FUNNEL_KEY]: FUNNEL_KEY_SUBSTEP_NAME } : {}, className: clsx_m_default(styles_css_default82["heading-text"], styles_css_default77["heading-text"], styles_css_default82[`heading-text-variant-${variantOverride}`]), id: headingId }, children2),
+            counter2 !== void 0 && import_react216.default.createElement(
               "span",
               { className: styles_css_default82.counter },
               " ",
               counter2
             )
           ),
-          info2 && import_react218.default.createElement(
+          info2 && import_react216.default.createElement(
             InfoLinkLabelContext.Provider,
             { value: headingId },
-            import_react218.default.createElement("span", { className: styles_css_default82["virtual-space"] }, " \xA0"),
-            import_react218.default.createElement("span", { className: styles_css_default82.info }, info2)
+            import_react216.default.createElement("span", { className: styles_css_default82["virtual-space"] }, " \xA0"),
+            import_react216.default.createElement("span", { className: styles_css_default82.info }, info2)
           )
         ),
-        __additionalTitleContent && import_react218.default.createElement("div", { className: styles_css_default82["additional-title-content"] }, __additionalTitleContent),
-        actions && import_react218.default.createElement("div", { className: clsx_m_default(styles_css_default82.actions, styles_css_default82[`actions-variant-${variantOverride}`], isRefresh && styles_css_default82.refresh, !__disableActionsWrapping && [styles_css_default82["actions-centered"]]) }, actions)
+        __additionalTitleContent && import_react216.default.createElement("div", { className: styles_css_default82["additional-title-content"] }, __additionalTitleContent),
+        actions && import_react216.default.createElement("div", { className: clsx_m_default(styles_css_default82.actions, styles_css_default82[`actions-variant-${variantOverride}`], isRefresh && styles_css_default82.refresh, !__disableActionsWrapping && [styles_css_default82["actions-centered"]]) }, actions)
       ),
-      import_react218.default.createElement(Description, { variantOverride }, description)
+      import_react216.default.createElement(Description, { variantOverride }, description)
     );
   }
   function Description({ children: children2, variantOverride }) {
     const isRefresh = useVisualRefresh();
-    return children2 && import_react218.default.createElement("p", { className: clsx_m_default(styles_css_default82.description, styles_css_default82[`description-variant-${variantOverride}`], isRefresh && styles_css_default82.refresh) }, children2) || null;
+    return children2 && import_react216.default.createElement("p", { className: clsx_m_default(styles_css_default82.description, styles_css_default82[`description-variant-${variantOverride}`], isRefresh && styles_css_default82.refresh) }, children2) || null;
   }
 
   // node_modules/@cloudscape-design/components/icon-provider/use-component-icons.js
-  var import_react219 = __toESM(require_react());
+  var import_react217 = __toESM(require_react());
   function useInternalComponentIcons(component2) {
-    return (0, import_react219.useContext)(InternalComponentIconsContext)[component2];
+    return (0, import_react217.useContext)(InternalComponentIconsContext)[component2];
   }
 
   // node_modules/@cloudscape-design/components/internal/components/customizable-icon/index.js
-  var import_react220 = __toESM(require_react());
+  var import_react218 = __toESM(require_react());
   function CustomizableIcon({ customIcon, fallback, ...shared }) {
     if (customIcon) {
-      return import_react220.default.createElement(internal_default, { ...shared, override: customIcon });
+      return import_react218.default.createElement(internal_default, { ...shared, override: customIcon });
     }
-    return import_react220.default.createElement(internal_default, { ...shared, ...fallback, className: clsx_m_default(shared.className, fallback === null || fallback === void 0 ? void 0 : fallback.className) });
+    return import_react218.default.createElement(internal_default, { ...shared, ...fallback, className: clsx_m_default(shared.className, fallback === null || fallback === void 0 ? void 0 : fallback.className) });
   }
 
   // node_modules/@cloudscape-design/components/expandable-section/utils.js
@@ -331068,7 +330974,7 @@ ${isHandDrawn ? "" : `
         event3.stopPropagation();
       }
     } : void 0;
-    return import_react221.default.createElement("button", { className: clsx_m_default(styles_css_default83["icon-container"], styles_css_default83["expand-button"], className), type: "button", "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy, "aria-describedby": ariaDescribedBy, "aria-controls": ariaControls, "aria-expanded": expanded, "data-awsui-motion-trigger": "hover", onClick: stopPropagation3 ? (event3) => {
+    return import_react219.default.createElement("button", { className: clsx_m_default(styles_css_default83["icon-container"], styles_css_default83["expand-button"], className), type: "button", "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy, "aria-describedby": ariaDescribedBy, "aria-controls": ariaControls, "aria-expanded": expanded, "data-awsui-motion-trigger": "hover", onClick: stopPropagation3 ? (event3) => {
       event3.stopPropagation();
       onClick(event3);
     } : onClick, onKeyUp: stopKeyPropagation, onKeyDown: stopKeyPropagation, ...getExpandActionAnalyticsMetadataAttribute(expanded) }, icon2);
@@ -331083,22 +330989,22 @@ ${isHandDrawn ? "" : `
     return getAnalyticsMetadataAttribute(metadata);
   };
   var ExpandableDeprecatedHeader = ({ id: id38, className, onClick, ariaLabel, ariaControls, expanded, children: children2, icon: icon2, onKeyUp, onKeyDown, variant }) => {
-    return import_react221.default.createElement(
+    return import_react219.default.createElement(
       "div",
       { id: id38, role: "button", className: clsx_m_default(className, styles_css_default83["expand-button"], styles_css_default83["click-target"], styles_css_default83["header-deprecated"], styles_css_default81["header-label"]), tabIndex: 0, onKeyUp, onKeyDown, onClick, "aria-label": ariaLabel, "aria-controls": ariaControls, "aria-expanded": expanded, "data-awsui-motion-trigger": "hover", ...getExpandActionAnalyticsMetadataAttribute(expanded) },
-      import_react221.default.createElement("div", { className: clsx_m_default(styles_css_default83["icon-container"], styles_css_default83[`icon-container-${variant}`]) }, icon2),
+      import_react219.default.createElement("div", { className: clsx_m_default(styles_css_default83["icon-container"], styles_css_default83[`icon-container-${variant}`]) }, icon2),
       children2
     );
   };
   var ExpandableNavigationHeader = ({ id: id38, className, onClick, ariaLabelledBy, ariaLabel, ariaControls, expanded, children: children2, icon: icon2, expandIconPosition, hideExpandIcon }) => {
-    const expandButton = hideExpandIcon ? null : import_react221.default.createElement(ExpandIconButton, { icon: icon2, ariaLabelledBy, ariaLabel, ariaControls, expanded, onClick, className: clsx_m_default(expandIconPosition === "end" && styles_css_default83["icon-container-end"], styles_css_default81["header-label"]) });
-    return import_react221.default.createElement("div", { id: id38, className: clsx_m_default(className, hideExpandIcon && styles_css_default81["header-label"], expandIconPosition === "end" && styles_css_default83["header-icon-end"]), "data-awsui-motion-trigger": "hover" }, expandIconPosition === "end" ? import_react221.default.createElement(
-      import_react221.default.Fragment,
+    const expandButton = hideExpandIcon ? null : import_react219.default.createElement(ExpandIconButton, { icon: icon2, ariaLabelledBy, ariaLabel, ariaControls, expanded, onClick, className: clsx_m_default(expandIconPosition === "end" && styles_css_default83["icon-container-end"], styles_css_default81["header-label"]) });
+    return import_react219.default.createElement("div", { id: id38, className: clsx_m_default(className, hideExpandIcon && styles_css_default81["header-label"], expandIconPosition === "end" && styles_css_default83["header-icon-end"]), "data-awsui-motion-trigger": "hover" }, expandIconPosition === "end" ? import_react219.default.createElement(
+      import_react219.default.Fragment,
       null,
       children2,
       expandButton
-    ) : import_react221.default.createElement(
-      import_react221.default.Fragment,
+    ) : import_react219.default.createElement(
+      import_react219.default.Fragment,
       null,
       expandButton,
       children2
@@ -331115,7 +331021,7 @@ ${isHandDrawn ? "" : `
     const restrictClickableArea = supportsInteractiveElements && (!!headerInfo || !!headerActions || !!secondaryContent) || !!headerEndInfo;
     const actions = supportsInteractiveElements && headerActions;
     const endInfo = !isContainer && headerEndInfo;
-    const description = variantSupportsDescription(variant) && headerDescription && import_react221.default.createElement("span", { id: descriptionId, className: styles_css_default83[`description-${variant}`] }, headerDescription);
+    const description = variantSupportsDescription(variant) && headerDescription && import_react219.default.createElement("span", { id: descriptionId, className: styles_css_default83[`description-${variant}`] }, headerDescription);
     const ariaDescribedBy = clsx_m_default(description && descriptionId, describedById) || void 0;
     const listeners = { onClick, onKeyDown, onKeyUp };
     const iconAtEnd = expandIconPosition === "end";
@@ -331127,42 +331033,42 @@ ${isHandDrawn ? "" : `
     const headerButtonMotionTrigger = headerButtonListeners ? motionTriggerAttribute : void 0;
     const headingTagMotionTrigger = headingTagListeners ? motionTriggerAttribute : void 0;
     const wrapperMotionTrigger = wrapperListeners ? motionTriggerAttribute : void 0;
-    const expandButton = import_react221.default.createElement(ExpandIconButton, { icon: icon2, ariaLabel, ariaLabelledBy: !ariaLabel ? id38 : void 0, ariaDescribedBy, ariaControls, expanded, onClick, stopPropagation: true, className: clsx_m_default(styles_css_default83[`icon-container-${variant}`], styles_css_default83["icon-container-end"]) });
-    const expandIcon = import_react221.default.createElement("span", { className: clsx_m_default(styles_css_default83["icon-container"], styles_css_default83[`icon-container-${variant}`], iconAtEnd && styles_css_default83["icon-container-end"]) }, icon2);
+    const expandButton = import_react219.default.createElement(ExpandIconButton, { icon: icon2, ariaLabel, ariaLabelledBy: !ariaLabel ? id38 : void 0, ariaDescribedBy, ariaControls, expanded, onClick, stopPropagation: true, className: clsx_m_default(styles_css_default83[`icon-container-${variant}`], styles_css_default83["icon-container-end"]) });
+    const expandIcon = import_react219.default.createElement("span", { className: clsx_m_default(styles_css_default83["icon-container"], styles_css_default83[`icon-container-${variant}`], iconAtEnd && styles_css_default83["icon-container-end"]) }, icon2);
     const outsideIcon = renderIconOutsideHeader ? expandButton : null;
-    const textElement = import_react221.default.createElement("span", { id: id38, className: clsx_m_default(styles_css_default83["header-text"], hideText && styles_css_default83["header-text-hidden"], styles_css_default81["header-label"]) }, children2);
-    const headerButton = renderIconOutsideHeader && hideText ? textElement : import_react221.default.createElement("span", { className: clsx_m_default(styles_css_default83["expand-button"], isContainer ? styles_css_default83["header-container-button"] : styles_css_default83["header-button"], iconAtEnd && styles_css_default83["header-button-icon-end"], headerButtonListeners && styles_css_default83["click-target"]), role: "button", tabIndex: 0, "aria-label": ariaLabel, "aria-labelledby": !ariaLabel && (hideText || description) ? id38 : void 0, "aria-describedby": ariaDescribedBy, "aria-controls": ariaControls, "aria-expanded": expanded, ...headerButtonListeners, ...headerButtonMotionTrigger, ...headerButtonListeners ? getExpandActionAnalyticsMetadataAttribute(expanded) : {} }, renderIconOutsideHeader ? textElement : iconAtEnd ? import_react221.default.createElement(
-      import_react221.default.Fragment,
+    const textElement = import_react219.default.createElement("span", { id: id38, className: clsx_m_default(styles_css_default83["header-text"], hideText && styles_css_default83["header-text-hidden"], styles_css_default81["header-label"]) }, children2);
+    const headerButton = renderIconOutsideHeader && hideText ? textElement : import_react219.default.createElement("span", { className: clsx_m_default(styles_css_default83["expand-button"], isContainer ? styles_css_default83["header-container-button"] : styles_css_default83["header-button"], iconAtEnd && styles_css_default83["header-button-icon-end"], headerButtonListeners && styles_css_default83["click-target"]), role: "button", tabIndex: 0, "aria-label": ariaLabel, "aria-labelledby": !ariaLabel && (hideText || description) ? id38 : void 0, "aria-describedby": ariaDescribedBy, "aria-controls": ariaControls, "aria-expanded": expanded, ...headerButtonListeners, ...headerButtonMotionTrigger, ...headerButtonListeners ? getExpandActionAnalyticsMetadataAttribute(expanded) : {} }, renderIconOutsideHeader ? textElement : iconAtEnd ? import_react219.default.createElement(
+      import_react219.default.Fragment,
       null,
       textElement,
       expandIcon
-    ) : import_react221.default.createElement(
-      import_react221.default.Fragment,
+    ) : import_react219.default.createElement(
+      import_react219.default.Fragment,
       null,
       expandIcon,
       textElement
     ));
-    return import_react221.default.createElement("div", { className: clsx_m_default(className, wrapperListeners && styles_css_default83["click-target"], iconAtEnd && styles_css_default83["header-icon-end"], iconAtEnd && endInfo && styles_css_default83["header-icon-end-with-info"]), ...wrapperListeners, ...wrapperMotionTrigger, ...wrapperListeners ? getExpandActionAnalyticsMetadataAttribute(expanded) : {} }, isContainer ? import_react221.default.createElement(
-      import_react221.default.Fragment,
+    return import_react219.default.createElement("div", { className: clsx_m_default(className, wrapperListeners && styles_css_default83["click-target"], iconAtEnd && styles_css_default83["header-icon-end"], iconAtEnd && endInfo && styles_css_default83["header-icon-end-with-info"]), ...wrapperListeners, ...wrapperMotionTrigger, ...wrapperListeners ? getExpandActionAnalyticsMetadataAttribute(expanded) : {} }, isContainer ? import_react219.default.createElement(
+      import_react219.default.Fragment,
       null,
-      import_react221.default.createElement(InternalHeader, { variant: "h2", description, counter: headerCounter, info: headerInfo, actions, headingTagOverride: hideText ? "div" : headingTagOverride, __inExpandableSection: true, __additionalTitleContent: secondaryContent ? import_react221.default.createElement("span", { id: describedById }, secondaryContent) : void 0 }, headerButton),
+      import_react219.default.createElement(InternalHeader, { variant: "h2", description, counter: headerCounter, info: headerInfo, actions, headingTagOverride: hideText ? "div" : headingTagOverride, __inExpandableSection: true, __additionalTitleContent: secondaryContent ? import_react219.default.createElement("span", { id: describedById }, secondaryContent) : void 0 }, headerButton),
       outsideIcon
-    ) : import_react221.default.createElement(
-      import_react221.default.Fragment,
+    ) : import_react219.default.createElement(
+      import_react219.default.Fragment,
       null,
-      import_react221.default.createElement(
+      import_react219.default.createElement(
         "div",
         { className: clsx_m_default(styles_css_default83["header-content"], (actions || secondaryContent) && styles_css_default83["header-actions-wrapper"], endInfo && styles_css_default83["header-content-with-info"]) },
-        import_react221.default.createElement(
+        import_react219.default.createElement(
           "div",
           { className: styles_css_default83["header-main"] },
-          import_react221.default.createElement(HeadingTag, { className: clsx_m_default(styles_css_default83["header-wrapper"], headingTagListeners && styles_css_default83["click-target"]), ...headingTagListeners, ...headingTagMotionTrigger, ...headingTagListeners ? getExpandActionAnalyticsMetadataAttribute(expanded) : {} }, headerButton),
-          secondaryContent && import_react221.default.createElement("div", { id: describedById, className: styles_css_default83["header-secondary-content"] }, secondaryContent)
+          import_react219.default.createElement(HeadingTag, { className: clsx_m_default(styles_css_default83["header-wrapper"], headingTagListeners && styles_css_default83["click-target"]), ...headingTagListeners, ...headingTagMotionTrigger, ...headingTagListeners ? getExpandActionAnalyticsMetadataAttribute(expanded) : {} }, headerButton),
+          secondaryContent && import_react219.default.createElement("div", { id: describedById, className: styles_css_default83["header-secondary-content"] }, secondaryContent)
         ),
         endInfo,
         actions
       ),
-      description && import_react221.default.createElement(Description, { variantOverride: "h3" }, description),
+      description && import_react219.default.createElement(Description, { variantOverride: "h3" }, description),
       outsideIcon
     ));
   };
@@ -331170,7 +331076,7 @@ ${isHandDrawn ? "" : `
     var _a213;
     const alwaysShowDivider = variantRequiresActionsDivider(variant) && headerActions;
     const icons2 = useInternalComponentIcons("expandable-section");
-    const icon2 = import_react221.default.createElement(CustomizableIcon, { customIcon: (_a213 = icons2 === null || icons2 === void 0 ? void 0 : icons2.expandToggle) === null || _a213 === void 0 ? void 0 : _a213.call(icons2, { expanded: !!expanded }), size: isThemeActive(Theme13.OneTheme) ? "x-small" : variant === "container" ? "medium" : "normal", className: styles_css_default83["icon-position"], fallback: {
+    const icon2 = import_react219.default.createElement(CustomizableIcon, { customIcon: (_a213 = icons2 === null || icons2 === void 0 ? void 0 : icons2.expandToggle) === null || _a213 === void 0 ? void 0 : _a213.call(icons2, { expanded: !!expanded }), size: isThemeActive(Theme13.OneTheme) ? "x-small" : variant === "container" ? "medium" : "normal", className: styles_css_default83["icon-position"], fallback: {
       name: isThemeActive(Theme13.OneTheme) ? "angle-down" : "caret-down-filled",
       className: clsx_m_default(styles_css_default83.icon, expanded && styles_css_default83.expanded),
       nativeAttributes: { "data-awsui-motion-target": "" }
@@ -331205,27 +331111,27 @@ ${isHandDrawn ? "" : `
     }
     const wrapperClassName = clsx_m_default(styles_css_default83.wrapper, styles_css_default83[`wrapper-${variant}`], (expanded || alwaysShowDivider) && styles_css_default83["wrapper-expanded"]);
     if (variant === "navigation") {
-      return import_react221.default.createElement(
+      return import_react219.default.createElement(
         ExpandableNavigationHeader,
         { className: clsx_m_default(className, wrapperClassName), ariaLabelledBy, hideExpandIcon, ...defaultHeaderProps },
-        import_react221.default.createElement("span", { className: styles_css_default83["header-navigation-content"] }, headerText !== null && headerText !== void 0 ? headerText : header)
+        import_react219.default.createElement("span", { className: styles_css_default83["header-navigation-content"] }, headerText !== null && headerText !== void 0 ? headerText : header)
       );
     }
     if (headerText || variant === "inline") {
       if (!headerText && header && variant === "inline") {
         warnOnce(componentName, "Only `headerText` instead of `header` is supported for `inline` variant.");
       }
-      return import_react221.default.createElement(ExpandableHeaderTextWrapper, { className: clsx_m_default(className, wrapperClassName, expanded && styles_css_default83.expanded, !expanded && (!headerActions || headerDescription) && !(headerSecondaryContent && variantSupportsHeaderSecondaryContent(variant)) && styles_css_default83["wrapper-not-expanded-without-actions"]), descriptionId, headerDescription, headerCounter, headerInfo, headerActions, headerEndInfo, headerSecondaryContent, secondaryContentId, hideHeaderText, headingTagOverride, onKeyUp, onKeyDown, ...defaultHeaderProps }, headerText);
+      return import_react219.default.createElement(ExpandableHeaderTextWrapper, { className: clsx_m_default(className, wrapperClassName, expanded && styles_css_default83.expanded, !expanded && (!headerActions || headerDescription) && !(headerSecondaryContent && variantSupportsHeaderSecondaryContent(variant)) && styles_css_default83["wrapper-not-expanded-without-actions"]), descriptionId, headerDescription, headerCounter, headerInfo, headerActions, headerEndInfo, headerSecondaryContent, secondaryContentId, hideHeaderText, headingTagOverride, onKeyUp, onKeyDown, ...defaultHeaderProps }, headerText);
     }
     if (variant === "container" && header && isDevelopment2) {
       warnOnce(componentName, "Use `headerText` instead of `header` to provide the button within the heading for a11y.");
     }
-    return import_react221.default.createElement(ExpandableDeprecatedHeader, { className: clsx_m_default(className, wrapperClassName, styles_css_default83.focusable, expanded && styles_css_default83.expanded), onKeyUp, onKeyDown, ...defaultHeaderProps }, header);
+    return import_react219.default.createElement(ExpandableDeprecatedHeader, { className: clsx_m_default(className, wrapperClassName, styles_css_default83.focusable, expanded && styles_css_default83.expanded), onKeyUp, onKeyDown, ...defaultHeaderProps }, header);
   };
 
   // node_modules/@cloudscape-design/components/expandable-section/internal.js
   function InternalExpandableSection({ expanded: controlledExpanded, defaultExpanded, onChange, variant = "default", children: children2, header, headerText, headerCounter, headerDescription, headerInfo, headerActions, headerSecondaryContent, hideHeaderText, headingTagOverride, disableContentPaddings, headerAriaLabel, __internalRootRef, __injectAnalyticsComponentMetadata, __expandIconPosition = "start", __disableHeaderPaddings = false, __hideExpandIcon = false, __headerEndInfo, ...props }) {
-    const contentInnerRef = (0, import_react222.useRef)(null);
+    const contentInnerRef = (0, import_react220.useRef)(null);
     const isOneTheme = useOneTheme();
     const controlId = useUniqueId();
     const triggerControlId = `${controlId}-trigger`;
@@ -331237,25 +331143,25 @@ ${isHandDrawn ? "" : `
       controlledProp: "expanded",
       changeHandler: "onChange"
     });
-    const onExpandChange = (0, import_react222.useCallback)((newExpanded) => {
+    const onExpandChange = (0, import_react220.useCallback)((newExpanded) => {
       setExpanded(newExpanded);
       fireNonCancelableEvent(onChange, { expanded: newExpanded });
     }, [onChange, setExpanded]);
-    const onClick = (0, import_react222.useCallback)(() => {
+    const onClick = (0, import_react220.useCallback)(() => {
       onExpandChange(!expanded);
     }, [onExpandChange, expanded]);
-    const onKeyUp = (0, import_react222.useCallback)((event3) => {
+    const onKeyUp = (0, import_react220.useCallback)((event3) => {
       const interactionKeys = [KeyCode2.enter, KeyCode2.space];
       if (interactionKeys.indexOf(event3.keyCode) !== -1) {
         onExpandChange(!expanded);
       }
     }, [onExpandChange, expanded]);
-    const onKeyDown = (0, import_react222.useCallback)((event3) => {
+    const onKeyDown = (0, import_react220.useCallback)((event3) => {
       if (event3.keyCode === KeyCode2.space) {
         event3.preventDefault();
       }
     }, []);
-    (0, import_react222.useEffect)(() => {
+    (0, import_react220.useEffect)(() => {
       if (contentInnerRef.current) {
         contentInnerRef.current.inert = !expanded;
       }
@@ -331270,21 +331176,21 @@ ${isHandDrawn ? "" : `
     };
     const baseVariant = variant === "stacked" ? "container" : variant;
     const headerTextHidden = hideHeaderText && variantSupportsHeaderSecondaryContent(baseVariant);
-    return import_react222.default.createElement(
+    return import_react220.default.createElement(
       ExpandableSectionContainer,
       { ...props, expanded, className: clsx_m_default(baseProps.className, styles_css_default83.root, styles_css_default81.root), variant, ...headerTextHidden ? {
         role: "region",
         ...headerAriaLabel ? { ariaLabel: headerAriaLabel } : { ariaLabelledby: triggerControlId }
-      } : {}, __injectAnalyticsComponentMetadata, header: import_react222.default.createElement(ExpandableSectionHeader, { id: triggerControlId, descriptionId, className: clsx_m_default(styles_css_default83.header, styles_css_default83[`header-${baseVariant}`], screenReaderTextClass, __disableHeaderPaddings && styles_css_default83["disable-header-paddings"]), variant: baseVariant, expanded: !!expanded, header, headerText, headerDescription, headerCounter, headerInfo, headerActions, headerSecondaryContent, secondaryContentId, hideHeaderText, headingTagOverride, expandIconPosition: __expandIconPosition, hideExpandIcon: __hideExpandIcon, headerEndInfo: __headerEndInfo, ...triggerProps }), __internalRootRef },
-      import_react222.default.createElement(Transition4, { in: !!expanded, disabled: !isOneTheme }, (transitionState, transitionEventsRef, motionDisabled) => {
+      } : {}, __injectAnalyticsComponentMetadata, header: import_react220.default.createElement(ExpandableSectionHeader, { id: triggerControlId, descriptionId, className: clsx_m_default(styles_css_default83.header, styles_css_default83[`header-${baseVariant}`], screenReaderTextClass, __disableHeaderPaddings && styles_css_default83["disable-header-paddings"]), variant: baseVariant, expanded: !!expanded, header, headerText, headerDescription, headerCounter, headerInfo, headerActions, headerSecondaryContent, secondaryContentId, hideHeaderText, headingTagOverride, expandIconPosition: __expandIconPosition, hideExpandIcon: __hideExpandIcon, headerEndInfo: __headerEndInfo, ...triggerProps }), __internalRootRef },
+      import_react220.default.createElement(Transition4, { in: !!expanded, disabled: !isOneTheme }, (transitionState, transitionEventsRef, motionDisabled) => {
         const contentSettled = !!expanded && (motionDisabled || transitionState === "entered");
-        return import_react222.default.createElement(
+        return import_react220.default.createElement(
           "div",
           { ref: transitionEventsRef, id: controlId, className: clsx_m_default(styles_css_default83.content, styles_css_default83[`content-${baseVariant}`], expanded && styles_css_default83["content-expanded"], disableContentPaddings && styles_css_default83["disable-content-paddings"]), role: "group", "aria-label": triggerProps.ariaLabel, "aria-labelledby": triggerProps.ariaLabelledBy, "aria-describedby": variantSupportsDescription(baseVariant) && headerDescription ? descriptionId : void 0 },
-          import_react222.default.createElement(
+          import_react220.default.createElement(
             "div",
             { ref: contentInnerRef, className: clsx_m_default(styles_css_default83["content-inner"], expanded && styles_css_default83["content-inner-expanded"], contentSettled && styles_css_default83["content-inner-settled"]) },
-            import_react222.default.createElement("div", { className: clsx_m_default(styles_css_default83["content-inner-body"], styles_css_default83[`content-inner-body-${baseVariant}`], disableContentPaddings && styles_css_default83["disable-content-paddings"]) }, children2)
+            import_react220.default.createElement("div", { className: clsx_m_default(styles_css_default83["content-inner-body"], styles_css_default83[`content-inner-body-${baseVariant}`], disableContentPaddings && styles_css_default83["disable-content-paddings"]) }, children2)
           )
         );
       })
@@ -331292,10 +331198,10 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/form-field/internal.js
-  var import_react224 = __toESM(require_react());
+  var import_react222 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/grid/internal.js
-  var import_react223 = __toESM(require_react());
+  var import_react221 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/hooks/container-queries/use-container-breakpoints.js
   function useContainerBreakpoints(triggers) {
@@ -331365,7 +331271,7 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/grid/internal.js
-  var InternalGrid = import_react223.default.forwardRef(({ __breakpoint, gridDefinition = [], disableGutters = false, children: children2, __tagOverride, __responsiveClassName, __internalRootRef, ...restProps }, ref) => {
+  var InternalGrid = import_react221.default.forwardRef(({ __breakpoint, gridDefinition = [], disableGutters = false, children: children2, __tagOverride, __responsiveClassName, __internalRootRef, ...restProps }, ref) => {
     let [defaultBreakpoint, defaultRef] = useContainerBreakpoints(void 0);
     if (__breakpoint !== void 0) {
       defaultBreakpoint = __breakpoint;
@@ -331382,13 +331288,13 @@ ${isHandDrawn ? "" : `
       }
     }
     const mergedRef = useMergeRefs(defaultRef, __internalRootRef);
-    return import_react223.default.createElement(Tag, { ...baseProps, className: clsx_m_default(styles_css_default84.grid, baseProps.className, { [styles_css_default84["no-gutters"]]: disableGutters }, __responsiveClassName ? __responsiveClassName(defaultBreakpoint) : null), ref: mergedRef }, flattenedChildren.map((child, i4) => {
+    return import_react221.default.createElement(Tag, { ...baseProps, className: clsx_m_default(styles_css_default84.grid, baseProps.className, { [styles_css_default84["no-gutters"]]: disableGutters }, __responsiveClassName ? __responsiveClassName(defaultBreakpoint) : null), ref: mergedRef }, flattenedChildren.map((child, i4) => {
       var _a213, _b, _c, _d;
       const key2 = child && typeof child === "object" ? child.key : void 0;
-      return import_react223.default.createElement(
+      return import_react221.default.createElement(
         "div",
         { key: key2 ? String(key2) : void 0, className: clsx_m_default(styles_css_default84["grid-column"], getColumnClassNames("colspan", (_a213 = gridDefinition[i4]) === null || _a213 === void 0 ? void 0 : _a213.colspan, defaultBreakpoint), getColumnClassNames("offset", (_b = gridDefinition[i4]) === null || _b === void 0 ? void 0 : _b.offset, defaultBreakpoint), getColumnClassNames("pull", (_c = gridDefinition[i4]) === null || _c === void 0 ? void 0 : _c.pull, defaultBreakpoint), getColumnClassNames("push", (_d = gridDefinition[i4]) === null || _d === void 0 ? void 0 : _d.push, defaultBreakpoint)) },
-        import_react223.default.createElement("div", { className: styles_css_default84["restore-pointer-events"] }, child)
+        import_react221.default.createElement("div", { className: styles_css_default84["restore-pointer-events"] }, child)
       );
     }));
   });
@@ -331484,57 +331390,57 @@ ${isHandDrawn ? "" : `
   var CHARACTER_COUNT_DEBOUNCE_MS = 1e3;
   function FormFieldError({ id: id38, children: children2, errorIconAriaLabel }) {
     const i18n = useInternalI18n("form-field");
-    const contentRef = (0, import_react224.useRef)(null);
+    const contentRef = (0, import_react222.useRef)(null);
     const i18nErrorIconAriaLabel = i18n("i18nStrings.errorIconAriaLabel", errorIconAriaLabel);
-    return import_react224.default.createElement(
-      import_react224.default.Fragment,
+    return import_react222.default.createElement(
+      import_react222.default.Fragment,
       null,
-      import_react224.default.createElement(
+      import_react222.default.createElement(
         "div",
         { id: id38, className: styles_css_default86.error },
-        import_react224.default.createElement(
+        import_react222.default.createElement(
           "div",
           { className: styles_css_default86["error-icon-shake-wrapper"] },
-          import_react224.default.createElement(
+          import_react222.default.createElement(
             "div",
             { className: styles_css_default86["error-icon-scale-wrapper"] },
-            import_react224.default.createElement(internal_default, { name: "status-negative", size: "small", ariaLabel: i18nErrorIconAriaLabel })
+            import_react222.default.createElement(internal_default, { name: "status-negative", size: "small", ariaLabel: i18nErrorIconAriaLabel })
           )
         ),
-        import_react224.default.createElement("span", { className: styles_css_default86.error__message, ref: contentRef }, children2)
+        import_react222.default.createElement("span", { className: styles_css_default86.error__message, ref: contentRef }, children2)
       ),
-      import_react224.default.createElement(internal_default2, { assertive: true, tagName: "span", sources: [i18nErrorIconAriaLabel, contentRef] })
+      import_react222.default.createElement(internal_default2, { assertive: true, tagName: "span", sources: [i18nErrorIconAriaLabel, contentRef] })
     );
   }
   function FormFieldWarning({ id: id38, children: children2, warningIconAriaLabel }) {
     const i18n = useInternalI18n("form-field");
-    const contentRef = (0, import_react224.useRef)(null);
+    const contentRef = (0, import_react222.useRef)(null);
     const i18nWarningIconAriaLabel = i18n("i18nStrings.warningIconAriaLabel", warningIconAriaLabel);
-    return import_react224.default.createElement(
-      import_react224.default.Fragment,
+    return import_react222.default.createElement(
+      import_react222.default.Fragment,
       null,
-      import_react224.default.createElement(
+      import_react222.default.createElement(
         "div",
         { id: id38, className: styles_css_default86.warning },
-        import_react224.default.createElement(
+        import_react222.default.createElement(
           "div",
           { className: styles_css_default86["warning-icon-shake-wrapper"] },
-          import_react224.default.createElement(
+          import_react222.default.createElement(
             "div",
             { className: styles_css_default86["warning-icon-scale-wrapper"] },
-            import_react224.default.createElement(internal_default, { name: "status-warning", size: "small", ariaLabel: i18nWarningIconAriaLabel })
+            import_react222.default.createElement(internal_default, { name: "status-warning", size: "small", ariaLabel: i18nWarningIconAriaLabel })
           )
         ),
-        import_react224.default.createElement("span", { className: styles_css_default86.warning__message, ref: contentRef }, children2)
+        import_react222.default.createElement("span", { className: styles_css_default86.warning__message, ref: contentRef }, children2)
       ),
-      import_react224.default.createElement(internal_default2, { assertive: true, tagName: "span", sources: [i18nWarningIconAriaLabel, contentRef] })
+      import_react222.default.createElement(internal_default2, { assertive: true, tagName: "span", sources: [i18nWarningIconAriaLabel, contentRef] })
     );
   }
   function ConstraintTextRegion({ id: id38, hasValidationText, children: children2 }) {
-    return import_react224.default.createElement("div", { id: id38, className: clsx_m_default(styles_css_default86.constraint, hasValidationText && styles_css_default86["constraint-has-validation-text"]) }, children2);
+    return import_react222.default.createElement("div", { id: id38, className: clsx_m_default(styles_css_default86.constraint, hasValidationText && styles_css_default86["constraint-has-validation-text"]) }, children2);
   }
   function InternalFormField({ controlId, stretch = false, label, info: info2, i18nStrings, children: children2, secondaryControl, description, constraintText, characterCountText, errorText, warningText, __hideLabel, __internalRootRef, __disableGutters = false, __analyticsMetadata = void 0, __style = {}, ...rest }) {
-    const rootRef = (0, import_react224.useRef)();
+    const rootRef = (0, import_react222.useRef)();
     const ref = useMergeRefs(rootRef, __internalRootRef);
     const baseProps = getBaseProps(rest);
     const isRefresh = useVisualRefresh();
@@ -331562,15 +331468,15 @@ ${isHandDrawn ? "" : `
       [DATA_ATTR_FIELD_LABEL]: slotIds.label ? getFieldSlotSeletor(slotIds.label) : void 0,
       [DATA_ATTR_FIELD_ERROR]: slotIds.error ? getFieldSlotSeletor(slotIds.error) : void 0
     };
-    const debounceTimeoutRef = (0, import_react224.useRef)();
-    const [debouncedCharacterCountText, setDebouncedCharacterCountText] = (0, import_react224.useState)(characterCountText);
+    const debounceTimeoutRef = (0, import_react222.useRef)();
+    const [debouncedCharacterCountText, setDebouncedCharacterCountText] = (0, import_react222.useState)(characterCountText);
     useEffectOnUpdate2(() => {
       debounceTimeoutRef.current = setTimeout(() => {
         setDebouncedCharacterCountText(characterCountText);
       }, CHARACTER_COUNT_DEBOUNCE_MS);
       return () => clearTimeout(debounceTimeoutRef.current);
     }, [characterCountText]);
-    (0, import_react224.useEffect)(() => {
+    (0, import_react222.useEffect)(() => {
       var _a213, _b, _c;
       if (funnelInteractionId && errorText && funnelState.current !== "complete") {
         const stepName = getTextFromSelector(stepNameSelector);
@@ -331601,48 +331507,48 @@ ${isHandDrawn ? "" : `
         };
       }
     }, [funnelInteractionId, errorText, submissionAttempt, errorCount]);
-    return import_react224.default.createElement(
+    return import_react222.default.createElement(
       "div",
       { ...baseProps, className: clsx_m_default(baseProps.className, styles_css_default86.root), style: __style, ref, ...analyticsAttributes, ...copyAnalyticsMetadataAttribute(rest) },
-      import_react224.default.createElement(
+      import_react222.default.createElement(
         "div",
         { className: clsx_m_default(styles_css_default86["label-wrapper"], __hideLabel && styles_css_default86["visually-hidden"]) },
-        label && import_react224.default.createElement("label", { className: clsx_m_default(styles_css_default86.label, styles_css_default85.label), id: slotIds.label, htmlFor: generatedControlId }, label),
-        import_react224.default.createElement(InfoLinkLabelContext.Provider, { value: slotIds.label }, !__hideLabel && info2 && import_react224.default.createElement("span", { className: styles_css_default86.info }, info2))
+        label && import_react222.default.createElement("label", { className: clsx_m_default(styles_css_default86.label, styles_css_default85.label), id: slotIds.label, htmlFor: generatedControlId }, label),
+        import_react222.default.createElement(InfoLinkLabelContext.Provider, { value: slotIds.label }, !__hideLabel && info2 && import_react222.default.createElement("span", { className: styles_css_default86.info }, info2))
       ),
-      description && import_react224.default.createElement("div", { className: styles_css_default86.description, id: slotIds.description }, description),
-      import_react224.default.createElement(
+      description && import_react222.default.createElement("div", { className: styles_css_default86.description, id: slotIds.description }, description),
+      import_react222.default.createElement(
         "div",
         { className: clsx_m_default(styles_css_default86.controls, __hideLabel && styles_css_default86["label-hidden"]) },
-        import_react224.default.createElement(
+        import_react222.default.createElement(
           internal_default15,
           { gridDefinition, disableGutters: __disableGutters },
-          import_react224.default.createElement(FormFieldContext.Provider, { value: {
+          import_react222.default.createElement(FormFieldContext.Provider, { value: {
             controlId: generatedControlId,
             ...contextValuesWithoutControlId
-          } }, children2 && import_react224.default.createElement("div", { className: styles_css_default86.control }, children2)),
-          secondaryControl && import_react224.default.createElement(
+          } }, children2 && import_react222.default.createElement("div", { className: styles_css_default86.control }, children2)),
+          secondaryControl && import_react222.default.createElement(
             FormFieldContext.Provider,
             { value: contextValuesWithoutControlId },
-            import_react224.default.createElement("div", { className: styles_css_default86["secondary-control"] }, secondaryControl)
+            import_react222.default.createElement("div", { className: styles_css_default86["secondary-control"] }, secondaryControl)
           )
         )
       ),
-      (constraintText || characterCountText || errorText || warningText) && import_react224.default.createElement(
+      (constraintText || characterCountText || errorText || warningText) && import_react222.default.createElement(
         "div",
         { className: styles_css_default86.hints },
-        errorText && import_react224.default.createElement(FormFieldError, { id: slotIds.error, errorIconAriaLabel: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.errorIconAriaLabel }, errorText),
-        showWarning && import_react224.default.createElement(FormFieldWarning, { id: slotIds.warning, warningIconAriaLabel: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.warningIconAriaLabel }, warningText),
-        (constraintText || characterCountText) && import_react224.default.createElement(
+        errorText && import_react222.default.createElement(FormFieldError, { id: slotIds.error, errorIconAriaLabel: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.errorIconAriaLabel }, errorText),
+        showWarning && import_react222.default.createElement(FormFieldWarning, { id: slotIds.warning, warningIconAriaLabel: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.warningIconAriaLabel }, warningText),
+        (constraintText || characterCountText) && import_react222.default.createElement(
           ConstraintTextRegion,
           { hasValidationText: !!errorText || !!warningText },
-          constraintText && import_react224.default.createElement("span", { id: slotIds.constraint, className: styles_css_default87.constraint }, constraintText),
-          characterCountText && import_react224.default.createElement(
-            import_react224.default.Fragment,
+          constraintText && import_react222.default.createElement("span", { id: slotIds.constraint, className: styles_css_default87.constraint }, constraintText),
+          characterCountText && import_react222.default.createElement(
+            import_react222.default.Fragment,
             null,
             !!constraintText && " ",
-            import_react224.default.createElement("span", { className: styles_css_default87["character-count"], "aria-hidden": true }, characterCountText),
-            import_react224.default.createElement(ScreenreaderOnly, { id: slotIds.characterCount }, debouncedCharacterCountText)
+            import_react222.default.createElement("span", { className: styles_css_default87["character-count"], "aria-hidden": true }, characterCountText),
+            import_react222.default.createElement(ScreenreaderOnly, { id: slotIds.characterCount }, debouncedCharacterCountText)
           )
         )
       )
@@ -331650,7 +331556,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/internal/components/checkbox-icon/index.js
-  var import_react225 = __toESM(require_react());
+  var import_react223 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/checkbox-icon/styles.css.js
   var styles_css_default88 = {
@@ -331698,21 +331604,21 @@ ${isHandDrawn ? "" : `
     const oneTheme = useOneTheme();
     const theme = useVisualRefresh() ? oneTheme ? "one" : "refresh" : "default";
     const dimensions2 = dimensionsByTheme[theme];
-    const [initialState] = (0, import_react225.useState)({ checked: !!checked, indeterminate: !!indeterminate });
-    const [hasChanged, setHasChanged] = (0, import_react225.useState)(false);
+    const [initialState] = (0, import_react223.useState)({ checked: !!checked, indeterminate: !!indeterminate });
+    const [hasChanged, setHasChanged] = (0, import_react223.useState)(false);
     if (!hasChanged && (!!checked !== initialState.checked || !!indeterminate !== initialState.indeterminate)) {
       setHasChanged(true);
     }
-    return import_react225.default.createElement(
+    return import_react223.default.createElement(
       "svg",
       { className: styles_css_default88.root, viewBox: dimensions2.viewBox, "aria-hidden": "true", focusable: "false", ...baseProps },
-      import_react225.default.createElement("rect", { className: clsx_m_default(styles_css_default88["styled-box"], {
+      import_react223.default.createElement("rect", { className: clsx_m_default(styles_css_default88["styled-box"], {
         [styles_css_default88["styled-box-checked"]]: checked,
         [styles_css_default88["styled-box-indeterminate"]]: indeterminate,
         [styles_css_default88["styled-box-disabled"]]: disabled,
         [styles_css_default88["styled-box-readonly"]]: readOnly
       }), x: dimensions2.xy, y: dimensions2.xy, rx: dimensions2.r, ry: dimensions2.r, width: dimensions2.size, height: dimensions2.size, style: { fill: (_a213 = style3 === null || style3 === void 0 ? void 0 : style3.box) === null || _a213 === void 0 ? void 0 : _a213.fill, stroke: (_b = style3 === null || style3 === void 0 ? void 0 : style3.box) === null || _b === void 0 ? void 0 : _b.stroke } }),
-      checked || indeterminate ? import_react225.default.createElement("polyline", { className: clsx_m_default(styles_css_default88["styled-line"], {
+      checked || indeterminate ? import_react223.default.createElement("polyline", { className: clsx_m_default(styles_css_default88["styled-line"], {
         [styles_css_default88["styled-line-disabled"]]: disabled,
         [styles_css_default88["styled-line-readonly"]]: readOnly
       }), "data-awsui-motion-ready": hasChanged ? "" : void 0, points: indeterminate ? dimensions2.indeterminate : dimensions2.checked, style: { stroke: (_c = style3 === null || style3 === void 0 ? void 0 : style3.line) === null || _c === void 0 ? void 0 : _c.stroke } }) : null
@@ -331721,7 +331627,7 @@ ${isHandDrawn ? "" : `
   var checkbox_icon_default = CheckboxIcon;
 
   // node_modules/@cloudscape-design/components/badge/index.js
-  var import_react226 = __toESM(require_react());
+  var import_react224 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/badge/style.js
   function getBadgeStyles(style3) {
@@ -331760,15 +331666,15 @@ ${isHandDrawn ? "" : `
     const baseProps = getBaseProps(rest);
     const { styleClassNames } = rest;
     const className = clsx_m_default(baseProps.className, styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.root, styles_css_default89.badge, styles_css_default89[`badge-color-${color2}`]);
-    return import_react226.default.createElement(with_native_attributes_default, { ...baseProps, tag: "span", componentName: "Badge", nativeAttributes, className, ref: __internalRootRef, style: getBadgeStyles(style3) }, children2);
+    return import_react224.default.createElement(with_native_attributes_default, { ...baseProps, tag: "span", componentName: "Badge", nativeAttributes, className, ref: __internalRootRef, style: getBadgeStyles(style3) }, children2);
   }
   applyDisplayName(Badge, "Badge");
 
   // node_modules/@cloudscape-design/components/box/index.js
-  var import_react228 = __toESM(require_react());
+  var import_react226 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/box/internal-do-not-use-core.js
-  var import_react227 = __toESM(require_react());
+  var import_react225 = __toESM(require_react());
   function Box({ variant = "div", margin = {}, padding = {}, ...props }) {
     const baseComponentProps = useBaseComponent("Box", {
       props: {
@@ -331781,27 +331687,27 @@ ${isHandDrawn ? "" : `
         variant
       }
     });
-    return import_react227.default.createElement(InternalBox, { variant, margin, padding, ...props, ...baseComponentProps });
+    return import_react225.default.createElement(InternalBox, { variant, margin, padding, ...props, ...baseComponentProps });
   }
   applyDisplayName(Box, "Box");
 
   // node_modules/@cloudscape-design/components/box/index.js
   var Box2 = (props) => {
     validateProps("Box", props, ["visualAccent"], {}, "core");
-    return import_react228.default.createElement(Box, props);
+    return import_react226.default.createElement(Box, props);
   };
   applyDisplayName(Box2, "Box");
   var box_default = Box2;
 
   // node_modules/@cloudscape-design/components/button/index.js
-  var import_react229 = __toESM(require_react());
-  var Button = import_react229.default.forwardRef(({ children: children2, iconName, iconAlign = "left", iconUrl, iconSvg, iconAlt, variant = "normal", loading = false, loadingText, disabled = false, disabledReason, wrapText: wrapText3 = true, href, target, rel: rel2, external = false, download, formAction = "submit", ariaLabel, ariaDescribedby, onClick, onFollow, ariaExpanded, ariaHaspopup, ariaControls, fullWidth, form, i18nStrings, style: style3, nativeButtonAttributes, nativeAnchorAttributes, ...props }, ref) => {
+  var import_react227 = __toESM(require_react());
+  var Button = import_react227.default.forwardRef(({ children: children2, iconName, iconAlign = "left", iconUrl, iconSvg, iconAlt, variant = "normal", loading = false, loadingText, disabled = false, disabledReason, wrapText: wrapText3 = true, href, target, rel: rel2, external = false, download, formAction = "submit", ariaLabel, ariaDescribedby, onClick, onFollow, ariaExpanded, ariaHaspopup, ariaControls, fullWidth, form, i18nStrings, style: style3, nativeButtonAttributes, nativeAnchorAttributes, ...props }, ref) => {
     const baseComponentProps = useBaseComponent("Button", {
       props: { formAction, fullWidth, iconAlign, iconName, rel: rel2, target, external, variant, wrapText: wrapText3 },
       metadata: { hasDisabledReason: Boolean(disabledReason) }
     });
     const baseProps = getBaseProps(props);
-    return import_react229.default.createElement(InternalButton, { ...baseProps, ...baseComponentProps, ref, iconName, iconAlign, iconUrl, iconSvg, iconAlt, variant, loading, loadingText, disabled, disabledReason, wrapText: wrapText3, href, target, rel: rel2, external, download, formAction, ariaLabel, ariaDescribedby, onClick, onFollow, ariaExpanded, ariaHaspopup, ariaControls, fullWidth, form, i18nStrings, style: style3, styleClassNames: props.styleClassNames, nativeButtonAttributes, nativeAnchorAttributes, __injectAnalyticsComponentMetadata: true }, children2);
+    return import_react227.default.createElement(InternalButton, { ...baseProps, ...baseComponentProps, ref, iconName, iconAlign, iconUrl, iconSvg, iconAlt, variant, loading, loadingText, disabled, disabledReason, wrapText: wrapText3, href, target, rel: rel2, external, download, formAction, ariaLabel, ariaDescribedby, onClick, onFollow, ariaExpanded, ariaHaspopup, ariaControls, fullWidth, form, i18nStrings, style: style3, styleClassNames: props.styleClassNames, nativeButtonAttributes, nativeAnchorAttributes, __injectAnalyticsComponentMetadata: true }, children2);
   });
   applyDisplayName(Button, "Button");
   var button_default2 = Button;
@@ -331849,13 +331755,13 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/selection/selection-control.js
-  var import_react233 = __toESM(require_react());
-
-  // node_modules/@cloudscape-design/components/checkbox/internal.js
   var import_react231 = __toESM(require_react());
 
+  // node_modules/@cloudscape-design/components/checkbox/internal.js
+  var import_react229 = __toESM(require_react());
+
   // node_modules/@cloudscape-design/components/internal/components/abstract-switch/index.js
-  var import_react230 = __toESM(require_react());
+  var import_react228 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/abstract-switch/analytics-metadata/styles.css.js
   var styles_css_default90 = {
@@ -331905,10 +331811,10 @@ ${isHandDrawn ? "" : `
       ariaDescriptions.push(descriptionId);
     }
     const interactionLabel = label ? `.${styles_css_default90.label}` : !ariaLabel && !ariaLabelledby && controlId ? { root: "body", selector: `label[for="${controlId}"]` } : `.${styles_css_default90["native-input"]}`;
-    return import_react230.default.createElement(
+    return import_react228.default.createElement(
       "span",
       { ...rest, className: clsx_m_default(styles_css_default91.wrapper, rest.className), ref: __internalRootRef, ...getAnalyticsLabelAttribute(label ? `.${styles_css_default90.label}` : `.${styles_css_default90["native-input"]}`) },
-      import_react230.default.createElement(
+      import_react228.default.createElement(
         "span",
         { className: styles_css_default91["label-wrapper"], "aria-disabled": disabled ? "true" : void 0, onClick: disabled || readOnly ? void 0 : onClick, ...getAnalyticsMetadataAttribute(disabled || readOnly ? {} : {
           action: "select",
@@ -331916,7 +331822,7 @@ ${isHandDrawn ? "" : `
             label: interactionLabel
           }
         }) },
-        import_react230.default.createElement(
+        import_react228.default.createElement(
           "span",
           { className: clsx_m_default(styles_css_default91.control, controlClassName), style: {
             background: (_a213 = style3 === null || style3 === void 0 ? void 0 : style3.control) === null || _a213 === void 0 ? void 0 : _a213.background,
@@ -331936,15 +331842,15 @@ ${isHandDrawn ? "" : `
             "aria-label": ariaLabel,
             "aria-controls": ariaControls
           }),
-          import_react230.default.createElement("span", { className: clsx_m_default(styles_css_default91.outline, outlineClassName, showOutline && styles_css_default91["show-outline"]) })
+          import_react228.default.createElement("span", { className: clsx_m_default(styles_css_default91.outline, outlineClassName, showOutline && styles_css_default91["show-outline"]) })
         ),
-        import_react230.default.createElement(
+        import_react228.default.createElement(
           "span",
           { className: clsx_m_default(styles_css_default91.content, !label && !description && styles_css_default91["empty-content"]) },
-          label && import_react230.default.createElement("span", { id: labelId, className: clsx_m_default(styles_css_default91.label, styles_css_default90.label, {
+          label && import_react228.default.createElement("span", { id: labelId, className: clsx_m_default(styles_css_default91.label, styles_css_default90.label, {
             [styles_css_default91["label-disabled"]]: disabled
           }), style: { color: (_e2 = style3 === null || style3 === void 0 ? void 0 : style3.label) === null || _e2 === void 0 ? void 0 : _e2.color } }, label),
-          description && import_react230.default.createElement("span", { id: descriptionId, className: clsx_m_default(styles_css_default91.description, {
+          description && import_react228.default.createElement("span", { id: descriptionId, className: clsx_m_default(styles_css_default91.description, {
             [styles_css_default91["description-disabled"]]: disabled,
             [styles_css_default91["description-bottom-padding"]]: descriptionBottomPadding
           }), style: { color: (_f = style3 === null || style3 === void 0 ? void 0 : style3.description) === null || _f === void 0 ? void 0 : _f.color } }, description)
@@ -332015,12 +331921,12 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/checkbox/internal.js
-  var InternalCheckbox = import_react231.default.forwardRef(({ controlId, name, checked, disabled, readOnly, ariaRequired, indeterminate, children: children2, description, ariaLabel, onFocus, onBlur, onChange, tabIndex: explicitTabIndex, showOutline, ariaControls, style: style3, styleClassNames, nativeInputAttributes, __internalRootRef, __injectAnalyticsComponentMetadata = false, ...rest }, ref) => {
+  var InternalCheckbox = import_react229.default.forwardRef(({ controlId, name, checked, disabled, readOnly, ariaRequired, indeterminate, children: children2, description, ariaLabel, onFocus, onBlur, onChange, tabIndex: explicitTabIndex, showOutline, ariaControls, style: style3, styleClassNames, nativeInputAttributes, __internalRootRef, __injectAnalyticsComponentMetadata = false, ...rest }, ref) => {
     const { ariaDescribedby, ariaLabelledby } = useFormFieldContext(rest);
     const baseProps = getBaseProps(rest);
-    const checkboxRef = (0, import_react231.useRef)(null);
+    const checkboxRef = (0, import_react229.useRef)(null);
     useForwardFocus(ref, checkboxRef);
-    (0, import_react231.useEffect)(() => {
+    (0, import_react229.useEffect)(() => {
       if (checkboxRef.current) {
         checkboxRef.current.indeterminate = Boolean(indeterminate);
       }
@@ -332040,7 +331946,7 @@ ${isHandDrawn ? "" : `
     if (!disabled && !readOnly) {
       analyticsMetadata.action = !checked ? "select" : "deselect";
     }
-    return import_react231.default.createElement(AbstractSwitch, { ...baseProps, className: clsx_m_default(styles_css_default92.root, baseProps.className), controlClassName: clsx_m_default(styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.control, styles_css_default92["checkbox-control"]), outlineClassName: styles_css_default92.outline, controlId, disabled, readOnly, label: children2, description, descriptionBottomPadding: true, ariaLabel, ariaLabelledby, ariaDescribedby, ariaControls, showOutline, nativeControl: (nativeControlProps) => import_react231.default.createElement(with_native_attributes_default, {
+    return import_react229.default.createElement(AbstractSwitch, { ...baseProps, className: clsx_m_default(styles_css_default92.root, baseProps.className), controlClassName: clsx_m_default(styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.control, styles_css_default92["checkbox-control"]), outlineClassName: styles_css_default92.outline, controlId, disabled, readOnly, label: children2, description, descriptionBottomPadding: true, ariaLabel, ariaLabelledby, ariaDescribedby, ariaControls, showOutline, nativeControl: (nativeControlProps) => import_react229.default.createElement(with_native_attributes_default, {
       ...nativeControlProps,
       tag: "input",
       componentName: "Checkbox",
@@ -332065,12 +331971,12 @@ ${isHandDrawn ? "" : `
         // for deterministic transitions "indeterminate" -> "checked" -> "unchecked"
         indeterminate ? { checked: true, indeterminate: false } : { checked: !checked, indeterminate: false }
       );
-    }, styledControl: import_react231.default.createElement(checkbox_icon_default, { checked, indeterminate, disabled, readOnly, style: getCheckboxIconStyles(style3, checked, disabled, readOnly, indeterminate) }), style: getAbstractSwitchStyles(style3, checked, disabled, readOnly, indeterminate), __internalRootRef, ...getAnalyticsMetadataAttribute(analyticsMetadata) });
+    }, styledControl: import_react229.default.createElement(checkbox_icon_default, { checked, indeterminate, disabled, readOnly, style: getCheckboxIconStyles(style3, checked, disabled, readOnly, indeterminate) }), style: getAbstractSwitchStyles(style3, checked, disabled, readOnly, indeterminate), __internalRootRef, ...getAnalyticsMetadataAttribute(analyticsMetadata) });
   });
   var internal_default16 = InternalCheckbox;
 
   // node_modules/@cloudscape-design/components/internal/components/radio-button/index.js
-  var import_react232 = __toESM(require_react());
+  var import_react230 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/radio-button/style.js
   function getOuterCircleStyle(style3, checked, disabled, readOnly) {
@@ -332136,17 +332042,17 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/internal/components/radio-button/index.js
-  var radio_button_default = import_react232.default.forwardRef(function RadioButton({ name, children: children2, value: value3, checked, ariaLabel, ariaLabelledby, ariaDescribedby, description, disabled, controlId, readOnly, className, style: style3, styleClassNames, nativeInputAttributes, onSelect, __skipNativeAttributesWarnings, ...rest }, ref) {
-    const radioButtonRef = (0, import_react232.useRef)(null);
+  var radio_button_default = import_react230.default.forwardRef(function RadioButton({ name, children: children2, value: value3, checked, ariaLabel, ariaLabelledby, ariaDescribedby, description, disabled, controlId, readOnly, className, style: style3, styleClassNames, nativeInputAttributes, onSelect, __skipNativeAttributesWarnings, ...rest }, ref) {
+    const radioButtonRef = (0, import_react230.useRef)(null);
     const mergedRefs = useMergeRefs(radioButtonRef, ref);
     const { tabIndex } = useSingleTabStopNavigation(radioButtonRef);
     const baseProps = getBaseProps(rest);
-    const [initialChecked] = (0, import_react232.useState)(!!checked);
-    const [hasChanged, setHasChanged] = (0, import_react232.useState)(false);
+    const [initialChecked] = (0, import_react230.useState)(!!checked);
+    const [hasChanged, setHasChanged] = (0, import_react230.useState)(false);
     if (!hasChanged && !!checked !== initialChecked) {
       setHasChanged(true);
     }
-    return import_react232.default.createElement(AbstractSwitch, { ...baseProps, className: clsx_m_default(styles_css_default94.root, className), controlClassName: clsx_m_default(styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.control, styles_css_default93["radio-control"]), outlineClassName: styles_css_default93.outline, label: children2, ariaLabel, ariaLabelledby, ariaDescribedby, description, disabled, readOnly, controlId, style: getAbstractSwitchStyles2(style3, checked, disabled, readOnly), __internalRootRef: rest.__internalRootRef, ...copyAnalyticsMetadataAttribute(rest), nativeControl: (nativeControlProps) => import_react232.default.createElement(with_native_attributes_default, {
+    return import_react230.default.createElement(AbstractSwitch, { ...baseProps, className: clsx_m_default(styles_css_default94.root, className), controlClassName: clsx_m_default(styleClassNames === null || styleClassNames === void 0 ? void 0 : styleClassNames.control, styles_css_default93["radio-control"]), outlineClassName: styles_css_default93.outline, label: children2, ariaLabel, ariaLabelledby, ariaDescribedby, description, disabled, readOnly, controlId, style: getAbstractSwitchStyles2(style3, checked, disabled, readOnly), __internalRootRef: rest.__internalRootRef, ...copyAnalyticsMetadataAttribute(rest), nativeControl: (nativeControlProps) => import_react230.default.createElement(with_native_attributes_default, {
       ...nativeControlProps,
       tag: "input",
       componentName: "RadioButton",
@@ -332168,14 +332074,14 @@ ${isHandDrawn ? "" : `
       if (!checked) {
         fireNonCancelableEvent(onSelect);
       }
-    }, styledControl: import_react232.default.createElement(
+    }, styledControl: import_react230.default.createElement(
       "svg",
       { viewBox: "0 0 100 100", focusable: "false", "aria-hidden": "true" },
-      import_react232.default.createElement("circle", { className: clsx_m_default(styles_css_default93["styled-circle-border"], {
+      import_react230.default.createElement("circle", { className: clsx_m_default(styles_css_default93["styled-circle-border"], {
         [styles_css_default93["styled-circle-disabled"]]: disabled,
         [styles_css_default93["styled-circle-readonly"]]: readOnly
       }), strokeWidth: 6.25, cx: 50, cy: 50, r: 46, style: getOuterCircleStyle(style3, checked, disabled, readOnly) }),
-      import_react232.default.createElement("circle", { className: clsx_m_default(styles_css_default93["styled-circle-fill"], {
+      import_react230.default.createElement("circle", { className: clsx_m_default(styles_css_default93["styled-circle-fill"], {
         [styles_css_default93["styled-circle-disabled"]]: disabled,
         [styles_css_default93["styled-circle-checked"]]: checked,
         [styles_css_default93["styled-circle-readonly"]]: readOnly
@@ -332232,17 +332138,17 @@ ${isHandDrawn ? "" : `
     if (ariaDescribedby) {
       nativeInputAttributes["aria-describedby"] = ariaDescribedby;
     }
-    const selector2 = isMultiSelection ? import_react233.default.createElement(internal_default16, { ...sharedProps, onChange, showOutline: focusedComponent === "selection-control", controlId, "data-focus-id": "selection-control", indeterminate, ariaLabel, ariaDescribedby }) : import_react233.default.createElement(radio_button_default, { ...sharedProps, controlId, name, value: "", onSelect: onChange, nativeInputAttributes: Object.keys(nativeInputAttributes).length > 0 ? nativeInputAttributes : void 0, __skipNativeAttributesWarnings: ["aria-label", "aria-describedby"] });
-    return import_react233.default.createElement(
-      import_react233.default.Fragment,
+    const selector2 = isMultiSelection ? import_react231.default.createElement(internal_default16, { ...sharedProps, onChange, showOutline: focusedComponent === "selection-control", controlId, "data-focus-id": "selection-control", indeterminate, ariaLabel, ariaDescribedby }) : import_react231.default.createElement(radio_button_default, { ...sharedProps, controlId, name, value: "", onSelect: onChange, nativeInputAttributes: Object.keys(nativeInputAttributes).length > 0 ? nativeInputAttributes : void 0, __skipNativeAttributesWarnings: ["aria-label", "aria-describedby"] });
+    return import_react231.default.createElement(
+      import_react231.default.Fragment,
       null,
-      import_react233.default.createElement("label", { onKeyDown: handleKeyDown, onKeyUp: setShiftState, onMouseDown: onMouseDownHandler, onMouseUp: setShiftState, onClick: handleClick, htmlFor: controlId, className: clsx_m_default(styles_css_default95.label, styles_css_default95.root, verticalAlign === "top" && styles_css_default95["label-top"]), "aria-label": ariaLabel, title: ariaLabel, ...rowIndex !== void 0 && !sharedProps.disabled ? getAnalyticsMetadataAttribute({
+      import_react231.default.createElement("label", { onKeyDown: handleKeyDown, onKeyUp: setShiftState, onMouseDown: onMouseDownHandler, onMouseUp: setShiftState, onClick: handleClick, htmlFor: controlId, className: clsx_m_default(styles_css_default95.label, styles_css_default95.root, verticalAlign === "top" && styles_css_default95["label-top"]), "aria-label": ariaLabel, title: ariaLabel, ...rowIndex !== void 0 && !sharedProps.disabled ? getAnalyticsMetadataAttribute({
         detail: {
           position: `${rowIndex + 1}`,
           item: itemKey || ""
         }
       }) : {} }, selector2),
-      import_react233.default.createElement("span", { className: styles_css_default95.stud, "aria-hidden": true }, "\xA0")
+      import_react231.default.createElement("span", { className: styles_css_default95.stud, "aria-hidden": true }, "\xA0")
     );
   }
 
@@ -332384,7 +332290,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/selection/use-selection.js
-  var import_react234 = __toESM(require_react());
+  var import_react232 = __toESM(require_react());
   function useSelection(options2) {
     const singleSelectionProps = useSingleSelection(options2);
     const multiSelectionProps = useMultiSelection(options2);
@@ -332427,8 +332333,8 @@ ${isHandDrawn ? "" : `
   }
   function useMultiSelection({ ariaLabels, isItemDisabled = () => false, items, loading, onSelectionChange, selectedItems = [], selectionType: selectionType2, trackBy, setLastUserAction, totalItemsCount }) {
     const selectionControlName = useUniqueId();
-    const [shiftPressed, setShiftPressed] = (0, import_react234.useState)(false);
-    const [lastClickedItem, setLastClickedItem] = (0, import_react234.useState)(null);
+    const [shiftPressed, setShiftPressed] = (0, import_react232.useState)(false);
+    const [lastClickedItem, setLastClickedItem] = (0, import_react232.useState)(null);
     if (selectionType2 !== "multi") {
       return { isItemSelected: () => false };
     }
@@ -332523,7 +332429,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/tools-header.js
-  var import_react235 = __toESM(require_react());
+  var import_react233 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/styles.css.js
   var styles_css_default96 = {
@@ -332570,7 +332476,7 @@ ${isHandDrawn ? "" : `
   function ToolsHeader({ header, filter: filter8, clearSort, pagination, preferences, setLastUserAction }) {
     const [breakpoint, ref] = useContainerBreakpoints(["xs"]);
     const isHeaderString = typeof header === "string";
-    const assignHeaderId = (0, import_react235.useContext)(CollectionLabelContext).assignId;
+    const assignHeaderId = (0, import_react233.useContext)(CollectionLabelContext).assignId;
     const headingId = useUniqueId("heading");
     if (assignHeaderId !== void 0 && isHeaderString) {
       assignHeaderId(headingId);
@@ -332578,30 +332484,30 @@ ${isHandDrawn ? "" : `
     const isSmall = breakpoint === "default";
     const hasTools = filter8 || clearSort || pagination || preferences;
     const hasRightAlignedTools = !!(clearSort || pagination || preferences);
-    return import_react235.default.createElement(
-      import_react235.default.Fragment,
+    return import_react233.default.createElement(
+      import_react233.default.Fragment,
       null,
-      isHeaderString ? import_react235.default.createElement("span", { id: headingId }, header) : header,
-      hasTools && import_react235.default.createElement(
+      isHeaderString ? import_react233.default.createElement("span", { id: headingId }, header) : header,
+      hasTools && import_react233.default.createElement(
         "div",
         { ref, className: clsx_m_default(styles_css_default96.tools, isSmall && styles_css_default96["tools-small"]) },
-        filter8 && import_react235.default.createElement("div", { className: styles_css_default96["tools-filtering"], onClickCapture: () => setLastUserAction === null || setLastUserAction === void 0 ? void 0 : setLastUserAction("filter"), onKeyDownCapture: () => setLastUserAction === null || setLastUserAction === void 0 ? void 0 : setLastUserAction("filter") }, filter8),
-        hasRightAlignedTools && import_react235.default.createElement(
+        filter8 && import_react233.default.createElement("div", { className: styles_css_default96["tools-filtering"], onClickCapture: () => setLastUserAction === null || setLastUserAction === void 0 ? void 0 : setLastUserAction("filter"), onKeyDownCapture: () => setLastUserAction === null || setLastUserAction === void 0 ? void 0 : setLastUserAction("filter") }, filter8),
+        hasRightAlignedTools && import_react233.default.createElement(
           "div",
           { className: styles_css_default96["tools-align-right"] },
-          clearSort && import_react235.default.createElement("div", { className: styles_css_default96["tools-clear-sort"] }, clearSort),
-          pagination && import_react235.default.createElement("div", { className: styles_css_default96["tools-pagination"], onClickCapture: () => setLastUserAction === null || setLastUserAction === void 0 ? void 0 : setLastUserAction("pagination") }, pagination),
-          preferences && import_react235.default.createElement("div", { className: styles_css_default96["tools-preferences"], onClickCapture: () => setLastUserAction === null || setLastUserAction === void 0 ? void 0 : setLastUserAction("preferences") }, preferences)
+          clearSort && import_react233.default.createElement("div", { className: styles_css_default96["tools-clear-sort"] }, clearSort),
+          pagination && import_react233.default.createElement("div", { className: styles_css_default96["tools-pagination"], onClickCapture: () => setLastUserAction === null || setLastUserAction === void 0 ? void 0 : setLastUserAction("pagination") }, pagination),
+          preferences && import_react233.default.createElement("div", { className: styles_css_default96["tools-preferences"], onClickCapture: () => setLastUserAction === null || setLastUserAction === void 0 ? void 0 : setLastUserAction("preferences") }, preferences)
         )
       )
     );
   }
 
   // node_modules/@cloudscape-design/components/column-layout/internal.js
-  var import_react238 = __toESM(require_react());
+  var import_react236 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/column-layout/flexible-column-layout/index.js
-  var import_react236 = __toESM(require_react());
+  var import_react234 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/column-layout/flexible-column-layout/styles.css.js
   var styles_css_default97 = {
@@ -332627,16 +332533,16 @@ ${isHandDrawn ? "" : `
     const shouldDisableGutters = variant !== "text-grid" && disableGutters;
     const flattenedChildren = flattenChildren2(children2, "ColumnLayout");
     const Tag = __tagOverride !== null && __tagOverride !== void 0 ? __tagOverride : "div";
-    return import_react236.default.createElement(Tag, { ref: containerRef, className: clsx_m_default(styles_css_default97["css-grid"], styles_css_default97[`grid-variant-${variant}`], shouldDisableGutters && [styles_css_default97["grid-no-gutters"]]), style: { gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` } }, flattenedChildren.map((child, i4) => {
+    return import_react234.default.createElement(Tag, { ref: containerRef, className: clsx_m_default(styles_css_default97["css-grid"], styles_css_default97[`grid-variant-${variant}`], shouldDisableGutters && [styles_css_default97["grid-no-gutters"]]), style: { gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` } }, flattenedChildren.map((child, i4) => {
       const key2 = child && typeof child === "object" ? child.key : void 0;
-      return import_react236.default.createElement("div", { key: key2 ? String(key2) : void 0, className: clsx_m_default(styles_css_default97.item, {
+      return import_react234.default.createElement("div", { key: key2 ? String(key2) : void 0, className: clsx_m_default(styles_css_default97.item, {
         [styles_css_default97["first-column"]]: i4 % columnCount === 0
       }) }, child);
     }));
   }
 
   // node_modules/@cloudscape-design/components/column-layout/grid-column-layout.js
-  var import_react237 = __toESM(require_react());
+  var import_react235 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/column-layout/util.js
   function repeat(value3, times) {
@@ -332679,7 +332585,7 @@ ${isHandDrawn ? "" : `
     const shouldHaveVerticalBorders = !isTextGridVariant && (borders === "vertical" || borders === "all");
     const flattenedChildren = flattenChildren2(children2, "ColumnLayout");
     const [breakpoint, ref] = useContainerBreakpoints(COLUMN_TRIGGERS);
-    return import_react237.default.createElement(internal_default15, { ref, disableGutters: true, gridDefinition: repeat((_a213 = COLUMN_DEFS[columns]) !== null && _a213 !== void 0 ? _a213 : {}, flattenedChildren.length), className: clsx_m_default(styles_css_default98.grid, styles_css_default98[`grid-columns-${columns}`], styles_css_default98[`grid-variant-${variant}`], {
+    return import_react235.default.createElement(internal_default15, { ref, disableGutters: true, gridDefinition: repeat((_a213 = COLUMN_DEFS[columns]) !== null && _a213 !== void 0 ? _a213 : {}, flattenedChildren.length), className: clsx_m_default(styles_css_default98.grid, styles_css_default98[`grid-columns-${columns}`], styles_css_default98[`grid-variant-${variant}`], {
       [styles_css_default98["grid-horizontal-borders"]]: shouldHaveHorizontalBorders,
       [styles_css_default98["grid-vertical-borders"]]: shouldHaveVerticalBorders,
       [styles_css_default98["grid-no-gutters"]]: shouldDisableGutters
@@ -332694,27 +332600,27 @@ ${isHandDrawn ? "" : `
     if (columns > MAX_SUPPORTED_COLUMNS && !minColumnWidth) {
       warnOnce("ColumnLayout", `\`columns\` (${columns}) is not supported without \`minColumnWidth\`: only up to ${MAX_SUPPORTED_COLUMNS} columns are supported, so the value is ignored and the columns are sized by their content instead. Set \`minColumnWidth\`, or use ${MAX_SUPPORTED_COLUMNS} columns or fewer.`);
     }
-    return import_react238.default.createElement("div", { ...baseProps, className: clsx_m_default(baseProps.className, styles_css_default98["column-layout"]), ref: __internalRootRef }, minColumnWidth ? import_react238.default.createElement(FlexibleColumnLayout, { columns, borders, variant, minColumnWidth, disableGutters, __tagOverride }, children2) : import_react238.default.createElement(GridColumnLayout, { columns, variant, borders, disableGutters, __breakpoint, __tagOverride }, children2));
+    return import_react236.default.createElement("div", { ...baseProps, className: clsx_m_default(baseProps.className, styles_css_default98["column-layout"]), ref: __internalRootRef }, minColumnWidth ? import_react236.default.createElement(FlexibleColumnLayout, { columns, borders, variant, minColumnWidth, disableGutters, __tagOverride }, children2) : import_react236.default.createElement(GridColumnLayout, { columns, variant, borders, disableGutters, __breakpoint, __tagOverride }, children2));
   }
 
   // node_modules/@cloudscape-design/components/internal/context/collection-preferences-metadata-context.js
-  var import_react239 = __toESM(require_react());
-  var CollectionPreferencesMetadata = (0, import_react239.createContext)({});
+  var import_react237 = __toESM(require_react());
+  var CollectionPreferencesMetadata = (0, import_react237.createContext)({});
 
   // node_modules/@cloudscape-design/components/column-layout/index.js
-  var import_react240 = __toESM(require_react());
+  var import_react238 = __toESM(require_react());
   function ColumnLayout2({ columns = 1, variant = "default", borders = "none", disableGutters = false, ...props }) {
     const baseComponentProps = useBaseComponent("ColumnLayout", {
       props: { borders, columns, disableGutters, minColumnWidth: props.minColumnWidth, variant }
     });
     const externalProps = getExternalProps(props);
-    return import_react240.default.createElement(ColumnLayout, { columns, variant, borders, disableGutters, ...externalProps, ...baseComponentProps });
+    return import_react238.default.createElement(ColumnLayout, { columns, variant, borders, disableGutters, ...externalProps, ...baseComponentProps });
   }
   applyDisplayName(ColumnLayout2, "ColumnLayout");
 
   // node_modules/@cloudscape-design/components/container/index.js
-  var import_react241 = __toESM(require_react());
-  var Container = import_react241.default.forwardRef(({ variant = "default", disableHeaderPaddings = false, disableContentPaddings = false, fitHeight = false, ...props }, ref) => {
+  var import_react239 = __toESM(require_react());
+  var Container = import_react239.default.forwardRef(({ variant = "default", disableHeaderPaddings = false, disableContentPaddings = false, fitHeight = false, ...props }, ref) => {
     const analyticsMetadata = getAnalyticsMetadataProps(props);
     const baseComponentProps = useBaseComponent("Container", {
       props: {
@@ -332732,37 +332638,37 @@ ${isHandDrawn ? "" : `
       name: "awsui.Container",
       label: { root: "self" }
     };
-    return import_react241.default.createElement(
+    return import_react239.default.createElement(
       AnalyticsFunnelSubStep,
       { subStepIdentifier: analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.instanceIdentifier, subStepErrorContext: analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.errorContext },
-      import_react241.default.createElement(InternalContainerAsSubstep, { ref, variant, disableContentPaddings, disableHeaderPaddings, fitHeight, ...props, ...externalProps, ...baseComponentProps, ...getAnalyticsMetadataAttribute({ component: analyticsComponentMetadata }) })
+      import_react239.default.createElement(InternalContainerAsSubstep, { ref, variant, disableContentPaddings, disableHeaderPaddings, fitHeight, ...props, ...externalProps, ...baseComponentProps, ...getAnalyticsMetadataAttribute({ component: analyticsComponentMetadata }) })
     );
   });
   applyDisplayName(Container, "Container");
   var container_default = Container;
 
   // node_modules/@cloudscape-design/components/content-layout/index.js
-  var import_react245 = __toESM(require_react());
+  var import_react243 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/content-layout/internal.js
-  var import_react244 = __toESM(require_react());
+  var import_react242 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/hooks/use-dynamic-overlap/index.js
-  var import_react242 = __toESM(require_react());
-  var import_react243 = __toESM(require_react());
+  var import_react240 = __toESM(require_react());
+  var import_react241 = __toESM(require_react());
   function useDynamicOverlap(props) {
     var _a213;
     const disabled = (_a213 = props === null || props === void 0 ? void 0 : props.disabled) !== null && _a213 !== void 0 ? _a213 : false;
-    const setDynamicOverlapHeight = (0, import_react242.useContext)(DynamicOverlapContext);
-    const overlapElementRef = (0, import_react243.useRef)(null);
-    const getElement = (0, import_react243.useCallback)(() => overlapElementRef.current, [overlapElementRef]);
-    const updateState = (0, import_react243.useCallback)((entry) => {
+    const setDynamicOverlapHeight = (0, import_react240.useContext)(DynamicOverlapContext);
+    const overlapElementRef = (0, import_react241.useRef)(null);
+    const getElement = (0, import_react241.useCallback)(() => overlapElementRef.current, [overlapElementRef]);
+    const updateState = (0, import_react241.useCallback)((entry) => {
       if (!disabled) {
         setDynamicOverlapHeight(entry.contentBoxHeight);
       }
     }, [disabled, setDynamicOverlapHeight]);
     useResizeObserver(getElement, updateState);
-    (0, import_react242.useLayoutEffect)(function handleDynamicOverlapHeight() {
+    (0, import_react240.useLayoutEffect)(function handleDynamicOverlapHeight() {
       return () => {
         if (!disabled) {
           setDynamicOverlapHeight(0);
@@ -332801,7 +332707,7 @@ ${isHandDrawn ? "" : `
   // node_modules/@cloudscape-design/components/content-layout/internal.js
   var halfGeckoMaxCssLength = ((1 << 30) - 1) / 120;
   function InternalContentLayout({ children: children2, disableOverlap, header, headerVariant = "default", headerBackgroundStyle, __internalRootRef, maxContentWidth = Number.MAX_VALUE, breadcrumbs, notifications: notifications2, defaultPadding, secondaryHeader, ...rest }) {
-    const mainRef = (0, import_react244.useRef)(null);
+    const mainRef = (0, import_react242.useRef)(null);
     const mergedRef = useMergeRefs(mainRef, __internalRootRef);
     const baseProps = getBaseProps(rest);
     const isVisualRefresh = useVisualRefresh();
@@ -332809,7 +332715,7 @@ ${isHandDrawn ? "" : `
     const overlapElement = useDynamicOverlap();
     const isOverlapDisabled = !children2 || disableOverlap;
     const contentHeaderClassName = headerVariant === "high-contrast" && isVisualRefresh ? highContrastHeaderClassName : "";
-    return import_react244.default.createElement(
+    return import_react242.default.createElement(
       "div",
       { ...baseProps, className: clsx_m_default(baseProps.className, styles_css_default99.layout, {
         [styles_css_default99["is-overlap-disabled"]]: isOverlapDisabled,
@@ -332820,27 +332726,27 @@ ${isHandDrawn ? "" : `
       }), style: {
         [custom_css_properties_default.contentLayoutMaxContentWidth]: maxContentWidth < Number.MAX_VALUE ? `${maxContentWidth}px` : `${halfGeckoMaxCssLength}px`
       }, ref: mergedRef },
-      import_react244.default.createElement("div", { className: clsx_m_default(styles_css_default99.background, { [styles_css_default99["has-default-background"]]: !headerBackgroundStyle }, contentHeaderClassName), ref: overlapElement }, headerBackgroundStyle && import_react244.default.createElement("div", { className: styles_css_default99["header-background"], style: {
+      import_react242.default.createElement("div", { className: clsx_m_default(styles_css_default99.background, { [styles_css_default99["has-default-background"]]: !headerBackgroundStyle }, contentHeaderClassName), ref: overlapElement }, headerBackgroundStyle && import_react242.default.createElement("div", { className: styles_css_default99["header-background"], style: {
         background: typeof headerBackgroundStyle === "function" ? headerBackgroundStyle(mode) : headerBackgroundStyle
       } })),
-      notifications2 && import_react244.default.createElement("div", { className: clsx_m_default(styles_css_default99.notifications, styles_css_default100.notifications, contentHeaderClassName) }, notifications2),
-      breadcrumbs && import_react244.default.createElement("div", { className: clsx_m_default(styles_css_default99.breadcrumbs, styles_css_default100.breadcrumbs, contentHeaderClassName) }, breadcrumbs),
-      header && !secondaryHeader && import_react244.default.createElement("div", { className: clsx_m_default(styles_css_default99["header-wrapper"], styles_css_default100.header, contentHeaderClassName, {
+      notifications2 && import_react242.default.createElement("div", { className: clsx_m_default(styles_css_default99.notifications, styles_css_default100.notifications, contentHeaderClassName) }, notifications2),
+      breadcrumbs && import_react242.default.createElement("div", { className: clsx_m_default(styles_css_default99.breadcrumbs, styles_css_default100.breadcrumbs, contentHeaderClassName) }, breadcrumbs),
+      header && !secondaryHeader && import_react242.default.createElement("div", { className: clsx_m_default(styles_css_default99["header-wrapper"], styles_css_default100.header, contentHeaderClassName, {
         [styles_css_default99["with-divider"]]: headerVariant === "divider"
       }) }, header),
-      header && secondaryHeader && import_react244.default.createElement(
+      header && secondaryHeader && import_react242.default.createElement(
         "div",
         { className: clsx_m_default(styles_css_default99["header-wrapper"], {
           [styles_css_default99["with-divider"]]: headerVariant === "divider"
         }) },
-        import_react244.default.createElement(
+        import_react242.default.createElement(
           internal_default15,
           { gridDefinition: [{ colspan: { default: 12, xs: 9 } }, { colspan: { default: 12, xs: 3 } }] },
-          import_react244.default.createElement("div", { className: clsx_m_default(styles_css_default100.header, contentHeaderClassName) }, header),
-          import_react244.default.createElement("div", { className: styles_css_default100["secondary-header"] }, secondaryHeader)
+          import_react242.default.createElement("div", { className: clsx_m_default(styles_css_default100.header, contentHeaderClassName) }, header),
+          import_react242.default.createElement("div", { className: styles_css_default100["secondary-header"] }, secondaryHeader)
         )
       ),
-      import_react244.default.createElement("div", { className: clsx_m_default(styles_css_default99.content, {
+      import_react242.default.createElement("div", { className: clsx_m_default(styles_css_default99.content, {
         [styles_css_default99["with-divider"]]: headerVariant === "divider"
       }) }, children2)
     );
@@ -332851,12 +332757,12 @@ ${isHandDrawn ? "" : `
     const baseComponentProps = useBaseComponent("ContentLayout", {
       props: { disableOverlap: props.disableOverlap }
     });
-    return import_react245.default.createElement(InternalContentLayout, { ...props, ...baseComponentProps });
+    return import_react243.default.createElement(InternalContentLayout, { ...props, ...baseComponentProps });
   }
   applyDisplayName(ContentLayout, "ContentLayout");
 
   // node_modules/@cloudscape-design/components/expandable-section/index.js
-  var import_react246 = __toESM(require_react());
+  var import_react244 = __toESM(require_react());
   function ExpandableSection({ variant = "default", ...props }) {
     const analyticsMetadata = getAnalyticsMetadataProps(props);
     const baseComponentProps = useBaseComponent("ExpandableSection", {
@@ -332870,18 +332776,18 @@ ${isHandDrawn ? "" : `
         hasHeaderActions: Boolean(props.headerActions)
       }
     }, analyticsMetadata);
-    return import_react246.default.createElement(InternalExpandableSection, { variant, ...props, ...baseComponentProps, __injectAnalyticsComponentMetadata: true });
+    return import_react244.default.createElement(InternalExpandableSection, { variant, ...props, ...baseComponentProps, __injectAnalyticsComponentMetadata: true });
   }
   applyDisplayName(ExpandableSection, "ExpandableSection");
 
   // node_modules/@cloudscape-design/components/internal/hooks/use-throttle-callback/index.js
-  var import_react247 = __toESM(require_react());
+  var import_react245 = __toESM(require_react());
   function useThrottleCallback(func, delay2, deps) {
-    return (0, import_react247.useMemo)(() => throttle(func, delay2), deps);
+    return (0, import_react245.useMemo)(() => throttle(func, delay2), deps);
   }
 
   // node_modules/@cloudscape-design/components/form-field/index.js
-  var import_react248 = __toESM(require_react());
+  var import_react246 = __toESM(require_react());
   function FormField({ stretch = false, ...props }) {
     const analyticsMetadata = getAnalyticsMetadataProps(props);
     const baseComponentProps = useBaseComponent("FormField", {
@@ -332893,7 +332799,7 @@ ${isHandDrawn ? "" : `
         hasErrorContext: Boolean(analyticsMetadata === null || analyticsMetadata === void 0 ? void 0 : analyticsMetadata.errorContext)
       }
     }, analyticsMetadata);
-    return import_react248.default.createElement(InternalFormField, { stretch, ...props, __hideLabel: false, __analyticsMetadata: analyticsMetadata, ...baseComponentProps, ...getAnalyticsMetadataAttribute({
+    return import_react246.default.createElement(InternalFormField, { stretch, ...props, __hideLabel: false, __analyticsMetadata: analyticsMetadata, ...baseComponentProps, ...getAnalyticsMetadataAttribute({
       component: {
         name: "awsui.FormField",
         label: `.${styles_css_default85.label}`
@@ -332903,35 +332809,35 @@ ${isHandDrawn ? "" : `
   applyDisplayName(FormField, "FormField");
 
   // node_modules/@cloudscape-design/components/grid/index.js
-  var import_react249 = __toESM(require_react());
+  var import_react247 = __toESM(require_react());
   function Grid({ gridDefinition = [], disableGutters = false, children: children2, ...restProps }) {
     const baseComponentProps = useBaseComponent("Grid", {
       props: { disableGutters }
     });
     const baseProps = getBaseProps(restProps);
     const [breakpoint, ref] = useContainerBreakpoints(void 0);
-    return import_react249.default.createElement(internal_default15, { ...baseProps, ...baseComponentProps, ref, __breakpoint: breakpoint, gridDefinition, disableGutters }, children2);
+    return import_react247.default.createElement(internal_default15, { ...baseProps, ...baseComponentProps, ref, __breakpoint: breakpoint, gridDefinition, disableGutters }, children2);
   }
   applyDisplayName(Grid, "Grid");
 
   // node_modules/@cloudscape-design/components/header/index.js
-  var import_react250 = __toESM(require_react());
+  var import_react248 = __toESM(require_react());
   function Header2({ variant = "h2", ...props }) {
     const baseComponentProps = useBaseComponent("Header", {
       props: { headingTagOverride: props.headingTagOverride, variant }
     });
     const tabIndex = variant === "h1" ? -1 : void 0;
-    return import_react250.default.createElement(InternalHeader, { __headingTagTabIndex: tabIndex, variant, ...props, ...baseComponentProps });
+    return import_react248.default.createElement(InternalHeader, { __headingTagTabIndex: tabIndex, variant, ...props, ...baseComponentProps });
   }
   applyDisplayName(Header2, "Header");
 
   // node_modules/@cloudscape-design/components/table/internal.js
-  var import_react291 = __toESM(require_react());
+  var import_react289 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/hooks/use-scroll-sync/index.js
-  var import_react251 = __toESM(require_react());
+  var import_react249 = __toESM(require_react());
   function useScrollSync(refs) {
-    const activeElement = (0, import_react251.useRef)(null);
+    const activeElement = (0, import_react249.useRef)(null);
     return (event3) => {
       const targetElement = event3.currentTarget;
       if (targetElement && (activeElement.current === null || activeElement.current === targetElement)) {
@@ -332952,25 +332858,25 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/internal/hooks/use-table-interaction-metrics/index.js
-  var import_react252 = __toESM(require_react());
+  var import_react250 = __toESM(require_react());
   var USER_ACTION_TIME_LIMIT = 1e3;
   function useTableInteractionMetrics({ elementRef, items, itemCount, instanceIdentifier, getComponentIdentifier, getComponentConfiguration, loading = false, interactionMetadata }) {
     const taskInteractionId = useRandomId();
     const tableInteractionAttributes = useDOMAttribute(elementRef, "data-analytics-task-interaction-id", taskInteractionId);
     const { isInFunnel } = useFunnel();
-    const lastUserAction = (0, import_react252.useRef)(null);
-    const capturedUserAction = (0, import_react252.useRef)(null);
-    const loadingStartTime = (0, import_react252.useRef)(null);
-    const isMountedRef = (0, import_react252.useRef)(true);
-    const metadata = (0, import_react252.useRef)({ itemCount, getComponentIdentifier, getComponentConfiguration, interactionMetadata });
+    const lastUserAction = (0, import_react250.useRef)(null);
+    const capturedUserAction = (0, import_react250.useRef)(null);
+    const loadingStartTime = (0, import_react250.useRef)(null);
+    const isMountedRef = (0, import_react250.useRef)(true);
+    const metadata = (0, import_react250.useRef)({ itemCount, getComponentIdentifier, getComponentConfiguration, interactionMetadata });
     metadata.current = { itemCount, getComponentIdentifier, getComponentConfiguration, interactionMetadata };
-    (0, import_react252.useEffect)(() => {
+    (0, import_react250.useEffect)(() => {
       isMountedRef.current = true;
       return () => {
         isMountedRef.current = false;
       };
     }, []);
-    (0, import_react252.useEffect)(() => {
+    (0, import_react250.useEffect)(() => {
       if (isInFunnel) {
         return;
       }
@@ -332980,7 +332886,7 @@ ${isHandDrawn ? "" : `
         componentConfiguration: metadata.current.getComponentConfiguration()
       });
     }, [taskInteractionId, isInFunnel]);
-    (0, import_react252.useEffect)(() => {
+    (0, import_react250.useEffect)(() => {
       if (loading) {
         loadingStartTime.current = performance.now();
         if (lastUserAction.current && lastUserAction.current.time > performance.now() - USER_ACTION_TIME_LIMIT) {
@@ -333030,29 +332936,29 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table-root/context.js
-  var import_react253 = __toESM(require_react());
+  var import_react251 = __toESM(require_react());
   var defaultTableContext = {
     isGrid: false,
     gridTemplateColumns: void 0
   };
-  var TableContext = (0, import_react253.createContext)(defaultTableContext);
+  var TableContext = (0, import_react251.createContext)(defaultTableContext);
   var TableContextProvider = TableContext.Provider;
   function useTableContext() {
-    return (0, import_react253.useContext)(TableContext);
+    return (0, import_react251.useContext)(TableContext);
   }
 
   // node_modules/@cloudscape-design/components/table/body-cell/index.js
-  var import_react263 = __toESM(require_react());
-
-  // node_modules/@cloudscape-design/components/table/body-cell/disabled-inline-editor.js
   var import_react261 = __toESM(require_react());
 
+  // node_modules/@cloudscape-design/components/table/body-cell/disabled-inline-editor.js
+  var import_react259 = __toESM(require_react());
+
   // node_modules/@cloudscape-design/components/table/body-cell/click-away.js
-  var import_react254 = __toESM(require_react());
+  var import_react252 = __toESM(require_react());
   function useClickAway(onClick) {
-    const awayRef = (0, import_react254.useRef)(null);
+    const awayRef = (0, import_react252.useRef)(null);
     const onClickStable = useStableCallback(onClick);
-    (0, import_react254.useEffect)(() => {
+    (0, import_react252.useEffect)(() => {
       function handleClick(event3) {
         if (!nodeBelongs2(awayRef.current, event3.target)) {
           onClickStable();
@@ -333065,10 +332971,10 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/body-cell/td-element.js
-  var import_react260 = __toESM(require_react());
+  var import_react258 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/expand-toggle-button/index.js
-  var import_react255 = __toESM(require_react());
+  var import_react253 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/expand-toggle-button/styles.css.js
   var styles_css_default101 = {
@@ -333080,16 +332986,16 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/internal/components/expand-toggle-button/index.js
   function ExpandToggleButton({ isExpanded, onExpandableItemToggle, expandButtonLabel, collapseButtonLabel, customIcon, expandToggleIcon, className, disableFocusHighlight }) {
-    const buttonRef = (0, import_react255.useRef)(null);
+    const buttonRef = (0, import_react253.useRef)(null);
     const { tabIndex } = useSingleTabStopNavigation(buttonRef);
-    return import_react255.default.createElement("button", { type: "button", ref: buttonRef, tabIndex, "aria-label": isExpanded ? collapseButtonLabel : expandButtonLabel, "aria-expanded": isExpanded, className: clsx_m_default(styles_css_default101["expand-toggle"], disableFocusHighlight && styles_css_default101["disable-focus-highlight"], className), onClick: onExpandableItemToggle, "data-awsui-motion-trigger": "hover", "data-awsui-motion-target": "" }, customIcon !== null && customIcon !== void 0 ? customIcon : import_react255.default.createElement(CustomizableIcon, { customIcon: expandToggleIcon === null || expandToggleIcon === void 0 ? void 0 : expandToggleIcon({ expanded: !!isExpanded }), size: isThemeActive(Theme13.OneTheme) ? "x-small" : "small", fallback: {
+    return import_react253.default.createElement("button", { type: "button", ref: buttonRef, tabIndex, "aria-label": isExpanded ? collapseButtonLabel : expandButtonLabel, "aria-expanded": isExpanded, className: clsx_m_default(styles_css_default101["expand-toggle"], disableFocusHighlight && styles_css_default101["disable-focus-highlight"], className), onClick: onExpandableItemToggle, "data-awsui-motion-trigger": "hover", "data-awsui-motion-target": "" }, customIcon !== null && customIcon !== void 0 ? customIcon : import_react253.default.createElement(CustomizableIcon, { customIcon: expandToggleIcon === null || expandToggleIcon === void 0 ? void 0 : expandToggleIcon({ expanded: !!isExpanded }), size: isThemeActive(Theme13.OneTheme) ? "x-small" : "small", fallback: {
       name: isThemeActive(Theme13.OneTheme) ? "angle-down" : "caret-down-filled",
       className: clsx_m_default(styles_css_default101["expand-toggle-icon"], isExpanded && styles_css_default101["expand-toggle-icon-expanded"])
     } }));
   }
 
   // node_modules/@cloudscape-design/components/table-body-cell/internal.js
-  var import_react256 = __toESM(require_react());
+  var import_react254 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/body-cell/styles.css.js
   var styles_css_default102 = {
@@ -333149,7 +333055,7 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/table-body-cell/internal.js
-  var InternalTableBodyCell = import_react256.default.forwardRef((props, ref) => {
+  var InternalTableBodyCell = import_react254.default.forwardRef((props, ref) => {
     var _a213;
     const { tag, style: style3, wrapLines, disablePaddings, colSpan, nativeAttributes, tabIndex, onClick, onFocus, onBlur, beforeContent, children: children2 } = props;
     const { className, ...restBaseProps } = getBaseProps(props);
@@ -333166,7 +333072,7 @@ ${isHandDrawn ? "" : `
       ...isGrid && colSpan ? { "aria-colspan": colSpan } : void 0
     };
     const Element4 = tag;
-    return import_react256.default.createElement(
+    return import_react254.default.createElement(
       Element4,
       { ref, ...restBaseProps, style: gridColumnStyle ? { ...style3, ...gridColumnStyle } : style3, colSpan: isGrid ? void 0 : colSpan, className: clsx_m_default(
         styles_css_default102["body-cell"],
@@ -333178,12 +333084,12 @@ ${isHandDrawn ? "" : `
         isVisualRefresh && styles_css_default102["is-visual-refresh"]
       ), onClick, onFocus, onBlur, ...mergedNativeAttributes, tabIndex },
       beforeContent,
-      import_react256.default.createElement("div", { className: clsx_m_default(styles_css_default102["body-cell-content"], wrapLines && styles_css_default102["body-cell-wrap"], !disablePaddings && styles_css_default102["with-paddings"]) }, children2)
+      import_react254.default.createElement("div", { className: clsx_m_default(styles_css_default102["body-cell-content"], wrapLines && styles_css_default102["body-cell-wrap"], !disablePaddings && styles_css_default102["with-paddings"]) }, children2)
     );
   });
 
   // node_modules/@cloudscape-design/components/table/sticky-columns/use-sticky-columns.js
-  var import_react257 = __toESM(require_react());
+  var import_react255 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/sticky-columns/utils.js
   function isCellStatesEqual(s1, s22) {
@@ -333226,10 +333132,10 @@ ${isHandDrawn ? "" : `
   var MINIMUM_SCROLLABLE_SPACE2 = 148;
   var MINIMUM_SCROLLABLE_SPACE_WHILE_STUCK = MINIMUM_SCROLLABLE_SPACE2 - 24;
   function useStickyColumns({ visibleColumns, stickyColumnsFirst, stickyColumnsLast }) {
-    const store2 = (0, import_react257.useMemo)(() => new StickyColumnsStore(), []);
-    const wrapperRef = (0, import_react257.useRef)(null);
-    const tableRef = (0, import_react257.useRef)(null);
-    const cellsRef = (0, import_react257.useRef)(/* @__PURE__ */ new Map());
+    const store2 = (0, import_react255.useMemo)(() => new StickyColumnsStore(), []);
+    const wrapperRef = (0, import_react255.useRef)(null);
+    const tableRef = (0, import_react255.useRef)(null);
+    const cellsRef = (0, import_react255.useRef)(/* @__PURE__ */ new Map());
     const hasStickyColumns = stickyColumnsFirst + stickyColumnsLast > 0;
     const updateStickyStyles = useStableCallback(() => {
       if (wrapperRef.current && tableRef.current) {
@@ -333245,7 +333151,7 @@ ${isHandDrawn ? "" : `
     });
     useResizeObserver(wrapperRef, updateStickyStyles);
     useResizeObserver(tableRef, updateStickyStyles);
-    (0, import_react257.useEffect)(() => {
+    (0, import_react255.useEffect)(() => {
       if (wrapperRef.current && tableRef.current) {
         store2.updateCellStyles({
           wrapper: wrapperRef.current,
@@ -333257,7 +333163,7 @@ ${isHandDrawn ? "" : `
         });
       }
     }, [store2, stickyColumnsFirst, stickyColumnsLast, visibleColumns]);
-    (0, import_react257.useEffect)(() => {
+    (0, import_react255.useEffect)(() => {
       if (!hasStickyColumns) {
         return;
       }
@@ -333274,7 +333180,7 @@ ${isHandDrawn ? "" : `
       const unsubscribe = store2.subscribe(selector2, (newState2, prevState) => updateWrapperStyles(selector2(newState2), selector2(prevState)));
       return unsubscribe;
     }, [store2, hasStickyColumns]);
-    const setWrapper = (0, import_react257.useCallback)((node2) => {
+    const setWrapper = (0, import_react255.useCallback)((node2) => {
       if (wrapperRef.current) {
         wrapperRef.current.removeEventListener("scroll", updateStickyStyles);
       }
@@ -333283,10 +333189,10 @@ ${isHandDrawn ? "" : `
       }
       wrapperRef.current = node2;
     }, [hasStickyColumns, updateStickyStyles]);
-    const setTable = (0, import_react257.useCallback)((node2) => {
+    const setTable = (0, import_react255.useCallback)((node2) => {
       tableRef.current = node2;
     }, []);
-    const setCell = (0, import_react257.useCallback)((columnId, node2) => {
+    const setCell = (0, import_react255.useCallback)((columnId, node2) => {
       if (node2) {
         cellsRef.current.set(columnId, node2);
       } else {
@@ -333320,8 +333226,8 @@ ${isHandDrawn ? "" : `
   function useStickyCellStyles({ stickyColumns, columnId, getClassName, boundaryColumnId }) {
     var _a213, _b, _c;
     const setCell = stickyColumns.refs.cell;
-    const unsubscribeRef = (0, import_react257.useRef)(null);
-    const refCallback = (0, import_react257.useCallback)(
+    const unsubscribeRef = (0, import_react255.useRef)(null);
+    const refCallback = (0, import_react255.useCallback)(
       (cellElement) => {
         if (unsubscribeRef.current) {
           unsubscribeRef.current();
@@ -333554,8 +333460,8 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/table-role/grid-navigation.js
-  var import_react258 = __toESM(require_react());
-  var import_react259 = __toESM(require_react());
+  var import_react256 = __toESM(require_react());
+  var import_react257 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/table-role/utils.js
   function getClosestCell(element3) {
@@ -333695,10 +333601,10 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/table/table-role/grid-navigation.js
   function GridNavigationProvider({ keyboardNavigation, pageSize, getTable, children: children2 }) {
-    const navigationAPI = (0, import_react258.useRef)(null);
-    const gridNavigation = (0, import_react259.useMemo)(() => new GridNavigationProcessor(navigationAPI), []);
+    const navigationAPI = (0, import_react256.useRef)(null);
+    const gridNavigation = (0, import_react257.useMemo)(() => new GridNavigationProcessor(navigationAPI), []);
     const getTableStable = useStableCallback(getTable);
-    (0, import_react259.useEffect)(() => {
+    (0, import_react257.useEffect)(() => {
       if (keyboardNavigation) {
         const table = getTableStable();
         if (table) {
@@ -333707,15 +333613,15 @@ ${isHandDrawn ? "" : `
         }
       }
     }, [keyboardNavigation, gridNavigation, getTableStable]);
-    (0, import_react259.useEffect)(() => {
+    (0, import_react257.useEffect)(() => {
       gridNavigation.update({ pageSize });
     }, [gridNavigation, pageSize]);
-    (0, import_react259.useEffect)(() => {
+    (0, import_react257.useEffect)(() => {
       if (keyboardNavigation) {
         gridNavigation.refresh();
       }
     });
-    return import_react258.default.createElement(SingleTabStopNavigationProvider, { ref: navigationAPI, navigationActive: keyboardNavigation, getNextFocusTarget: gridNavigation.getNextFocusTarget, isElementSuppressed: gridNavigation.isElementSuppressed, onRegisterFocusable: gridNavigation.onRegisterFocusable, onUnregisterActive: gridNavigation.onUnregisterActive }, children2);
+    return import_react256.default.createElement(SingleTabStopNavigationProvider, { ref: navigationAPI, navigationActive: keyboardNavigation, getNextFocusTarget: gridNavigation.getNextFocusTarget, isElementSuppressed: gridNavigation.isElementSuppressed, onRegisterFocusable: gridNavigation.onRegisterFocusable, onUnregisterActive: gridNavigation.onUnregisterActive }, children2);
   }
   var GridNavigationProcessor = class {
     constructor(navigationAPI) {
@@ -333932,7 +333838,7 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/table/body-cell/td-element.js
-  var TableTdElement = import_react260.default.forwardRef(({ children: children2, wrapLines, isRowHeader, isSelected, isNextSelected, isPrevSelected, nativeAttributes, onClick, onFocus, onBlur, isEvenRow, stripedRows, isSelection, hasSelection, hasFooter, columnId, colIndex, stickyState, tableRole, level, isExpandable, isExpanded, onExpandableItemToggle, expandButtonLabel, collapseButtonLabel, verticalAlign, resizableColumns, resizableStyle, isEditable, isEditing, isEditingDisabled, hasSuccessIcon, tableVariant, counter: counter2, ...rest }, ref) => {
+  var TableTdElement = import_react258.default.forwardRef(({ children: children2, wrapLines, isRowHeader, isSelected, isNextSelected, isPrevSelected, nativeAttributes, onClick, onFocus, onBlur, isEvenRow, stripedRows, isSelection, hasSelection, hasFooter, columnId, colIndex, stickyState, tableRole, level, isExpandable, isExpanded, onExpandableItemToggle, expandButtonLabel, collapseButtonLabel, verticalAlign, resizableColumns, resizableStyle, isEditable, isEditing, isEditingDisabled, hasSuccessIcon, tableVariant, counter: counter2, ...rest }, ref) => {
     const tag = isRowHeader ? "th" : "td";
     resizableStyle = resizableColumns ? {} : resizableStyle;
     const cellNativeAttributes = {
@@ -333944,24 +333850,24 @@ ${isHandDrawn ? "" : `
       columnId,
       getClassName: (props) => getStickyClassNames(styles_css_default102, props)
     });
-    const cellRefObject = (0, import_react260.useRef)(null);
+    const cellRefObject = (0, import_react258.useRef)(null);
     const mergedRef = useMergeRefs(stickyStyles.ref, ref, cellRefObject);
     const { tabIndex: cellTabIndex } = useSingleTabStopNavigation(cellRefObject);
     const tableIcons = useInternalComponentIcons("table");
     const isEditingActive = isEditing && !isEditingDisabled;
-    return import_react260.default.createElement(
+    return import_react258.default.createElement(
       InternalTableBodyCell,
-      { ref: mergedRef, tag, style: { ...resizableStyle, ...stickyStyles.style }, className: clsx_m_default(isSelected && styles_css_default102["body-cell-selected"], isNextSelected && styles_css_default102["body-cell-next-selected"], isPrevSelected && styles_css_default102["body-cell-prev-selected"], !isEvenRow && stripedRows && styles_css_default102["body-cell-shaded"], stripedRows && styles_css_default102["has-striped-rows"], isSelection && styles_css_default96["selection-control"], hasSelection && styles_css_default102["has-selection"], hasFooter && styles_css_default102["has-footer"], resizableColumns && styles_css_default102["resizable-columns"], verticalAlign === "top" && styles_css_default102["body-cell-align-top"], isEditable && styles_css_default102["body-cell-editable"], isEditing && !isEditingDisabled && styles_css_default102["body-cell-edit-active"], isEditing && isEditingDisabled && styles_css_default102["body-cell-edit-disabled-popover"], hasSuccessIcon && styles_css_default102["body-cell-has-success"], level !== void 0 && !isEditingActive && styles_css_default102["body-cell-expandable"], level !== void 0 && !isEditingActive && styles_css_default102[`expandable-level-${getLevelClassSuffix(level)}`], tableVariant && styles_css_default102[`table-variant-${tableVariant}`], stickyStyles.className), wrapLines, ...copyAnalyticsMetadataAttribute(rest), nativeAttributes: cellNativeAttributes, tabIndex: cellTabIndex === -1 ? void 0 : cellTabIndex, onClick, onFocus, onBlur, beforeContent: level !== void 0 && isExpandable && !isEditingActive ? import_react260.default.createElement(
+      { ref: mergedRef, tag, style: { ...resizableStyle, ...stickyStyles.style }, className: clsx_m_default(isSelected && styles_css_default102["body-cell-selected"], isNextSelected && styles_css_default102["body-cell-next-selected"], isPrevSelected && styles_css_default102["body-cell-prev-selected"], !isEvenRow && stripedRows && styles_css_default102["body-cell-shaded"], stripedRows && styles_css_default102["has-striped-rows"], isSelection && styles_css_default96["selection-control"], hasSelection && styles_css_default102["has-selection"], hasFooter && styles_css_default102["has-footer"], resizableColumns && styles_css_default102["resizable-columns"], verticalAlign === "top" && styles_css_default102["body-cell-align-top"], isEditable && styles_css_default102["body-cell-editable"], isEditing && !isEditingDisabled && styles_css_default102["body-cell-edit-active"], isEditing && isEditingDisabled && styles_css_default102["body-cell-edit-disabled-popover"], hasSuccessIcon && styles_css_default102["body-cell-has-success"], level !== void 0 && !isEditingActive && styles_css_default102["body-cell-expandable"], level !== void 0 && !isEditingActive && styles_css_default102[`expandable-level-${getLevelClassSuffix(level)}`], tableVariant && styles_css_default102[`table-variant-${tableVariant}`], stickyStyles.className), wrapLines, ...copyAnalyticsMetadataAttribute(rest), nativeAttributes: cellNativeAttributes, tabIndex: cellTabIndex === -1 ? void 0 : cellTabIndex, onClick, onFocus, onBlur, beforeContent: level !== void 0 && isExpandable && !isEditingActive ? import_react258.default.createElement(
         "div",
         { className: styles_css_default102["expandable-toggle-wrapper"] },
-        import_react260.default.createElement(ExpandToggleButton, { isExpanded, onExpandableItemToggle, expandButtonLabel, collapseButtonLabel, expandToggleIcon: tableIcons === null || tableIcons === void 0 ? void 0 : tableIcons.expandToggle })
+        import_react258.default.createElement(ExpandToggleButton, { isExpanded, onExpandableItemToggle, expandButtonLabel, collapseButtonLabel, expandToggleIcon: tableIcons === null || tableIcons === void 0 ? void 0 : tableIcons.expandToggle })
       ) : null },
       children2,
-      counter2 ? import_react260.default.createElement(
+      counter2 ? import_react258.default.createElement(
         "div",
         { className: styles_css_default102["body-cell-counter"] },
-        import_react260.default.createElement("span", null, " "),
-        import_react260.default.createElement("span", { className: styles_css_default104["body-cell-counter"] }, counter2)
+        import_react258.default.createElement("span", null, " "),
+        import_react258.default.createElement("span", { className: styles_css_default104["body-cell-counter"] }, counter2)
       ) : null
     );
   });
@@ -333978,9 +333884,9 @@ ${isHandDrawn ? "" : `
         onEditEnd(true);
       }
     });
-    const iconRef = (0, import_react261.useRef)(null);
-    const buttonRef = (0, import_react261.useRef)(null);
-    const portalRef = (0, import_react261.useRef)(null);
+    const iconRef = (0, import_react259.useRef)(null);
+    const buttonRef = (0, import_react259.useRef)(null);
+    const portalRef = (0, import_react259.useRef)(null);
     function handleEscape(event3) {
       if (event3.key === "Escape") {
         onEditEnd(true);
@@ -333994,45 +333900,45 @@ ${isHandDrawn ? "" : `
     const { targetProps, descriptionEl } = useHiddenDescription(editDisabledReason);
     const portalClasses = usePortalModeClasses(portalRef);
     const { tabIndex } = useSingleTabStopNavigation(buttonRef);
-    return import_react261.default.createElement(
+    return import_react259.default.createElement(
       TableTdElement,
       { ...rest, nativeAttributes: { "data-inline-editing-active": isEditing.toString() }, isEditing, isEditingDisabled: true, onClick: !isEditing && !isExpandableColumn ? onClick : void 0, ref: !isExpandableColumn ? clickAwayRef : void 0 },
       column2.cell(item),
-      import_react261.default.createElement(
+      import_react259.default.createElement(
         "div",
         { className: styles_css_default102["body-cell-editor-wrapper"] },
-        import_react261.default.createElement(
+        import_react259.default.createElement(
           "div",
           { ref: isExpandableColumn ? clickAwayRef : void 0 },
-          import_react261.default.createElement(
+          import_react259.default.createElement(
             "button",
             { ref: buttonRef, tabIndex, className: clsx_m_default(styles_css_default102["body-cell-editor"], styles_css_default102["body-cell-editor-disabled"], isExpandableColumn && styles_css_default102["body-cell-editor-focusable"]), onClick: !isEditing && isExpandableColumn ? onClick : void 0, "aria-label": (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.activateEditLabel) === null || _a213 === void 0 ? void 0 : _a213.call(ariaLabels, column2, item), "aria-haspopup": "dialog", "aria-disabled": "true", onKeyDown: handleEscape, ...targetProps },
-            import_react261.default.createElement(
+            import_react259.default.createElement(
               "span",
               { className: styles_css_default102["body-cell-editor-icon"] },
-              import_react261.default.createElement(internal_default, { name: "lock-private", variant: "normal", __internalRootRef: iconRef })
+              import_react259.default.createElement(internal_default, { name: "lock-private", variant: "normal", __internalRootRef: iconRef })
             ),
             descriptionEl
           )
         )
       ),
-      isEditing && import_react261.default.createElement(
+      isEditing && import_react259.default.createElement(
         "span",
         { ref: portalRef },
-        import_react261.default.createElement(
+        import_react259.default.createElement(
           Portal,
           null,
-          import_react261.default.createElement(
+          import_react259.default.createElement(
             "span",
             { className: portalClasses },
-            import_react261.default.createElement(
+            import_react259.default.createElement(
               PopoverContainer,
-              { size: "medium", fixedWidth: false, position: "top", trackRef: iconRef, arrow: (position5) => import_react261.default.createElement(arrow_default, { position: position5 }), renderWithPortal: true, zIndex: 7e3 },
-              import_react261.default.createElement(
+              { size: "medium", fixedWidth: false, position: "top", trackRef: iconRef, arrow: (position5) => import_react259.default.createElement(arrow_default, { position: position5 }), renderWithPortal: true, zIndex: 7e3 },
+              import_react259.default.createElement(
                 body_default,
                 { dismissButton: false, dismissAriaLabel: void 0, header: null, onDismiss: () => {
                 }, overflowVisible: "both" },
-                import_react261.default.createElement(internal_default2, { tagName: "span" }, editDisabledReason)
+                import_react259.default.createElement(internal_default2, { tagName: "span" }, editDisabledReason)
               )
             )
           )
@@ -334042,14 +333948,14 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/body-cell/inline-editor.js
-  var import_react262 = __toESM(require_react());
+  var import_react260 = __toESM(require_react());
   var noop12 = () => void 0;
   function InlineEditor({ ariaLabels, item, column: column2, onEditEnd, submitEdit, __onRender }) {
     var _a213, _b, _c, _d;
-    const [currentEditLoading, setCurrentEditLoading] = (0, import_react262.useState)(false);
-    const [currentEditValue, setCurrentEditValue] = (0, import_react262.useState)();
+    const [currentEditLoading, setCurrentEditLoading] = (0, import_react260.useState)(false);
+    const [currentEditValue, setCurrentEditValue] = (0, import_react260.useState)();
     const i18n = useInternalI18n("table");
-    const focusLockRef = (0, import_react262.useRef)(null);
+    const focusLockRef = (0, import_react260.useRef)(null);
     function finishEdit({ cancelled = false, refocusCell = true } = {}) {
       if (!cancelled) {
         setCurrentEditValue(void 0);
@@ -334089,7 +333995,7 @@ ${isHandDrawn ? "" : `
       }
     }
     const clickAwayRef = useClickAway(() => onCancel({ reFocusEditedCell: false }));
-    (0, import_react262.useEffect)(() => {
+    (0, import_react260.useEffect)(() => {
       if (__onRender) {
         const timer4 = setTimeout(__onRender, 1);
         return () => clearTimeout(timer4);
@@ -334102,32 +334008,32 @@ ${isHandDrawn ? "" : `
       submitValue: handleSubmit
     };
     const FormElement = disableNativeForm ? "div" : "form";
-    return import_react262.default.createElement(
+    return import_react260.default.createElement(
       focus_lock_default,
       { restoreFocus: true, ref: focusLockRef },
-      import_react262.default.createElement(
+      import_react260.default.createElement(
         "div",
         { role: "dialog", ref: clickAwayRef, "aria-label": (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.activateEditLabel) === null || _a213 === void 0 ? void 0 : _a213.call(ariaLabels, column2, item), onKeyDown: handleEscape },
-        import_react262.default.createElement(
+        import_react260.default.createElement(
           FormElement,
           { onSubmit: disableNativeForm ? void 0 : onFormSubmit },
-          import_react262.default.createElement(
+          import_react260.default.createElement(
             InternalFormField,
             { stretch: true, label: ariaLabel, constraintText, __hideLabel: true, __disableGutters: true, i18nStrings: { errorIconAriaLabel }, errorText: validation(item, currentEditValue) },
-            import_react262.default.createElement(
+            import_react260.default.createElement(
               "div",
               { className: styles_css_default102["body-cell-editor-row"] },
-              import_react262.default.createElement("div", { className: styles_css_default102["body-cell-editor-row-editor"] }, editingCell(item, cellContext)),
-              import_react262.default.createElement(
+              import_react260.default.createElement("div", { className: styles_css_default102["body-cell-editor-row-editor"] }, editingCell(item, cellContext)),
+              import_react260.default.createElement(
                 "span",
                 { className: styles_css_default102["body-cell-editor-controls"] },
-                import_react262.default.createElement(
+                import_react260.default.createElement(
                   internal_default5,
                   { direction: "horizontal", size: "xxs" },
-                  !currentEditLoading ? import_react262.default.createElement(internal_default4, { ariaLabel: (_b = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.cancelEditLabel) === null || _b === void 0 ? void 0 : _b.call(ariaLabels, column2), formAction: "none", iconName: "close", variant: "inline-icon", onClick: () => onCancel() }) : null,
-                  import_react262.default.createElement(internal_default4, { ariaLabel: (_c = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.submitEditLabel) === null || _c === void 0 ? void 0 : _c.call(ariaLabels, column2), formAction: disableNativeForm ? "none" : "submit", onClick: disableNativeForm ? handleSubmit : void 0, iconName: "check", variant: "inline-icon", loading: currentEditLoading })
+                  !currentEditLoading ? import_react260.default.createElement(internal_default4, { ariaLabel: (_b = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.cancelEditLabel) === null || _b === void 0 ? void 0 : _b.call(ariaLabels, column2), formAction: "none", iconName: "close", variant: "inline-icon", onClick: () => onCancel() }) : null,
+                  import_react260.default.createElement(internal_default4, { ariaLabel: (_c = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.submitEditLabel) === null || _c === void 0 ? void 0 : _c.call(ariaLabels, column2), formAction: disableNativeForm ? "none" : "submit", onClick: disableNativeForm ? handleSubmit : void 0, iconName: "check", variant: "inline-icon", loading: currentEditLoading })
                 ),
-                import_react262.default.createElement(internal_default2, { tagName: "span", hidden: true }, currentEditLoading ? i18n("ariaLabels.submittingEditText", (_d = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.submittingEditText) === null || _d === void 0 ? void 0 : _d.call(ariaLabels, column2)) : "")
+                import_react260.default.createElement(internal_default2, { tagName: "span", hidden: true }, currentEditLoading ? i18n("ariaLabels.submittingEditText", (_d = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.submittingEditText) === null || _d === void 0 ? void 0 : _d.call(ariaLabels, column2)) : "")
               )
             )
           )
@@ -334143,23 +334049,23 @@ ${isHandDrawn ? "" : `
   function TableCellEditable({ item, column: column2, isEditing, onEditStart, onEditEnd, submitEdit, ariaLabels, successfulEdit = false, ...rest }) {
     var _a213, _b, _c;
     const i18n = useInternalI18n("table");
-    const editActivateRef = (0, import_react263.useRef)(null);
+    const editActivateRef = (0, import_react261.useRef)(null);
     const tdNativeAttributes = {
       "data-inline-editing-active": isEditing.toString()
     };
-    const isFocusMoveNeededRef = (0, import_react263.useRef)(false);
+    const isFocusMoveNeededRef = (0, import_react261.useRef)(false);
     const isExpandableColumn = rest.level !== void 0;
-    (0, import_react263.useEffect)(() => {
+    (0, import_react261.useEffect)(() => {
       if (!isEditing && editActivateRef.current && isFocusMoveNeededRef.current) {
         isFocusMoveNeededRef.current = false;
         editActivateRef.current.focus();
       }
     }, [isEditing]);
-    const [hasFocus, setHasFocus] = (0, import_react263.useState)(false);
+    const [hasFocus, setHasFocus] = (0, import_react261.useState)(false);
     const prevSuccessfulEdit = usePrevious(successfulEdit);
     const prevHasFocus = usePrevious(hasFocus);
-    const [showSuccessIcon, setShowSuccessIcon] = (0, import_react263.useState)(false);
-    (0, import_react263.useEffect)(() => {
+    const [showSuccessIcon, setShowSuccessIcon] = (0, import_react261.useState)(false);
+    (0, import_react261.useEffect)(() => {
       if (successfulEdit && prevSuccessfulEdit && !hasFocus && prevHasFocus) {
         setShowSuccessIcon(false);
       }
@@ -334168,36 +334074,36 @@ ${isHandDrawn ? "" : `
       }
     }, [hasFocus, successfulEdit, prevHasFocus, prevSuccessfulEdit]);
     const { tabIndex: editActivateTabIndex } = useSingleTabStopNavigation(editActivateRef);
-    return import_react263.default.createElement(TableTdElement, { ...rest, nativeAttributes: tdNativeAttributes, isEditing, hasSuccessIcon: showSuccessIcon && hasFocus, onClick: !isEditing && !isExpandableColumn ? onEditStart : void 0, onFocus: () => setHasFocus(true), onBlur: () => setHasFocus(false) }, isEditing && column2.editConfig ? import_react263.default.createElement(InlineEditor, { ariaLabels, column: column2, item, onEditEnd: (options2) => {
+    return import_react261.default.createElement(TableTdElement, { ...rest, nativeAttributes: tdNativeAttributes, isEditing, hasSuccessIcon: showSuccessIcon && hasFocus, onClick: !isEditing && !isExpandableColumn ? onEditStart : void 0, onFocus: () => setHasFocus(true), onBlur: () => setHasFocus(false) }, isEditing && column2.editConfig ? import_react261.default.createElement(InlineEditor, { ariaLabels, column: column2, item, onEditEnd: (options2) => {
       setShowSuccessIcon(false);
       isFocusMoveNeededRef.current = options2.refocusCell;
       onEditEnd(options2.cancelled);
-    }, submitEdit: submitEdit !== null && submitEdit !== void 0 ? submitEdit : submitHandlerFallback }) : import_react263.default.createElement(
-      import_react263.default.Fragment,
+    }, submitEdit: submitEdit !== null && submitEdit !== void 0 ? submitEdit : submitHandlerFallback }) : import_react261.default.createElement(
+      import_react261.default.Fragment,
       null,
       column2.cell(item),
-      showSuccessIcon && hasFocus && import_react263.default.createElement(
-        import_react263.default.Fragment,
+      showSuccessIcon && hasFocus && import_react261.default.createElement(
+        import_react261.default.Fragment,
         null,
-        import_react263.default.createElement(
+        import_react261.default.createElement(
           "span",
           { className: styles_css_default102["body-cell-success"], onMouseDown: (e3) => {
             e3.preventDefault();
           } },
-          import_react263.default.createElement(internal_default, { name: "status-positive", variant: "success", ariaLabel: (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.successfulEditLabel) === null || _a213 === void 0 ? void 0 : _a213.call(ariaLabels, column2) })
+          import_react261.default.createElement(internal_default, { name: "status-positive", variant: "success", ariaLabel: (_a213 = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.successfulEditLabel) === null || _a213 === void 0 ? void 0 : _a213.call(ariaLabels, column2) })
         ),
-        import_react263.default.createElement(internal_default2, { tagName: "span", hidden: true }, i18n("ariaLabels.successfulEditLabel", (_b = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.successfulEditLabel) === null || _b === void 0 ? void 0 : _b.call(ariaLabels, column2)))
+        import_react261.default.createElement(internal_default2, { tagName: "span", hidden: true }, i18n("ariaLabels.successfulEditLabel", (_b = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.successfulEditLabel) === null || _b === void 0 ? void 0 : _b.call(ariaLabels, column2)))
       ),
-      import_react263.default.createElement(
+      import_react261.default.createElement(
         "div",
         { className: styles_css_default102["body-cell-editor-wrapper"] },
-        import_react263.default.createElement(
+        import_react261.default.createElement(
           "button",
           { className: clsx_m_default(styles_css_default102["body-cell-editor"], isExpandableColumn && styles_css_default102["body-cell-editor-focusable"]), "aria-label": (_c = ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.activateEditLabel) === null || _c === void 0 ? void 0 : _c.call(ariaLabels, column2, item), ref: editActivateRef, onClick: !isEditing && isExpandableColumn ? onEditStart : void 0, tabIndex: editActivateTabIndex },
-          import_react263.default.createElement(
+          import_react261.default.createElement(
             "span",
             { className: styles_css_default102["body-cell-editor-icon"] },
-            import_react263.default.createElement(internal_default, { name: "edit" })
+            import_react261.default.createElement(internal_default, { name: "edit" })
           )
         )
       )
@@ -334207,39 +334113,39 @@ ${isHandDrawn ? "" : `
     var _a213, _b;
     const editDisabledReason = (_b = (_a213 = props.column.editConfig) === null || _a213 === void 0 ? void 0 : _a213.disabledReason) === null || _b === void 0 ? void 0 : _b.call(_a213, props.item);
     if (editDisabledReason) {
-      return import_react263.default.createElement(DisabledInlineEditor, { editDisabledReason, ...props });
+      return import_react261.default.createElement(DisabledInlineEditor, { editDisabledReason, ...props });
     }
     if (props.isEditable || props.isEditing) {
-      return import_react263.default.createElement(TableCellEditable, { ...props });
+      return import_react261.default.createElement(TableCellEditable, { ...props });
     }
     const { column: column2, item } = props;
-    return import_react263.default.createElement(TableTdElement, { ...props, isEditable: false }, column2.cell(item));
+    return import_react261.default.createElement(TableTdElement, { ...props, isEditable: false }, column2.cell(item));
   }
 
   // node_modules/@cloudscape-design/components/table/clear-sort.js
-  var import_react264 = __toESM(require_react());
+  var import_react262 = __toESM(require_react());
   function ClearSortButton({ multiColumnSort, i18nStrings, onClearSort }) {
     var _a213;
     const i18n = useInternalI18n("table");
-    return import_react264.default.createElement(internal_default4, { variant: "inline-link", formAction: "none", onClick: () => {
+    return import_react262.default.createElement(internal_default4, { variant: "inline-link", formAction: "none", onClick: () => {
       fireNonCancelableEvent(multiColumnSort.onChange, { sortingColumns: [] });
       onClearSort === null || onClearSort === void 0 ? void 0 : onClearSort();
     } }, (_a213 = i18n("i18nStrings.clearSort", i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.clearSort)) !== null && _a213 !== void 0 ? _a213 : "");
   }
 
   // node_modules/@cloudscape-design/components/table/column-groups/col-group.js
-  var import_react267 = __toESM(require_react());
+  var import_react265 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/use-column-widths.js
-  var import_react266 = __toESM(require_react());
+  var import_react264 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/sticky-header/use-cells-resize-observer.js
-  var import_react265 = __toESM(require_react());
+  var import_react263 = __toESM(require_react());
   function useCellsResizeObserver(getCells, onResize) {
     const stableOnResize = useStableCallback(onResize);
-    const observerRef = (0, import_react265.useRef)(null);
-    const observedCellsRef = (0, import_react265.useRef)([]);
-    (0, import_react265.useLayoutEffect)(() => {
+    const observerRef = (0, import_react263.useRef)(null);
+    const observedCellsRef = (0, import_react263.useRef)([]);
+    (0, import_react263.useLayoutEffect)(() => {
       if (typeof ResizeObserver === "undefined") {
         return;
       }
@@ -334256,7 +334162,7 @@ ${isHandDrawn ? "" : `
       cells.filter((cell) => !observedCells.includes(cell)).forEach((cell) => observer2.observe(cell));
       observedCellsRef.current = cells;
     });
-    (0, import_react265.useEffect)(() => {
+    (0, import_react263.useEffect)(() => {
       return () => {
         var _a213;
         (_a213 = observerRef.current) === null || _a213 === void 0 ? void 0 : _a213.disconnect();
@@ -334337,7 +334243,7 @@ ${isHandDrawn ? "" : `
     newWidths.set(columnId, newWidth);
     return newWidths;
   }
-  var WidthsContext = (0, import_react266.createContext)({
+  var WidthsContext = (0, import_react264.createContext)({
     getColumnStyles: () => ({}),
     columnWidths: /* @__PURE__ */ new Map(),
     getColumnMinWidth: () => DEFAULT_COLUMN_WIDTH,
@@ -334351,14 +334257,14 @@ ${isHandDrawn ? "" : `
     }
   });
   function ColumnWidthsProvider({ visibleColumns, resizableColumns, containerRef, groupColumnMap, children: children2 }) {
-    const visibleColumnsRef = (0, import_react266.useRef)(null);
-    const containerWidthRef = (0, import_react266.useRef)(0);
-    const [columnWidths, setColumnWidths] = (0, import_react266.useState)(null);
-    const cellsRef = (0, import_react266.useRef)(/* @__PURE__ */ new Map());
-    const stickyCellsRef = (0, import_react266.useRef)(/* @__PURE__ */ new Map());
-    const colsRef = (0, import_react266.useRef)(/* @__PURE__ */ new Map());
-    const stickyColsRef = (0, import_react266.useRef)(/* @__PURE__ */ new Map());
-    const hasColElements = (0, import_react266.useRef)(false);
+    const visibleColumnsRef = (0, import_react264.useRef)(null);
+    const containerWidthRef = (0, import_react264.useRef)(0);
+    const [columnWidths, setColumnWidths] = (0, import_react264.useState)(null);
+    const cellsRef = (0, import_react264.useRef)(/* @__PURE__ */ new Map());
+    const stickyCellsRef = (0, import_react264.useRef)(/* @__PURE__ */ new Map());
+    const colsRef = (0, import_react264.useRef)(/* @__PURE__ */ new Map());
+    const stickyColsRef = (0, import_react264.useRef)(/* @__PURE__ */ new Map());
+    const hasColElements = (0, import_react264.useRef)(false);
     const getCell = (columnId) => {
       var _a213;
       return (_a213 = cellsRef.current.get(columnId)) !== null && _a213 !== void 0 ? _a213 : null;
@@ -334458,7 +334364,7 @@ ${isHandDrawn ? "" : `
       containerWidthRef.current = containerWidth;
       requestAnimationFrame(() => updateColumnWidths());
     });
-    (0, import_react266.useEffect)(() => {
+    (0, import_react264.useEffect)(() => {
       updateColumnWidths();
       if (!resizableColumns) {
         return;
@@ -334482,7 +334388,7 @@ ${isHandDrawn ? "" : `
       }
       visibleColumnsRef.current = visibleColumns.map((column2) => column2.id);
     }, [columnWidths, resizableColumns, visibleColumns, updateColumnWidths]);
-    (0, import_react266.useEffect)(() => {
+    (0, import_react264.useEffect)(() => {
       if (!resizableColumns) {
         return;
       }
@@ -334510,7 +334416,7 @@ ${isHandDrawn ? "" : `
       const currentColumnWidth = columnWidths.get(rightmostColumn) || DEFAULT_COLUMN_WIDTH;
       updateColumn(rightmostColumn, currentColumnWidth + delta);
     }
-    return import_react266.default.createElement(WidthsContext.Provider, { value: {
+    return import_react264.default.createElement(WidthsContext.Provider, { value: {
       getColumnStyles,
       columnWidths: columnWidths !== null && columnWidths !== void 0 ? columnWidths : /* @__PURE__ */ new Map(),
       getColumnMinWidth,
@@ -334521,22 +334427,22 @@ ${isHandDrawn ? "" : `
     } }, children2);
   }
   function useColumnWidths() {
-    return (0, import_react266.useContext)(WidthsContext);
+    return (0, import_react264.useContext)(WidthsContext);
   }
 
   // node_modules/@cloudscape-design/components/table/column-groups/col-group.js
   function TableColGroup({ visibleColumnDefinitions, hasSelection, sticky = false, selectionColumnId: selectionColumnId2 }) {
     const { getColumnStyles, setCol } = useColumnWidths();
-    return import_react267.default.createElement(
+    return import_react265.default.createElement(
       "colgroup",
       null,
-      hasSelection && import_react267.default.createElement("col", { style: sticky ? { width: getColumnStyles(true, selectionColumnId2).width } : void 0, ref: (node2) => setCol(sticky, selectionColumnId2, node2) }),
+      hasSelection && import_react265.default.createElement("col", { style: sticky ? { width: getColumnStyles(true, selectionColumnId2).width } : void 0, ref: (node2) => setCol(sticky, selectionColumnId2, node2) }),
       visibleColumnDefinitions.map((column2, colIndex) => {
         const columnId = getColumnKey(column2, colIndex);
         if (sticky) {
-          return import_react267.default.createElement("col", { key: String(columnId), style: { width: getColumnStyles(true, columnId).width }, ref: (node2) => setCol(true, columnId, node2) });
+          return import_react265.default.createElement("col", { key: String(columnId), style: { width: getColumnStyles(true, columnId).width }, ref: (node2) => setCol(true, columnId, node2) });
         }
-        return import_react267.default.createElement("col", { key: columnId, "data-column-id": String(columnId), ref: (node2) => setCol(false, columnId, node2) });
+        return import_react265.default.createElement("col", { key: columnId, "data-column-id": String(columnId), ref: (node2) => setCol(false, columnId, node2) });
       })
     );
   }
@@ -334808,7 +334714,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/multi-column-sort/live-announcement.js
-  var import_react268 = __toESM(require_react());
+  var import_react266 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/multi-column-sort/utils.js
   function getSortIndex(sortingColumns, column2) {
@@ -334876,15 +334782,15 @@ ${isHandDrawn ? "" : `
     var _a213, _b;
     const i18n = useInternalI18n("table");
     const locale3 = useLocale();
-    const listFormatter = (0, import_react268.useMemo)(() => new Intl.ListFormat(locale3 !== null && locale3 !== void 0 ? locale3 : void 0, { type: "unit" }), [locale3]);
+    const listFormatter = (0, import_react266.useMemo)(() => new Intl.ListFormat(locale3 !== null && locale3 !== void 0 ? locale3 : void 0, { type: "unit" }), [locale3]);
     const sortAscending = (_a213 = i18n("ariaLabels.sortAscending", ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.sortAscending)) !== null && _a213 !== void 0 ? _a213 : "";
     const sortDescending = (_b = i18n("ariaLabels.sortDescending", ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.sortDescending)) !== null && _b !== void 0 ? _b : "";
     const renderSortColumn = ({ columnLabel, isDescending }) => `${columnLabel} ${isDescending ? sortDescending : sortAscending}`.trim();
     const renderSortOrder = i18n("ariaLabels.liveAnnouncementSortOrder", ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.liveAnnouncementSortOrder, formatSortOrder);
     const sortCleared = i18n("ariaLabels.liveAnnouncementSortCleared", ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.liveAnnouncementSortCleared);
-    const [announcement, setAnnouncement] = (0, import_react268.useState)("");
-    const isFirstRender = (0, import_react268.useRef)(true);
-    (0, import_react268.useEffect)(() => {
+    const [announcement, setAnnouncement] = (0, import_react266.useState)("");
+    const isFirstRender = (0, import_react266.useRef)(true);
+    (0, import_react266.useEffect)(() => {
       if (isFirstRender.current) {
         isFirstRender.current = false;
         return;
@@ -334902,13 +334808,13 @@ ${isHandDrawn ? "" : `
     if (!announcement) {
       return null;
     }
-    return import_react268.default.createElement(internal_default2, { hidden: true, tagName: "span" }, announcement);
+    return import_react266.default.createElement(internal_default2, { hidden: true, tagName: "span" }, announcement);
   }
 
   // node_modules/@cloudscape-design/components/table/no-data-cell.js
-  var import_react269 = __toESM(require_react());
+  var import_react267 = __toESM(require_react());
   function NoDataCell({ totalColumnsCount, hasFooter, loading, loadingText, empty: empty3, tableRef, containerRef }) {
-    const cellContentRef = (0, import_react269.useRef)(null);
+    const cellContentRef = (0, import_react267.useRef)(null);
     useResizeObserver(containerRef, ({ contentBoxWidth: containerInlineSize }) => {
       if (tableRef.current && cellContentRef.current) {
         const tablePaddingInlineStart = parseFloat(getComputedStyle(tableRef.current).paddingInlineStart) || 0;
@@ -334917,19 +334823,19 @@ ${isHandDrawn ? "" : `
         cellContentRef.current.style.inlineSize = Math.floor(inlineSize) + "px";
       }
     });
-    return import_react269.default.createElement(
+    return import_react267.default.createElement(
       "td",
       { colSpan: totalColumnsCount, className: clsx_m_default(styles_css_default96["cell-merged"], hasFooter && styles_css_default96["has-footer"]) },
-      import_react269.default.createElement("div", { ref: cellContentRef, className: styles_css_default96["cell-merged-content"], "data-awsui-table-suppress-navigation": true }, loading ? import_react269.default.createElement(
+      import_react267.default.createElement("div", { ref: cellContentRef, className: styles_css_default96["cell-merged-content"], "data-awsui-table-suppress-navigation": true }, loading ? import_react267.default.createElement(
         StatusIndicator,
         { type: "loading", className: styles_css_default96.loading, wrapText: true },
-        import_react269.default.createElement(internal_default2, { tagName: "span" }, loadingText)
-      ) : import_react269.default.createElement("div", { className: styles_css_default96.empty }, empty3))
+        import_react267.default.createElement(internal_default2, { tagName: "span" }, loadingText)
+      ) : import_react267.default.createElement("div", { className: styles_css_default96.empty }, empty3))
     );
   }
 
   // node_modules/@cloudscape-design/components/table/progressive-loading/items-loader.js
-  var import_react270 = __toESM(require_react());
+  var import_react268 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/progressive-loading/styles.css.js
   var styles_css_default106 = {
@@ -334940,18 +334846,18 @@ ${isHandDrawn ? "" : `
   function ItemsLoader({ item, trackBy, children: children2 }) {
     let parentTrackId = item && trackBy ? applyTrackBy(trackBy, item) : void 0;
     parentTrackId = typeof parentTrackId === "string" ? parentTrackId : void 0;
-    return import_react270.default.createElement("div", { "data-root": item ? "false" : "true", "data-parentrow": parentTrackId, className: styles_css_default106["items-loader"] }, children2);
+    return import_react268.default.createElement("div", { "data-root": item ? "false" : "true", "data-parentrow": parentTrackId, className: styles_css_default106["items-loader"] }, children2);
   }
   function getLoaderContent({ item, loadingStatus, renderLoaderPending, renderLoaderLoading, renderLoaderError, renderLoaderEmpty }) {
     let content = null;
     if (loadingStatus === "pending" && renderLoaderPending) {
       content = renderLoaderPending({ item });
     } else if (loadingStatus === "loading" && renderLoaderLoading) {
-      content = import_react270.default.createElement(internal_default2, { tagName: "span" }, renderLoaderLoading({ item }));
+      content = import_react268.default.createElement(internal_default2, { tagName: "span" }, renderLoaderLoading({ item }));
     } else if (loadingStatus === "error" && renderLoaderError) {
-      content = import_react270.default.createElement(internal_default2, { tagName: "span" }, renderLoaderError({ item }));
+      content = import_react268.default.createElement(internal_default2, { tagName: "span" }, renderLoaderError({ item }));
     } else if (loadingStatus === "finished" && renderLoaderEmpty && item) {
-      content = import_react270.default.createElement(internal_default2, { tagName: "span" }, renderLoaderEmpty({ item }));
+      content = import_react268.default.createElement(internal_default2, { tagName: "span" }, renderLoaderEmpty({ item }));
     } else {
       warnOnce("Table", "Must define `renderLoaderPending`, `renderLoaderLoading`, `renderLoaderError`, or `renderLoaderEmpty` when using corresponding loading status.");
     }
@@ -334959,13 +334865,13 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/progressive-loading/loader-cell.js
-  var import_react271 = __toESM(require_react());
+  var import_react269 = __toESM(require_react());
   function TableLoaderCell({ item, trackBy, counter: counter2, children: children2, ...props }) {
-    return props.isRowHeader ? import_react271.default.createElement(
+    return props.isRowHeader ? import_react269.default.createElement(
       TableTdElement,
       { ...props, counter: counter2, isEditable: false, isEditing: false },
-      import_react271.default.createElement(ItemsLoader, { item, trackBy }, children2)
-    ) : import_react271.default.createElement(TableTdElement, { ...props, isEditable: false, isEditing: false }, null);
+      import_react269.default.createElement(ItemsLoader, { item, trackBy }, children2)
+    ) : import_react269.default.createElement(TableTdElement, { ...props, isEditable: false, isEditing: false }, null);
   }
 
   // node_modules/@cloudscape-design/components/table/progressive-loading/progressive-loading-utils.js
@@ -335007,7 +334913,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/resizer/index.js
-  var import_react272 = __toESM(require_react());
+  var import_react270 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/resizer/styles.css.js
   var styles_css_default107 = {
@@ -335069,28 +334975,28 @@ ${isHandDrawn ? "" : `
   var AUTO_GROW_INTERVAL = 10;
   var AUTO_GROW_INCREMENT = 5;
   function Divider({ className, position: position5, isGrouped }) {
-    return import_react272.default.createElement("span", { className: clsx_m_default(styles_css_default107.divider, position5 && position5 !== "default" && styles_css_default107[`divider-position-${position5}`], isGrouped && styles_css_default107["divider-grouped"], className) });
+    return import_react270.default.createElement("span", { className: clsx_m_default(styles_css_default107.divider, position5 && position5 !== "default" && styles_css_default107[`divider-position-${position5}`], isGrouped && styles_css_default107["divider-grouped"], className) });
   }
   function Resizer({ onWidthUpdate, onWidthUpdateCommit, ariaLabelledby, minWidth = DEFAULT_COLUMN_WIDTH, tabIndex, showFocusRing, focusId, roleDescription, tooltipText, isBorderless, isLast, isGrouped, dividerPosition }) {
     onWidthUpdate = useStableCallback(onWidthUpdate);
     onWidthUpdateCommit = useStableCallback(onWidthUpdateCommit);
     const isVisualRefresh = useVisualRefresh();
     const separatorId = useUniqueId();
-    const positioningWrapperRef = (0, import_react272.useRef)(null);
-    const resizerToggleRef = (0, import_react272.useRef)(null);
-    const resizerSeparatorRef = (0, import_react272.useRef)(null);
-    const [isPointerDown, setIsPointerDown] = (0, import_react272.useState)(false);
-    const [isDragging, setIsDragging] = (0, import_react272.useState)(false);
-    const [showUapButtons, setShowUapButtons] = (0, import_react272.useState)(false);
-    const [resizerObscured, setResizerObscured] = (0, import_react272.useState)(false);
-    const [isKeyboardDragging, setIsKeyboardDragging] = (0, import_react272.useState)(false);
-    const autoGrowTimeout = (0, import_react272.useRef)();
-    const [resizerHasFocus, setResizerHasFocus] = (0, import_react272.useState)(false);
-    const [headerCellWidth, setHeaderCellWidth] = (0, import_react272.useState)(0);
-    (0, import_react272.useEffect)(() => {
+    const positioningWrapperRef = (0, import_react270.useRef)(null);
+    const resizerToggleRef = (0, import_react270.useRef)(null);
+    const resizerSeparatorRef = (0, import_react270.useRef)(null);
+    const [isPointerDown, setIsPointerDown] = (0, import_react270.useState)(false);
+    const [isDragging, setIsDragging] = (0, import_react270.useState)(false);
+    const [showUapButtons, setShowUapButtons] = (0, import_react270.useState)(false);
+    const [resizerObscured, setResizerObscured] = (0, import_react270.useState)(false);
+    const [isKeyboardDragging, setIsKeyboardDragging] = (0, import_react270.useState)(false);
+    const autoGrowTimeout = (0, import_react270.useRef)();
+    const [resizerHasFocus, setResizerHasFocus] = (0, import_react270.useState)(false);
+    const [headerCellWidth, setHeaderCellWidth] = (0, import_react270.useState)(0);
+    (0, import_react270.useEffect)(() => {
       setHeaderCellWidth(getHeaderWidth(resizerToggleRef.current));
     }, []);
-    const isObscured = (0, import_react272.useCallback)(() => {
+    const isObscured = (0, import_react270.useCallback)(() => {
       const elements2 = getResizerElements(resizerToggleRef.current);
       if (!elements2 || !positioningWrapperRef.current) {
         return false;
@@ -335117,12 +335023,12 @@ ${isHandDrawn ? "" : `
         Math.ceil(relativeInsetInlineEnd) < (isSticky ? 0 : scrollPaddingInlineEnd)
       );
     }, []);
-    const scrollIntoViewIfNeeded2 = (0, import_react272.useCallback)(() => {
+    const scrollIntoViewIfNeeded2 = (0, import_react270.useCallback)(() => {
       if (resizerSeparatorRef.current && isObscured()) {
         scrollElementIntoView(resizerSeparatorRef.current);
       }
     }, [isObscured]);
-    (0, import_react272.useEffect)(() => {
+    (0, import_react270.useEffect)(() => {
       if (!showUapButtons) {
         setResizerObscured(false);
         return;
@@ -335135,12 +335041,12 @@ ${isHandDrawn ? "" : `
       elements2.scrollParent.addEventListener("scroll", onScroll);
       return () => elements2.scrollParent.removeEventListener("scroll", onScroll);
     }, [isObscured, showUapButtons]);
-    (0, import_react272.useEffect)(() => {
+    (0, import_react270.useEffect)(() => {
       if (showUapButtons) {
         setResizerObscured(isObscured());
       }
     }, [headerCellWidth, isObscured, showUapButtons]);
-    const updateTrackerPosition = (0, import_react272.useCallback)((newOffset) => {
+    const updateTrackerPosition = (0, import_react270.useCallback)((newOffset) => {
       const elements2 = getResizerElements(resizerToggleRef.current);
       if (!elements2) {
         return;
@@ -335149,7 +335055,7 @@ ${isHandDrawn ? "" : `
       elements2.tracker.style.insetBlockStart = getLogicalBoundingClientRect(elements2.header).blockSize + "px";
       elements2.tracker.style.insetInlineStart = newOffset - scrollParentInsetInlineStart - 1 + "px";
     }, []);
-    const updateColumnWidth = (0, import_react272.useCallback)((newWidth) => {
+    const updateColumnWidth = (0, import_react270.useCallback)((newWidth) => {
       const elements2 = getResizerElements(resizerToggleRef.current);
       if (!elements2) {
         return;
@@ -335172,7 +335078,7 @@ ${isHandDrawn ? "" : `
         updateColumnWidth(newWidth);
       }
     }, RESIZE_THROTTLE, [updateColumnWidth]);
-    (0, import_react272.useEffect)(() => {
+    (0, import_react270.useEffect)(() => {
       var _a213, _b;
       const elements2 = getResizerElements(resizerToggleRef.current);
       const document2 = (_b = (_a213 = resizerToggleRef.current) === null || _a213 === void 0 ? void 0 : _a213.ownerDocument) !== null && _b !== void 0 ? _b : window.document;
@@ -335284,13 +335190,13 @@ ${isHandDrawn ? "" : `
       updateColumnWidth,
       updateTrackerPosition
     ]);
-    (0, import_react272.useEffect)(() => {
+    (0, import_react270.useEffect)(() => {
       if (isDragging) {
         return () => clearTimeout(autoGrowTimeout.current);
       }
     }, [isDragging]);
     const { tabIndex: resizerTabIndex } = useSingleTabStopNavigation(resizerToggleRef, { tabIndex });
-    return import_react272.default.createElement(
+    return import_react270.default.createElement(
       "div",
       {
         // When the table is borderless (works in visual refresh tables only), the last resize handle must not
@@ -335298,7 +335204,7 @@ ${isHandDrawn ? "" : `
         className: clsx_m_default(styles_css_default107["resizer-wrapper"], isVisualRefresh && styles_css_default107["visual-refresh"], (!isVisualRefresh || isBorderless) && styles_css_default107["is-borderless"], isLast && styles_css_default107["is-last"]),
         ref: positioningWrapperRef
       },
-      import_react272.default.createElement(
+      import_react270.default.createElement(
         DragHandleWrapper,
         { clickDragThreshold: 3, hideButtonsOnDrag: false, directions: {
           "inline-start": resizerObscured ? void 0 : headerCellWidth > minWidth ? "active" : "disabled",
@@ -335322,7 +335228,7 @@ ${isHandDrawn ? "" : `
             });
           }
         } },
-        import_react272.default.createElement("button", { type: "button", ref: resizerToggleRef, className: clsx_m_default(styles_css_default107.resizer, (resizerHasFocus || showFocusRing || isKeyboardDragging) && styles_css_default107["has-focus"]), onPointerDown: (event3) => {
+        import_react270.default.createElement("button", { type: "button", ref: resizerToggleRef, className: clsx_m_default(styles_css_default107.resizer, (resizerHasFocus || showFocusRing || isKeyboardDragging) && styles_css_default107["has-focus"]), onPointerDown: (event3) => {
           if (event3.pointerType === "mouse" && event3.button !== 0) {
             return;
           }
@@ -335345,7 +335251,7 @@ ${isHandDrawn ? "" : `
             return;
           }
         }, "aria-roledescription": roleDescription, "aria-labelledby": ariaLabelledby, tabIndex: resizerTabIndex, "data-focus-id": focusId }),
-        import_react272.default.createElement("span", { className: clsx_m_default(styles_css_default107["divider-interactive"], (isPointerDown || isDragging) && styles_css_default107["divider-active"], isGrouped && styles_css_default107["divider-grouped"], dividerPosition && dividerPosition !== "default" && styles_css_default107[`divider-position-${dividerPosition}`]), "data-awsui-table-suppress-navigation": true, ref: resizerSeparatorRef, id: separatorId, role: "slider", tabIndex: -1, "aria-labelledby": ariaLabelledby, "aria-hidden": !isKeyboardDragging, "aria-valuemin": minWidth, "aria-valuemax": Number.MAX_SAFE_INTEGER, "aria-valuenow": headerCellWidth, "data-focus-id": focusId, onBlur: (event3) => {
+        import_react270.default.createElement("span", { className: clsx_m_default(styles_css_default107["divider-interactive"], (isPointerDown || isDragging) && styles_css_default107["divider-active"], isGrouped && styles_css_default107["divider-grouped"], dividerPosition && dividerPosition !== "default" && styles_css_default107[`divider-position-${dividerPosition}`]), "data-awsui-table-suppress-navigation": true, ref: resizerSeparatorRef, id: separatorId, role: "slider", tabIndex: -1, "aria-labelledby": ariaLabelledby, "aria-hidden": !isKeyboardDragging, "aria-valuemin": minWidth, "aria-valuemax": Number.MAX_SAFE_INTEGER, "aria-valuenow": headerCellWidth, "data-focus-id": focusId, onBlur: (event3) => {
           setIsKeyboardDragging(false);
           if (event3.relatedTarget !== resizerToggleRef.current) {
             setResizerHasFocus(false);
@@ -335357,17 +335263,17 @@ ${isHandDrawn ? "" : `
     );
   }
   function ResizeTracker() {
-    return import_react272.default.createElement("span", { className: styles_css_default107.tracker });
+    return import_react270.default.createElement("span", { className: styles_css_default107.tracker });
   }
 
   // node_modules/@cloudscape-design/components/table/selection/selection-cell.js
-  var import_react275 = __toESM(require_react());
+  var import_react273 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/header-cell/th-element.js
-  var import_react274 = __toESM(require_react());
+  var import_react272 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table-header-cell/internal.js
-  var import_react273 = __toESM(require_react());
+  var import_react271 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/header-cell/styles.css.js
   var styles_css_default108 = {
@@ -335423,7 +335329,7 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/table-header-cell/internal.js
-  var InternalTableHeaderCell = import_react273.default.forwardRef((props, ref) => {
+  var InternalTableHeaderCell = import_react271.default.forwardRef((props, ref) => {
     const { ariaLabel, ariaLabelledby, ariaDescribedby, ariaSort, disablePaddings, style: style3, tabIndex, nativeAttributes, disableContentWrapper, disableDivider, children: children2 } = props;
     const { className, ...restBaseProps } = getBaseProps(props);
     const { isGrid } = useTableContext();
@@ -335437,7 +335343,7 @@ ${isHandDrawn ? "" : `
       ...ariaSort !== void 0 ? { "aria-sort": ariaSort } : void 0,
       ...isGrid ? { role: "columnheader" } : void 0
     };
-    return import_react273.default.createElement("th", { ref, ...restBaseProps, className: clsx_m_default(
+    return import_react271.default.createElement("th", { ref, ...restBaseProps, className: clsx_m_default(
       styles_css_default108["header-cell"],
       className,
       styles_css_default109["header-cell"],
@@ -335450,7 +335356,7 @@ ${isHandDrawn ? "" : `
       disablePaddings && styles_css_default109["disable-paddings"],
       !disablePaddings && styles_css_default108["with-paddings"],
       disableDivider && styles_css_default109["no-divider"]
-    ), style: style3, tabIndex, ...mergedNativeAttributes }, disableContentWrapper ? children2 : import_react273.default.createElement("div", { className: styles_css_default109["header-cell-content"] }, children2));
+    ), style: style3, tabIndex, ...mergedNativeAttributes }, disableContentWrapper ? children2 : import_react271.default.createElement("div", { className: styles_css_default109["header-cell-content"] }, children2));
   });
 
   // node_modules/@cloudscape-design/components/table/header-cell/th-element.js
@@ -335461,7 +335367,7 @@ ${isHandDrawn ? "" : `
       getClassName: (props2) => getStickyClassNames(styles_css_default108, props2),
       boundaryColumnId: stickyBoundaryColumnId
     });
-    const cellRefObject = (0, import_react274.useRef)(null);
+    const cellRefObject = (0, import_react272.useRef)(null);
     const mergedRef = useMergeRefs(stickyStyles.ref, cellRef, cellRefObject);
     const { tabIndex: cellTabIndex } = useSingleTabStopNavigation(cellRefObject);
     const nativeAttributes = {
@@ -335475,7 +335381,7 @@ ${isHandDrawn ? "" : `
       scope: scope !== null && scope !== void 0 ? scope : "col",
       ...ariaLabel ? { "aria-label": ariaLabel } : {}
     };
-    return import_react274.default.createElement(InternalTableHeaderCell, { className: clsx_m_default(styles_css_default108[`header-cell-variant-${variant}`], sticky && styles_css_default108["header-cell-sticky"], resizable && styles_css_default108["header-cell-resizable"], stuck && styles_css_default108["header-cell-stuck"], stripedRows && styles_css_default108["has-striped-rows"], isSelection && clsx_m_default(styles_css_default96["selection-control"], styles_css_default96["selection-control-header"]), tableVariant && styles_css_default108[`table-variant-${tableVariant}`], scope === "colgroup" && styles_css_default108["header-cell-group"], {
+    return import_react272.default.createElement(InternalTableHeaderCell, { className: clsx_m_default(styles_css_default108[`header-cell-variant-${variant}`], sticky && styles_css_default108["header-cell-sticky"], resizable && styles_css_default108["header-cell-resizable"], stuck && styles_css_default108["header-cell-stuck"], stripedRows && styles_css_default108["has-striped-rows"], isSelection && clsx_m_default(styles_css_default96["selection-control"], styles_css_default96["selection-control-header"]), tableVariant && styles_css_default108[`table-variant-${tableVariant}`], scope === "colgroup" && styles_css_default108["header-cell-group"], {
       [styles_css_default108["header-cell-fake-focus"]]: focusedComponent === `header-${String(columnId)}`,
       [styles_css_default108["header-cell-sortable"]]: sortingStatus,
       [styles_css_default108["header-cell-sorted"]]: sortingStatus === "ascending" || sortingStatus === "descending",
@@ -335491,27 +335397,27 @@ ${isHandDrawn ? "" : `
   // node_modules/@cloudscape-design/components/table/selection/selection-cell.js
   function TableHeaderSelectionCell({ focusedComponent, singleSelectionHeaderAriaLabel, getSelectAllProps, onFocusMove, isGrouped, ...props }) {
     const selectAllProps = getSelectAllProps ? getSelectAllProps() : void 0;
-    return import_react275.default.createElement(
+    return import_react273.default.createElement(
       TableThElement,
       { ...props, isSelection: true, colIndex: 0, focusedComponent, ariaLabel: selectAllProps === null || selectAllProps === void 0 ? void 0 : selectAllProps.selectionGroupLabel, ...getAnalyticsMetadataAttribute({
         action: (selectAllProps === null || selectAllProps === void 0 ? void 0 : selectAllProps.checked) ? "deselectAll" : "selectAll"
       }) },
-      selectAllProps ? import_react275.default.createElement(SelectionControl, { onFocusDown: (event3) => {
+      selectAllProps ? import_react273.default.createElement(SelectionControl, { onFocusDown: (event3) => {
         onFocusMove(event3.target, -1, 1);
-      }, focusedComponent, ...selectAllProps, ...props.sticky ? { tabIndex: -1 } : {} }) : import_react275.default.createElement(ScreenreaderOnly, null, singleSelectionHeaderAriaLabel),
-      import_react275.default.createElement(Divider, { className: styles_css_default96["resize-divider"], isGrouped })
+      }, focusedComponent, ...selectAllProps, ...props.sticky ? { tabIndex: -1 } : {} }) : import_react273.default.createElement(ScreenreaderOnly, null, singleSelectionHeaderAriaLabel),
+      import_react273.default.createElement(Divider, { className: styles_css_default96["resize-divider"], isGrouped })
     );
   }
   function TableBodySelectionCell({ selectionControlProps, ...props }) {
-    return import_react275.default.createElement(TableTdElement, { ...props, isSelection: true, wrapLines: false, isEditable: false, isEditing: false, colIndex: 0 }, selectionControlProps ? import_react275.default.createElement(SelectionControl, { ...selectionControlProps, verticalAlign: props.verticalAlign }) : null);
+    return import_react273.default.createElement(TableTdElement, { ...props, isSelection: true, wrapLines: false, isEditable: false, isEditing: false, colIndex: 0 }, selectionControlProps ? import_react273.default.createElement(SelectionControl, { ...selectionControlProps, verticalAlign: props.verticalAlign }) : null);
   }
 
   // node_modules/@cloudscape-design/components/table/selection/use-group-selection.js
-  var import_react276 = __toESM(require_react());
+  var import_react274 = __toESM(require_react());
   function useGroupSelection({ ariaLabels, items, rootItems, selectedItems = [], totalItemsCount, trackBy, expandableRows, selectionType: selectionType2, getLoadingStatus, setLastUserAction }) {
     const selectionControlName = useUniqueId();
-    const [shiftPressed, setShiftPressed] = (0, import_react276.useState)(false);
-    const [lastClickedItem, setLastClickedItem] = (0, import_react276.useState)(null);
+    const [shiftPressed, setShiftPressed] = (0, import_react274.useState)(false);
+    const [lastClickedItem, setLastClickedItem] = (0, import_react274.useState)(null);
     if (selectionType2 !== "group") {
       return { isItemSelected: () => false };
     }
@@ -335598,10 +335504,10 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/skeleton-rows.js
-  var import_react278 = __toESM(require_react());
+  var import_react276 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/skeleton/internal.js
-  var import_react277 = __toESM(require_react());
+  var import_react275 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/skeleton/styles.css.js
   var styles_css_default110 = {
@@ -335626,10 +335532,10 @@ ${isHandDrawn ? "" : `
   function InternalSkeleton({ variant, height: height2, width: width3, display, tagOverride, __internalRootRef, ...props }) {
     const baseProps = getBaseProps(props);
     const Tag = tagOverride;
-    return import_react277.default.createElement(
+    return import_react275.default.createElement(
       Tag,
       { ...baseProps, className: clsx_m_default(baseProps.className, styles_css_default110.root, variant && styles_css_default110[`variant-${variant}`], display && styles_css_default110[`display-${display}`]), ref: __internalRootRef, style: width3 !== void 0 ? { inlineSize: width3 } : {}, "aria-hidden": "true" },
-      import_react277.default.createElement(Tag, { className: styles_css_default110.inner, style: height2 !== void 0 ? { blockSize: height2 } : {} })
+      import_react275.default.createElement(Tag, { className: styles_css_default110.inner, style: height2 !== void 0 ? { blockSize: height2 } : {} })
     );
   }
 
@@ -335637,26 +335543,26 @@ ${isHandDrawn ? "" : `
   var noop13 = () => {
   };
   function SkeletonRows({ count: count2, totalColumnsCount, loadingText, hasSelection, hasFooter, stickyState, tableRole, ariaLabels, cellVerticalAlign, computedVariant, visibleColumnDefinitions, wrapLines, resizableColumns, colIndexOffset, renderCell }) {
-    return import_react278.default.createElement(
-      import_react278.default.Fragment,
+    return import_react276.default.createElement(
+      import_react276.default.Fragment,
       null,
-      import_react278.default.createElement(
+      import_react276.default.createElement(
         "tr",
         { "aria-hidden": "false" },
-        import_react278.default.createElement(
+        import_react276.default.createElement(
           "td",
           { colSpan: totalColumnsCount, className: styles_css_default96["skeleton-loading-cell"] },
-          import_react278.default.createElement(ScreenreaderOnly, null, loadingText)
+          import_react276.default.createElement(ScreenreaderOnly, null, loadingText)
         )
       ),
       Array.from({ length: count2 }, (_3, i4) => {
-        return import_react278.default.createElement(
+        return import_react276.default.createElement(
           "tr",
           { key: `skeleton-row-${i4}`, className: styles_css_default96.row, "aria-hidden": "true" },
-          hasSelection && import_react278.default.createElement("td", { className: styles_css_default96["selection-control"] }),
+          hasSelection && import_react276.default.createElement("td", { className: styles_css_default96["selection-control"] }),
           visibleColumnDefinitions.map((column2, colIndex) => {
             var _a213, _b;
-            return import_react278.default.createElement(TableBodyCell, { key: `skeleton-${getColumnKey(column2, colIndex)}`, isSelected: false, isPrevSelected: false, isNextSelected: false, hasSelection, hasFooter, stickyState, tableRole, resizableStyle: {
+            return import_react276.default.createElement(TableBodyCell, { key: `skeleton-${getColumnKey(column2, colIndex)}`, isSelected: false, isPrevSelected: false, isNextSelected: false, hasSelection, hasFooter, stickyState, tableRole, resizableStyle: {
               width: column2.width,
               minWidth: column2.minWidth,
               maxWidth: column2.maxWidth
@@ -335664,7 +335570,7 @@ ${isHandDrawn ? "" : `
               ...column2,
               cell: () => {
                 const customSkeleton = renderCell === null || renderCell === void 0 ? void 0 : renderCell(column2);
-                return customSkeleton === void 0 ? import_react278.default.createElement(InternalSkeleton, { variant: "dynamic", tagOverride: "span" }) : customSkeleton;
+                return customSkeleton === void 0 ? import_react276.default.createElement(InternalSkeleton, { variant: "dynamic", tagOverride: "span" }) : customSkeleton;
               }
             }, item: {}, wrapLines, isEditable: false, isEditing: false, isRowHeader: column2.isRowHeader, resizableColumns, onEditStart: noop13, onEditEnd: noop13, columnId: (_a213 = column2.id) !== null && _a213 !== void 0 ? _a213 : colIndex, colIndex: colIndex + colIndexOffset, verticalAlign: (_b = column2.verticalAlign) !== null && _b !== void 0 ? _b : cellVerticalAlign, tableVariant: computedVariant });
           })
@@ -335674,20 +335580,20 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/sticky-header.js
-  var import_react284 = __toESM(require_react());
+  var import_react282 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/sticky-header/use-sticky-header-copy.js
-  var import_react279 = __toESM(require_react());
+  var import_react277 = __toESM(require_react());
   function useStickyHeaderCopy({ tableRef, theadRef, secondaryTheadRef, secondaryTableRef, tableWrapperRef }) {
     const isMobile = useMobile();
-    const hideHeaderUnderCopy = (0, import_react279.useCallback)(() => {
+    const hideHeaderUnderCopy = (0, import_react277.useCallback)(() => {
       var _a213;
       if (tableRef.current && theadRef.current && secondaryTheadRef.current && secondaryTableRef.current && tableWrapperRef.current) {
         const thead = (_a213 = theadRef.current.closest("thead")) !== null && _a213 !== void 0 ? _a213 : theadRef.current;
         tableWrapperRef.current.style.marginBlockStart = `-${thead.getBoundingClientRect().height}px`;
       }
     }, [theadRef, secondaryTheadRef, secondaryTableRef, tableWrapperRef, tableRef]);
-    (0, import_react279.useLayoutEffect)(() => {
+    (0, import_react277.useLayoutEffect)(() => {
       hideHeaderUnderCopy();
     });
     useResizeObserver(theadRef, hideHeaderUnderCopy);
@@ -335709,7 +335615,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/thead.js
-  var import_react283 = __toESM(require_react());
+  var import_react281 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/column-groups/split-utils.js
   function getGroupColumnIds(columnGroupsLayout, groupId) {
@@ -335745,10 +335651,10 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/header-cell/index.js
-  var import_react281 = __toESM(require_react());
+  var import_react279 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/header-cell/sort-menu.js
-  var import_react280 = __toESM(require_react());
+  var import_react278 = __toESM(require_react());
   function SortMenu({ inSort, isSortedAscending, isSortedDescending, i18nStrings, ariaLabel, ariaDescribedby, onAction }) {
     var _a213, _b, _c, _d, _e2, _f, _g;
     const i18n = useInternalI18n("table");
@@ -335791,7 +335697,7 @@ ${isHandDrawn ? "" : `
         ]
       }
     ];
-    return import_react280.default.createElement(internal_default9, { items, variant: "icon", compactTrigger: true, expandToViewport: true, ariaLabel: (_g = i18n("ariaLabels.sortMenuTriggerLabel", ariaLabel)) !== null && _g !== void 0 ? _g : "", ariaDescribedby, onItemClick: ({ detail }) => onAction(detail.id) });
+    return import_react278.default.createElement(internal_default9, { items, variant: "icon", compactTrigger: true, expandToViewport: true, ariaLabel: (_g = i18n("ariaLabels.sortMenuTriggerLabel", ariaLabel)) !== null && _g !== void 0 ? _g : "", ariaDescribedby, onItemClick: ({ detail }) => onAction(detail.id) });
   }
 
   // node_modules/@cloudscape-design/components/table/header-cell/utils.js
@@ -335900,14 +335806,14 @@ ${isHandDrawn ? "" : `
     };
     const headerId = useUniqueId("table-header-");
     const icons2 = useInternalComponentIcons("table");
-    const clickableHeaderRef = (0, import_react281.useRef)(null);
+    const clickableHeaderRef = (0, import_react279.useRef)(null);
     const { tabIndex: clickableHeaderTabIndex } = useSingleTabStopNavigation(clickableHeaderRef, { tabIndex });
-    const cellRefObject = (0, import_react281.useRef)(null);
+    const cellRefObject = (0, import_react279.useRef)(null);
     const cellRefCombined = useMergeRefs(cellRef, cellRefObject);
     useResizeObserver(hasDynamicContent ? cellRefObject : () => null, (entry) => {
       updateColumn(columnId, entry.borderBoxWidth);
     });
-    return import_react281.default.createElement(
+    return import_react279.default.createElement(
       TableThElement,
       { resizableStyle, cellRef: cellRefCombined, sortingStatus, sortingDisabled, suppressAriaSort, focusedComponent, stuck, sticky, resizable: resizableColumns, hidden, stripedRows, colIndex, columnId, stickyState, tableRole, variant, tableVariant, colSpan, rowSpan, columnGroupId, isLast, ...sortingDisabled ? {} : getAnalyticsMetadataAttribute({
         action: "sort",
@@ -335918,10 +335824,10 @@ ${isHandDrawn ? "" : `
           sortingDescending: `${!descending4}`
         }
       }) },
-      import_react281.default.createElement(
+      import_react279.default.createElement(
         "div",
         { className: clsx_m_default(styles_css_default108["header-cell-main"], hasSortMenu && styles_css_default108["header-cell-main-with-menu"]) },
-        import_react281.default.createElement(
+        import_react279.default.createElement(
           "div",
           { ref: clickableHeaderRef, "data-focus-id": `sorting-control-${String(columnId)}`, className: clsx_m_default(styles_css_default108["header-cell-content"], {
             [styles_css_default108["header-cell-fake-focus"]]: focusedComponent === `sorting-control-${String(columnId)}`,
@@ -335946,30 +335852,30 @@ ${isHandDrawn ? "" : `
               }
             }
           } : {} },
-          import_react281.default.createElement(
+          import_react279.default.createElement(
             "div",
             { className: clsx_m_default(styles_css_default108["header-cell-text"], styles_css_default105["header-cell-text"], wrapLines && styles_css_default108["header-cell-text-wrap"]), id: headerId },
             column2.header,
-            isEditable ? import_react281.default.createElement(
+            isEditable ? import_react279.default.createElement(
               "span",
               { className: styles_css_default108["edit-icon"] },
-              import_react281.default.createElement(internal_default, { name: "edit", ariaLabel: i18n("columnDefinitions.editConfig.editIconAriaLabel", (_a213 = column2.editConfig) === null || _a213 === void 0 ? void 0 : _a213.editIconAriaLabel) })
+              import_react279.default.createElement(internal_default, { name: "edit", ariaLabel: i18n("columnDefinitions.editConfig.editIconAriaLabel", (_a213 = column2.editConfig) === null || _a213 === void 0 ? void 0 : _a213.editIconAriaLabel) })
             ) : null
           ),
-          sortAccessibleText && import_react281.default.createElement(ScreenreaderOnly, null, sortAccessibleText),
-          sortingStatus && import_react281.default.createElement(
+          sortAccessibleText && import_react279.default.createElement(ScreenreaderOnly, null, sortAccessibleText),
+          sortingStatus && import_react279.default.createElement(
             "span",
             { className: styles_css_default108["sorting-icon"] },
-            showPriorityBadge && import_react281.default.createElement("span", { className: styles_css_default108["sort-priority-badge"], "aria-hidden": "true" }, multiSortIndex),
-            import_react281.default.createElement(CustomizableIcon, { customIcon: (_b = icons2 === null || icons2 === void 0 ? void 0 : icons2.sortingIndicator) === null || _b === void 0 ? void 0 : _b.call(icons2, { sortingState: sortingStatus }), fallback: {
+            showPriorityBadge && import_react279.default.createElement("span", { className: styles_css_default108["sort-priority-badge"], "aria-hidden": "true" }, multiSortIndex),
+            import_react279.default.createElement(CustomizableIcon, { customIcon: (_b = icons2 === null || icons2 === void 0 ? void 0 : icons2.sortingIndicator) === null || _b === void 0 ? void 0 : _b.call(icons2, { sortingState: sortingStatus }), fallback: {
               name: getSortingIconName(sortingStatus),
               nativeAttributes: { "data-awsui-motion-target": "" }
             } })
           )
         ),
-        hasSortMenu && import_react281.default.createElement(SortMenu, { column: column2, inSort: inMultiSort, isSortedAscending: inMultiSort && !descending4, isSortedDescending: inMultiSort && descending4, i18nStrings, ariaLabel: ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.sortMenuTriggerLabel, ariaDescribedby: headerId, onAction: handleSortMenuAction })
+        hasSortMenu && import_react279.default.createElement(SortMenu, { column: column2, inSort: inMultiSort, isSortedAscending: inMultiSort && !descending4, isSortedDescending: inMultiSort && descending4, i18nStrings, ariaLabel: ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.sortMenuTriggerLabel, ariaDescribedby: headerId, onAction: handleSortMenuAction })
       ),
-      resizableColumns ? import_react281.default.createElement(Resizer, {
+      resizableColumns ? import_react279.default.createElement(Resizer, {
         tabIndex,
         focusId: `resize-control-${String(columnId)}`,
         showFocusRing: focusedComponent === `resize-control-${String(columnId)}`,
@@ -335985,12 +335891,12 @@ ${isHandDrawn ? "" : `
         isLast,
         isGrouped,
         dividerPosition: isLastChildOfGroup ? "top" : void 0
-      }) : import_react281.default.createElement(Divider, { className: styles_css_default108["resize-divider"], position: isLastChildOfGroup ? "top" : void 0, isGrouped })
+      }) : import_react279.default.createElement(Divider, { className: styles_css_default108["resize-divider"], position: isLastChildOfGroup ? "top" : void 0, isGrouped })
     );
   }
 
   // node_modules/@cloudscape-design/components/table/header-cell/group-header-cell.js
-  var import_react282 = __toESM(require_react());
+  var import_react280 = __toESM(require_react());
   function TableGroupHeaderCell({ group: group2, colspan, rowspan, colIndex, groupId, resizableColumns, resizableStyle, onResizeFinish, updateGroupWidth, childColumnIds, focusedComponent, tabIndex, sticky, hidden, stripedRows, stickyState, cellRef, tableRole, resizerRoleDescription, resizerTooltipText, variant, tableVariant, columnGroupId, stickyColumnId, stickyBoundaryColumnId, isLast, wrapLines }) {
     var _a213;
     const headerId = useUniqueId("table-group-header-");
@@ -336002,26 +335908,26 @@ ${isHandDrawn ? "" : `
       }
       return sum2 + (columnWidths.get(id38) || DEFAULT_COLUMN_WIDTH);
     }, 0);
-    const clickableHeaderRef = (0, import_react282.useRef)(null);
+    const clickableHeaderRef = (0, import_react280.useRef)(null);
     const { tabIndex: clickableHeaderTabIndex } = useSingleTabStopNavigation(clickableHeaderRef, { tabIndex });
-    return import_react282.default.createElement(
+    return import_react280.default.createElement(
       TableThElement,
       { resizableStyle, cellRef, focusedComponent, sticky, resizable: resizableColumns, hidden, stripedRows, colIndex, columnId: stickyColumnId !== null && stickyColumnId !== void 0 ? stickyColumnId : groupId, stickyBoundaryColumnId, stickyState, tableRole, variant, tableVariant, colSpan: colspan, rowSpan: rowspan, scope: "colgroup", isLast, columnGroupId },
-      import_react282.default.createElement(
+      import_react280.default.createElement(
         "div",
         { ref: clickableHeaderRef, "data-focus-id": `group-header-${groupId}`, className: clsx_m_default(styles_css_default108["header-cell-content"], {
           [styles_css_default108["header-cell-fake-focus"]]: focusedComponent === `group-header-${groupId}`
         }), "aria-label": (_a213 = group2.ariaLabel) === null || _a213 === void 0 ? void 0 : _a213.call(group2, { sorted: false, descending: false, disabled: true }), tabIndex: clickableHeaderTabIndex },
-        import_react282.default.createElement("div", { className: clsx_m_default(styles_css_default108["header-cell-text"], wrapLines && styles_css_default108["header-cell-text-wrap"]), id: headerId }, group2.header)
+        import_react280.default.createElement("div", { className: clsx_m_default(styles_css_default108["header-cell-text"], wrapLines && styles_css_default108["header-cell-text-wrap"]), id: headerId }, group2.header)
       ),
-      resizableColumns ? import_react282.default.createElement(Resizer, { tabIndex, focusId: `resize-group-${groupId}`, showFocusRing: focusedComponent === `resize-group-${groupId}`, onWidthUpdate: (newWidth) => updateGroupWidth(groupId, newWidth), onWidthUpdateCommit: onResizeFinish, ariaLabelledby: headerId, minWidth: groupMinWidth, roleDescription: resizerRoleDescription, tooltipText: resizerTooltipText, isBorderless: variant === "full-page" || variant === "embedded" || variant === "borderless", isLast, isGrouped: true, dividerPosition: columnGroupId ? "full" : "bottom" }) : import_react282.default.createElement(Divider, { position: columnGroupId ? "full" : "bottom", isGrouped: true })
+      resizableColumns ? import_react280.default.createElement(Resizer, { tabIndex, focusId: `resize-group-${groupId}`, showFocusRing: focusedComponent === `resize-group-${groupId}`, onWidthUpdate: (newWidth) => updateGroupWidth(groupId, newWidth), onWidthUpdateCommit: onResizeFinish, ariaLabelledby: headerId, minWidth: groupMinWidth, roleDescription: resizerRoleDescription, tooltipText: resizerTooltipText, isBorderless: variant === "full-page" || variant === "embedded" || variant === "borderless", isLast, isGrouped: true, dividerPosition: columnGroupId ? "full" : "bottom" }) : import_react280.default.createElement(Divider, { position: columnGroupId ? "full" : "bottom", isGrouped: true })
     );
   }
 
   // node_modules/@cloudscape-design/components/table/thead.js
-  var Thead = import_react283.default.forwardRef(({ selectionType: selectionType2, getSelectAllProps, columnDefinitions, columnGroupsLayout, sortingColumn, sortingDisabled, sortingDescending, multiColumnSort, i18nStrings, ariaLabels, resizableColumns, variant, tableVariant, wrapLines, onFocusMove, onSortingChange, onResizeFinish, singleSelectionHeaderAriaLabel, stripedRows, sticky = false, hidden = false, stuck = false, stickyState, stickyColumnsFirst, stickyColumnsLast, selectionColumnId: selectionColumnId2, focusedComponent, onFocusedComponentChange, tableRole, resizerRoleDescription, resizerTooltipText, isExpandable, setLastUserAction }, outerRef) => {
+  var Thead = import_react281.default.forwardRef(({ selectionType: selectionType2, getSelectAllProps, columnDefinitions, columnGroupsLayout, sortingColumn, sortingDisabled, sortingDescending, multiColumnSort, i18nStrings, ariaLabels, resizableColumns, variant, tableVariant, wrapLines, onFocusMove, onSortingChange, onResizeFinish, singleSelectionHeaderAriaLabel, stripedRows, sticky = false, hidden = false, stuck = false, stickyState, stickyColumnsFirst, stickyColumnsLast, selectionColumnId: selectionColumnId2, focusedComponent, onFocusedComponentChange, tableRole, resizerRoleDescription, resizerTooltipText, isExpandable, setLastUserAction }, outerRef) => {
     const { getColumnStyles, columnWidths, updateColumn, updateGroup, setCell } = useColumnWidths();
-    const columnWidthsRef = (0, import_react283.useRef)(columnWidths);
+    const columnWidthsRef = (0, import_react281.useRef)(columnWidths);
     columnWidthsRef.current = columnWidths;
     const handleSplitGroupResize = (columnIds, newWidth) => {
       const lastColumn = columnIds[columnIds.length - 1];
@@ -336053,16 +335959,16 @@ ${isHandDrawn ? "" : `
       onBlur: () => onFocusedComponentChange === null || onFocusedComponentChange === void 0 ? void 0 : onFocusedComponentChange(null)
     };
     if (!columnGroupsLayout || columnGroupsLayout.rows.length <= 1) {
-      return import_react283.default.createElement(
+      return import_react281.default.createElement(
         "thead",
         { className: clsx_m_default(!hidden && styles_css_default96["thead-active"]) },
-        import_react283.default.createElement(
+        import_react281.default.createElement(
           "tr",
           { ...focusMarkers.all, ref: outerRef, "aria-rowindex": 1, ...getTableHeaderRowRoleProps({ tableRole }), ...sharedTrProps },
-          selectionType2 ? import_react283.default.createElement(TableHeaderSelectionCell, { ...commonCellProps, focusedComponent, columnId: selectionColumnId2, cellRef: (node2) => setCell(sticky, selectionColumnId2, node2), getSelectAllProps, onFocusMove, singleSelectionHeaderAriaLabel }) : null,
+          selectionType2 ? import_react281.default.createElement(TableHeaderSelectionCell, { ...commonCellProps, focusedComponent, columnId: selectionColumnId2, cellRef: (node2) => setCell(sticky, selectionColumnId2, node2), getSelectAllProps, onFocusMove, singleSelectionHeaderAriaLabel }) : null,
           columnDefinitions.map((column2, colIndex) => {
             const columnId = getColumnKey(column2, colIndex);
-            return import_react283.default.createElement(TableHeaderCell, { ...commonCellProps, key: columnId, tabIndex: sticky ? -1 : 0, focusedComponent, column: column2, activeSortingColumn: sortingColumn, sortingDescending, sortingDisabled, multiColumnSort, i18nStrings, ariaLabels, wrapLines, colIndex: selectionType2 ? colIndex + 1 : colIndex, columnId, updateColumn, onResizeFinish: () => onResizeFinish(columnWidthsRef.current), resizableColumns, resizableStyle: getColumnStyles(sticky, columnId), onClick: (detail) => {
+            return import_react281.default.createElement(TableHeaderCell, { ...commonCellProps, key: columnId, tabIndex: sticky ? -1 : 0, focusedComponent, column: column2, activeSortingColumn: sortingColumn, sortingDescending, sortingDisabled, multiColumnSort, i18nStrings, ariaLabels, wrapLines, colIndex: selectionType2 ? colIndex + 1 : colIndex, columnId, updateColumn, onResizeFinish: () => onResizeFinish(columnWidthsRef.current), resizableColumns, resizableStyle: getColumnStyles(sticky, columnId), onClick: (detail) => {
               setLastUserAction("sorting");
               fireNonCancelableEvent(onSortingChange, detail);
             }, isEditable: !!column2.editConfig, cellRef: (node2) => setCell(sticky, columnId, node2), tableRole, resizerRoleDescription, resizerTooltipText, isExpandable: colIndex === 0 && isExpandable, hasDynamicContent: hidden && !resizableColumns && column2.hasDynamicContent, isLast: colIndex === columnDefinitions.length - 1 });
@@ -336071,10 +335977,10 @@ ${isHandDrawn ? "" : `
       );
     }
     const totalColumns = columnDefinitions.length;
-    return import_react283.default.createElement("thead", { className: clsx_m_default(!hidden && styles_css_default96["thead-active"]) }, columnGroupsLayout.rows.map((row, rowIndex) => import_react283.default.createElement(
+    return import_react281.default.createElement("thead", { className: clsx_m_default(!hidden && styles_css_default96["thead-active"]) }, columnGroupsLayout.rows.map((row, rowIndex) => import_react281.default.createElement(
       "tr",
       { key: rowIndex, ...rowIndex === 0 ? focusMarkers.all : {}, ref: rowIndex === 0 ? outerRef : void 0, "aria-rowindex": rowIndex + 1, "data-group-level": rowIndex, ...getTableHeaderRowRoleProps({ tableRole, rowIndex }), ...sharedTrProps },
-      selectionType2 && rowIndex === 0 ? import_react283.default.createElement(TableHeaderSelectionCell, { ...commonCellProps, focusedComponent, columnId: selectionColumnId2, cellRef: (node2) => setCell(sticky, selectionColumnId2, node2), getSelectAllProps, onFocusMove, singleSelectionHeaderAriaLabel, rowSpan: columnGroupsLayout.rows.length, isGrouped: true }) : null,
+      selectionType2 && rowIndex === 0 ? import_react281.default.createElement(TableHeaderSelectionCell, { ...commonCellProps, focusedComponent, columnId: selectionColumnId2, cellRef: (node2) => setCell(sticky, selectionColumnId2, node2), getSelectAllProps, onFocusMove, singleSelectionHeaderAriaLabel, rowSpan: columnGroupsLayout.rows.length, isGrouped: true }) : null,
       row.columns.map((col, colIndexInRow) => {
         var _a213, _b;
         const nextCol = row.columns[colIndexInRow + 1];
@@ -336120,14 +336026,14 @@ ${isHandDrawn ? "" : `
             const rightColIndex = col.colIndex + leftColspan;
             const rightGroupId = isSplitFirst ? `${col.id}__split` : col.id;
             const rightChildIds = childIds.slice(leftColspan);
-            return import_react283.default.createElement(
-              import_react283.default.Fragment,
+            return import_react281.default.createElement(
+              import_react281.default.Fragment,
               { key: col.cellKey },
-              import_react283.default.createElement(TableGroupHeaderCell, { ...sharedGroupCellProps, colspan: leftColspan, colIndex: selectionType2 ? leftColIndex + 1 : leftColIndex, groupId: leftGroupId, resizableStyle: void 0, updateGroupWidth: (_3, newWidth) => {
+              import_react281.default.createElement(TableGroupHeaderCell, { ...sharedGroupCellProps, colspan: leftColspan, colIndex: selectionType2 ? leftColIndex + 1 : leftColIndex, groupId: leftGroupId, resizableStyle: void 0, updateGroupWidth: (_3, newWidth) => {
                 handleSplitGroupResize(leftChildIds, newWidth);
               }, childColumnIds: leftChildIds, firstChildColumnId: leftChildIds[0], lastChildColumnId: leftChildIds[leftChildIds.length - 1], cellRef: isSplitFirst ? (node2) => setCell(sticky, col.cellKey, node2) : () => {
               }, isLast: false, stickyColumnId: isSplitFirst ? childIds[0] : void 0, stickyBoundaryColumnId: isSplitFirst ? leftChildIds[leftChildIds.length - 1] : void 0 }),
-              import_react283.default.createElement(TableGroupHeaderCell, { ...sharedGroupCellProps, colspan: rightColspan, colIndex: selectionType2 ? rightColIndex + 1 : rightColIndex, groupId: rightGroupId, resizableStyle: getColumnStyles(sticky, col.cellKey), updateGroupWidth: (_3, newWidth) => {
+              import_react281.default.createElement(TableGroupHeaderCell, { ...sharedGroupCellProps, colspan: rightColspan, colIndex: selectionType2 ? rightColIndex + 1 : rightColIndex, groupId: rightGroupId, resizableStyle: getColumnStyles(sticky, col.cellKey), updateGroupWidth: (_3, newWidth) => {
                 handleSplitGroupResize(rightChildIds, newWidth);
               }, childColumnIds: rightChildIds, firstChildColumnId: rightChildIds[0], lastChildColumnId: rightChildIds[rightChildIds.length - 1], cellRef: !isSplitFirst ? (node2) => setCell(sticky, col.cellKey, node2) : () => {
               }, resizerRoleDescription, resizerTooltipText, isLast: rightColIndex + rightColspan === totalColumns, stickyColumnId: !isSplitFirst ? childIds[childIds.length - 1] : void 0, stickyBoundaryColumnId: !isSplitFirst ? rightChildIds[0] : void 0 })
@@ -336139,14 +336045,14 @@ ${isHandDrawn ? "" : `
           const isAtStickyFirstBoundary = isFullyStickyFirst && col.colIndex + col.colSpan - 1 === stickyColumnsFirst - 1;
           const isAtStickyLastBoundary = isFullyStickyLast && col.colIndex === columnDefinitions.length - stickyColumnsLast;
           const fullyStickyBoundaryColumnId = isAtStickyFirstBoundary ? childIds[childIds.length - 1] : isAtStickyLastBoundary ? childIds[0] : void 0;
-          return import_react283.default.createElement(TableGroupHeaderCell, { ...sharedGroupCellProps, key: col.cellKey, colspan: col.colSpan, colIndex: selectionType2 ? col.colIndex + 1 : col.colIndex, groupId: col.id, resizableStyle: getColumnStyles(sticky, col.cellKey), updateGroupWidth: (groupId, newWidth) => {
+          return import_react281.default.createElement(TableGroupHeaderCell, { ...sharedGroupCellProps, key: col.cellKey, colspan: col.colSpan, colIndex: selectionType2 ? col.colIndex + 1 : col.colIndex, groupId: col.id, resizableStyle: getColumnStyles(sticky, col.cellKey), updateGroupWidth: (groupId, newWidth) => {
             updateGroup(groupId, newWidth);
           }, childColumnIds: childIds, firstChildColumnId: childIds[0], lastChildColumnId: childIds[childIds.length - 1], cellRef: (node2) => setCell(sticky, col.cellKey, node2), resizerRoleDescription, resizerTooltipText, isLast: col.colIndex + col.colSpan === totalColumns, stickyColumnId: fullyStickyColumnId, stickyBoundaryColumnId: fullyStickyBoundaryColumnId });
         } else {
           const column2 = col.columnDefinition;
           const columnId = col.id;
           const colIndex = col.colIndex;
-          return import_react283.default.createElement(TableHeaderCell, { ...commonCellProps, key: columnId, tabIndex: sticky ? -1 : 0, focusedComponent, column: column2, activeSortingColumn: sortingColumn, sortingDescending, sortingDisabled, multiColumnSort, i18nStrings, ariaLabels, wrapLines, colIndex: selectionType2 ? colIndex + 1 : colIndex, columnId, updateColumn, onResizeFinish: () => onResizeFinish(columnWidthsRef.current), resizableColumns, resizableStyle: getColumnStyles(sticky, columnId), onClick: (detail) => {
+          return import_react281.default.createElement(TableHeaderCell, { ...commonCellProps, key: columnId, tabIndex: sticky ? -1 : 0, focusedComponent, column: column2, activeSortingColumn: sortingColumn, sortingDescending, sortingDisabled, multiColumnSort, i18nStrings, ariaLabels, wrapLines, colIndex: selectionType2 ? colIndex + 1 : colIndex, columnId, updateColumn, onResizeFinish: () => onResizeFinish(columnWidthsRef.current), resizableColumns, resizableStyle: getColumnStyles(sticky, columnId), onClick: (detail) => {
             setLastUserAction("sorting");
             fireNonCancelableEvent(onSortingChange, detail);
           }, isEditable: !!column2.editConfig, cellRef: (node2) => {
@@ -336159,12 +336065,12 @@ ${isHandDrawn ? "" : `
   var thead_default = Thead;
 
   // node_modules/@cloudscape-design/components/table/sticky-header.js
-  var sticky_header_default = (0, import_react284.forwardRef)(StickyHeader);
+  var sticky_header_default = (0, import_react282.forwardRef)(StickyHeader);
   function StickyHeader({ variant, theadProps, wrapperRef, theadRef, secondaryWrapperRef, tableRef, onScroll, tableHasHeader, contentDensity, tableRole, hasGroupedColumns, columnDefinitions, hasSelection }, ref) {
-    const secondaryTheadRef = (0, import_react284.useRef)(null);
-    const secondaryTableRef = (0, import_react284.useRef)(null);
-    const { isStuck } = (0, import_react284.useContext)(StickyHeaderContext);
-    const [focusedComponent, setFocusedComponent] = (0, import_react284.useState)(null);
+    const secondaryTheadRef = (0, import_react282.useRef)(null);
+    const secondaryTableRef = (0, import_react282.useRef)(null);
+    const { isStuck } = (0, import_react282.useContext)(StickyHeaderContext);
+    const [focusedComponent, setFocusedComponent] = (0, import_react282.useState)(null);
     const { scrollToRow, scrollToTop } = useStickyHeaderCopy({
       tableRef,
       theadRef,
@@ -336172,12 +336078,12 @@ ${isHandDrawn ? "" : `
       secondaryTableRef,
       tableWrapperRef: wrapperRef
     });
-    (0, import_react284.useImperativeHandle)(ref, () => ({
+    (0, import_react282.useImperativeHandle)(ref, () => ({
       scrollToTop,
       scrollToRow,
       setFocus: setFocusedComponent
     }));
-    return import_react284.default.createElement(
+    return import_react282.default.createElement(
       "div",
       {
         className: clsx_m_default(styles_css_default96["header-secondary"], styles_css_default96[`variant-${variant}`], {
@@ -336190,20 +336096,20 @@ ${isHandDrawn ? "" : `
         ref: secondaryWrapperRef,
         onScroll
       },
-      import_react284.default.createElement(
+      import_react282.default.createElement(
         "table",
         { className: clsx_m_default(styles_css_default96.table, styles_css_default96["table-layout-fixed"], hasGroupedColumns && styles_css_default96["has-grouped-header"], contentDensity === "compact" && getVisualContextClassname("compact-table")), ref: secondaryTableRef, ...getTableRoleProps({ tableRole }) },
-        hasGroupedColumns && columnDefinitions && import_react284.default.createElement(TableColGroup, { visibleColumnDefinitions: columnDefinitions, hasSelection: !!hasSelection, sticky: true, selectionColumnId: theadProps.selectionColumnId }),
-        import_react284.default.createElement(thead_default, { ref: secondaryTheadRef, sticky: true, stuck: isStuck, focusedComponent, ...theadProps })
+        hasGroupedColumns && columnDefinitions && import_react282.default.createElement(TableColGroup, { visibleColumnDefinitions: columnDefinitions, hasSelection: !!hasSelection, sticky: true, selectionColumnId: theadProps.selectionColumnId }),
+        import_react282.default.createElement(thead_default, { ref: secondaryTheadRef, sticky: true, stuck: isStuck, focusedComponent, ...theadProps })
       )
     );
   }
 
   // node_modules/@cloudscape-design/components/table/sticky-scrollbar/sticky-scrollbar.js
-  var import_react286 = __toESM(require_react());
+  var import_react284 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/sticky-scrollbar/use-sticky-scrollbar.js
-  var import_react285 = __toESM(require_react());
+  var import_react283 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/table/sticky-scrollbar/styles.css.js
   var styles_css_default111 = {
@@ -336250,14 +336156,14 @@ ${isHandDrawn ? "" : `
     }
   };
   function useStickyScrollbar(scrollbarRef, scrollbarContentRef, tableRef, wrapperRef, offsetScrollbar) {
-    const [inScrollableContainer, setInScrollableContainer] = (0, import_react285.useState)(false);
+    const [inScrollableContainer, setInScrollableContainer] = (0, import_react283.useState)(false);
     const wrapperEl = wrapperRef.current;
-    (0, import_react285.useEffect)(() => {
+    (0, import_react283.useEffect)(() => {
       if (wrapperEl) {
         setInScrollableContainer(!!getContainingBlock(wrapperEl) || !!getOverflowParents(wrapperEl)[0]);
       }
     }, [wrapperEl]);
-    (0, import_react285.useEffect)(() => {
+    (0, import_react283.useEffect)(() => {
       if (wrapperRef.current && tableRef.current && typeof ResizeObserver !== "undefined") {
         const observer2 = new ResizeObserver(() => {
           if (scrollbarContentRef.current) {
@@ -336271,7 +336177,7 @@ ${isHandDrawn ? "" : `
         };
       }
     }, [scrollbarContentRef, scrollbarRef, tableRef, wrapperRef, inScrollableContainer, offsetScrollbar]);
-    (0, import_react285.useEffect)(() => {
+    (0, import_react283.useEffect)(() => {
       const resizeHandler = () => {
         updatePosition(tableRef.current, wrapperRef.current, scrollbarRef.current, scrollbarContentRef.current, inScrollableContainer);
       };
@@ -336284,29 +336190,29 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/sticky-scrollbar/sticky-scrollbar.js
-  var sticky_scrollbar_default = (0, import_react286.forwardRef)(StickyScrollbar);
+  var sticky_scrollbar_default = (0, import_react284.forwardRef)(StickyScrollbar);
   function StickyScrollbar({ wrapperRef, tableRef, onScroll, hasStickyColumns }, ref) {
     const isVisualRefresh = useVisualRefresh();
-    const scrollbarRef = import_react286.default.useRef(null);
-    const scrollbarContentRef = import_react286.default.useRef(null);
+    const scrollbarRef = import_react284.default.useRef(null);
+    const scrollbarContentRef = import_react284.default.useRef(null);
     const mergedRef = useMergeRefs(ref, scrollbarRef);
     const offsetScrollbar = hasStickyColumns || browserScrollbarSize().height === 0;
     useStickyScrollbar(scrollbarRef, scrollbarContentRef, tableRef, wrapperRef, offsetScrollbar);
     const { ref: stickyDetectionRef, isIntersecting: isStickyDetectionVisible } = useIntersectionObserver();
-    return import_react286.default.createElement(
-      import_react286.default.Fragment,
+    return import_react284.default.createElement(
+      import_react284.default.Fragment,
       null,
-      import_react286.default.createElement(
+      import_react284.default.createElement(
         "div",
         { ref: mergedRef, className: clsx_m_default(styles_css_default111["sticky-scrollbar"], offsetScrollbar && styles_css_default111["sticky-scrollbar-offset"], isVisualRefresh && styles_css_default111["is-visual-refresh"]), onScroll, "data-stuck": !isStickyDetectionVisible },
-        import_react286.default.createElement("div", { ref: scrollbarContentRef, className: styles_css_default111["sticky-scrollbar-content"] })
+        import_react284.default.createElement("div", { ref: scrollbarContentRef, className: styles_css_default111["sticky-scrollbar-content"] })
       ),
-      import_react286.default.createElement("div", { ref: stickyDetectionRef, style: { position: "absolute", right: 0, bottom: 0, left: 0, height: 1 } })
+      import_react284.default.createElement("div", { ref: stickyDetectionRef, style: { position: "absolute", right: 0, bottom: 0, left: 0, height: 1 } })
     );
   }
 
   // node_modules/@cloudscape-design/components/table/use-auto-skeleton-rows.js
-  var import_react287 = __toESM(require_react());
+  var import_react285 = __toESM(require_react());
   var AUTO_SKELETON_VIEWPORT_BUFFER = 16;
   var SKELETON_ROW_SELECTOR = 'tr[aria-hidden="true"]';
   function getDocumentViewportBottom() {
@@ -336334,9 +336240,9 @@ ${isHandDrawn ? "" : `
   function useAutoSkeletonRows({ enabled, maxRows, minRows, tableBodyRef, tableRootRef, tableWrapperRef }) {
     const maxRowsValue = maxRows === void 0 ? void 0 : Math.max(1, maxRows);
     const minRowsValue = Math.min(Math.max(1, minRows !== null && minRows !== void 0 ? minRows : 1), maxRowsValue !== null && maxRowsValue !== void 0 ? maxRowsValue : Number.POSITIVE_INFINITY);
-    const [rows, setRows] = (0, import_react287.useState)(minRowsValue);
-    const rowHeightRef = (0, import_react287.useRef)();
-    const updateRows = (0, import_react287.useCallback)(() => {
+    const [rows, setRows] = (0, import_react285.useState)(minRowsValue);
+    const rowHeightRef = (0, import_react285.useRef)();
+    const updateRows = (0, import_react285.useCallback)(() => {
       var _a213, _b, _c, _d;
       if (!enabled) {
         return;
@@ -336362,8 +336268,8 @@ ${isHandDrawn ? "" : `
       });
       setRows((currentRows) => currentRows === nextRows ? currentRows : nextRows);
     }, [enabled, maxRowsValue, minRowsValue, tableBodyRef, tableRootRef, tableWrapperRef]);
-    (0, import_react287.useLayoutEffect)(updateRows, [updateRows]);
-    (0, import_react287.useLayoutEffect)(() => {
+    (0, import_react285.useLayoutEffect)(updateRows, [updateRows]);
+    (0, import_react285.useLayoutEffect)(() => {
       const tableWrapper = tableWrapperRef.current;
       const rowHeight = rowHeightRef.current;
       if (!enabled || rows <= minRowsValue || !tableWrapper || !rowHeight) {
@@ -336381,7 +336287,7 @@ ${isHandDrawn ? "" : `
       });
       setRows((currentRows) => currentRows - rowsToRemove);
     }, [enabled, rows, minRowsValue, tableWrapperRef]);
-    (0, import_react287.useLayoutEffect)(() => {
+    (0, import_react285.useLayoutEffect)(() => {
       if (!enabled || typeof ResizeObserver === "undefined") {
         return void 0;
       }
@@ -336404,16 +336310,16 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/use-cell-editing.js
-  var import_react288 = __toESM(require_react());
+  var import_react286 = __toESM(require_react());
   function useCellEditing({ onCancel, onSubmit }) {
-    const [currentEditCell, setCurrentEditCell] = (0, import_react288.useState)(null);
-    const [lastSuccessfulEditCell, setLastSuccessfulEditCell] = (0, import_react288.useState)(null);
-    const [currentEditLoading, setCurrentEditLoading] = (0, import_react288.useState)(false);
+    const [currentEditCell, setCurrentEditCell] = (0, import_react286.useState)(null);
+    const [lastSuccessfulEditCell, setLastSuccessfulEditCell] = (0, import_react286.useState)(null);
+    const [currentEditLoading, setCurrentEditLoading] = (0, import_react286.useState)(false);
     const startEdit = (cellId) => {
       setLastSuccessfulEditCell(null);
       setCurrentEditCell(cellId);
     };
-    const cancelEdit = (0, import_react288.useCallback)(() => setCurrentEditCell(null), []);
+    const cancelEdit = (0, import_react286.useCallback)(() => setCurrentEditCell(null), []);
     const completeEdit = (cellId, editCancelled) => {
       const eventCancelled = fireCancelableEvent(onCancel, {});
       if (!eventCancelled) {
@@ -336445,14 +336351,14 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/use-prevent-sticky-click-scroll.js
-  var import_react289 = __toESM(require_react());
+  var import_react287 = __toESM(require_react());
   var _ScrollLock_timeoutId;
   var _ScrollLock_scrollLeft;
   var _ScrollLock_active;
   var stickyCellSelector = `.${styles_css_default102["sticky-cell"]}`;
   var scrollLockTimeout = 50;
   function usePreventStickyClickScroll(wrapperRefObject) {
-    (0, import_react289.useEffect)(() => {
+    (0, import_react287.useEffect)(() => {
       if (wrapperRefObject.current) {
         const wrapperEl = wrapperRefObject.current;
         const scrollLock = new ScrollLock();
@@ -336528,7 +336434,7 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/table/use-table-focus-navigation.js
-  var import_react290 = __toESM(require_react());
+  var import_react288 = __toESM(require_react());
   function iterateTableCells(table, func) {
     table.querySelectorAll("tr").forEach((row, rowIndex) => {
       row.querySelectorAll("td").forEach((cell, cellIndex) => {
@@ -336537,7 +336443,7 @@ ${isHandDrawn ? "" : `
     });
   }
   function useTableFocusNavigation({ enableKeyboardNavigation, selectionType: selectionType2, tableRoot, columnDefinitions, numRows }) {
-    const focusableColumns = (0, import_react290.useMemo)(() => {
+    const focusableColumns = (0, import_react288.useMemo)(() => {
       const cols = columnDefinitions.map((column2) => !!column2.editConfig);
       if (selectionType2) {
         cols.unshift(false);
@@ -336546,7 +336452,7 @@ ${isHandDrawn ? "" : `
     }, [columnDefinitions, selectionType2]);
     const maxColumnIndex = focusableColumns.length - 1;
     const minColumnIndex = selectionType2 ? 1 : 0;
-    const focusCell = (0, import_react290.useCallback)((rowIndex, columnIndex) => {
+    const focusCell = (0, import_react288.useCallback)((rowIndex, columnIndex) => {
       if (tableRoot === null || tableRoot === void 0 ? void 0 : tableRoot.current) {
         iterateTableCells(tableRoot.current, (cell, rIndex, cIndex) => {
           var _a213;
@@ -336560,7 +336466,7 @@ ${isHandDrawn ? "" : `
         });
       }
     }, [tableRoot]);
-    const shiftFocus = (0, import_react290.useCallback)((vertical, horizontal) => {
+    const shiftFocus = (0, import_react288.useCallback)((vertical, horizontal) => {
       var _a213;
       const focusedCell = (_a213 = tableRoot.current) === null || _a213 === void 0 ? void 0 : _a213.querySelector("td:focus-within");
       if (!focusedCell) {
@@ -336585,7 +336491,7 @@ ${isHandDrawn ? "" : `
         focusCell(newRowIndex, newColumnIndex);
       }
     }, [focusCell, focusableColumns, maxColumnIndex, minColumnIndex, numRows, tableRoot]);
-    const handleArrowKeyEvents = (0, import_react290.useCallback)((event3) => {
+    const handleArrowKeyEvents = (0, import_react288.useCallback)((event3) => {
       var _a213, _b;
       const abort = !!((_a213 = tableRoot.current) === null || _a213 === void 0 ? void 0 : _a213.querySelector('[data-inline-editing-active = "true"]')) || !((_b = document.activeElement) === null || _b === void 0 ? void 0 : _b.closest("[data-inline-editing-active]"));
       if (abort) {
@@ -336613,7 +336519,7 @@ ${isHandDrawn ? "" : `
           return;
       }
     }, [shiftFocus, tableRoot]);
-    (0, import_react290.useEffect)(() => {
+    (0, import_react288.useEffect)(() => {
       if (!tableRoot.current || enableKeyboardNavigation) {
         return;
       }
@@ -336628,15 +336534,15 @@ ${isHandDrawn ? "" : `
   var GRID_NAVIGATION_PAGE_SIZE = 10;
   var SELECTION_COLUMN_WIDTH = 54;
   var selectionColumnId = /* @__PURE__ */ Symbol("selection-column-id");
-  var InternalTableAsSubstep = import_react291.default.forwardRef((props, ref) => {
+  var InternalTableAsSubstep = import_react289.default.forwardRef((props, ref) => {
     const { funnelSubStepProps } = useFunnelSubStep();
     const tableProps = {
       ...props,
       __funnelSubStepProps: funnelSubStepProps
     };
-    return import_react291.default.createElement(InternalTable, { ...tableProps, ref });
+    return import_react289.default.createElement(InternalTable, { ...tableProps, ref });
   });
-  var InternalTable = import_react291.default.forwardRef(({ header, footer, empty: empty3, filter: filter8, pagination, preferences, items, columnDefinitions, groupDefinitions, trackBy, loading, loadingText, skeleton, selectionType: externalSelectionType, selectedItems, isItemDisabled, ariaLabels, onSelectionChange, onSortingChange, sortingColumn, sortingDescending, sortingDisabled, multiColumnSort, i18nStrings, visibleColumns, stickyHeader, stickyHeaderVerticalOffset, onRowClick, onRowContextMenu, wrapLines, stripedRows, contentDensity, submitEdit, onEditCancel, resizableColumns, onColumnWidthsChange, variant, __internalRootRef, totalItemsCount, firstIndex, renderAriaLive, stickyColumns, columnDisplay, enableKeyboardNavigation, expandableRows: externalExpandableRows, getLoadingStatus, renderLoaderPending, renderLoaderLoading, renderLoaderError, renderLoaderEmpty, renderLoaderCounter, cellVerticalAlign, __funnelSubStepProps, ...rest }, ref) => {
+  var InternalTable = import_react289.default.forwardRef(({ header, footer, empty: empty3, filter: filter8, pagination, preferences, items, columnDefinitions, groupDefinitions, trackBy, loading, loadingText, skeleton, selectionType: externalSelectionType, selectedItems, isItemDisabled, ariaLabels, onSelectionChange, onSortingChange, sortingColumn, sortingDescending, sortingDisabled, multiColumnSort, i18nStrings, visibleColumns, stickyHeader, stickyHeaderVerticalOffset, onRowClick, onRowContextMenu, wrapLines, stripedRows, contentDensity, submitEdit, onEditCancel, resizableColumns, onColumnWidthsChange, variant, __internalRootRef, totalItemsCount, firstIndex, renderAriaLive, stickyColumns, columnDisplay, enableKeyboardNavigation, expandableRows: externalExpandableRows, getLoadingStatus, renderLoaderPending, renderLoaderLoading, renderLoaderError, renderLoaderEmpty, renderLoaderCounter, cellVerticalAlign, __funnelSubStepProps, ...rest }, ref) => {
     var _a213, _b, _c, _d, _e2, _f;
     if (externalExpandableRows && enableKeyboardNavigation === void 0) {
       enableKeyboardNavigation = true;
@@ -336657,19 +336563,19 @@ ${isHandDrawn ? "" : `
     const { allRows } = useProgressiveLoadingProps({ getLoadingStatus, expandableRows });
     const selectionType2 = expandableRows.hasGroupSelection ? "group" : externalSelectionType;
     const [containerWidth, wrapperMeasureRef] = useContainerQuery((rect2) => rect2.borderBoxWidth);
-    const wrapperMeasureRefObject = (0, import_react291.useRef)(null);
+    const wrapperMeasureRefObject = (0, import_react289.useRef)(null);
     const wrapperMeasureMergedRef = useMergeRefs(wrapperMeasureRef, wrapperMeasureRefObject);
     const [tableWidth, tableMeasureRef] = useContainerQuery((rect2) => rect2.borderBoxWidth);
-    const tableRefObject = (0, import_react291.useRef)(null);
-    const secondaryWrapperRef = import_react291.default.useRef(null);
-    const theadRef = (0, import_react291.useRef)(null);
-    const stickyHeaderRef = import_react291.default.useRef(null);
-    const scrollbarRef = import_react291.default.useRef(null);
+    const tableRefObject = (0, import_react289.useRef)(null);
+    const secondaryWrapperRef = import_react289.default.useRef(null);
+    const theadRef = (0, import_react289.useRef)(null);
+    const stickyHeaderRef = import_react289.default.useRef(null);
+    const scrollbarRef = import_react289.default.useRef(null);
     const { cancelEdit, ...cellEditing } = useCellEditing({ onCancel: onEditCancel, onSubmit: submitEdit });
-    const paginationRef = (0, import_react291.useRef)({});
-    const filterRef = (0, import_react291.useRef)({});
-    const preferencesRef = (0, import_react291.useRef)({});
-    const headerRef = (0, import_react291.useRef)({});
+    const paginationRef = (0, import_react289.useRef)({});
+    const filterRef = (0, import_react289.useRef)({});
+    const preferencesRef = (0, import_react289.useRef)({});
+    const headerRef = (0, import_react289.useRef)({});
     const getHeaderText = () => {
       var _a214, _b2, _c2, _d2;
       return (_c2 = (_b2 = (_a214 = toolsHeaderPerformanceMarkRef.current) === null || _a214 === void 0 ? void 0 : _a214.querySelector(`.${styles_css_default82["heading-text"]}`)) === null || _b2 === void 0 ? void 0 : _b2.innerText) !== null && _c2 !== void 0 ? _c2 : (_d2 = toolsHeaderPerformanceMarkRef.current) === null || _d2 === void 0 ? void 0 : _d2.innerText;
@@ -336741,20 +336647,20 @@ ${isHandDrawn ? "" : `
       getComponentConfiguration,
       interactionMetadata
     });
-    (0, import_react291.useImperativeHandle)(ref, () => {
+    (0, import_react289.useImperativeHandle)(ref, () => {
       var _a214;
       return {
         scrollToTop: ((_a214 = stickyHeaderRef.current) === null || _a214 === void 0 ? void 0 : _a214.scrollToTop) || (() => void 0),
         cancelEdit
       };
     }, [cancelEdit]);
-    const tableRootRefObject = (0, import_react291.useRef)(null);
-    const tableBodyRef = (0, import_react291.useRef)(null);
-    const wrapperRefObject = (0, import_react291.useRef)(null);
+    const tableRootRefObject = (0, import_react289.useRef)(null);
+    const tableBodyRef = (0, import_react289.useRef)(null);
+    const wrapperRefObject = (0, import_react289.useRef)(null);
     const handleScroll = useScrollSync([wrapperRefObject, scrollbarRef, secondaryWrapperRef]);
     const { moveFocusDown, moveFocusUp, moveFocus } = useSelectionFocusMove(selectionType2, allItems.length);
     const { onRowClickHandler, onRowContextMenuHandler } = useRowEvents({ onRowClick, onRowContextMenu });
-    const visibleColumnDefinitions = (0, import_react291.useMemo)(() => getVisibleColumnDefinitions({ columnDefinitions, columnDisplay, visibleColumns }), [columnDefinitions, columnDisplay, visibleColumns]);
+    const visibleColumnDefinitions = (0, import_react289.useMemo)(() => getVisibleColumnDefinitions({ columnDefinitions, columnDisplay, visibleColumns }), [columnDefinitions, columnDisplay, visibleColumns]);
     const visibleColumnIds = visibleColumnDefinitions.map((col, idx) => getColumnKey(col, idx).toString());
     const { groupColumnMap, ...columnGroupsLayout } = useColumnGroups(columnDefinitions, visibleColumnIds, groupDefinitions, columnDisplay);
     const selectionProps = {
@@ -336806,13 +336712,13 @@ ${isHandDrawn ? "" : `
     const hasSelection = !!selectionType2;
     const hasFooterPagination = isMobile && variant === "full-page" && !!pagination;
     const hasFooter = !!footer || hasFooterPagination;
-    const headerIdRef = (0, import_react291.useRef)(void 0);
+    const headerIdRef = (0, import_react289.useRef)(void 0);
     const isLabelledByHeader = !(ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.tableLabel) && !!header;
     const ariaLabelledby = isLabelledByHeader && headerIdRef.current ? headerIdRef.current : void 0;
-    const setHeaderRef = (0, import_react291.useCallback)((id38) => {
+    const setHeaderRef = (0, import_react289.useCallback)((id38) => {
       headerIdRef.current = id38;
     }, []);
-    const { visibleColumnWidthsWithSelection, visibleColumnIdsWithSelection } = (0, import_react291.useMemo)(() => {
+    const { visibleColumnWidthsWithSelection, visibleColumnIdsWithSelection } = (0, import_react289.useMemo)(() => {
       const widths = [];
       const ids2 = [];
       if (hasSelection) {
@@ -336909,72 +336815,72 @@ ${isHandDrawn ? "" : `
       columnDefinitions: visibleColumnDefinitions,
       numRows: allRows === null || allRows === void 0 ? void 0 : allRows.length
     });
-    const toolsHeaderPerformanceMarkRef = (0, import_react291.useRef)(null);
+    const toolsHeaderPerformanceMarkRef = (0, import_react289.useRef)(null);
     const [toolsHeaderHeight, toolsHeaderWrapperMeasureRef] = useContainerQuery((rect2) => rect2.borderBoxHeight);
     const toolsHeaderWrapper = useMergeRefs(toolsHeaderPerformanceMarkRef, toolsHeaderWrapperMeasureRef);
     const colIndexOffset = selectionType2 ? 1 : 0;
     const totalColumnsCount = visibleColumnDefinitions.length + colIndexOffset;
     const headerRowCount = (columnGroupsLayout === null || columnGroupsLayout === void 0 ? void 0 : columnGroupsLayout.rows.length) || 1;
-    const tableContent = import_react291.default.createElement(
+    const tableContent = import_react289.default.createElement(
       LinkDefaultVariantContext.Provider,
       { value: { defaultVariant: "primary" } },
-      import_react291.default.createElement(
+      import_react289.default.createElement(
         TableComponentsContextProvider,
         { value: { paginationRef, filterRef, preferencesRef, headerRef } },
-        import_react291.default.createElement(
+        import_react289.default.createElement(
           ColumnWidthsProvider,
           { visibleColumns: visibleColumnWidthsWithSelection, resizableColumns, containerRef: wrapperMeasureRefObject, groupColumnMap },
-          import_react291.default.createElement(
+          import_react289.default.createElement(
             internal_default14,
-            { ...baseProps, ...tableInteractionAttributes, __internalRootRef: tableRootRef, className: clsx_m_default(baseProps.className, styles_css_default96.root), __funnelSubStepProps, __fullPage: variant === "full-page", header: import_react291.default.createElement(
-              import_react291.default.Fragment,
+            { ...baseProps, ...tableInteractionAttributes, __internalRootRef: tableRootRef, className: clsx_m_default(baseProps.className, styles_css_default96.root), __funnelSubStepProps, __fullPage: variant === "full-page", header: import_react289.default.createElement(
+              import_react289.default.Fragment,
               null,
-              hasHeader && import_react291.default.createElement(
+              hasHeader && import_react289.default.createElement(
                 "div",
                 null,
-                import_react291.default.createElement(
+                import_react289.default.createElement(
                   "div",
                   { ref: toolsHeaderWrapper, className: clsx_m_default(styles_css_default96["header-controls"], styles_css_default96[`variant-${computedVariant}`]) },
-                  import_react291.default.createElement(
+                  import_react289.default.createElement(
                     CollectionLabelContext.Provider,
                     { value: { assignId: setHeaderRef } },
-                    import_react291.default.createElement(ToolsHeader, { header, filter: filter8, clearSort: hasActiveMultiSort && multiColumnSort ? import_react291.default.createElement(ClearSortButton, { multiColumnSort, i18nStrings, onClearSort: focusFirstSortableColumn }) : void 0, pagination, preferences, setLastUserAction })
+                    import_react289.default.createElement(ToolsHeader, { header, filter: filter8, clearSort: hasActiveMultiSort && multiColumnSort ? import_react289.default.createElement(ClearSortButton, { multiColumnSort, i18nStrings, onClearSort: focusFirstSortableColumn }) : void 0, pagination, preferences, setLastUserAction })
                   )
                 )
               ),
-              stickyHeader && import_react291.default.createElement(sticky_header_default, { ref: stickyHeaderRef, variant: computedVariant, theadProps, wrapperRef: wrapperRefObject, theadRef, secondaryWrapperRef, tableRef: tableRefObject, onScroll: handleScroll, tableHasHeader: hasHeader, contentDensity, tableRole, hasGroupedColumns: !!columnGroupsLayout && columnGroupsLayout.rows.length > 1, columnDefinitions: visibleColumnDefinitions, hasSelection })
-            ), disableHeaderPaddings: true, disableContentPaddings: true, disableFooterPaddings: true, variant: toContainerVariant(computedVariant), __disableFooterDivider: true, __disableStickyMobile: false, footer: hasFooter ? import_react291.default.createElement(
+              stickyHeader && import_react289.default.createElement(sticky_header_default, { ref: stickyHeaderRef, variant: computedVariant, theadProps, wrapperRef: wrapperRefObject, theadRef, secondaryWrapperRef, tableRef: tableRefObject, onScroll: handleScroll, tableHasHeader: hasHeader, contentDensity, tableRole, hasGroupedColumns: !!columnGroupsLayout && columnGroupsLayout.rows.length > 1, columnDefinitions: visibleColumnDefinitions, hasSelection })
+            ), disableHeaderPaddings: true, disableContentPaddings: true, disableFooterPaddings: true, variant: toContainerVariant(computedVariant), __disableFooterDivider: true, __disableStickyMobile: false, footer: hasFooter ? import_react289.default.createElement(
               "div",
               { className: clsx_m_default(styles_css_default96["footer-wrapper"], styles_css_default96[`variant-${computedVariant}`]) },
-              import_react291.default.createElement(
+              import_react289.default.createElement(
                 "div",
                 { className: clsx_m_default(styles_css_default96.footer, hasFooterPagination && styles_css_default96["footer-with-pagination"]) },
-                footer && import_react291.default.createElement("span", null, footer),
-                hasFooterPagination && import_react291.default.createElement("div", { className: styles_css_default96["footer-pagination"] }, pagination)
+                footer && import_react289.default.createElement("span", null, footer),
+                hasFooterPagination && import_react289.default.createElement("div", { className: styles_css_default96["footer-pagination"] }, pagination)
               )
             ) : null, __stickyHeader: stickyHeader, __mobileStickyOffset: toolsHeaderHeight !== null && toolsHeaderHeight !== void 0 ? toolsHeaderHeight : 0, __stickyOffset: stickyHeaderVerticalOffset, ...focusMarkers.root },
-            import_react291.default.createElement(
+            import_react289.default.createElement(
               "div",
               { ref: wrapperRef, className: clsx_m_default(styles_css_default96.wrapper, styles_css_default96[`variant-${computedVariant}`], {
                 [styles_css_default96["has-footer"]]: hasFooter,
                 [styles_css_default96["has-header"]]: hasHeader
               }), style: stickyState.style.wrapper, onScroll: handleScroll, ...wrapperProps },
-              import_react291.default.createElement("div", { className: styles_css_default96["wrapper-content-measure"], ref: wrapperMeasureMergedRef }),
-              !!renderAriaLive && !!firstIndex && !loading && import_react291.default.createElement(
+              import_react289.default.createElement("div", { className: styles_css_default96["wrapper-content-measure"], ref: wrapperMeasureMergedRef }),
+              !!renderAriaLive && !!firstIndex && !loading && import_react289.default.createElement(
                 internal_default2,
                 { hidden: true, tagName: "span" },
-                import_react291.default.createElement("span", null, renderAriaLive({
+                import_react289.default.createElement("span", null, renderAriaLive({
                   firstIndex,
                   lastIndex: firstIndex + items.length - 1,
                   visibleItemsCount: allItems.length,
                   totalItemsCount
                 }))
               ),
-              (multiColumnSort === null || multiColumnSort === void 0 ? void 0 : multiColumnSort.sortingColumns) && import_react291.default.createElement(SortLiveAnnouncement, { sortingColumns: multiColumnSort.sortingColumns, columnDefinitions, ariaLabels, containerRef: tableRefObject }),
-              import_react291.default.createElement(
+              (multiColumnSort === null || multiColumnSort === void 0 ? void 0 : multiColumnSort.sortingColumns) && import_react289.default.createElement(SortLiveAnnouncement, { sortingColumns: multiColumnSort.sortingColumns, columnDefinitions, ariaLabels, containerRef: tableRefObject }),
+              import_react289.default.createElement(
                 GridNavigationProvider,
                 { keyboardNavigation: !!enableKeyboardNavigation, pageSize: GRID_NAVIGATION_PAGE_SIZE, getTable: () => tableRefObject.current },
-                import_react291.default.createElement(
+                import_react289.default.createElement(
                   "table",
                   { ...performanceMarkAttributes, ref: tableRef, className: clsx_m_default(styles_css_default96.table, resizableColumns && styles_css_default96["table-layout-fixed"], columnGroupsLayout && columnGroupsLayout.rows.length > 1 && styles_css_default96["has-grouped-header"], contentDensity === "compact" && getVisualContextClassname("compact-table")), ...getTableRoleProps({
                     tableRole,
@@ -336984,18 +336890,18 @@ ${isHandDrawn ? "" : `
                     ariaLabel: ariaLabels === null || ariaLabels === void 0 ? void 0 : ariaLabels.tableLabel,
                     ariaLabelledby
                   }) },
-                  resizableColumns && columnGroupsLayout && columnGroupsLayout.rows.length > 1 && import_react291.default.createElement(TableColGroup, { visibleColumnDefinitions, hasSelection, selectionColumnId }),
-                  import_react291.default.createElement(thead_default, { ref: theadRef, hidden: stickyHeader, onFocusedComponentChange: (focusId) => {
+                  resizableColumns && columnGroupsLayout && columnGroupsLayout.rows.length > 1 && import_react289.default.createElement(TableColGroup, { visibleColumnDefinitions, hasSelection, selectionColumnId }),
+                  import_react289.default.createElement(thead_default, { ref: theadRef, hidden: stickyHeader, onFocusedComponentChange: (focusId) => {
                     var _a214;
                     return (_a214 = stickyHeaderRef.current) === null || _a214 === void 0 ? void 0 : _a214.setFocus(focusId);
                   }, ...theadProps }),
-                  import_react291.default.createElement(
+                  import_react289.default.createElement(
                     "tbody",
                     { ref: tableBodyRef },
-                    skeleton && allItems.length === 0 && loading ? import_react291.default.createElement(SkeletonRows, { count: skeletonRowsCount, totalColumnsCount, loadingText, hasSelection, hasFooter, stickyState, tableRole, ariaLabels, cellVerticalAlign, computedVariant, visibleColumnDefinitions, wrapLines, resizableColumns, colIndexOffset, renderCell: skeleton === null || skeleton === void 0 ? void 0 : skeleton.renderCell }) : allItems.length === 0 || loading && !skeleton ? import_react291.default.createElement(
+                    skeleton && allItems.length === 0 && loading ? import_react289.default.createElement(SkeletonRows, { count: skeletonRowsCount, totalColumnsCount, loadingText, hasSelection, hasFooter, stickyState, tableRole, ariaLabels, cellVerticalAlign, computedVariant, visibleColumnDefinitions, wrapLines, resizableColumns, colIndexOffset, renderCell: skeleton === null || skeleton === void 0 ? void 0 : skeleton.renderCell }) : allItems.length === 0 || loading && !skeleton ? import_react289.default.createElement(
                       "tr",
                       null,
-                      import_react291.default.createElement(NoDataCell, { totalColumnsCount, hasFooter, loading, loadingText, empty: empty3, tableRef: tableRefObject, containerRef: wrapperMeasureRefObject })
+                      import_react289.default.createElement(NoDataCell, { totalColumnsCount, hasFooter, loading, loadingText, empty: empty3, tableRef: tableRefObject, containerRef: wrapperMeasureRefObject })
                     ) : allRows.map((row, rowIndex) => {
                       const rowExpandableProps = row.type === "data" ? expandableRows.getExpandableItemProps(row.item) : void 0;
                       const rowRoleProps = getTableRowRoleProps({
@@ -337020,7 +336926,7 @@ ${isHandDrawn ? "" : `
                       };
                       if (row.type === "data") {
                         const rowId = `${getTableItemKey(row.item)}`;
-                        return import_react291.default.createElement(
+                        return import_react289.default.createElement(
                           "tr",
                           { key: rowId, className: clsx_m_default(styles_css_default96.row, sharedCellProps.isSelected && styles_css_default96["row-selected"]), ...focusMarkers.item, ...rowRoleProps, onFocus: ({ currentTarget }) => {
                             var _a214;
@@ -337028,7 +336934,7 @@ ${isHandDrawn ? "" : `
                               (_a214 = stickyHeaderRef.current) === null || _a214 === void 0 ? void 0 : _a214.scrollToRow(currentTarget);
                             }
                           }, onClick: onRowClickHandler && onRowClickHandler.bind(null, rowIndex, row.item), onContextMenu: onRowContextMenuHandler && onRowContextMenuHandler.bind(null, rowIndex, row.item) },
-                          selection2.getItemSelectionProps && import_react291.default.createElement(TableBodySelectionCell, { ...sharedCellProps, columnId: selectionColumnId, selectionControlProps: {
+                          selection2.getItemSelectionProps && import_react289.default.createElement(TableBodySelectionCell, { ...sharedCellProps, columnId: selectionColumnId, selectionControlProps: {
                             ...selection2.getItemSelectionProps(row.item),
                             onFocusDown: moveFocusDown,
                             onFocusUp: moveFocusUp,
@@ -337061,7 +336967,7 @@ ${isHandDrawn ? "" : `
                                 }
                               }
                             };
-                            return import_react291.default.createElement(TableBodyCell, { key: colId, ...sharedCellProps, resizableStyle: {
+                            return import_react289.default.createElement(TableBodyCell, { key: colId, ...sharedCellProps, resizableStyle: {
                               width: column2.width,
                               minWidth: column2.minWidth,
                               maxWidth: column2.maxWidth
@@ -337084,23 +336990,23 @@ ${isHandDrawn ? "" : `
                         loadingStatus: row.status,
                         selected: !!(rowSelection === null || rowSelection === void 0 ? void 0 : rowSelection.checked)
                       });
-                      return loaderContent && import_react291.default.createElement(
+                      return loaderContent && import_react289.default.createElement(
                         "tr",
                         { key: (row.item ? getTableItemKey(row.item) : "root-" + rowIndex) + "-" + row.from, className: styles_css_default96.row, ...rowRoleProps },
-                        selectionType2 ? import_react291.default.createElement(TableBodySelectionCell, { ...sharedCellProps, columnId: selectionColumnId, verticalAlign: cellVerticalAlign, tableVariant: computedVariant, selectionControlProps: selectionType2 === "group" ? loaderSelectionProps : void 0, isSelected: selectionType2 === "group" && !!(loaderSelectionProps === null || loaderSelectionProps === void 0 ? void 0 : loaderSelectionProps.checked) }) : null,
+                        selectionType2 ? import_react289.default.createElement(TableBodySelectionCell, { ...sharedCellProps, columnId: selectionColumnId, verticalAlign: cellVerticalAlign, tableVariant: computedVariant, selectionControlProps: selectionType2 === "group" ? loaderSelectionProps : void 0, isSelected: selectionType2 === "group" && !!(loaderSelectionProps === null || loaderSelectionProps === void 0 ? void 0 : loaderSelectionProps.checked) }) : null,
                         visibleColumnDefinitions.map((column2, colIndex) => {
                           var _a214;
-                          return import_react291.default.createElement(TableLoaderCell, { key: getColumnKey(column2, colIndex), ...sharedCellProps, wrapLines: false, columnId: (_a214 = column2.id) !== null && _a214 !== void 0 ? _a214 : colIndex, colIndex: colIndex + colIndexOffset, isSelected: selectionType2 === "group" && !!(loaderSelectionProps === null || loaderSelectionProps === void 0 ? void 0 : loaderSelectionProps.checked), isRowHeader: colIndex === 0, level: row.level, item: row.item, trackBy, counter: loaderCounter }, loaderContent);
+                          return import_react289.default.createElement(TableLoaderCell, { key: getColumnKey(column2, colIndex), ...sharedCellProps, wrapLines: false, columnId: (_a214 = column2.id) !== null && _a214 !== void 0 ? _a214 : colIndex, colIndex: colIndex + colIndexOffset, isSelected: selectionType2 === "group" && !!(loaderSelectionProps === null || loaderSelectionProps === void 0 ? void 0 : loaderSelectionProps.checked), isRowHeader: colIndex === 0, level: row.level, item: row.item, trackBy, counter: loaderCounter }, loaderContent);
                         })
                       );
                     }),
-                    loading && skeleton && allItems.length > 0 && skeletonRowsCount - allItems.length > 0 && import_react291.default.createElement(SkeletonRows, { count: skeletonRowsCount - allItems.length, totalColumnsCount, loadingText, hasSelection, hasFooter, stickyState, tableRole, ariaLabels, cellVerticalAlign, computedVariant, visibleColumnDefinitions, wrapLines, resizableColumns, colIndexOffset, renderCell: skeleton === null || skeleton === void 0 ? void 0 : skeleton.renderCell })
+                    loading && skeleton && allItems.length > 0 && skeletonRowsCount - allItems.length > 0 && import_react289.default.createElement(SkeletonRows, { count: skeletonRowsCount - allItems.length, totalColumnsCount, loadingText, hasSelection, hasFooter, stickyState, tableRole, ariaLabels, cellVerticalAlign, computedVariant, visibleColumnDefinitions, wrapLines, resizableColumns, colIndexOffset, renderCell: skeleton === null || skeleton === void 0 ? void 0 : skeleton.renderCell })
                   )
                 )
               ),
-              resizableColumns && import_react291.default.createElement(ResizeTracker, null)
+              resizableColumns && import_react289.default.createElement(ResizeTracker, null)
             ),
-            import_react291.default.createElement(sticky_scrollbar_default, { ref: scrollbarRef, wrapperRef: wrapperRefObject, tableRef: tableRefObject, onScroll: handleScroll, hasStickyColumns })
+            import_react289.default.createElement(sticky_scrollbar_default, { ref: scrollbarRef, wrapperRef: wrapperRefObject, tableRef: tableRefObject, onScroll: handleScroll, hasStickyColumns })
           )
         )
       )
@@ -337109,19 +337015,19 @@ ${isHandDrawn ? "" : `
       // Reset the shared cell contexts to known defaults: the extracted cell substrate reads column
       // layout and row variant from context, so the existing Table pins them here (it drives its own
       // selection/striping paint directly, not via the atomic row-variant context).
-      import_react291.default.createElement(TableContextProvider, { value: defaultTableContext }, tableContent)
+      import_react289.default.createElement(TableContextProvider, { value: defaultTableContext }, tableContent)
     );
   });
   var internal_default17 = InternalTable;
 
   // node_modules/@cloudscape-design/components/side-navigation/index.js
-  var import_react294 = __toESM(require_react());
+  var import_react292 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/side-navigation/implementation.js
-  var import_react293 = __toESM(require_react());
+  var import_react291 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/side-navigation/parts.js
-  var import_react292 = __toESM(require_react());
+  var import_react290 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/side-navigation/util.js
   function hasActiveLink(items, activeHref) {
@@ -337293,7 +337199,7 @@ ${isHandDrawn ? "" : `
   // node_modules/@cloudscape-design/components/side-navigation/parts.js
   function Header3({ definition, activeHref, fireFollow, collapsed }) {
     checkSafeUrl("SideNavigation", definition.href);
-    const onClick = (0, import_react292.useCallback)((event3) => {
+    const onClick = (0, import_react290.useCallback)((event3) => {
       if (isPlainLeftClick(event3)) {
         fireFollow(definition, event3);
       }
@@ -337307,24 +337213,24 @@ ${isHandDrawn ? "" : `
         position: "header"
       }
     };
-    return import_react292.default.createElement(
-      import_react292.default.Fragment,
+    return import_react290.default.createElement(
+      import_react290.default.Fragment,
       null,
-      !collapsed && import_react292.default.createElement(
+      !collapsed && import_react290.default.createElement(
         "h2",
         { className: styles_css_default113.header },
-        import_react292.default.createElement(
+        import_react290.default.createElement(
           "a",
           { href: definition.href, className: clsx_m_default(styles_css_default113["header-link"], { [styles_css_default113["header-link--has-logo"]]: !!definition.logo }), "aria-current": definition.href === activeHref ? "page" : void 0, onClick, ...getAnalyticsMetadataAttribute(clickActionAnalyticsMetadata) },
-          definition.logo && (definition.logo.svg ? import_react292.default.createElement("span", { className: clsx_m_default(styles_css_default113["header-logo"], {
+          definition.logo && (definition.logo.svg ? import_react290.default.createElement("span", { className: clsx_m_default(styles_css_default113["header-logo"], {
             [styles_css_default113["header-logo--stretched"]]: !definition.text
-          }) }, definition.logo.svg) : import_react292.default.createElement("img", { className: clsx_m_default(styles_css_default113["header-logo"], {
+          }) }, definition.logo.svg) : import_react290.default.createElement("img", { className: clsx_m_default(styles_css_default113["header-logo"], {
             [styles_css_default113["header-logo--stretched"]]: !definition.text
           }), src: definition.logo.src, alt: definition.logo.alt })),
-          import_react292.default.createElement("span", { className: clsx_m_default(styles_css_default113["header-link-text"], styles_css_default112["header-link-text"]) }, definition.text)
+          import_react290.default.createElement("span", { className: clsx_m_default(styles_css_default113["header-link-text"], styles_css_default112["header-link-text"]) }, definition.text)
         )
       ),
-      !collapsed && import_react292.default.createElement(Divider2, { isPresentational: true, variant: "header" })
+      !collapsed && import_react290.default.createElement(Divider2, { isPresentational: true, variant: "header" })
     );
   }
   function NavigationItemsList({ items, variant, activeHref, fireChange, fireFollow, position: position5 = "", collapsed, withIcons, ariaLabel, activeTooltip, setActiveTooltip }) {
@@ -337341,10 +337247,10 @@ ${isHandDrawn ? "" : `
       function pushDivider() {
         lists.push({
           listVariant: variant,
-          element: import_react292.default.createElement(
+          element: import_react290.default.createElement(
             "div",
             { "data-itemid": `item-${itemid}`, className: clsx_m_default(collapsed && styles_css_default113["list-item--group"]) },
-            import_react292.default.createElement(Divider2, { variant: "default", collapsed })
+            import_react290.default.createElement(Divider2, { variant: "default", collapsed })
           )
         });
         currentListIndex = lists.push({
@@ -337362,50 +337268,50 @@ ${isHandDrawn ? "" : `
         }
         case "link": {
           (_a213 = lists[currentListIndex].items) === null || _a213 === void 0 ? void 0 : _a213.push({
-            element: import_react292.default.createElement(
+            element: import_react290.default.createElement(
               "li",
               { key: index2, "data-itemid": `item-${itemid}`, className: clsx_m_default(styles_css_default113["list-item"], collapsed && styles_css_default113["list-item--collapsed"]) },
-              import_react292.default.createElement(Link2, { definition: item, activeHref, fireChange, fireFollow, position: itemPosition, collapsed, activeTooltip, setActiveTooltip })
+              import_react290.default.createElement(Link2, { definition: item, activeHref, fireChange, fireFollow, position: itemPosition, collapsed, activeTooltip, setActiveTooltip })
             )
           });
           return;
         }
         case "section": {
           (_b = lists[currentListIndex].items) === null || _b === void 0 ? void 0 : _b.push({
-            element: import_react292.default.createElement(
+            element: import_react290.default.createElement(
               "li",
               { key: index2, "data-itemid": `item-${itemid}`, className: clsx_m_default(styles_css_default113["list-item"], collapsed && styles_css_default113["list-item--collapsed"], collapsed && styles_css_default113["list-item--group"]) },
-              import_react292.default.createElement(Section2, { definition: item, activeHref, variant, fireChange, fireFollow, position: itemPosition, collapsed, withIcons, activeTooltip, setActiveTooltip })
+              import_react290.default.createElement(Section2, { definition: item, activeHref, variant, fireChange, fireFollow, position: itemPosition, collapsed, withIcons, activeTooltip, setActiveTooltip })
             )
           });
           return;
         }
         case "section-group": {
           (_c = lists[currentListIndex].items) === null || _c === void 0 ? void 0 : _c.push({
-            element: import_react292.default.createElement(
+            element: import_react290.default.createElement(
               "li",
               { key: index2, "data-itemid": `item-${itemid}`, className: clsx_m_default(styles_css_default113["list-item"], collapsed && styles_css_default113["list-item--collapsed"], collapsed && styles_css_default113["list-item--group"]) },
-              import_react292.default.createElement(SectionGroup, { definition: item, activeHref, fireChange, fireFollow, position: itemPosition, collapsed, withIcons, activeTooltip, setActiveTooltip })
+              import_react290.default.createElement(SectionGroup, { definition: item, activeHref, fireChange, fireFollow, position: itemPosition, collapsed, withIcons, activeTooltip, setActiveTooltip })
             )
           });
           return;
         }
         case "link-group": {
           (_d = lists[currentListIndex].items) === null || _d === void 0 ? void 0 : _d.push({
-            element: import_react292.default.createElement(
+            element: import_react290.default.createElement(
               "li",
               { key: index2, "data-itemid": `item-${itemid}`, className: clsx_m_default(styles_css_default113["list-item"], collapsed && styles_css_default113["list-item--collapsed"], collapsed && styles_css_default113["list-item--group"]) },
-              import_react292.default.createElement(LinkGroup, { definition: item, activeHref, fireChange, fireFollow, position: itemPosition, collapsed, withIcons, activeTooltip, setActiveTooltip })
+              import_react290.default.createElement(LinkGroup, { definition: item, activeHref, fireChange, fireFollow, position: itemPosition, collapsed, withIcons, activeTooltip, setActiveTooltip })
             )
           });
           return;
         }
         case "expandable-link-group": {
           (_e2 = lists[currentListIndex].items) === null || _e2 === void 0 ? void 0 : _e2.push({
-            element: import_react292.default.createElement(
+            element: import_react290.default.createElement(
               "li",
               { key: index2, "data-itemid": `item-${itemid}`, className: clsx_m_default(styles_css_default113["list-item"], collapsed && styles_css_default113["list-item--collapsed"], collapsed && styles_css_default113["list-item--group"]) },
-              import_react292.default.createElement(ExpandableLinkGroup, { definition: item, activeHref, fireChange, fireFollow, variant, position: itemPosition, collapsed, withIcons, activeTooltip, setActiveTooltip })
+              import_react290.default.createElement(ExpandableLinkGroup, { definition: item, activeHref, fireChange, fireFollow, variant, position: itemPosition, collapsed, withIcons, activeTooltip, setActiveTooltip })
             )
           });
           return;
@@ -337420,15 +337326,15 @@ ${isHandDrawn ? "" : `
       const nextVisible = lists.slice(index2 + 1).find((l4) => !l4.items || l4.items.length > 0);
       return (!prevVisible || prevVisible.items !== void 0 && prevVisible.items.length > 0) && nextVisible !== void 0 && (nextVisible.items === void 0 || nextVisible.items.length > 0);
     }) : lists;
-    return import_react292.default.createElement(import_react292.default.Fragment, null, filteredLists.map((list, index2) => {
+    return import_react290.default.createElement(import_react290.default.Fragment, null, filteredLists.map((list, index2) => {
       if (!list.items || list.items.length === 0) {
-        return import_react292.default.createElement("div", { key: `hr-${index2}`, className: clsx_m_default(styles_css_default113.list, styles_css_default113[`list-variant-${variant}`], {
+        return import_react290.default.createElement("div", { key: `hr-${index2}`, className: clsx_m_default(styles_css_default113.list, styles_css_default113[`list-variant-${variant}`], {
           [styles_css_default113["list-variant-root--first"]]: list.listVariant === "root" && index2 === 0,
           [styles_css_default113[`list-variant-${list.listVariant}--collapsed`]]: collapsed,
           [styles_css_default113["list--with-icons"]]: withIcons
         }) }, list.element);
       } else {
-        return import_react292.default.createElement("ul", { key: `list-${index2}`, className: clsx_m_default(styles_css_default113.list, styles_css_default113[`list-variant-${list.listVariant}`], {
+        return import_react290.default.createElement("ul", { key: `list-${index2}`, className: clsx_m_default(styles_css_default113.list, styles_css_default113[`list-variant-${list.listVariant}`], {
           [styles_css_default113["list-variant-root--first"]]: list.listVariant === "root" && index2 === 0,
           [styles_css_default113[`list-variant-${list.listVariant}--collapsed`]]: collapsed,
           [styles_css_default113["list--with-icons"]]: withIcons
@@ -337437,16 +337343,16 @@ ${isHandDrawn ? "" : `
     }));
   }
   function Divider2({ variant = "default", isPresentational = false, collapsed }) {
-    return import_react292.default.createElement("hr", { className: clsx_m_default(styles_css_default113.divider, styles_css_default113[`divider-${variant}`], collapsed && styles_css_default113["divider--collapsed"]), role: isPresentational ? "presentation" : void 0 });
+    return import_react290.default.createElement("hr", { className: clsx_m_default(styles_css_default113.divider, styles_css_default113[`divider-${variant}`], collapsed && styles_css_default113["divider--collapsed"]), role: isPresentational ? "presentation" : void 0 });
   }
-  var ItemIcon = import_react292.default.forwardRef(function ItemIcon2({ icon: icon2, collapsed, className, ...rest }, ref) {
+  var ItemIcon = import_react290.default.forwardRef(function ItemIcon2({ icon: icon2, collapsed, className, ...rest }, ref) {
     if (!icon2) {
       return null;
     }
-    return import_react292.default.createElement("span", { ref, className: clsx_m_default(styles_css_default113["item-icon"], styles_css_default114["item-icon"], collapsed && styles_css_default113["item-icon--collapsed"], className), "data-awsui-motion-target": "", ...rest }, icon2);
+    return import_react290.default.createElement("span", { ref, className: clsx_m_default(styles_css_default113["item-icon"], styles_css_default114["item-icon"], collapsed && styles_css_default113["item-icon--collapsed"], className), "data-awsui-motion-target": "", ...rest }, icon2);
   });
   function useCollapsedTooltip({ label, position: position5, activeTooltip, setActiveTooltip }) {
-    const triggerRef = (0, import_react292.useRef)(null);
+    const triggerRef = (0, import_react290.useRef)(null);
     const id38 = position5 !== null && position5 !== void 0 ? position5 : "";
     const show2 = activeTooltip === id38;
     const claim = () => setActiveTooltip === null || setActiveTooltip === void 0 ? void 0 : setActiveTooltip(id38);
@@ -337461,14 +337367,14 @@ ${isHandDrawn ? "" : `
       onMouseEnter: claim,
       onMouseLeave: release
     };
-    const tooltip = show2 ? import_react292.default.createElement(InternalTooltip, { getTrack: () => triggerRef.current, content: label, position: "right", onEscape: release }) : null;
+    const tooltip = show2 ? import_react290.default.createElement(InternalTooltip, { getTrack: () => triggerRef.current, content: label, position: "right", onEscape: release }) : null;
     return { triggerRef, triggerProps, tooltip };
   }
   function Link2({ definition, activeHref, fireFollow, position: position5, collapsed, activeTooltip, setActiveTooltip }) {
     checkSafeUrl("SideNavigation", definition.href);
     const isActive = definition.href === activeHref;
     const i18n = useInternalI18n("link");
-    const linkRef = (0, import_react292.useRef)(null);
+    const linkRef = (0, import_react290.useRef)(null);
     const collapsedTooltip = useCollapsedTooltip({
       label: definition.text,
       position: position5,
@@ -337476,18 +337382,18 @@ ${isHandDrawn ? "" : `
       setActiveTooltip
     });
     const isIconLess = !definition.icon;
-    (0, import_react292.useEffect)(() => {
+    (0, import_react290.useEffect)(() => {
       if (linkRef.current) {
         linkRef.current.inert = !!(collapsed && isIconLess);
       }
     }, [collapsed, isIconLess]);
-    const mergedRef = (0, import_react292.useCallback)((node2) => {
+    const mergedRef = (0, import_react290.useCallback)((node2) => {
       linkRef.current = node2;
       if (collapsed) {
         collapsedTooltip.triggerRef.current = node2;
       }
     }, [collapsed, collapsedTooltip.triggerRef]);
-    const onClick = (0, import_react292.useCallback)((event3) => {
+    const onClick = (0, import_react290.useCallback)((event3) => {
       if (isPlainLeftClick(event3)) {
         fireFollow(definition, event3);
       }
@@ -337503,50 +337409,50 @@ ${isHandDrawn ? "" : `
     };
     const renderedExternalIconAriaLabel = i18n("externalIconAriaLabel", definition.externalIconAriaLabel);
     const showInfo = !collapsed && definition.info;
-    const internalLink = import_react292.default.createElement(
+    const internalLink = import_react290.default.createElement(
       "a",
       { ref: mergedRef, href: definition.href, className: clsx_m_default(styles_css_default113.link, {
         [styles_css_default113["link-active"]]: isActive,
         [styles_css_default113["link--collapsed"]]: collapsed
       }), target: definition.external ? "_blank" : void 0, rel: definition.external ? "noopener noreferrer" : void 0, "aria-current": definition.href === activeHref ? "page" : void 0, "aria-label": collapsed ? definition.text : void 0, ...definition.external || definition.icon ? { "data-awsui-motion-trigger": "hover" } : {}, onClick, ...collapsed ? collapsedTooltip.triggerProps : {}, ...getAnalyticsMetadataAttribute(clickActionAnalyticsMetadata) },
-      import_react292.default.createElement(ItemIcon, { icon: definition.icon, collapsed, "aria-hidden": collapsed ? true : void 0 }),
-      import_react292.default.createElement(
+      import_react290.default.createElement(ItemIcon, { icon: definition.icon, collapsed, "aria-hidden": collapsed ? true : void 0 }),
+      import_react290.default.createElement(
         "span",
         { className: clsx_m_default(styles_css_default113["link-text-wrapper"], collapsed && styles_css_default113["link-text-wrapper--collapsed"]), "aria-hidden": collapsed ? true : void 0 },
-        import_react292.default.createElement(
+        import_react290.default.createElement(
           "span",
           { className: clsx_m_default(styles_css_default113["link-text-wrapper-content"]) },
-          import_react292.default.createElement("span", { className: styles_css_default112["link-text"] }, definition.text),
-          definition.external && import_react292.default.createElement(
+          import_react290.default.createElement("span", { className: styles_css_default112["link-text"] }, definition.text),
+          definition.external && import_react290.default.createElement(
             "span",
             { "aria-label": renderedExternalIconAriaLabel, role: renderedExternalIconAriaLabel ? "img" : void 0 },
-            import_react292.default.createElement(internal_default, { name: "external", className: styles_css_default113["external-icon"], nativeAttributes: { "data-awsui-motion-target": "" } })
+            import_react290.default.createElement(internal_default, { name: "external", className: styles_css_default113["external-icon"], nativeAttributes: { "data-awsui-motion-target": "" } })
           )
         )
       ),
       collapsed && collapsedTooltip.tooltip
     );
-    return showInfo ? import_react292.default.createElement(
+    return showInfo ? import_react290.default.createElement(
       "div",
       { className: styles_css_default113["list-item--link-with-info"] },
       internalLink,
-      import_react292.default.createElement("span", { className: clsx_m_default(styles_css_default113.info, styles_css_default114.info) }, definition.info)
+      import_react290.default.createElement("span", { className: clsx_m_default(styles_css_default113.info, styles_css_default114.info) }, definition.info)
     ) : internalLink;
   }
   function Section2({ definition, activeHref, fireFollow, fireChange, variant, position: position5, collapsed, withIcons, activeTooltip, setActiveTooltip }) {
     var _a213;
-    const [expanded, setExpanded] = (0, import_react292.useState)((_a213 = definition.defaultExpanded) !== null && _a213 !== void 0 ? _a213 : true);
+    const [expanded, setExpanded] = (0, import_react290.useState)((_a213 = definition.defaultExpanded) !== null && _a213 !== void 0 ? _a213 : true);
     const isVisualRefresh = useVisualRefresh();
-    const sectionRef = (0, import_react292.useRef)(null);
-    const onExpandedChange = (0, import_react292.useCallback)((e3) => {
+    const sectionRef = (0, import_react290.useRef)(null);
+    const onExpandedChange = (0, import_react290.useCallback)((e3) => {
       fireChange(definition, e3.detail.expanded);
       setExpanded(e3.detail.expanded);
     }, [definition, fireChange]);
-    (0, import_react292.useEffect)(() => {
+    (0, import_react290.useEffect)(() => {
       var _a214;
       setExpanded((_a214 = definition.defaultExpanded) !== null && _a214 !== void 0 ? _a214 : true);
     }, [definition]);
-    (0, import_react292.useEffect)(() => {
+    (0, import_react290.useEffect)(() => {
       const el = sectionRef.current;
       if (el) {
         el.inert = false;
@@ -337557,90 +337463,90 @@ ${isHandDrawn ? "" : `
       }
     }, [collapsed]);
     const isInSectionGroup = variant === "section-group";
-    return import_react292.default.createElement(
+    return import_react290.default.createElement(
       InternalExpandableSection,
-      { variant: "footer", expanded: collapsed ? true : expanded, onChange: onExpandedChange, disableContentPaddings: true, __internalRootRef: sectionRef, className: clsx_m_default(styles_css_default113.section, isInSectionGroup && styles_css_default113["section--no-ident"], withIcons && styles_css_default113["section--expand-icon-end"], withIcons && !collapsed && definition.info && styles_css_default113["section--expand-icon-end-with-info"], isVisualRefresh && styles_css_default113.refresh, collapsed && styles_css_default113["section--collapsed"]), headerText: import_react292.default.createElement("span", { className: clsx_m_default(styles_css_default113["section-header"], styles_css_default113["label-text"], collapsed && styles_css_default113["label-text--collapsed"]), "aria-hidden": collapsed ? true : void 0 }, definition.text), __expandIconPosition: withIcons ? "end" : "start", __headerEndInfo: !collapsed && definition.info ? import_react292.default.createElement("span", { className: clsx_m_default(styles_css_default113.info, styles_css_default114.info) }, definition.info) : void 0 },
-      import_react292.default.createElement(NavigationItemsList, { variant: "section", items: definition.items, fireFollow, fireChange, activeHref, position: position5, collapsed, withIcons, ariaLabel: collapsed ? definition.text : void 0, activeTooltip, setActiveTooltip })
+      { variant: "footer", expanded: collapsed ? true : expanded, onChange: onExpandedChange, disableContentPaddings: true, __internalRootRef: sectionRef, className: clsx_m_default(styles_css_default113.section, isInSectionGroup && styles_css_default113["section--no-ident"], withIcons && styles_css_default113["section--expand-icon-end"], withIcons && !collapsed && definition.info && styles_css_default113["section--expand-icon-end-with-info"], isVisualRefresh && styles_css_default113.refresh, collapsed && styles_css_default113["section--collapsed"]), headerText: import_react290.default.createElement("span", { className: clsx_m_default(styles_css_default113["section-header"], styles_css_default113["label-text"], collapsed && styles_css_default113["label-text--collapsed"]), "aria-hidden": collapsed ? true : void 0 }, definition.text), __expandIconPosition: withIcons ? "end" : "start", __headerEndInfo: !collapsed && definition.info ? import_react290.default.createElement("span", { className: clsx_m_default(styles_css_default113.info, styles_css_default114.info) }, definition.info) : void 0 },
+      import_react290.default.createElement(NavigationItemsList, { variant: "section", items: definition.items, fireFollow, fireChange, activeHref, position: position5, collapsed, withIcons, ariaLabel: collapsed ? definition.text : void 0, activeTooltip, setActiveTooltip })
     );
   }
   function SectionGroup({ definition, activeHref, fireFollow, fireChange, position: position5, collapsed, withIcons, activeTooltip, setActiveTooltip }) {
     const isOneTheme = useOneTheme();
-    const sectionGroupRef = (0, import_react292.useRef)(null);
-    (0, import_react292.useEffect)(() => {
+    const sectionGroupRef = (0, import_react290.useRef)(null);
+    (0, import_react290.useEffect)(() => {
       if (sectionGroupRef.current) {
         sectionGroupRef.current.inert = false;
       }
     }, [collapsed]);
     const showInfo = !collapsed && definition.info;
-    const title2 = import_react292.default.createElement(
+    const title2 = import_react290.default.createElement(
       InternalBox,
       { className: clsx_m_default(styles_css_default113["section-group-title"], collapsed && styles_css_default113["section-group-title--collapsed"]), variant: "h3", fontSize: isOneTheme ? "heading-s" : void 0 },
-      import_react292.default.createElement("span", { className: clsx_m_default(styles_css_default113["label-text"], collapsed && styles_css_default113["label-text--collapsed"]), "aria-hidden": collapsed ? true : void 0 }, definition.title)
+      import_react290.default.createElement("span", { className: clsx_m_default(styles_css_default113["label-text"], collapsed && styles_css_default113["label-text--collapsed"]), "aria-hidden": collapsed ? true : void 0 }, definition.title)
     );
-    return import_react292.default.createElement(
+    return import_react290.default.createElement(
       "div",
       { ref: sectionGroupRef, className: styles_css_default113["section-group"] },
-      definition.info ? import_react292.default.createElement(
+      definition.info ? import_react290.default.createElement(
         "div",
         { className: styles_css_default113["list-item--link-with-info"] },
         title2,
-        showInfo && import_react292.default.createElement("span", { className: clsx_m_default(styles_css_default113.info, styles_css_default114.info) }, definition.info)
+        showInfo && import_react290.default.createElement("span", { className: clsx_m_default(styles_css_default113.info, styles_css_default114.info) }, definition.info)
       ) : title2,
-      import_react292.default.createElement(NavigationItemsList, { variant: "section-group", items: definition.items, fireFollow, fireChange, activeHref, position: position5, collapsed, withIcons, ariaLabel: collapsed ? definition.title : void 0, activeTooltip, setActiveTooltip })
+      import_react290.default.createElement(NavigationItemsList, { variant: "section-group", items: definition.items, fireFollow, fireChange, activeHref, position: position5, collapsed, withIcons, ariaLabel: collapsed ? definition.title : void 0, activeTooltip, setActiveTooltip })
     );
   }
   function LinkGroup({ definition, activeHref, fireFollow, fireChange, position: position5, collapsed, withIcons, activeTooltip, setActiveTooltip }) {
     checkSafeUrl("SideNavigation", definition.href);
-    const childrenRef = (0, import_react292.useRef)(null);
+    const childrenRef = (0, import_react290.useRef)(null);
     const isOneTheme = useOneTheme();
-    (0, import_react292.useEffect)(() => {
+    (0, import_react290.useEffect)(() => {
       if (childrenRef.current) {
         childrenRef.current.inert = !!collapsed;
       }
     }, [collapsed]);
-    return import_react292.default.createElement(
-      import_react292.default.Fragment,
+    return import_react290.default.createElement(
+      import_react290.default.Fragment,
       null,
-      import_react292.default.createElement(Link2, { definition: {
+      import_react290.default.createElement(Link2, { definition: {
         type: "link",
         href: definition.href,
         text: definition.text,
         info: definition.info,
         icon: definition.icon
       }, fireFollow: (_3, event3) => fireFollow(definition, event3), fireChange, activeHref, position: position5, collapsed, activeTooltip, setActiveTooltip }),
-      import_react292.default.createElement(Transition4, { in: !collapsed, disabled: !isOneTheme }, (transitionState, transitionEventsRef, motionDisabled) => {
+      import_react290.default.createElement(Transition4, { in: !collapsed, disabled: !isOneTheme }, (transitionState, transitionEventsRef, motionDisabled) => {
         const childrenSettled = !collapsed && (motionDisabled || transitionState === "entered");
-        return import_react292.default.createElement(
+        return import_react290.default.createElement(
           "div",
           { ref: transitionEventsRef, className: clsx_m_default(styles_css_default113["link-group-children"], collapsed && styles_css_default113["link-group-children--collapsed"]) },
-          import_react292.default.createElement(
+          import_react290.default.createElement(
             "div",
             { ref: childrenRef, className: clsx_m_default(styles_css_default113["link-group-children-inner"], !collapsed && styles_css_default113["link-group-children-inner--expanded"], childrenSettled && styles_css_default113["link-group-children-inner--settled"]) },
-            import_react292.default.createElement(NavigationItemsList, { variant: "link-group", items: definition.items, fireFollow, fireChange, activeHref, position: position5, collapsed, withIcons, ariaLabel: collapsed ? definition.text : void 0, activeTooltip, setActiveTooltip })
+            import_react290.default.createElement(NavigationItemsList, { variant: "link-group", items: definition.items, fireFollow, fireChange, activeHref, position: position5, collapsed, withIcons, ariaLabel: collapsed ? definition.text : void 0, activeTooltip, setActiveTooltip })
           )
         );
       })
     );
   }
   function ExpandableLinkGroup({ definition, fireFollow, fireChange, activeHref, variant, position: position5, collapsed, withIcons, activeTooltip, setActiveTooltip }) {
-    const containsActiveLink = (0, import_react292.useMemo)(() => {
+    const containsActiveLink = (0, import_react290.useMemo)(() => {
       return activeHref ? hasActiveLink(definition.items, activeHref) : false;
     }, [activeHref, definition.items]);
-    const [expanded, setExpanded] = (0, import_react292.useState)(() => {
+    const [expanded, setExpanded] = (0, import_react290.useState)(() => {
       var _a213;
       return (_a213 = definition.defaultExpanded) !== null && _a213 !== void 0 ? _a213 : definition.href === activeHref || containsActiveLink;
     });
-    const [userExpanded, setUserExpanded] = (0, import_react292.useState)();
-    (0, import_react292.useEffect)(() => setUserExpanded(void 0), [definition]);
-    (0, import_react292.useEffect)(() => {
+    const [userExpanded, setUserExpanded] = (0, import_react290.useState)();
+    (0, import_react290.useEffect)(() => setUserExpanded(void 0), [definition]);
+    (0, import_react290.useEffect)(() => {
       setExpanded(definition.href === activeHref || containsActiveLink);
     }, [definition.href, containsActiveLink, activeHref]);
-    (0, import_react292.useEffect)(() => {
+    (0, import_react290.useEffect)(() => {
       if (definition.defaultExpanded !== void 0) {
         setExpanded(definition.defaultExpanded);
       }
     }, [definition]);
-    const onExpandedChange = (0, import_react292.useCallback)((e3) => {
+    const onExpandedChange = (0, import_react290.useCallback)((e3) => {
       fireChange(definition, e3.detail.expanded);
       setUserExpanded(e3.detail.expanded);
     }, [definition, fireChange]);
@@ -337651,16 +337557,16 @@ ${isHandDrawn ? "" : `
         fireChange(definition, true);
       }
     };
-    return import_react292.default.createElement(
+    return import_react290.default.createElement(
       InternalExpandableSection,
-      { className: clsx_m_default(styles_css_default113["expandable-link-group"], variant === "section-group" && styles_css_default113["expandable-link-group--no-ident"], withIcons && styles_css_default113["expandable-link-group--expand-icon-end"], definition.href === activeHref && styles_css_default113["expandable-link-group--active"], collapsed && styles_css_default113["expandable-link-group--collapsed"]), variant: "navigation", expanded: collapsed ? false : userExpanded !== null && userExpanded !== void 0 ? userExpanded : expanded, onChange: onExpandedChange, disableContentPaddings: true, __disableHeaderPaddings: true, __expandIconPosition: withIcons ? "end" : "start", __hideExpandIcon: !!collapsed, headerAriaLabel: definition.info ? definition.text : void 0, headerText: import_react292.default.createElement(Link2, { definition: {
+      { className: clsx_m_default(styles_css_default113["expandable-link-group"], variant === "section-group" && styles_css_default113["expandable-link-group--no-ident"], withIcons && styles_css_default113["expandable-link-group--expand-icon-end"], definition.href === activeHref && styles_css_default113["expandable-link-group--active"], collapsed && styles_css_default113["expandable-link-group--collapsed"]), variant: "navigation", expanded: collapsed ? false : userExpanded !== null && userExpanded !== void 0 ? userExpanded : expanded, onChange: onExpandedChange, disableContentPaddings: true, __disableHeaderPaddings: true, __expandIconPosition: withIcons ? "end" : "start", __hideExpandIcon: !!collapsed, headerAriaLabel: definition.info ? definition.text : void 0, headerText: import_react290.default.createElement(Link2, { definition: {
         type: "link",
         href: definition.href,
         text: definition.text,
         info: definition.info,
         icon: definition.icon
       }, fireFollow: onHeaderFollow, fireChange, activeHref, position: position5, collapsed, activeTooltip, setActiveTooltip }) },
-      import_react292.default.createElement(NavigationItemsList, { variant: "expandable-link-group", items: definition.items, fireFollow, fireChange, activeHref, position: position5, collapsed, withIcons, activeTooltip, setActiveTooltip })
+      import_react290.default.createElement(NavigationItemsList, { variant: "expandable-link-group", items: definition.items, fireFollow, fireChange, activeHref, position: position5, collapsed, withIcons, activeTooltip, setActiveTooltip })
     );
   }
 
@@ -337668,29 +337574,29 @@ ${isHandDrawn ? "" : `
   function SideNavigationImplementation({ header, itemsControl, activeHref, items = [], onFollow, onChange, collapsed = false, __internalRootRef, ...props }) {
     const baseProps = getBaseProps(props);
     const isToolbar = useAppLayoutToolbarDesignEnabled();
-    const parentMap = (0, import_react293.useMemo)(() => generateExpandableItemsMapping(items), [items]);
-    const withIcons = (0, import_react293.useMemo)(() => hasNavigationIcons(items), [items]);
-    const [activeTooltip, setActiveTooltip] = (0, import_react293.useState)(null);
-    const listContainerRef = (0, import_react293.useRef)(null);
+    const parentMap = (0, import_react291.useMemo)(() => generateExpandableItemsMapping(items), [items]);
+    const withIcons = (0, import_react291.useMemo)(() => hasNavigationIcons(items), [items]);
+    const [activeTooltip, setActiveTooltip] = (0, import_react291.useState)(null);
+    const listContainerRef = (0, import_react291.useRef)(null);
     if (isDevelopment2) {
-      (0, import_react293.useEffect)(() => checkDuplicateHrefs(items), [items]);
-      (0, import_react293.useEffect)(() => checkCollapsedIconSupport(items, collapsed), [items, collapsed]);
+      (0, import_react291.useEffect)(() => checkDuplicateHrefs(items), [items]);
+      (0, import_react291.useEffect)(() => checkCollapsedIconSupport(items, collapsed), [items, collapsed]);
     }
-    const onChangeHandler = (0, import_react293.useCallback)((item, expanded) => {
+    const onChangeHandler = (0, import_react291.useCallback)((item, expanded) => {
       fireNonCancelableEvent(onChange, { item, expanded, expandableParents: parentMap.get(item) });
     }, [onChange, parentMap]);
-    const onFollowHandler = (0, import_react293.useCallback)((item, sourceEvent) => {
+    const onFollowHandler = (0, import_react291.useCallback)((item, sourceEvent) => {
       fireCancelableEvent(onFollow, item, sourceEvent);
     }, [onFollow]);
-    return import_react293.default.createElement(
+    return import_react291.default.createElement(
       "div",
       { ...baseProps, className: clsx_m_default(styles_css_default113.root, baseProps.className, isToolbar && styles_css_default113["with-toolbar"], collapsed && styles_css_default113["root--collapsed"]), ref: __internalRootRef },
-      header && import_react293.default.createElement(Header3, { definition: header, activeHref, fireChange: onChangeHandler, fireFollow: onFollowHandler, collapsed }),
-      !collapsed && itemsControl && import_react293.default.createElement("div", { className: styles_css_default113["items-control"] }, itemsControl),
-      items && import_react293.default.createElement(
+      header && import_react291.default.createElement(Header3, { definition: header, activeHref, fireChange: onChangeHandler, fireFollow: onFollowHandler, collapsed }),
+      !collapsed && itemsControl && import_react291.default.createElement("div", { className: styles_css_default113["items-control"] }, itemsControl),
+      items && import_react291.default.createElement(
         "div",
         { ref: listContainerRef, className: styles_css_default113["list-container"] },
-        import_react293.default.createElement(NavigationItemsList, { variant: "root", items, fireFollow: onFollowHandler, fireChange: onChangeHandler, activeHref, collapsed, withIcons, activeTooltip, setActiveTooltip })
+        import_react291.default.createElement(NavigationItemsList, { variant: "root", items, fireFollow: onFollowHandler, fireChange: onChangeHandler, activeHref, collapsed, withIcons, activeTooltip, setActiveTooltip })
       )
     );
   }
@@ -337711,33 +337617,33 @@ ${isHandDrawn ? "" : `
         activeHref: props.activeHref || ""
       }
     };
-    return import_react294.default.createElement(InternalSideNavigation, { ...props, ...internalProps, items, collapsed, ...getAnalyticsMetadataAttribute({ component: componentAnalyticMetadata }) });
+    return import_react292.default.createElement(InternalSideNavigation, { ...props, ...internalProps, items, collapsed, ...getAnalyticsMetadataAttribute({ component: componentAnalyticMetadata }) });
   }
   applyDisplayName(SideNavigation, "SideNavigation");
 
   // node_modules/@cloudscape-design/components/space-between/index.js
-  var import_react295 = __toESM(require_react());
+  var import_react293 = __toESM(require_react());
   function SpaceBetween({ direction: direction2 = "vertical", ...props }) {
     const baseComponentProps = useBaseComponent("SpaceBetween", {
       props: { alignItems: props.alignItems, direction: direction2, size: props.size }
     });
-    return import_react295.default.createElement(internal_default5, { direction: direction2, ...props, ...baseComponentProps });
+    return import_react293.default.createElement(internal_default5, { direction: direction2, ...props, ...baseComponentProps });
   }
   applyDisplayName(SpaceBetween, "SpaceBetween");
 
   // node_modules/@cloudscape-design/components/status-indicator/index.js
-  var import_react296 = __toESM(require_react());
+  var import_react294 = __toESM(require_react());
   function StatusIndicator2({ type: type3 = "success", wrapText: wrapText3 = true, ...props }) {
     const baseComponentProps = useBaseComponent("StatusIndicator", {
       props: { colorOverride: props.colorOverride, type: type3, wrapText: wrapText3 }
     });
-    return import_react296.default.createElement(StatusIndicator, { type: type3, wrapText: wrapText3, ...props, ...baseComponentProps });
+    return import_react294.default.createElement(StatusIndicator, { type: type3, wrapText: wrapText3, ...props, ...baseComponentProps });
   }
   applyDisplayName(StatusIndicator2, "StatusIndicator");
 
   // node_modules/@cloudscape-design/components/table/index.js
-  var import_react297 = __toESM(require_react());
-  var Table = import_react297.default.forwardRef(({ items = [], selectedItems = [], variant = "container", contentDensity = "comfortable", cellVerticalAlign = "middle", firstIndex = 1, ...props }, ref) => {
+  var import_react295 = __toESM(require_react());
+  var Table = import_react295.default.forwardRef(({ items = [], selectedItems = [], variant = "container", contentDensity = "comfortable", cellVerticalAlign = "middle", firstIndex = 1, ...props }, ref) => {
     var _a213, _b, _c, _d, _e2, _f, _g, _h, _j, _k, _l;
     const analyticsMetadata = getAnalyticsMetadataProps(props);
     const hasHiddenColumns = props.visibleColumns && props.visibleColumns.length < props.columnDefinitions.length || ((_a213 = props.columnDisplay) === null || _a213 === void 0 ? void 0 : _a213.some((col) => col.type !== "group" && !col.visible));
@@ -337822,19 +337728,19 @@ ${isHandDrawn ? "" : `
       tableHasStickyColumns: hasStickyColumns
     };
     if (variant === "borderless" || variant === "embedded") {
-      return import_react297.default.createElement(
+      return import_react295.default.createElement(
         CollectionPreferencesMetadata.Provider,
         { value: collectionPreferencesMetadata },
-        import_react297.default.createElement(internal_default17, { ...tableProps })
+        import_react295.default.createElement(internal_default17, { ...tableProps })
       );
     }
-    return import_react297.default.createElement(
+    return import_react295.default.createElement(
       CollectionPreferencesMetadata.Provider,
       { value: collectionPreferencesMetadata },
-      import_react297.default.createElement(
+      import_react295.default.createElement(
         AnalyticsFunnelSubStep,
         null,
-        import_react297.default.createElement(InternalTableAsSubstep, { ...tableProps })
+        import_react295.default.createElement(InternalTableAsSubstep, { ...tableProps })
       )
     );
   });
@@ -337842,13 +337748,13 @@ ${isHandDrawn ? "" : `
   var table_default = Table;
 
   // node_modules/@cloudscape-design/components/top-navigation/index.js
-  var import_react308 = __toESM(require_react());
+  var import_react306 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/top-navigation/internal.js
-  var import_react307 = __toESM(require_react());
+  var import_react305 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/menu-dropdown/index.js
-  var import_react298 = __toESM(require_react());
+  var import_react296 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/internal/components/menu-dropdown/styles.css.js
   var styles_css_default115 = {
@@ -337862,9 +337768,9 @@ ${isHandDrawn ? "" : `
   };
 
   // node_modules/@cloudscape-design/components/internal/components/menu-dropdown/index.js
-  var ButtonTrigger = import_react298.default.forwardRef(({ testUtilsClass, iconName, iconUrl, iconAlt, iconSvg, badge, ariaLabel, offsetRight, disabled, expanded, children: children2, onClick }, ref) => {
+  var ButtonTrigger = import_react296.default.forwardRef(({ testUtilsClass, iconName, iconUrl, iconAlt, iconSvg, badge, ariaLabel, offsetRight, disabled, expanded, children: children2, onClick }, ref) => {
     const hasIcon = iconName || iconUrl || iconSvg;
-    return import_react298.default.createElement(
+    return import_react296.default.createElement(
       "button",
       { ref, type: "button", className: clsx_m_default(styles_css_default115.button, styles_css_default115[`offset-right-${offsetRight}`], testUtilsClass, {
         [styles_css_default115.expanded]: expanded
@@ -337872,57 +337778,57 @@ ${isHandDrawn ? "" : `
         event3.preventDefault();
         onClick === null || onClick === void 0 ? void 0 : onClick();
       }, "data-awsui-motion-trigger": "hover", "data-awsui-motion-target": "" },
-      hasIcon && import_react298.default.createElement(internal_default, { className: styles_css_default115.icon, name: iconName, url: iconUrl, alt: iconAlt, svg: iconSvg, badge }),
-      children2 && import_react298.default.createElement("span", { className: styles_css_default115.text }, children2),
-      children2 && import_react298.default.createElement(internal_default, { name: "caret-down-filled", className: spinWhenOpen(styles_css_default32, "rotate", !!expanded) })
+      hasIcon && import_react296.default.createElement(internal_default, { className: styles_css_default115.icon, name: iconName, url: iconUrl, alt: iconAlt, svg: iconSvg, badge }),
+      children2 && import_react296.default.createElement("span", { className: styles_css_default115.text }, children2),
+      children2 && import_react296.default.createElement(internal_default, { name: "caret-down-filled", className: spinWhenOpen(styles_css_default32, "rotate", !!expanded) })
     );
   });
   var MenuDropdown = ({ iconName, iconUrl, iconAlt, iconSvg, badge, offsetRight, children: children2, ...props }) => {
     const baseProps = getBaseProps(props);
     const dropdownTrigger = ({ triggerRef, ariaLabel, isOpen, testUtilsClass, disabled, onClick }) => {
-      return import_react298.default.createElement(ButtonTrigger, { testUtilsClass, ref: triggerRef, disabled, expanded: isOpen, iconName, iconUrl, iconAlt, iconSvg, badge, ariaLabel, offsetRight, onClick }, children2);
+      return import_react296.default.createElement(ButtonTrigger, { testUtilsClass, ref: triggerRef, disabled, expanded: isOpen, iconName, iconUrl, iconAlt, iconSvg, badge, ariaLabel, offsetRight, onClick }, children2);
     };
-    return import_react298.default.createElement(internal_default9, { ...baseProps, ...props, variant: "navigation", customTriggerBuilder: dropdownTrigger, preferCenter: true });
+    return import_react296.default.createElement(internal_default9, { ...baseProps, ...props, variant: "navigation", customTriggerBuilder: dropdownTrigger, preferCenter: true });
   };
   applyDisplayName(MenuDropdown, "MenuDropdown");
   var menu_dropdown_default = MenuDropdown;
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/overflow-menu/index.js
-  var import_react304 = __toESM(require_react());
+  var import_react302 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/overflow-menu/router.js
-  var import_react299 = __toESM(require_react());
+  var import_react297 = __toESM(require_react());
   var defaultCtx = { state: { view: "utilities", data: null }, setState: () => {
   } };
-  var ViewContext = (0, import_react299.createContext)(defaultCtx);
+  var ViewContext = (0, import_react297.createContext)(defaultCtx);
   var useNavigate = () => {
-    const { setState } = (0, import_react299.useContext)(ViewContext);
+    const { setState } = (0, import_react297.useContext)(ViewContext);
     const navigate = (view, data6) => {
       setState({ view, data: data6 });
     };
     return navigate;
   };
   var Route = ({ view, element: element3 }) => {
-    const { state: state5 } = (0, import_react299.useContext)(ViewContext);
+    const { state: state5 } = (0, import_react297.useContext)(ViewContext);
     if (view === state5.view) {
       if (typeof element3 === "function") {
         return element3(state5.data);
       }
-      return import_react299.default.createElement(import_react299.default.Fragment, null, element3);
+      return import_react297.default.createElement(import_react297.default.Fragment, null, element3);
     }
     return null;
   };
   var Router = ({ children: children2 }) => {
-    const [state5, setState] = (0, import_react299.useState)({ view: "utilities", data: null });
-    return import_react299.default.createElement(ViewContext.Provider, { value: { state: state5, setState } }, children2);
+    const [state5, setState] = (0, import_react297.useState)({ view: "utilities", data: null });
+    return import_react297.default.createElement(ViewContext.Provider, { value: { state: state5, setState } }, children2);
   };
   var router_default = Router;
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/overflow-menu/views/submenu.js
-  var import_react302 = __toESM(require_react());
+  var import_react300 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/overflow-menu/header.js
-  var import_react300 = __toESM(require_react());
+  var import_react298 = __toESM(require_react());
 
   // node_modules/@cloudscape-design/components/top-navigation/styles.css.js
   var styles_css_default116 = {
@@ -337977,10 +337883,10 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/overflow-menu/header.js
   var Header4 = ({ children: children2, secondaryText, backIconAriaLabel, dismissIconAriaLabel, onBack, onClose }) => {
-    return import_react300.default.createElement(
+    return import_react298.default.createElement(
       "div",
       { className: styles_css_default116["overflow-menu-header"] },
-      onBack && import_react300.default.createElement(
+      onBack && import_react298.default.createElement(
         internal_default4,
         {
           // Used for test-utils, which require the selectable element to have a classname.
@@ -337991,48 +337897,48 @@ ${isHandDrawn ? "" : `
           onClick: () => onBack()
         }
       ),
-      import_react300.default.createElement(
+      import_react298.default.createElement(
         "h2",
         { className: styles_css_default116["overflow-menu-header-text"] },
-        import_react300.default.createElement("div", { className: styles_css_default116["overflow-menu-header-text--title"] }, children2),
-        secondaryText && import_react300.default.createElement("div", { className: styles_css_default116["overflow-menu-header-text--secondary"] }, secondaryText)
+        import_react298.default.createElement("div", { className: styles_css_default116["overflow-menu-header-text--title"] }, children2),
+        secondaryText && import_react298.default.createElement("div", { className: styles_css_default116["overflow-menu-header-text--secondary"] }, secondaryText)
       ),
-      import_react300.default.createElement(internal_default4, { className: styles_css_default116["overflow-menu-dismiss-button"], ariaLabel: dismissIconAriaLabel, iconName: "close", variant: "icon", onClick: () => onClose && onClose() })
+      import_react298.default.createElement(internal_default4, { className: styles_css_default116["overflow-menu-dismiss-button"], ariaLabel: dismissIconAriaLabel, iconName: "close", variant: "icon", onClick: () => onClose && onClose() })
     );
   };
   var header_default = Header4;
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/overflow-menu/menu-item.js
-  var import_react301 = __toESM(require_react());
+  var import_react299 = __toESM(require_react());
   var ListItem = ({ children: children2, startIcon, endIcon }) => {
-    return import_react301.default.createElement(
-      import_react301.default.Fragment,
+    return import_react299.default.createElement(
+      import_react299.default.Fragment,
       null,
-      startIcon && import_react301.default.createElement("span", { className: styles_css_default116["overflow-menu-list-item-icon"] }, startIcon),
-      import_react301.default.createElement("span", { className: styles_css_default116["overflow-menu-list-item-text"] }, children2),
+      startIcon && import_react299.default.createElement("span", { className: styles_css_default116["overflow-menu-list-item-icon"] }, startIcon),
+      import_react299.default.createElement("span", { className: styles_css_default116["overflow-menu-list-item-text"] }, children2),
       endIcon && endIcon
     );
   };
-  var LinkItem = (0, import_react301.forwardRef)(({ children: children2, external, href, target, rel: rel2, lang, startIcon, endIcon, onClick, context, testId }, ref) => {
+  var LinkItem = (0, import_react299.forwardRef)(({ children: children2, external, href, target, rel: rel2, lang, startIcon, endIcon, onClick, context, testId }, ref) => {
     const anchorTarget = target !== null && target !== void 0 ? target : external ? "_blank" : void 0;
     const anchorRel = rel2 !== null && rel2 !== void 0 ? rel2 : anchorTarget === "_blank" ? "noopener noreferrer" : void 0;
     const role = !href ? "button" : void 0;
-    return import_react301.default.createElement(
+    return import_react299.default.createElement(
       "a",
       { ref, onClick, className: clsx_m_default(styles_css_default116["overflow-menu-control"], styles_css_default116["overflow-menu-control-link"], context && styles_css_default116[`overflow-menu-control-${context}`]), role, tabIndex: 0, href, target: anchorTarget, rel: anchorRel, lang, "data-awsui-motion-trigger": "hover", ...testId ? { "data-testid": testId } : {} },
-      import_react301.default.createElement(ListItem, { startIcon, endIcon }, children2)
+      import_react299.default.createElement(ListItem, { startIcon, endIcon }, children2)
     );
   });
-  var ButtonItem = (0, import_react301.forwardRef)(({ children: children2, startIcon, endIcon, onClick, testId }, ref) => {
-    return import_react301.default.createElement(
+  var ButtonItem = (0, import_react299.forwardRef)(({ children: children2, startIcon, endIcon, onClick, testId }, ref) => {
+    return import_react299.default.createElement(
       "button",
       { ref, className: styles_css_default116["overflow-menu-control"], onClick, "data-awsui-motion-trigger": "hover", ...typeof testId === "string" ? { "data-testid": testId } : {} },
-      import_react301.default.createElement(ListItem, { startIcon, endIcon }, children2)
+      import_react299.default.createElement(ListItem, { startIcon, endIcon }, children2)
     );
   });
-  var NavigationItem = (0, import_react301.forwardRef)(({ startIcon, children: children2, index: index2, testId, ...definition }, ref) => {
+  var NavigationItem = (0, import_react299.forwardRef)(({ startIcon, children: children2, index: index2, testId, ...definition }, ref) => {
     const navigate = useNavigate();
-    return import_react301.default.createElement(ButtonItem, { ref, startIcon, endIcon: import_react301.default.createElement(internal_default, { name: "angle-right", nativeAttributes: { "data-awsui-motion-target": "" } }), testId, onClick: () => navigate("dropdown-menu", {
+    return import_react299.default.createElement(ButtonItem, { ref, startIcon, endIcon: import_react299.default.createElement(internal_default, { name: "angle-right", nativeAttributes: { "data-awsui-motion-target": "" } }), testId, onClick: () => navigate("dropdown-menu", {
       definition,
       headerText: definition.text || definition.title,
       headerSecondaryText: definition.description,
@@ -338040,34 +337946,34 @@ ${isHandDrawn ? "" : `
     }) }, children2);
   });
   var ExpandableItem = ({ children: children2, onItemClick, ...definition }) => {
-    const [expanded, setExpanded] = (0, import_react301.useState)(false);
+    const [expanded, setExpanded] = (0, import_react299.useState)(false);
     const headerId = useUniqueId("overflow-menu-item");
-    return import_react301.default.createElement(
-      import_react301.default.Fragment,
+    return import_react299.default.createElement(
+      import_react299.default.Fragment,
       null,
-      import_react301.default.createElement(
+      import_react299.default.createElement(
         "button",
         { className: clsx_m_default(styles_css_default116["overflow-menu-control"], styles_css_default116["overflow-menu-control-expandable-menu-trigger"]), onClick: () => setExpanded((value3) => !value3), "aria-expanded": expanded, "data-awsui-motion-trigger": "hover" },
-        import_react301.default.createElement(
+        import_react299.default.createElement(
           ListItem,
-          { endIcon: import_react301.default.createElement(
+          { endIcon: import_react299.default.createElement(
             "span",
             { className: spinWhenOpen(styles_css_default116, "icon", expanded) },
-            import_react301.default.createElement(internal_default, { name: "caret-down-filled", nativeAttributes: { "data-awsui-motion-target": "" } })
+            import_react299.default.createElement(internal_default, { name: "caret-down-filled", nativeAttributes: { "data-awsui-motion-target": "" } })
           ) },
-          import_react301.default.createElement("span", { id: headerId }, children2)
+          import_react299.default.createElement("span", { id: headerId }, children2)
         )
       ),
-      expanded && import_react301.default.createElement("ul", { className: clsx_m_default(styles_css_default116["overflow-menu-list"], styles_css_default116["overflow-menu-list-submenu"]), "aria-labelledby": headerId }, definition.items.map((item, index2) => {
+      expanded && import_react299.default.createElement("ul", { className: clsx_m_default(styles_css_default116["overflow-menu-list"], styles_css_default116["overflow-menu-list-submenu"]), "aria-labelledby": headerId }, definition.items.map((item, index2) => {
         const isGroup2 = typeof item.items !== "undefined";
-        return import_react301.default.createElement("li", { key: index2, className: clsx_m_default(styles_css_default116[`overflow-menu-list-item`], styles_css_default116[`overflow-menu-list-item-dropdown-menu`]) }, dropdownComponentFactory(item, isGroup2, onItemClick));
+        return import_react299.default.createElement("li", { key: index2, className: clsx_m_default(styles_css_default116[`overflow-menu-list-item`], styles_css_default116[`overflow-menu-list-item-dropdown-menu`]) }, dropdownComponentFactory(item, isGroup2, onItemClick));
       }))
     );
   };
   function utilityComponentFactory(utility, index2, ref) {
     const label = utility.text || utility.title;
     const hasIcon = !!utility.iconName || !!utility.iconUrl || !!utility.iconAlt || !!utility.iconSvg;
-    const startIcon = hasIcon && import_react301.default.createElement(internal_default, { name: utility.iconName, url: utility.iconUrl, alt: utility.iconAlt, svg: utility.iconSvg });
+    const startIcon = hasIcon && import_react299.default.createElement(internal_default, { name: utility.iconName, url: utility.iconUrl, alt: utility.iconAlt, svg: utility.iconSvg });
     switch (utility.type) {
       case "button": {
         const handleClick = (event3) => {
@@ -338078,28 +337984,28 @@ ${isHandDrawn ? "" : `
           fireCancelableEvent(utility.onClick, {}, event3);
           (_a213 = utility.onClose) === null || _a213 === void 0 ? void 0 : _a213.call(utility);
         };
-        const content = import_react301.default.createElement(
-          import_react301.default.Fragment,
+        const content = import_react299.default.createElement(
+          import_react299.default.Fragment,
           null,
           label,
-          utility.external && import_react301.default.createElement(
-            import_react301.default.Fragment,
+          utility.external && import_react299.default.createElement(
+            import_react299.default.Fragment,
             null,
             " ",
-            import_react301.default.createElement(
+            import_react299.default.createElement(
               "span",
               { "aria-label": utility.externalIconAriaLabel, role: utility.externalIconAriaLabel ? "img" : void 0 },
-              import_react301.default.createElement(internal_default, { name: "external", size: "normal" })
+              import_react299.default.createElement(internal_default, { name: "external", size: "normal" })
             )
           )
         );
         if (!utility.href) {
-          return import_react301.default.createElement(ButtonItem, { ref, startIcon, onClick: handleClick, testId: `__${index2}` }, content);
+          return import_react299.default.createElement(ButtonItem, { ref, startIcon, onClick: handleClick, testId: `__${index2}` }, content);
         }
-        return import_react301.default.createElement(LinkItem, { ref, startIcon, href: utility.href, external: utility.external, target: utility.target, rel: utility.rel, testId: `__${index2}`, onClick: handleClick }, content);
+        return import_react299.default.createElement(LinkItem, { ref, startIcon, href: utility.href, external: utility.external, target: utility.target, rel: utility.rel, testId: `__${index2}`, onClick: handleClick }, content);
       }
       case "menu-dropdown": {
-        return import_react301.default.createElement(NavigationItem, { ref, startIcon, index: index2, ...utility, testId: `__${index2}` }, label);
+        return import_react299.default.createElement(NavigationItem, { ref, startIcon, index: index2, ...utility, testId: `__${index2}` }, label);
       }
     }
   }
@@ -338107,47 +338013,47 @@ ${isHandDrawn ? "" : `
     const label = item.text;
     const hasIcon = !!item.iconName || !!item.iconUrl || !!item.iconAlt || !!item.iconSvg;
     const isLink = isLinkItem(item);
-    const startIcon = hasIcon && import_react301.default.createElement(internal_default, { name: item.iconName, url: item.iconUrl, alt: item.iconAlt, svg: item.iconSvg });
+    const startIcon = hasIcon && import_react299.default.createElement(internal_default, { name: item.iconName, url: item.iconUrl, alt: item.iconAlt, svg: item.iconSvg });
     if (expandable) {
-      return import_react301.default.createElement(ExpandableItem, { ...item, onItemClick }, label);
+      return import_react299.default.createElement(ExpandableItem, { ...item, onItemClick }, label);
     }
-    return import_react301.default.createElement(
+    return import_react299.default.createElement(
       LinkItem,
       { startIcon, href: isLink ? item.href : void 0, external: isLink ? item.external : void 0, lang: item.lang, context: "dropdown-menu", testId: item.id, onClick: (event3) => onItemClick(event3, item) },
       label,
-      isLink && item.external && import_react301.default.createElement(
-        import_react301.default.Fragment,
+      isLink && item.external && import_react299.default.createElement(
+        import_react299.default.Fragment,
         null,
         " ",
-        import_react301.default.createElement(
+        import_react299.default.createElement(
           "span",
           { "aria-label": item.externalIconAriaLabel, role: item.externalIconAriaLabel ? "img" : void 0 },
-          import_react301.default.createElement(internal_default, { name: "external", size: "normal" })
+          import_react299.default.createElement(internal_default, { name: "external", size: "normal" })
         )
       )
     );
   }
-  var UtilityMenuItem = (0, import_react301.forwardRef)(({ index: index2, ...props }, ref) => {
-    return import_react301.default.createElement("li", { className: clsx_m_default(styles_css_default116[`overflow-menu-list-item`], styles_css_default116[`overflow-menu-list-item-utility`]) }, utilityComponentFactory(props, index2, ref));
+  var UtilityMenuItem = (0, import_react299.forwardRef)(({ index: index2, ...props }, ref) => {
+    return import_react299.default.createElement("li", { className: clsx_m_default(styles_css_default116[`overflow-menu-list-item`], styles_css_default116[`overflow-menu-list-item-utility`]) }, utilityComponentFactory(props, index2, ref));
   });
   var SubmenuItem = (props) => {
     const expandable = typeof props.items !== "undefined";
-    return import_react301.default.createElement("li", { className: clsx_m_default(styles_css_default116[`overflow-menu-list-item`], styles_css_default116[`overflow-menu-list-item-submenu`], expandable && styles_css_default116[`overflow-menu-list-item-expandable`]) }, dropdownComponentFactory(props, expandable, props.onClick));
+    return import_react299.default.createElement("li", { className: clsx_m_default(styles_css_default116[`overflow-menu-list-item`], styles_css_default116[`overflow-menu-list-item-submenu`], expandable && styles_css_default116[`overflow-menu-list-item-expandable`]) }, dropdownComponentFactory(props, expandable, props.onClick));
   };
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/overflow-menu/views/submenu.js
   var SubmenuView = ({ onClose, utilityIndex, headerText, headerSecondaryText, dismissIconAriaLabel, backIconAriaLabel, definition }) => {
     const navigate = useNavigate();
     const headerId = useUniqueId("overflow-menu-header");
-    return import_react302.default.createElement(
+    return import_react300.default.createElement(
       focus_lock_default,
       { autoFocus: true },
-      import_react302.default.createElement(
+      import_react300.default.createElement(
         header_default,
         { secondaryText: headerSecondaryText, dismissIconAriaLabel, backIconAriaLabel, onClose, onBack: () => navigate("utilities", { utilityIndex }) },
-        import_react302.default.createElement("span", { id: headerId }, headerText)
+        import_react300.default.createElement("span", { id: headerId }, headerText)
       ),
-      import_react302.default.createElement("ul", { className: clsx_m_default(styles_css_default116["overflow-menu-list"], styles_css_default116["overflow-menu-list-submenu"]), "aria-labelledby": headerId }, definition.items.map((item, index2) => import_react302.default.createElement(SubmenuItem, { key: index2, ...item, onClick: (event3, item2) => {
+      import_react300.default.createElement("ul", { className: clsx_m_default(styles_css_default116["overflow-menu-list"], styles_css_default116["overflow-menu-list-submenu"]), "aria-labelledby": headerId }, definition.items.map((item, index2) => import_react300.default.createElement(SubmenuItem, { key: index2, ...item, onClick: (event3, item2) => {
         if (item2.href && isPlainLeftClick(event3)) {
           fireCancelableEvent(definition.onItemFollow, { id: item2.id, href: item2.href, external: item2.external }, event3);
         }
@@ -338159,25 +338065,25 @@ ${isHandDrawn ? "" : `
   var submenu_default = SubmenuView;
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/overflow-menu/views/utilities.js
-  var import_react303 = __toESM(require_react());
+  var import_react301 = __toESM(require_react());
   var UtilitiesView = ({ headerText, dismissIconAriaLabel, onClose, items = [], focusIndex }) => {
     const headerId = useUniqueId("overflow-menu-header");
-    const ref = (0, import_react303.useRef)(null);
-    (0, import_react303.useEffect)(() => {
+    const ref = (0, import_react301.useRef)(null);
+    (0, import_react301.useEffect)(() => {
       var _a213;
       if (typeof focusIndex === "number") {
         (_a213 = ref.current) === null || _a213 === void 0 ? void 0 : _a213.focus();
       }
     }, [focusIndex]);
-    return import_react303.default.createElement(
+    return import_react301.default.createElement(
       focus_lock_default,
       { autoFocus: true },
-      import_react303.default.createElement(
+      import_react301.default.createElement(
         header_default,
         { dismissIconAriaLabel, onClose },
-        import_react303.default.createElement("span", { id: headerId }, headerText)
+        import_react301.default.createElement("span", { id: headerId }, headerText)
       ),
-      import_react303.default.createElement("ul", { className: styles_css_default116["overflow-menu-list"], "aria-labelledby": headerId }, items.map((utility, index2) => import_react303.default.createElement(UtilityMenuItem, { key: index2, index: index2, ref: index2 === focusIndex ? ref : void 0, onClose, ...utility })))
+      import_react301.default.createElement("ul", { className: styles_css_default116["overflow-menu-list"], "aria-labelledby": headerId }, items.map((utility, index2) => import_react301.default.createElement(UtilityMenuItem, { key: index2, index: index2, ref: index2 === focusIndex ? ref : void 0, onClose, ...utility })))
     );
   };
   var utilities_default = UtilitiesView;
@@ -338187,25 +338093,25 @@ ${isHandDrawn ? "" : `
     const i18n = useInternalI18n("top-navigation");
     const renderedDismissIconAriaLabel = i18n("i18nStrings.overflowMenuDismissIconAriaLabel", dismissIconAriaLabel);
     const renderedBackIconAriaLabel = i18n("i18nStrings.overflowMenuBackIconAriaLabel", backIconAriaLabel);
-    return import_react304.default.createElement(
+    return import_react302.default.createElement(
       "div",
       { className: styles_css_default116["overflow-menu"], onKeyUp: (event3) => {
         if (event3.key === "Escape") {
           onClose === null || onClose === void 0 ? void 0 : onClose();
         }
       } },
-      import_react304.default.createElement(
+      import_react302.default.createElement(
         router_default,
         null,
-        import_react304.default.createElement(Route, { view: "utilities", element: (data6) => import_react304.default.createElement(utilities_default, { headerText: i18n("i18nStrings.overflowMenuTitleText", headerText), items, focusIndex: data6 === null || data6 === void 0 ? void 0 : data6.utilityIndex, dismissIconAriaLabel: renderedDismissIconAriaLabel, backIconAriaLabel: renderedBackIconAriaLabel, onClose }) }),
-        import_react304.default.createElement(Route, { view: "dropdown-menu", element: (data6) => import_react304.default.createElement(submenu_default, { headerText: data6 === null || data6 === void 0 ? void 0 : data6.headerText, headerSecondaryText: data6 === null || data6 === void 0 ? void 0 : data6.headerSecondaryText, dismissIconAriaLabel: renderedDismissIconAriaLabel, backIconAriaLabel: renderedBackIconAriaLabel, definition: data6 === null || data6 === void 0 ? void 0 : data6.definition, utilityIndex: data6 === null || data6 === void 0 ? void 0 : data6.utilityIndex, onClose }) })
+        import_react302.default.createElement(Route, { view: "utilities", element: (data6) => import_react302.default.createElement(utilities_default, { headerText: i18n("i18nStrings.overflowMenuTitleText", headerText), items, focusIndex: data6 === null || data6 === void 0 ? void 0 : data6.utilityIndex, dismissIconAriaLabel: renderedDismissIconAriaLabel, backIconAriaLabel: renderedBackIconAriaLabel, onClose }) }),
+        import_react302.default.createElement(Route, { view: "dropdown-menu", element: (data6) => import_react302.default.createElement(submenu_default, { headerText: data6 === null || data6 === void 0 ? void 0 : data6.headerText, headerSecondaryText: data6 === null || data6 === void 0 ? void 0 : data6.headerSecondaryText, dismissIconAriaLabel: renderedDismissIconAriaLabel, backIconAriaLabel: renderedBackIconAriaLabel, definition: data6 === null || data6 === void 0 ? void 0 : data6.definition, utilityIndex: data6 === null || data6 === void 0 ? void 0 : data6.utilityIndex, onClose }) })
       )
     );
   };
   var overflow_menu_default = OverflowMenu2;
 
   // node_modules/@cloudscape-design/components/top-navigation/parts/utility.js
-  var import_react305 = __toESM(require_react());
+  var import_react303 = __toESM(require_react());
   function Utility({ hideText, definition, offsetRight }) {
     var _a213;
     const hasIcon = !!definition.iconName || !!definition.iconUrl || !!definition.iconAlt || !!definition.iconSvg;
@@ -338215,37 +338121,37 @@ ${isHandDrawn ? "" : `
       ariaLabel = definition.ariaLabel ? definition.ariaLabel : joinStrings(definition.text, definition.externalIconAriaLabel);
       checkSafeUrl("TopNavigation", definition.href);
       if (definition.variant === "primary-button") {
-        return import_react305.default.createElement(
+        return import_react303.default.createElement(
           "span",
           { className: styles_css_default116[`offset-right-${offsetRight}`] },
-          import_react305.default.createElement(InternalButton, { variant: "primary", href: definition.href, target: definition.external ? "_blank" : void 0, onClick: definition.onClick, onFollow: definition.onFollow, ariaLabel, iconName: definition.iconName, iconUrl: definition.iconUrl, iconAlt: definition.iconAlt, iconSvg: definition.iconSvg }, shouldHideText ? null : import_react305.default.createElement(
-            import_react305.default.Fragment,
+          import_react303.default.createElement(InternalButton, { variant: "primary", href: definition.href, target: definition.external ? "_blank" : void 0, onClick: definition.onClick, onFollow: definition.onFollow, ariaLabel, iconName: definition.iconName, iconUrl: definition.iconUrl, iconAlt: definition.iconAlt, iconSvg: definition.iconSvg }, shouldHideText ? null : import_react303.default.createElement(
+            import_react303.default.Fragment,
             null,
             definition.text,
-            definition.external && import_react305.default.createElement(
-              import_react305.default.Fragment,
+            definition.external && import_react303.default.createElement(
+              import_react303.default.Fragment,
               null,
               " ",
-              import_react305.default.createElement(
+              import_react303.default.createElement(
                 "span",
                 { className: clsx_m_default(styles_css_default116["utility-button-external-icon"], styles_css_default116[`offset-right-${offsetRight}`]), "aria-label": definition.externalIconAriaLabel, role: definition.externalIconAriaLabel ? "img" : void 0 },
-                import_react305.default.createElement(internal_default, { name: "external" })
+                import_react303.default.createElement(internal_default, { name: "external" })
               )
             )
           ))
         );
       } else {
-        return import_react305.default.createElement(
+        return import_react303.default.createElement(
           "span",
           { className: styles_css_default116[`offset-right-${offsetRight}`] },
-          import_react305.default.createElement(
+          import_react303.default.createElement(
             internal_default7,
             { variant: "top-navigation", href: definition.href, target: definition.target, rel: definition.rel, external: definition.external, onFollow: (evt) => {
               fireCancelableEvent(definition.onFollow, { href: definition.href, target: definition.target, external: definition.external }, evt);
               fireCancelableEvent(definition.onClick, { href: definition.href, target: definition.target, external: definition.external }, evt);
             }, ariaLabel },
-            hasIcon && import_react305.default.createElement(internal_default, { name: definition.iconName, url: definition.iconUrl, alt: definition.iconAlt, svg: definition.iconSvg, badge: definition.badge }),
-            !shouldHideText && definition.text && import_react305.default.createElement("span", { className: hasIcon ? styles_css_default116["utility-link-icon"] : void 0 }, definition.text)
+            hasIcon && import_react303.default.createElement(internal_default, { name: definition.iconName, url: definition.iconUrl, alt: definition.iconAlt, svg: definition.iconSvg, badge: definition.badge }),
+            !shouldHideText && definition.text && import_react303.default.createElement("span", { className: hasIcon ? styles_css_default116["utility-link-icon"] : void 0 }, definition.text)
           )
         );
       }
@@ -338253,7 +338159,7 @@ ${isHandDrawn ? "" : `
       const title2 = definition.title || definition.text;
       const shouldShowTitle = shouldHideText || !definition.text;
       checkSafeUrlRecursively(definition.items);
-      return import_react305.default.createElement(menu_dropdown_default, { ...definition, title: shouldShowTitle ? title2 : "", ariaLabel, offsetRight }, !shouldHideText && definition.text);
+      return import_react303.default.createElement(menu_dropdown_default, { ...definition, title: shouldShowTitle ? title2 : "", ariaLabel, offsetRight }, !shouldHideText && definition.text);
     }
     return null;
   }
@@ -338270,19 +338176,19 @@ ${isHandDrawn ? "" : `
   }
 
   // node_modules/@cloudscape-design/components/top-navigation/use-top-navigation.js
-  var import_react306 = __toESM(require_react());
+  var import_react304 = __toESM(require_react());
   var RESPONSIVENESS_BUFFER = 20;
   function useTopNavigation({ identity: identity10, search, utilities }) {
-    const mainRef = (0, import_react306.useRef)(null);
-    const virtualRef = (0, import_react306.useRef)(null);
+    const mainRef = (0, import_react304.useRef)(null);
+    const virtualRef = (0, import_react304.useRef)(null);
     const [breakpoint, breakpointRef] = useContainerBreakpoints(["xxs", "s"]);
     const hasSearch = !!search;
     const hasTitleWithLogo = !!identity10 && !!identity10.logo && !!identity10.title;
-    const responsiveStates = (0, import_react306.useMemo)(() => {
+    const responsiveStates = (0, import_react304.useMemo)(() => {
       return generateResponsiveStateKeys(utilities, hasSearch, hasTitleWithLogo);
     }, [utilities, hasSearch, hasTitleWithLogo]);
-    const [responsiveState, setResponsiveState] = (0, import_react306.useState)();
-    const recalculateFit = (0, import_react306.useCallback)(() => {
+    const [responsiveState, setResponsiveState] = (0, import_react304.useState)();
+    const recalculateFit = (0, import_react304.useCallback)(() => {
       if (!(mainRef === null || mainRef === void 0 ? void 0 : mainRef.current) || !virtualRef.current) {
         setResponsiveState(responsiveStates[0]);
         return;
@@ -338310,18 +338216,18 @@ ${isHandDrawn ? "" : `
     const [, containerQueryRef] = useContainerQuery(() => {
       recalculateFit();
     }, [recalculateFit]);
-    const onVirtualMount = (0, import_react306.useCallback)((element3) => {
+    const onVirtualMount = (0, import_react304.useCallback)((element3) => {
       virtualRef.current = element3;
       recalculateFit();
     }, [recalculateFit]);
-    const [isSearchMinimized, setSearchMinimized] = (0, import_react306.useState)(true);
+    const [isSearchMinimized, setSearchMinimized] = (0, import_react304.useState)(true);
     const isSearchExpanded = !isSearchMinimized && hasSearch && (responsiveState === null || responsiveState === void 0 ? void 0 : responsiveState.hideSearch);
-    (0, import_react306.useEffect)(() => {
+    (0, import_react304.useEffect)(() => {
       if (!(responsiveState === null || responsiveState === void 0 ? void 0 : responsiveState.hideSearch)) {
         setSearchMinimized(true);
       }
     }, [responsiveState]);
-    (0, import_react306.useEffect)(() => {
+    (0, import_react304.useEffect)(() => {
       var _a213, _b;
       if (isSearchExpanded) {
         (_b = (_a213 = mainRef === null || mainRef === void 0 ? void 0 : mainRef.current) === null || _a213 === void 0 ? void 0 : _a213.querySelector(`.${styles_css_default116.search} input`)) === null || _b === void 0 ? void 0 : _b.focus();
@@ -338399,13 +338305,13 @@ ${isHandDrawn ? "" : `
 
   // node_modules/@cloudscape-design/components/top-navigation/internal.js
   function wrapWithVisualContext(content, visualContext) {
-    return visualContext === "none" ? content : import_react307.default.createElement(VisualContext, { contextName: visualContext }, content);
+    return visualContext === "none" ? content : import_react305.default.createElement(VisualContext, { contextName: visualContext }, content);
   }
   function InternalTopNavigation({ __internalRootRef, children: children2, visualContext, ...restProps }) {
     if (children2 !== void 0) {
-      return import_react307.default.createElement(CustomContentTopNavigation, { __internalRootRef, visualContext, ...restProps }, children2);
+      return import_react305.default.createElement(CustomContentTopNavigation, { __internalRootRef, visualContext, ...restProps }, children2);
     }
-    return import_react307.default.createElement(StructuredTopNavigation, { __internalRootRef, visualContext, ...restProps });
+    return import_react305.default.createElement(StructuredTopNavigation, { __internalRootRef, visualContext, ...restProps });
   }
   function CustomContentTopNavigation({ __internalRootRef, children: children2, visualContext, ...restProps }) {
     const baseProps = getBaseProps(restProps);
@@ -338413,10 +338319,10 @@ ${isHandDrawn ? "" : `
     if (identity10 || search || utilities && utilities.length > 0) {
       warnOnce("TopNavigation", "When children is set, the structured props (identity, search, and utilities) are ignored");
     }
-    return import_react307.default.createElement("div", { ...baseProps, ref: __internalRootRef }, wrapWithVisualContext(import_react307.default.createElement(
+    return import_react305.default.createElement("div", { ...baseProps, ref: __internalRootRef }, wrapWithVisualContext(import_react305.default.createElement(
       "header",
       { className: styles_css_default116["top-navigation"] },
-      import_react307.default.createElement("div", { className: styles_css_default117["custom-content"] }, children2)
+      import_react305.default.createElement("div", { className: styles_css_default117["custom-content"] }, children2)
     ), visualContext));
   }
   function StructuredTopNavigation({ __internalRootRef, identity: identity10, i18nStrings, utilities, search, visualContext, ...restProps }) {
@@ -338425,14 +338331,14 @@ ${isHandDrawn ? "" : `
     }
     const baseProps = getBaseProps(restProps);
     const { mainRef, virtualRef, breakpoint, responsiveState, isSearchExpanded, onSearchUtilityClick } = useTopNavigation({ identity: identity10, search, utilities });
-    const [overflowMenuOpen, setOverflowMenuOpen] = (0, import_react307.useState)(false);
-    const overflowMenuTriggerRef = (0, import_react307.useRef)(null);
+    const [overflowMenuOpen, setOverflowMenuOpen] = (0, import_react305.useState)(false);
+    const overflowMenuTriggerRef = (0, import_react305.useRef)(null);
     const isNarrowViewport = breakpoint === "default";
     const isMediumViewport = breakpoint === "xxs";
     const isLargeViewport = breakpoint === "s";
     const i18n = useInternalI18n("top-navigation");
     const menuTriggerVisible = !isSearchExpanded && responsiveState.hideUtilities;
-    (0, import_react307.useEffect)(() => {
+    (0, import_react305.useEffect)(() => {
       setOverflowMenuOpen(false);
     }, [menuTriggerVisible]);
     useEffectOnUpdate2(() => {
@@ -338457,7 +338363,7 @@ ${isHandDrawn ? "" : `
       const showSearchUtility = isVirtual || search && responsiveState.hideSearch;
       const showUtilities = isVirtual || !isSearchExpanded;
       const showMenuTrigger = isVirtual || menuTriggerVisible;
-      return import_react307.default.createElement(
+      return import_react305.default.createElement(
         Wrapper,
         { ref: isVirtual ? virtualRef : mainRef, "aria-hidden": isVirtual ? true : void 0, className: clsx_m_default(styles_css_default116["top-navigation"], {
           [styles_css_default116.virtual]: isVirtual,
@@ -338465,36 +338371,36 @@ ${isHandDrawn ? "" : `
           [styles_css_default116.narrow]: isNarrowViewport,
           [styles_css_default116.medium]: isMediumViewport
         }) },
-        import_react307.default.createElement(
+        import_react305.default.createElement(
           "div",
           { className: styles_css_default116["padding-box"] },
-          showIdentity && identity10 && import_react307.default.createElement(
+          showIdentity && identity10 && import_react305.default.createElement(
             "div",
             { className: clsx_m_default(styles_css_default116.identity, !identity10.logo && styles_css_default116["no-logo"]) },
-            import_react307.default.createElement(
+            import_react305.default.createElement(
               "a",
               { className: styles_css_default116["identity-link"], href: identity10.href, onClick: onIdentityClick },
-              identity10.logo && import_react307.default.createElement("img", { role: "img", src: identity10.logo.src, alt: identity10.logo.alt, className: clsx_m_default(styles_css_default116.logo, {
+              identity10.logo && import_react305.default.createElement("img", { role: "img", src: identity10.logo.src, alt: identity10.logo.alt, className: clsx_m_default(styles_css_default116.logo, {
                 [styles_css_default116.narrow]: isNarrowViewport
               }) }),
-              showTitle && import_react307.default.createElement("span", { className: styles_css_default116.title }, identity10.title)
+              showTitle && import_react305.default.createElement("span", { className: styles_css_default116.title }, identity10.title)
             )
           ),
-          showSearchSlot && import_react307.default.createElement(
+          showSearchSlot && import_react305.default.createElement(
             "div",
             { className: styles_css_default116.inputs },
-            import_react307.default.createElement("div", { className: clsx_m_default(styles_css_default116.search, !isVirtual && isSearchExpanded && styles_css_default116["search-expanded"]) }, search)
+            import_react305.default.createElement("div", { className: clsx_m_default(styles_css_default116.search, !isVirtual && isSearchExpanded && styles_css_default116["search-expanded"]) }, search)
           ),
-          import_react307.default.createElement(
+          import_react305.default.createElement(
             "div",
             { className: styles_css_default116.utilities },
-            showSearchUtility && import_react307.default.createElement(
+            showSearchUtility && import_react305.default.createElement(
               "div",
               { className: clsx_m_default(styles_css_default116["utility-wrapper"], styles_css_default116["utility-type-button"], styles_css_default116["utility-type-button-link"], {
                 [styles_css_default116.narrow]: isNarrowViewport,
                 [styles_css_default116.medium]: isMediumViewport
               }), "data-utility-special": "search" },
-              import_react307.default.createElement(Utility, { hideText: true, definition: {
+              import_react305.default.createElement(Utility, { hideText: true, definition: {
                 type: "button",
                 iconName: isSearchExpanded ? "close" : "search",
                 ariaLabel: isSearchExpanded ? i18n("i18nStrings.searchDismissIconAriaLabel", i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.searchDismissIconAriaLabel) : i18n("i18nStrings.searchIconAriaLabel", i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.searchIconAriaLabel),
@@ -338506,13 +338412,13 @@ ${isHandDrawn ? "" : `
               const hideText = !!responsiveState.hideUtilityText;
               const isLast = (isVirtual || !showMenuTrigger) && i4 === utilities.length - 1;
               const offsetRight = isLast && isLargeViewport ? "xxl" : isLast ? "l" : void 0;
-              return import_react307.default.createElement(
+              return import_react305.default.createElement(
                 "div",
                 { key: i4, className: clsx_m_default(styles_css_default116["utility-wrapper"], styles_css_default116[`utility-type-${utility.type}`], utility.type === "button" && styles_css_default116[`utility-type-button-${(_a213 = utility.variant) !== null && _a213 !== void 0 ? _a213 : "link"}`], {
                   [styles_css_default116.narrow]: isNarrowViewport,
                   [styles_css_default116.medium]: isMediumViewport
                 }), "data-utility-index": i4, "data-utility-hide": `${hideText}` },
-                import_react307.default.createElement(Utility, { hideText, definition: utility, offsetRight })
+                import_react305.default.createElement(Utility, { hideText, definition: utility, offsetRight })
               );
             }),
             isVirtual && utilities.map((utility, i4) => {
@@ -338520,45 +338426,45 @@ ${isHandDrawn ? "" : `
               const hideText = !responsiveState.hideUtilityText;
               const isLast = !showMenuTrigger && i4 === utilities.length - 1;
               const offsetRight = isLast && isLargeViewport ? "xxl" : isLast ? "l" : void 0;
-              return import_react307.default.createElement(
+              return import_react305.default.createElement(
                 "div",
                 { key: i4, className: clsx_m_default(styles_css_default116["utility-wrapper"], styles_css_default116[`utility-type-${utility.type}`], utility.type === "button" && styles_css_default116[`utility-type-button-${(_a213 = utility.variant) !== null && _a213 !== void 0 ? _a213 : "link"}`], {
                   [styles_css_default116.narrow]: isNarrowViewport,
                   [styles_css_default116.medium]: isMediumViewport
                 }), "data-utility-index": i4, "data-utility-hide": `${hideText}` },
-                import_react307.default.createElement(Utility, { hideText, definition: utility, offsetRight })
+                import_react305.default.createElement(Utility, { hideText, definition: utility, offsetRight })
               );
             }),
-            showMenuTrigger && import_react307.default.createElement(
+            showMenuTrigger && import_react305.default.createElement(
               "div",
               { className: clsx_m_default(styles_css_default116["utility-wrapper"], styles_css_default116["utility-type-menu-dropdown"], {
                 [styles_css_default116.narrow]: isNarrowViewport,
                 [styles_css_default116.medium]: isMediumViewport
               }), "data-utility-special": "menu-trigger" },
-              import_react307.default.createElement(ButtonTrigger, { expanded: overflowMenuOpen, onClick: toggleOverflowMenu, offsetRight: "l", ref: !isVirtual ? overflowMenuTriggerRef : void 0 }, i18n("i18nStrings.overflowMenuTriggerText", i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.overflowMenuTriggerText))
+              import_react305.default.createElement(ButtonTrigger, { expanded: overflowMenuOpen, onClick: toggleOverflowMenu, offsetRight: "l", ref: !isVirtual ? overflowMenuTriggerRef : void 0 }, i18n("i18nStrings.overflowMenuTriggerText", i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.overflowMenuTriggerText))
             )
           )
         )
       );
     };
-    const structuredContent = import_react307.default.createElement(
-      import_react307.default.Fragment,
+    const structuredContent = import_react305.default.createElement(
+      import_react305.default.Fragment,
       null,
       content(true),
       content(false),
-      menuTriggerVisible && overflowMenuOpen && import_react307.default.createElement(
+      menuTriggerVisible && overflowMenuOpen && import_react305.default.createElement(
         "div",
         { className: styles_css_default116["overflow-menu-drawer"] },
-        import_react307.default.createElement(overflow_menu_default, { headerText: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.overflowMenuTitleText, dismissIconAriaLabel: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.overflowMenuDismissIconAriaLabel, backIconAriaLabel: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.overflowMenuBackIconAriaLabel, items: utilities.filter((utility, i4) => (!responsiveState.hideUtilities || responsiveState.hideUtilities.indexOf(i4) !== -1) && !utility.disableUtilityCollapse), onClose: toggleOverflowMenu })
+        import_react305.default.createElement(overflow_menu_default, { headerText: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.overflowMenuTitleText, dismissIconAriaLabel: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.overflowMenuDismissIconAriaLabel, backIconAriaLabel: i18nStrings === null || i18nStrings === void 0 ? void 0 : i18nStrings.overflowMenuBackIconAriaLabel, items: utilities.filter((utility, i4) => (!responsiveState.hideUtilities || responsiveState.hideUtilities.indexOf(i4) !== -1) && !utility.disableUtilityCollapse), onClose: toggleOverflowMenu })
       )
     );
-    return import_react307.default.createElement("div", { ...baseProps, ref: __internalRootRef }, wrapWithVisualContext(structuredContent, visualContext));
+    return import_react305.default.createElement("div", { ...baseProps, ref: __internalRootRef }, wrapWithVisualContext(structuredContent, visualContext));
   }
 
   // node_modules/@cloudscape-design/components/top-navigation/index.js
   function TopNavigation({ utilities = [], visualContext = "top-navigation", ...restProps }) {
     const baseComponentProps = useBaseComponent("TopNavigation");
-    return import_react308.default.createElement(InternalTopNavigation, { ...baseComponentProps, utilities, visualContext, ...restProps });
+    return import_react306.default.createElement(InternalTopNavigation, { ...baseComponentProps, utilities, visualContext, ...restProps });
   }
   applyDisplayName(TopNavigation, "TopNavigation");
 
@@ -338631,9 +338537,9 @@ ${isHandDrawn ? "" : `
     return lines.join("\n");
   }
   function MermaidRenderer({ code, id: id38 = "workflow-mermaid" }) {
-    const [svgContent, setSvgContent] = (0, import_react309.useState)("");
-    const [error3, setError] = (0, import_react309.useState)(null);
-    (0, import_react309.useEffect)(() => {
+    const [svgContent, setSvgContent] = (0, import_react307.useState)("");
+    const [error3, setError] = (0, import_react307.useState)(null);
+    (0, import_react307.useEffect)(() => {
       let isMounted = true;
       async function renderDiagram2() {
         try {
@@ -338679,50 +338585,50 @@ ${isHandDrawn ? "" : `
     );
   }
   function ControlPanelApp() {
-    const [state5, setState] = (0, import_react309.useState)(null);
-    const [activeTab, setActiveTab] = (0, import_react309.useState)("overview");
-    const [navOpen, setNavOpen] = (0, import_react309.useState)(true);
-    const [projProvider, setProjProvider] = (0, import_react309.useState)("github");
-    const [projRepo, setProjRepo] = (0, import_react309.useState)("");
-    const [projBranch, setProjBranch] = (0, import_react309.useState)("main");
-    const [projTrackerKey, setProjTrackerKey] = (0, import_react309.useState)("");
-    const [projStatusFilter, setProjStatusFilter] = (0, import_react309.useState)("Ready for Agent");
-    const [projRequiredLabels, setProjRequiredLabels] = (0, import_react309.useState)("");
-    const [projExcludedLabels, setProjExcludedLabels] = (0, import_react309.useState)("");
-    const [projCustomFields, setProjCustomFields] = (0, import_react309.useState)("");
-    const [projAssigneeFilter, setProjAssigneeFilter] = (0, import_react309.useState)("any");
-    const [projJql, setProjJql] = (0, import_react309.useState)("");
-    const [projFeedback, setProjFeedback] = (0, import_react309.useState)("");
-    const [schedulerInterval, setSchedulerInterval] = (0, import_react309.useState)("60");
-    const [schedulerEnabled, setSchedulerEnabled] = (0, import_react309.useState)(false);
-    const [intakeRepo, setIntakeRepo] = (0, import_react309.useState)("");
-    const [intakeIssueNum, setIntakeIssueNum] = (0, import_react309.useState)("");
-    const [intakeTitle, setIntakeTitle] = (0, import_react309.useState)("");
-    const [intakeType, setIntakeType] = (0, import_react309.useState)("");
-    const [intakeBody, setIntakeBody] = (0, import_react309.useState)("");
-    const [intakeFeedback, setIntakeFeedback] = (0, import_react309.useState)("");
-    const [dispatchingKeys, setDispatchingKeys] = (0, import_react309.useState)({});
-    const [addingProject, setAddingProject] = (0, import_react309.useState)(false);
-    const [syncingProjects, setSyncingProjects] = (0, import_react309.useState)(false);
-    const [intakingTicket, setIntakingTicket] = (0, import_react309.useState)(false);
-    const [savingControls, setSavingControls] = (0, import_react309.useState)(false);
-    const [selectedWf, setSelectedWf] = (0, import_react309.useState)("feature");
-    const [currentWfObj, setCurrentWfObj] = (0, import_react309.useState)(null);
-    const [wfJson, setWfJson] = (0, import_react309.useState)("");
-    const [wfCommit, setWfCommit] = (0, import_react309.useState)(false);
-    const [wfStatus, setWfStatus] = (0, import_react309.useState)("");
-    const [ctrlAutonomy, setCtrlAutonomy] = (0, import_react309.useState)("gated");
-    const [ctrlRate, setCtrlRate] = (0, import_react309.useState)("10");
-    const [ctrlBudget, setCtrlBudget] = (0, import_react309.useState)("25");
-    const [ctrlStallMinutes, setCtrlStallMinutes] = (0, import_react309.useState)("30");
-    const [ctrlPlanConfidence, setCtrlPlanConfidence] = (0, import_react309.useState)("0.8");
-    const [ctrlKill, setCtrlKill] = (0, import_react309.useState)(false);
-    const [controlsFeedback, setControlsFeedback] = (0, import_react309.useState)("");
-    const [deploySha, setDeploySha] = (0, import_react309.useState)("");
-    const [deployErrorRate, setDeployErrorRate] = (0, import_react309.useState)("0.2");
-    const [deployMaxRate, setDeployMaxRate] = (0, import_react309.useState)("1.0");
-    const [deployFeedback, setDeployFeedback] = (0, import_react309.useState)("");
-    const loadDashboard = (0, import_react309.useCallback)(async () => {
+    const [state5, setState] = (0, import_react307.useState)(null);
+    const [activeTab, setActiveTab] = (0, import_react307.useState)("overview");
+    const [navOpen, setNavOpen] = (0, import_react307.useState)(true);
+    const [projProvider, setProjProvider] = (0, import_react307.useState)("github");
+    const [projRepo, setProjRepo] = (0, import_react307.useState)("");
+    const [projBranch, setProjBranch] = (0, import_react307.useState)("main");
+    const [projTrackerKey, setProjTrackerKey] = (0, import_react307.useState)("");
+    const [projStatusFilter, setProjStatusFilter] = (0, import_react307.useState)("Ready for Agent");
+    const [projRequiredLabels, setProjRequiredLabels] = (0, import_react307.useState)("");
+    const [projExcludedLabels, setProjExcludedLabels] = (0, import_react307.useState)("");
+    const [projCustomFields, setProjCustomFields] = (0, import_react307.useState)("");
+    const [projAssigneeFilter, setProjAssigneeFilter] = (0, import_react307.useState)("any");
+    const [projJql, setProjJql] = (0, import_react307.useState)("");
+    const [projFeedback, setProjFeedback] = (0, import_react307.useState)("");
+    const [schedulerInterval, setSchedulerInterval] = (0, import_react307.useState)("60");
+    const [schedulerEnabled, setSchedulerEnabled] = (0, import_react307.useState)(false);
+    const [intakeRepo, setIntakeRepo] = (0, import_react307.useState)("");
+    const [intakeIssueNum, setIntakeIssueNum] = (0, import_react307.useState)("");
+    const [intakeTitle, setIntakeTitle] = (0, import_react307.useState)("");
+    const [intakeType, setIntakeType] = (0, import_react307.useState)("");
+    const [intakeBody, setIntakeBody] = (0, import_react307.useState)("");
+    const [intakeFeedback, setIntakeFeedback] = (0, import_react307.useState)("");
+    const [dispatchingKeys, setDispatchingKeys] = (0, import_react307.useState)({});
+    const [addingProject, setAddingProject] = (0, import_react307.useState)(false);
+    const [syncingProjects, setSyncingProjects] = (0, import_react307.useState)(false);
+    const [intakingTicket, setIntakingTicket] = (0, import_react307.useState)(false);
+    const [savingControls, setSavingControls] = (0, import_react307.useState)(false);
+    const [selectedWf, setSelectedWf] = (0, import_react307.useState)("feature");
+    const [currentWfObj, setCurrentWfObj] = (0, import_react307.useState)(null);
+    const [wfJson, setWfJson] = (0, import_react307.useState)("");
+    const [wfCommit, setWfCommit] = (0, import_react307.useState)(false);
+    const [wfStatus, setWfStatus] = (0, import_react307.useState)("");
+    const [ctrlAutonomy, setCtrlAutonomy] = (0, import_react307.useState)("gated");
+    const [ctrlRate, setCtrlRate] = (0, import_react307.useState)("10");
+    const [ctrlBudget, setCtrlBudget] = (0, import_react307.useState)("25");
+    const [ctrlStallMinutes, setCtrlStallMinutes] = (0, import_react307.useState)("30");
+    const [ctrlPlanConfidence, setCtrlPlanConfidence] = (0, import_react307.useState)("0.8");
+    const [ctrlKill, setCtrlKill] = (0, import_react307.useState)(false);
+    const [controlsFeedback, setControlsFeedback] = (0, import_react307.useState)("");
+    const [deploySha, setDeploySha] = (0, import_react307.useState)("");
+    const [deployErrorRate, setDeployErrorRate] = (0, import_react307.useState)("0.2");
+    const [deployMaxRate, setDeployMaxRate] = (0, import_react307.useState)("1.0");
+    const [deployFeedback, setDeployFeedback] = (0, import_react307.useState)("");
+    const loadDashboard = (0, import_react307.useCallback)(async () => {
       const res = await fetch("/api/dashboard");
       const data6 = await res.json();
       setState(data6);
@@ -338745,7 +338651,7 @@ ${isHandDrawn ? "" : `
         setWfJson(JSON.stringify(wf, null, 2));
       }
     }, [selectedWf]);
-    (0, import_react309.useEffect)(() => {
+    (0, import_react307.useEffect)(() => {
       loadDashboard();
     }, [loadDashboard]);
     const handleSelectWorkflow = (wfId) => {
@@ -339138,61 +339044,7 @@ ${isHandDrawn ? "" : `
               }
             }
           ) }),
-          notifications: stalledList.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "stalled-alarm-banner", "data-testid": "stalled-alarm-banner", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-            alert_default,
-            {
-              type: "error",
-              dismissible: false,
-              header: `STALLED TASK ALARM \u2014 ${stalledList.length} TASK(S) IDLE BEYOND ${f2.limits?.stallThresholdMinutes || 30} MIN THRESHOLD`,
-              children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "xs", children: stalledList.map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-                "div",
-                {
-                  "data-testid": `alarm-item-${item.issueNumber}`,
-                  style: {
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: "1rem",
-                    padding: "0.5rem",
-                    background: "rgba(127, 29, 29, 0.4)",
-                    borderRadius: "6px",
-                    border: "1px solid #ef4444"
-                  },
-                  children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "red", children: String(item.severity || "CRITICAL").toUpperCase() }),
-                      " ",
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { children: [
-                        "#",
-                        item.issueNumber,
-                        " [",
-                        item.repo,
-                        "]"
-                      ] }),
-                      " ",
-                      "\u2014 ",
-                      item.title,
-                      " (",
-                      item.idleMinutes,
-                      "m idle at ",
-                      item.stage,
-                      ")"
-                    ] }),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-                      button_default2,
-                      {
-                        size: "small",
-                        "data-testid": `alarm-snooze-btn-${item.issueNumber}`,
-                        onClick: () => snoozeTaskAlarm(item.executionKey),
-                        children: "Snooze Alarm"
-                      }
-                    )
-                  ]
-                },
-                item.executionKey
-              )) })
-            }
-          ) }) : void 0,
+          notifications: void 0,
           content: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
             ContentLayout,
             {
@@ -339217,7 +339069,7 @@ ${isHandDrawn ? "" : `
                         children: f2.killSwitch ? "PAUSED (KILL SWITCH)" : `ACTIVE (${String(f2.autonomy).toUpperCase()})`
                       }
                     ),
-                    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
                       "span",
                       {
                         id: "header-alarm-badge",
@@ -339225,12 +339077,17 @@ ${isHandDrawn ? "" : `
                         style: {
                           padding: "0.2rem 0.6rem",
                           borderRadius: "6px",
-                          fontWeight: 700,
-                          fontSize: "0.78rem",
-                          background: stalledList.length > 0 ? "#991b1b" : "#065f46",
-                          color: "#fff"
+                          fontWeight: 600,
+                          fontSize: "0.75rem",
+                          background: "#1e293b",
+                          color: "#94a3b8"
                         },
-                        children: stalledList.length > 0 ? `${stalledList.length} STALLED ALARM(S)` : "0 ALARMS"
+                        children: [
+                          "IDLE (>",
+                          f2.limits?.stallThresholdMinutes || 30,
+                          "m): ",
+                          stalledList.length
+                        ]
                       }
                     ),
                     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
@@ -339971,17 +339828,17 @@ ${isHandDrawn ? "" : `
                                             {
                                               "data-testid": `task-stalled-badge-${t4.issue_number}`,
                                               style: {
-                                                background: "#991b1b",
-                                                color: "#fff",
+                                                background: "#1e293b",
+                                                color: "#94a3b8",
                                                 padding: "0.1rem 0.45rem",
                                                 borderRadius: "4px",
                                                 fontSize: "0.72rem",
-                                                fontWeight: 700
+                                                fontWeight: 500
                                               },
                                               children: [
-                                                "STALLED (",
+                                                "\u23F1 ",
                                                 stalledInfo.idleMinutes,
-                                                "m)"
+                                                "m"
                                               ]
                                             }
                                           )

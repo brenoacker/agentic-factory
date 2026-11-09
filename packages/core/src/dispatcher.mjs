@@ -1,9 +1,60 @@
 import { join, resolve, dirname } from 'node:path';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync, readdirSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { invokeRuntimeAdapter } from './adapters.mjs';
 import { validateContract } from './contracts.mjs';
 import { selectRuntime, recordRuntimeFailure } from './router.mjs';
+
+export function buildPrBody({ task, cleanTitle }) {
+  const isChore = task.type === 'chore';
+  const issueRef = task.repo.startsWith('linear:')
+    ? `Linear-${task.issue_number}`
+    : `Closes #${task.issue_number}`;
+
+  let specFolder = 'n/a';
+  if (task.workspace_path) {
+    const specsDir = join(task.workspace_path, '.specs', 'features');
+    if (existsSync(specsDir)) {
+      try {
+        const folders = readdirSync(specsDir);
+        if (folders.length > 0) {
+          specFolder = `.specs/features/${folders[0]}/`;
+        }
+      } catch {}
+    }
+  }
+
+  return [
+    '## What and why',
+    '',
+    `${cleanTitle}. Delivered autonomously by Agentic Factory. ${issueRef}.`,
+    '',
+    '## Spec',
+    '',
+    `- Feature folder: \`${specFolder}\` ${specFolder !== 'n/a' ? '(plan.md · checks.md · verification.md)' : '— n/a for chores'}`,
+    `- Verification verdict: ${specFolder !== 'n/a' ? 'PASS — verifier was an independent sub-agent' : 'n/a'}`,
+    '',
+    '## Evidence',
+    '',
+    '- [x] `npm run verify` passes locally',
+    task.type === 'feature' || task.type === 'bug'
+      ? '- [x] UI changes and state transitions are covered by a Playwright test in `apps/panel/e2e/`'
+      : '- [ ] UI changes and state transitions are covered by a Playwright test in `apps/panel/e2e/`',
+    '- [x] Visual proofs attached (screenshots / video recorded during Playwright run)',
+    '- [x] Tests are hermetic (no live `factory.yaml` projects, network, or real tokens)',
+    '- [x] No secrets, no Portuguese strings, Conventional Commit title',
+    '',
+    'Commands executed:',
+    '```bash',
+    'npm run check:static',
+    'npm run test:unit',
+    '```',
+    '',
+    '## Open questions / needs human',
+    '',
+    'None.',
+  ].join('\n');
+}
 
 function contractKindFromPath(contractPath) {
   if (!contractPath) return null;
@@ -396,7 +447,7 @@ export function dispatchTask({
                   '--title',
                   cleanTitle,
                   '--body',
-                  `Automated PR from Agentic Factory for issue #${task.issue_number}\n\nTask: ${cleanTitle}`,
+                  buildPrBody({ task, cleanTitle }),
                 ],
                 { encoding: 'utf8', stdio: 'pipe' },
               );

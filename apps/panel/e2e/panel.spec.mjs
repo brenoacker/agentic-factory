@@ -463,16 +463,15 @@ test('C9: Playwright E2E test verifies stalled feature alarm banner, header badg
 
     await page.goto(baseUrl);
 
-    // 1. Verify top Stalled Task Alarm Banner and Header Alarm Badge are visible immediately
-    await expect(page.getByTestId('header-alarm-badge')).toHaveText('1 STALLED ALARM(S)');
-    await expect(page.getByTestId('stalled-alarm-banner')).toBeVisible();
-    await expect(page.getByTestId('alarm-item-601')).toContainText('CRITICAL');
-    await expect(page.getByTestId('alarm-item-601')).toContainText('Stalled payment webhook feature');
+    // 1. Verify intrusive top alarm banner is removed and header shows compact idle counter
+    await expect(page.getByTestId('header-alarm-badge')).toHaveText('IDLE (>30m): 1');
+    await expect(page.getByTestId('stalled-alarm-banner')).toHaveCount(0);
 
-    // 2. Verify Kanban Board shows the red STALLED badge on card #601
+    // 2. Verify Kanban Board and Needs Human queue show compact idle metrics without noisy red banner
     await navigateTab(page, 'board');
-    await expect(page.getByTestId('task-stalled-badge-601')).toContainText('STALLED');
-    await page.screenshot({ path: join(CAPTURES_DIR, 'stalled-feature-alarm-active.png'), fullPage: true });
+    await expect(page.getByTestId('task-stalled-badge-601')).toContainText('80m');
+    await expect(page.getByTestId('needs-human-idle-601')).toContainText('80m');
+    await page.screenshot({ path: join(CAPTURES_DIR, 'stalled-feature-idle-metric.png'), fullPage: true });
 
     // 3. Configure Stall Alarm Threshold in Operational Controls
     await navigateTab(page, 'controls');
@@ -480,10 +479,11 @@ test('C9: Playwright E2E test verifies stalled feature alarm banner, header badg
     await page.locator('#save-controls-btn').click();
     await expect(page.locator('#controls-feedback')).toContainText('Controls saved');
 
-    // 4. Click "Snooze Alarm" on the top Stalled Task Alarm Banner and verify the alarm clears
-    await page.getByTestId('alarm-snooze-btn-601').click();
-    await expect(page.getByTestId('header-alarm-badge')).toHaveText('0 ALARMS');
-    await expect(page.getByTestId('stalled-alarm-banner')).toBeHidden();
+    // 4. Click 1-Click Approve & Advance on the Needs Human Queue to advance blocked task
+    await navigateTab(page, 'board');
+    await page.getByTestId('approve-btn-601').click();
+    await expect(page.getByTestId('header-alarm-badge')).toHaveText('IDLE (>45m): 0');
+    await expect(page.getByTestId('stalled-alarm-banner')).toHaveCount(0);
   } finally {
     await panel.close();
     rmSync(tmpDir, { recursive: true, force: true });
