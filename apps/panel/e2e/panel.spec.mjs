@@ -31,6 +31,110 @@ async function navigateTab(page, tabId, expectedLabel = null) {
   await expect(page.locator(`#tab-${tabId}`)).toBeVisible();
 }
 
+test('C1: Kanban board renders 3 unified columns (Triage, In Progress, Done) with accurate stage grouping and badges', async ({ page }) => {
+  const featureCapturesDir = join(REPO_ROOT, '.specs', 'features', 'unified-kanban-board-columns', 'captures');
+  mkdirSync(featureCapturesDir, { recursive: true });
+  mkdirSync(CAPTURES_DIR, { recursive: true });
+
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    await page.goto(baseUrl);
+    await navigateTab(page, 'board');
+
+    // Verify 3 unified columns are present and legacy individual stage columns do not exist
+    const board = page.locator('#kanban-board');
+    await expect(board).toBeVisible();
+
+    const colTriage = page.getByTestId('kanban-col-triage');
+    const colInProgress = page.getByTestId('kanban-col-in_progress');
+    const colDone = page.getByTestId('kanban-col-done');
+
+    await expect(colTriage).toBeVisible();
+    await expect(colInProgress).toBeVisible();
+    await expect(colDone).toBeVisible();
+
+    await expect(colTriage).toContainText('Triage');
+    await expect(colInProgress).toContainText('In Progress');
+    await expect(colDone).toContainText('Done');
+
+    // Legacy stage columns should not exist as separate column containers
+    await expect(page.locator('[data-testid="kanban-col-plan"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="kanban-col-verify"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="kanban-col-merge"]')).toHaveCount(0);
+
+    // Initial counters should be (0)
+    await expect(colTriage.locator('h3')).toContainText('(0)');
+    await expect(colInProgress.locator('h3')).toContainText('(0)');
+    await expect(colDone.locator('h3')).toContainText('(0)');
+
+    // 1. Intake 3 tickets: #401 (feature), #402 (bug), #403 (chore)
+    const tickets = [
+      { num: 401, title: '[feature] Unified Kanban columns', body: 'Consolidate columns', type: 'feature' },
+      { num: 402, title: 'Bug in column wrap', body: 'Fix wrapping', type: 'bug' },
+      { num: 403, title: 'Chore: clean CSS styles', body: 'CSS refactoring', type: 'chore' },
+    ];
+
+    for (const t of tickets) {
+      await page.locator('#intake-issue-number').fill(String(t.num));
+      await page.locator('#intake-title').fill(t.title);
+      await page.locator('#intake-body').fill(t.body);
+      await page.locator('#intake-submit-btn').click();
+      await expect(page.locator('#intake-feedback')).toContainText(`Classified as ${t.type} at stage triage`);
+    }
+
+    // All 3 tickets must be placed in the Triage column with stage badge 'triage'
+    await expect(colTriage.locator('h3')).toContainText('(3)');
+    await expect(colInProgress.locator('h3')).toContainText('(0)');
+    await expect(colDone.locator('h3')).toContainText('(0)');
+
+    for (const t of tickets) {
+      await expect(colTriage.getByTestId(`task-card-${t.num}`)).toBeVisible();
+      await expect(page.getByTestId(`task-stage-${t.num}`)).toHaveText('triage');
+    }
+
+    // 2. Advance #401 (feature): triage -> plan (in_progress)
+    await page.getByTestId('dispatch-btn-401').click();
+    await expect(page.getByTestId('task-stage-401')).toHaveText('plan');
+    await expect(colTriage.locator('h3')).toContainText('(2)');
+    await expect(colInProgress.locator('h3')).toContainText('(1)');
+    await expect(colInProgress.getByTestId('task-card-401')).toBeVisible();
+
+    // 3. Advance #401 through gate to merge (still in_progress)
+    await page.getByTestId('approve-btn-401').click();
+    await expect(page.getByTestId('task-stage-401')).toHaveText('merge');
+    await expect(colInProgress.locator('h3')).toContainText('(1)');
+    await expect(colInProgress.getByTestId('task-card-401')).toBeVisible();
+
+    // 4. Advance #401 from merge to done
+    await page.getByTestId('approve-btn-401').click();
+    await expect(page.getByTestId('task-stage-401')).toHaveText('done');
+    await expect(colTriage.locator('h3')).toContainText('(2)');
+    await expect(colInProgress.locator('h3')).toContainText('(0)');
+    await expect(colDone.locator('h3')).toContainText('(1)');
+    await expect(colDone.getByTestId('task-card-401')).toBeVisible();
+
+    // 5. Advance #402 (bug) to done
+    await page.getByTestId('dispatch-btn-402').click();
+    await expect(page.getByTestId('task-stage-402')).toHaveText('merge');
+    await expect(colInProgress.locator('h3')).toContainText('(1)');
+    await expect(colInProgress.getByTestId('task-card-402')).toBeVisible();
+    await page.getByTestId('approve-btn-402').click();
+    await expect(page.getByTestId('task-stage-402')).toHaveText('done');
+    await expect(colDone.locator('h3')).toContainText('(2)');
+
+    // Capture visual proof of the 3 unified columns
+    const screenshotPath = join(featureCapturesDir, 'kanban-3-columns.png');
+    await page.screenshot({ path: screenshotPath, fullPage: true });
+    await page.screenshot({ path: join(CAPTURES_DIR, 'kanban-3-columns.png'), fullPage: true });
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
 test('C3: Control Panel renders 100% in English across all 6 tabs with zero Portuguese strings', async ({ page }) => {
   const tmpDir = makeTempFactoryClone();
   const dbPath = join(tmpDir, 'factory.db');

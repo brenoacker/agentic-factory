@@ -338599,6 +338599,15 @@ ${isHandDrawn ? "" : `
     "merge",
     "done"
   ];
+  var KANBAN_COLUMNS = [
+    { id: "triage", title: "Triage", stages: ["triage"] },
+    {
+      id: "in_progress",
+      title: "In Progress",
+      stages: ["plan", "checks_and_build", "verify", "review", "investigate", "discover", "merge"]
+    },
+    { id: "done", title: "Done", stages: ["done"] }
+  ];
   var KNOWN_AGENTS = ["planner", "builder", "verifier", "judge", "triager", "investigator", "ops"];
   function generateWorkflowMermaid(wf) {
     if (!wf || !Array.isArray(wf.stages) || wf.stages.length === 0) {
@@ -339790,17 +339799,19 @@ ${isHandDrawn ? "" : `
                     "div",
                     {
                       id: "kanban-board",
+                      "data-testid": "kanban-board",
                       style: {
                         display: "grid",
                         gap: "0.75rem",
-                        gridTemplateColumns: "repeat(auto-fit, minmax(195px, 1fr))"
+                        gridTemplateColumns: "repeat(3, minmax(260px, 1fr))"
                       },
-                      children: STAGES.map((col) => {
-                        const items = (st2.tasks || []).filter((t4) => t4.stage === col);
+                      children: KANBAN_COLUMNS.map((col) => {
+                        const items = (st2.tasks || []).filter((t4) => col.stages.includes(t4.stage));
                         return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
                           container_default,
                           {
-                            header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h3", counter: `(${items.length})`, children: col }),
+                            "data-testid": `kanban-col-${col.id}`,
+                            header: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Header2, { variant: "h3", counter: `(${items.length})`, children: col.title }),
                             children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SpaceBetween, { size: "xs", children: items.map((t4) => {
                               const stalledInfo = stalledMap[t4.execution_key];
                               return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
@@ -339942,7 +339953,7 @@ ${isHandDrawn ? "" : `
                               );
                             }) })
                           },
-                          col
+                          col.id
                         );
                       })
                     }
