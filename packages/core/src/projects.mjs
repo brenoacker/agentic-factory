@@ -1,8 +1,9 @@
 import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { loadAndValidateFactory } from './config.mjs';
 import { SUPPORTED_PROVIDERS, normalizeTriggerRules, pollProjectTracker } from './trackers.mjs';
-import { intakeAndTriageTicket } from './pipeline.mjs';
+import { intakeAndTriageTicket, advanceTicketInPanel } from './pipeline.mjs';
 
 const REPO_RE = /^[^/\s]+\/[^/\s]+$/;
 
@@ -270,12 +271,67 @@ export function syncMonitoredProjectsIssues({ rootDir, store, runner = null }) {
     });
   }
 
+  // Check tasks in stage 'merge' to detect if their Pull Request has merged on GitHub
+  let mergedTasksCount = 0;
+  try {
+    const mergeTasks = store.db.prepare("SELECT * FROM tasks WHERE stage = 'merge'").all();
+    for (const mTask of mergeTasks) {
+      if (mTask.deliverable_type === 'pull_request' && mTask.deliverable_url) {
+        const prMatch = mTask.deliverable_url.match(/pull\/(\d+)/);
+        if (prMatch) {
+          const prNumber = Number(prMatch[1]);
+          const ghRepo =
+            mTask.repo && mTask.repo.includes('/') && !mTask.repo.startsWith('linear:')
+              ? mTask.repo
+              : cfg.factoryConfig?.factory?.repo || 'brenoacker/agentic-factory';
+
+          let isMerged = false;
+          if (runner) {
+            const checkRes = runner({ action: 'check_pr_merged', repo: ghRepo, prNumber });
+            isMerged = Boolean(checkRes?.merged);
+          } else {
+            try {
+              const check = spawnSync(
+                'gh',
+                ['pr', 'view', String(prNumber), '--repo', ghRepo, '--json', 'state,mergedAt'],
+                { encoding: 'utf8' },
+              );
+              if (check.status === 0 && check.stdout) {
+                const prInfo = JSON.parse(check.stdout);
+                isMerged = prInfo.state === 'MERGED' || Boolean(prInfo.mergedAt);
+              }
+            } catch {
+              // fallback
+            }
+          }
+
+          if (isMerged) {
+            advanceTicketInPanel({
+              executionKey: mTask.execution_key,
+              factoryRoot: rootDir,
+              factoryConfig: cfg.factoryConfig,
+              workflows: cfg.workflows,
+              pricesConfig: cfg.pricesConfig,
+              store,
+              approveCurrentStage: true,
+              runner,
+            });
+            mergedTasksCount += 1;
+          }
+        }
+      }
+    }
+  } catch {
+    // non-blocking
+  }
+
   return {
     ok: true,
     polledRepos,
     skippedNotModified,
     skippedByTriggersCount,
     newTasksCount: newTasks.length,
+    mergedTasksCount,
     newTasks,
     results,
   };

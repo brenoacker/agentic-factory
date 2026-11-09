@@ -616,7 +616,7 @@ test('C9: Tracker lifecycle updates status to in-progress, posts pickup comment,
     assert.ok(linearCalls.some((c) => c.action === 'linear_update' && c.stateName === 'Done'));
   } finally {
     store.close();
-    rmSync(tmpDir, { recursive: true, force: true });
+    rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 

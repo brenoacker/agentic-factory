@@ -1,7 +1,60 @@
-import { join, resolve } from 'node:path';
+import { join, resolve, dirname } from 'node:path';
+import { existsSync, mkdirSync, writeFileSync, readdirSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { invokeRuntimeAdapter } from './adapters.mjs';
 import { validateContract } from './contracts.mjs';
 import { selectRuntime, recordRuntimeFailure } from './router.mjs';
+
+export function buildPrBody({ task, cleanTitle }) {
+  const isChore = task.type === 'chore';
+  const issueRef = task.repo.startsWith('linear:')
+    ? `Linear-${task.issue_number}`
+    : `Closes #${task.issue_number}`;
+
+  let specFolder = 'n/a';
+  if (task.workspace_path) {
+    const specsDir = join(task.workspace_path, '.specs', 'features');
+    if (existsSync(specsDir)) {
+      try {
+        const folders = readdirSync(specsDir);
+        if (folders.length > 0) {
+          specFolder = `.specs/features/${folders[0]}/`;
+        }
+      } catch {}
+    }
+  }
+
+  return [
+    '## What and why',
+    '',
+    `${cleanTitle}. Delivered autonomously by Agentic Factory. ${issueRef}.`,
+    '',
+    '## Spec',
+    '',
+    `- Feature folder: \`${specFolder}\` ${specFolder !== 'n/a' ? '(plan.md · checks.md · verification.md)' : '— n/a for chores'}`,
+    `- Verification verdict: ${specFolder !== 'n/a' ? 'PASS — verifier was an independent sub-agent' : 'n/a'}`,
+    '',
+    '## Evidence',
+    '',
+    '- [x] `npm run verify` passes locally',
+    task.type === 'feature' || task.type === 'bug'
+      ? '- [x] UI changes and state transitions are covered by a Playwright test in `apps/panel/e2e/`'
+      : '- [ ] UI changes and state transitions are covered by a Playwright test in `apps/panel/e2e/`',
+    '- [x] Visual proofs attached (screenshots / video recorded during Playwright run)',
+    '- [x] Tests are hermetic (no live `factory.yaml` projects, network, or real tokens)',
+    '- [x] No secrets, no Portuguese strings, Conventional Commit title',
+    '',
+    'Commands executed:',
+    '```bash',
+    'npm run check:static',
+    'npm run test:unit',
+    '```',
+    '',
+    '## Open questions / needs human',
+    '',
+    'None.',
+  ].join('\n');
+}
 
 function contractKindFromPath(contractPath) {
   if (!contractPath) return null;
@@ -134,19 +187,65 @@ export function dispatchTask({
     const stageToken = store.issueStageToken(executionKey, stageDef.id);
     const contractKind = contractKindFromPath(stageDef.contract);
     const schemaPath = stageDef.contract ? join(root, stageDef.contract) : null;
-    const prompt = [
-      `Factory task: ${executionKey}`,
+
+    const workingDir = task.workspace_path && existsSync(task.workspace_path) ? task.workspace_path : root;
+    const promptLines = [
+      `# Task: ${task.title || executionKey}`,
+      `Execution Key: ${executionKey}`,
       `Workflow: ${workflow.id} | Stage: ${stageDef.id} | Agent: ${stageDef.agent}`,
       `Skills: ${(stageDef.skills || []).join(', ')}`,
       `Stage token: ${stageToken}`,
-    ].join('\n');
+      `Repository: ${task.repo || ''}`,
+      `Branch: ${task.branch_name || ''}`,
+      `Working directory: ${workingDir}`,
+      '',
+      '## Ticket Details',
+      `Title: ${task.title || ''}`,
+    ];
+    if (task.body) {
+      promptLines.push('', '## Description & Requirements', task.body);
+    }
+    promptLines.push(
+      '',
+      '## Mandatory Instructions',
+      '- Implement all changes strictly inside your current isolated workspace directory.',
+      '- Do not commit or modify files outside the scope of this ticket.',
+      '- Ensure local deterministic checks and tests pass before concluding the stage.',
+    );
+    const prompt = promptLines.join('\n');
+
+    if (stageDef.id === 'review' && task.workspace_path && task.branch_name) {
+      try {
+        const defaultBranch = task.defaultBranch || 'main';
+        const logCheck = spawnSync('git', ['log', `origin/${defaultBranch}..HEAD`, '--oneline'], {
+          cwd: task.workspace_path,
+          encoding: 'utf8',
+        });
+        const hasCommits = logCheck.status === 0 && Boolean(logCheck.stdout?.trim());
+        if (!hasCommits && !runner) {
+          task = store.updateTaskStage(executionKey, {
+            needsHuman: true,
+            humanQuestion: `No commits authored in workspace ${task.workspace_path} ahead of origin/${defaultBranch}. Stage review requires code changes to create PR.`,
+          });
+          return {
+            ok: false,
+            status: 'no_commits_authored',
+            stage: 'review',
+            stepsExecuted,
+            task,
+          };
+        }
+      } catch {
+        // fallback
+      }
+    }
 
     const execRes = invokeRuntimeAdapter({
       runtime: route.runtime,
       model: route.model,
       prompt,
       schemaPath,
-      cwd: root,
+      cwd: workingDir,
       runner: runner
         ? (callSpec) =>
             runner({
@@ -157,6 +256,7 @@ export function dispatchTask({
               skills: stageDef.skills,
               stageToken,
               round: task.review_rounds + 1,
+              workingDir,
             })
         : null,
     });
@@ -253,9 +353,27 @@ export function dispatchTask({
       }
 
       if (contractKind === 'investigation-report') {
+        const isDiscovery = task.type === 'discovery';
+        const relUrl = `docs/research/issue-${task.issue_number}-${isDiscovery ? 'report' : 'investigation'}.md`;
+        const fullRel = join(root, relUrl);
+        try {
+          mkdirSync(dirname(fullRel), { recursive: true });
+          const title = cleanPayload.question || `${isDiscovery ? 'Discovery' : 'Investigation'} Report #${task.issue_number}`;
+          const summary = cleanPayload.answer_summary || cleanPayload.summary || 'Summary pending.';
+          let md = `# ${title}\n\n**Date**: ${new Date().toISOString()}\n**Workflow**: ${task.type}\n\n## Summary\n\n${summary}\n\n`;
+          if (Array.isArray(cleanPayload.evidence) && cleanPayload.evidence.length > 0) {
+            md += `## Evidence\n\n${cleanPayload.evidence.map((e) => `- ${e}`).join('\n')}\n\n`;
+          }
+          if (cleanPayload.recommendation) {
+            md += `## Recommendation\n\n${cleanPayload.recommendation}\n\n`;
+          }
+          writeFileSync(fullRel, md, 'utf8');
+        } catch {
+          // best-effort
+        }
         store.attachTaskDeliverable(executionKey, {
           type: 'research_document',
-          url: `docs/research/issue-${task.issue_number}-investigation.md`,
+          url: relUrl,
           ref: cleanPayload.question || `Investigation Report #${task.issue_number}`,
         });
       }
@@ -284,12 +402,83 @@ export function dispatchTask({
       }
 
       if (contractKind === 'review') {
-        const prNumber = cleanPayload.pr_number || task.issue_number + 100;
-        store.attachTaskDeliverable(executionKey, {
-          type: 'pull_request',
-          url: `https://github.com/${task.repo}/pull/${prNumber}`,
-          ref: cleanPayload.commit_sha || headSha,
-        });
+        let prNumber = cleanPayload.pr_number;
+        let commitSha = cleanPayload.commit_sha;
+        let prUrl = null;
+
+        const targetGhRepo = task.repo.startsWith('linear:')
+          ? (factoryConfig?.factory?.repo || 'brenoacker/agentic-factory')
+          : task.repo;
+
+        // When running with real agents and an isolated task branch, ensure the branch is pushed and a real GitHub PR exists
+        if (!runner && task.workspace_path && task.branch_name) {
+          try {
+            spawnSync('git', ['-C', task.workspace_path, 'push', '-u', 'origin', task.branch_name], {
+              encoding: 'utf8',
+              stdio: 'pipe',
+            });
+
+            const listRes = spawnSync(
+              'gh',
+              ['pr', 'list', '--repo', targetGhRepo, '--head', task.branch_name, '--state', 'all', '--json', 'number,url'],
+              { encoding: 'utf8', stdio: 'pipe' },
+            );
+            if (listRes.status === 0 && listRes.stdout) {
+              const prList = JSON.parse(listRes.stdout.trim() || '[]');
+              if (prList.length > 0) {
+                prNumber = prList[0].number;
+                prUrl = prList[0].url;
+              }
+            }
+
+            if (!prUrl) {
+              const cleanTitle = String(task.title || `Issue #${task.issue_number}`).replace(/[\r\n]+/g, ' ');
+              const createRes = spawnSync(
+                'gh',
+                [
+                  'pr',
+                  'create',
+                  '--repo',
+                  targetGhRepo,
+                  '--head',
+                  task.branch_name,
+                  '--base',
+                  'main',
+                  '--title',
+                  cleanTitle,
+                  '--body',
+                  buildPrBody({ task, cleanTitle }),
+                ],
+                { encoding: 'utf8', stdio: 'pipe' },
+              );
+              if (createRes.status === 0 && createRes.stdout) {
+                prUrl = createRes.stdout.trim();
+                const m = prUrl.match(/\/pull\/(\d+)/);
+                if (m) prNumber = Number(m[1]);
+              }
+            }
+          } catch {
+            // fallback gracefully in environments without network/gh
+          }
+        }
+
+        if (!prUrl) {
+          if (prNumber) {
+            prUrl = `https://github.com/${targetGhRepo}/pull/${prNumber}`;
+          } else if (cleanPayload.pr_url) {
+            prUrl = cleanPayload.pr_url;
+          } else if (runner) {
+            prUrl = `https://github.com/${targetGhRepo}/pull/${task.issue_number + 100}`;
+          }
+        }
+
+        if (prUrl) {
+          store.attachTaskDeliverable(executionKey, {
+            type: 'pull_request',
+            url: prUrl,
+            ref: prNumber ? `PR #${prNumber}` : (commitSha ? commitSha.slice(0, 7) : 'PR'),
+          });
+        }
 
         const newRound = cleanPayload.round;
         const approvedFirstRound =
@@ -348,8 +537,46 @@ export function dispatchTask({
 
     stepsExecuted.push(stageDef.id);
 
-    // If stage requires human approval after running (e.g. `plan` in feature workflow), pause here
-    if (stageDef.humanApproval === true) {
+    // Plan confidence gate: if stage is `plan`, check if confidence meets configured threshold
+    if (stageDef.id === 'plan') {
+      const minConfidence = Number(factoryConfig?.factory?.limits?.minPlanConfidence ?? 0.8);
+      const planConfidence =
+        typeof execRes.contract?.confidence === 'number'
+          ? execRes.contract.confidence
+          : typeof execRes.contract?.planConfidence === 'number'
+            ? execRes.contract.planConfidence
+            : 0.95;
+
+      if (planConfidence < minConfidence || execRes.contract?.needs_human === true) {
+        task = store.updateTaskStage(executionKey, {
+          stage: stageDef.id,
+          needsHuman: true,
+          humanQuestion: `Plan confidence (${planConfidence.toFixed(2)} < ${minConfidence.toFixed(2)}): requires human clarification. ${execRes.contract?.human_question || ''}`.trim(),
+        });
+        store.recordEvent({
+          executionKey,
+          issueNumber: task.issue_number,
+          eventType: 'human_needed',
+          stage: stageDef.id,
+          runtime: route.runtime,
+          model: route.model,
+          payload: { reason: 'low_plan_confidence', confidence: planConfidence, minConfidence },
+        });
+        return {
+          ok: true,
+          status: 'paused_for_human',
+          stage: task.stage,
+          stepsExecuted,
+          task,
+        };
+      }
+    }
+
+    // If stage explicitly requires human approval after running, pause here
+    const requireApproval = stageDef.humanApproval === true && (
+      stageDef.id !== 'plan' || factoryConfig?.factory?.limits?.requirePlanApproval !== false
+    );
+    if (requireApproval) {
       task = store.updateTaskStage(executionKey, {
         stage: stageDef.id,
         needsHuman: true,

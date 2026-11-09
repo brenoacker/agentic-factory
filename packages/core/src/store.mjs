@@ -36,6 +36,7 @@ export class FactoryStore {
         issue_number INTEGER NOT NULL,
         repo TEXT NOT NULL,
         title TEXT NOT NULL DEFAULT '',
+        body TEXT NOT NULL DEFAULT '',
         type TEXT NOT NULL,
         stage TEXT NOT NULL,
         impact TEXT NOT NULL DEFAULT 'medium',
@@ -113,6 +114,7 @@ export class FactoryStore {
     const tableInfo = this.db.prepare('PRAGMA table_info(tasks)').all();
     const existingCols = new Set(tableInfo.map((c) => c.name));
     for (const col of [
+      { name: 'body', type: "TEXT NOT NULL DEFAULT ''" },
       { name: 'deliverable_type', type: "TEXT NOT NULL DEFAULT ''" },
       { name: 'deliverable_url', type: "TEXT NOT NULL DEFAULT ''" },
       { name: 'deliverable_ref', type: "TEXT NOT NULL DEFAULT ''" },
@@ -417,6 +419,7 @@ export class FactoryStore {
     issueNumber,
     repo,
     title = '',
+    body = '',
     type,
     stage = 'triage',
     impact = 'medium',
@@ -426,12 +429,12 @@ export class FactoryStore {
   }) {
     const stmt = this.db.prepare(`
       INSERT INTO tasks (
-        execution_key, issue_number, repo, title, type, stage, impact, runtime, model,
+        execution_key, issue_number, repo, title, body, type, stage, impact, runtime, model,
         review_rounds, approved_first_round, needs_human, human_question,
         cost_usd, input_tokens, output_tokens, cached_tokens, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, '', 0, 0, 0, 0, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, '', 0, 0, 0, 0, ?, ?)
     `);
-    stmt.run(executionKey, issueNumber, repo, title, type, stage, impact, runtime, model, now, now);
+    stmt.run(executionKey, issueNumber, repo, title, body, type, stage, impact, runtime, model, now, now);
     this.recordEvent({
       executionKey,
       issueNumber,
@@ -446,6 +449,7 @@ export class FactoryStore {
 
   updateTaskStage(executionKey, {
     stage,
+    body,
     impact,
     runtime,
     model,
@@ -463,6 +467,7 @@ export class FactoryStore {
     const current = this.getTask(executionKey);
     if (!current) throw new Error(`Task not found: ${executionKey}`);
     const nextStage = stage ?? current.stage;
+    const nextBody = body !== undefined ? String(body || '') : current.body;
     const nextImpact = impact ?? current.impact;
     const nextRuntime = runtime ?? current.runtime;
     const nextModel = model ?? current.model;
@@ -479,13 +484,14 @@ export class FactoryStore {
     this.db
       .prepare(`
         UPDATE tasks
-        SET stage = ?, impact = ?, runtime = ?, model = ?, needs_human = ?, human_question = ?,
+        SET stage = ?, body = ?, impact = ?, runtime = ?, model = ?, needs_human = ?, human_question = ?,
             review_rounds = ?, approved_first_round = ?, deliverable_type = ?, deliverable_url = ?,
             deliverable_ref = ?, workspace_path = ?, branch_name = ?, updated_at = ?
         WHERE execution_key = ?
       `)
       .run(
         nextStage,
+        nextBody,
         nextImpact,
         nextRuntime,
         nextModel,
@@ -643,9 +649,11 @@ export class FactoryStore {
   }
 
   getStatusSummary({ stallThresholdMinutes = 30, now = new Date() } = {}) {
+    const nowDate = now instanceof Date ? now : new Date(now);
+    const nowMs = nowDate.getTime();
     const tasks = this.db.prepare('SELECT * FROM tasks ORDER BY issue_number ASC').all();
     const events = this.db.prepare('SELECT * FROM telemetry_events ORDER BY id ASC').all();
-    const stalledTasks = this.evaluateStalledTasks({ stallThresholdMinutes, now });
+    const stalledTasks = this.evaluateStalledTasks({ stallThresholdMinutes, now: nowDate });
 
     const byStage = {};
     const byType = {};
@@ -678,6 +686,8 @@ export class FactoryStore {
       }
 
       if (t.needs_human === 1) {
+        const updatedMs = new Date(t.updated_at).getTime();
+        const idleMinutes = Number.isFinite(updatedMs) ? Math.max(0, Math.floor((nowMs - updatedMs) / 60000)) : 0;
         needsHumanQueue.push({
           executionKey: t.execution_key,
           issueNumber: t.issue_number,
@@ -685,6 +695,8 @@ export class FactoryStore {
           type: t.type,
           stage: t.stage,
           question: t.human_question,
+          idleMinutes,
+          updatedAt: t.updated_at,
         });
       }
     }
