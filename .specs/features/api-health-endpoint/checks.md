@@ -40,5 +40,5 @@ Proof: run unit | ✔ C2: GET /api/health returns 503 with status unhealthy and 
 
 - **Settled mid-build:** none
 - **Dispatched:** none
-- **Boundary:** none
+- **Boundary:** C1-C2 complete at aad2540
 - **Abandoned:** none
