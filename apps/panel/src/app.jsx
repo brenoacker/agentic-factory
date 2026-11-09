@@ -57,7 +57,7 @@ export const NAV_ITEMS = [
   { type: 'link', text: 'Controls, Deploy & Brain', href: '#controls', id: 'controls' },
 ];
 
-const STAGES = [
+export const STAGES = [
   'triage',
   'plan',
   'checks_and_build',
@@ -68,6 +68,17 @@ const STAGES = [
   'merge',
   'done',
 ];
+
+export const KANBAN_COLUMNS = [
+  { id: 'triage', title: 'Triage', stages: ['triage'] },
+  {
+    id: 'in_progress',
+    title: 'In Progress',
+    stages: ['plan', 'checks_and_build', 'verify', 'review', 'investigate', 'discover', 'merge'],
+  },
+  { id: 'done', title: 'Done', stages: ['done'] },
+];
+
 
 const KNOWN_AGENTS = ['planner', 'builder', 'verifier', 'judge', 'triager', 'investigator', 'ops'];
 
@@ -1319,20 +1330,22 @@ function ControlPanelApp() {
 
                 <div
                   id="kanban-board"
+                  data-testid="kanban-board"
                   style={{
                     display: 'grid',
                     gap: '0.75rem',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(195px, 1fr))',
+                    gridTemplateColumns: 'repeat(3, minmax(260px, 1fr))',
                   }}
                 >
-                  {STAGES.map((col) => {
-                    const items = (st.tasks || []).filter((t) => t.stage === col);
+                  {KANBAN_COLUMNS.map((col) => {
+                    const items = (st.tasks || []).filter((t) => col.stages.includes(t.stage));
                     return (
                       <Container
-                        key={col}
+                        key={col.id}
+                        data-testid={`kanban-col-${col.id}`}
                         header={
                           <Header variant="h3" counter={`(${items.length})`}>
-                            {col}
+                            {col.title}
                           </Header>
                         }
                       >
