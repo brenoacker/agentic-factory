@@ -15,7 +15,7 @@
       "stageTimeoutMinutes": 30,
       "stallThresholdMinutes": 30,
       "minPlanConfidence": 0.8,
-      "requirePlanApproval": false
+      "requirePlanApproval": true
     },
     "modelByImpact": {
       "low": {

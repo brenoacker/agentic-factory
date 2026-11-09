@@ -339160,7 +339160,7 @@ ${isHandDrawn ? "" : `
                   },
                   children: [
                     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "red", children: item.severity || "CRITICAL" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, { color: "red", children: String(item.severity || "CRITICAL").toUpperCase() }),
                       " ",
                       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { children: [
                         "#",
@@ -339971,17 +339971,17 @@ ${isHandDrawn ? "" : `
                                             {
                                               "data-testid": `task-stalled-badge-${t4.issue_number}`,
                                               style: {
-                                                background: "#1e293b",
-                                                color: "#94a3b8",
+                                                background: "#991b1b",
+                                                color: "#fff",
                                                 padding: "0.1rem 0.45rem",
                                                 borderRadius: "4px",
                                                 fontSize: "0.72rem",
-                                                fontWeight: 500
+                                                fontWeight: 700
                                               },
                                               children: [
-                                                "\u23F1 ",
+                                                "STALLED (",
                                                 stalledInfo.idleMinutes,
-                                                "m"
+                                                "m)"
                                               ]
                                             }
                                           )

@@ -359,19 +359,73 @@ export function dispatchTask({
           ? (factoryConfig?.factory?.repo || 'brenoacker/agentic-factory')
           : task.repo;
 
-        if (prNumber) {
-          prUrl = `https://github.com/${targetGhRepo}/pull/${prNumber}`;
-        } else if (cleanPayload.pr_url) {
-          prUrl = cleanPayload.pr_url;
-        } else if (runner) {
-          prUrl = `https://github.com/${targetGhRepo}/pull/${task.issue_number + 100}`;
+        // When running with real agents and an isolated task branch, ensure the branch is pushed and a real GitHub PR exists
+        if (!runner && task.workspace_path && task.branch_name) {
+          try {
+            spawnSync('git', ['-C', task.workspace_path, 'push', '-u', 'origin', task.branch_name], {
+              encoding: 'utf8',
+              stdio: 'pipe',
+            });
+
+            const listRes = spawnSync(
+              'gh',
+              ['pr', 'list', '--repo', targetGhRepo, '--head', task.branch_name, '--state', 'all', '--json', 'number,url'],
+              { encoding: 'utf8', stdio: 'pipe' },
+            );
+            if (listRes.status === 0 && listRes.stdout) {
+              const prList = JSON.parse(listRes.stdout.trim() || '[]');
+              if (prList.length > 0) {
+                prNumber = prList[0].number;
+                prUrl = prList[0].url;
+              }
+            }
+
+            if (!prUrl) {
+              const cleanTitle = String(task.title || `Issue #${task.issue_number}`).replace(/[\r\n]+/g, ' ');
+              const createRes = spawnSync(
+                'gh',
+                [
+                  'pr',
+                  'create',
+                  '--repo',
+                  targetGhRepo,
+                  '--head',
+                  task.branch_name,
+                  '--base',
+                  'main',
+                  '--title',
+                  cleanTitle,
+                  '--body',
+                  `Automated PR from Agentic Factory for issue #${task.issue_number}\n\nTask: ${cleanTitle}`,
+                ],
+                { encoding: 'utf8', stdio: 'pipe' },
+              );
+              if (createRes.status === 0 && createRes.stdout) {
+                prUrl = createRes.stdout.trim();
+                const m = prUrl.match(/\/pull\/(\d+)/);
+                if (m) prNumber = Number(m[1]);
+              }
+            }
+          } catch {
+            // fallback gracefully in environments without network/gh
+          }
+        }
+
+        if (!prUrl) {
+          if (prNumber) {
+            prUrl = `https://github.com/${targetGhRepo}/pull/${prNumber}`;
+          } else if (cleanPayload.pr_url) {
+            prUrl = cleanPayload.pr_url;
+          } else if (runner) {
+            prUrl = `https://github.com/${targetGhRepo}/pull/${task.issue_number + 100}`;
+          }
         }
 
         if (prUrl) {
           store.attachTaskDeliverable(executionKey, {
             type: 'pull_request',
             url: prUrl,
-            ref: commitSha || headSha,
+            ref: prNumber ? `PR #${prNumber}` : (commitSha ? commitSha.slice(0, 7) : 'PR'),
           });
         }
 

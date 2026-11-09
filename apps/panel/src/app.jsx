@@ -684,7 +684,7 @@ function ControlPanelApp() {
                       }}
                     >
                       <div>
-                        <Badge color="red">{item.severity || 'CRITICAL'}</Badge>{' '}
+                        <Badge color="red">{String(item.severity || 'CRITICAL').toUpperCase()}</Badge>{' '}
                         <strong>
                           #{item.issueNumber} [{item.repo}]
                         </strong>{' '}
@@ -1501,15 +1501,15 @@ function ControlPanelApp() {
                                     <span
                                       data-testid={`task-stalled-badge-${t.issue_number}`}
                                       style={{
-                                        background: '#1e293b',
-                                        color: '#94a3b8',
+                                        background: '#991b1b',
+                                        color: '#fff',
                                         padding: '0.1rem 0.45rem',
                                         borderRadius: '4px',
                                         fontSize: '0.72rem',
-                                        fontWeight: 500,
+                                        fontWeight: 700,
                                       }}
                                     >
-                                      ⏱ {stalledInfo.idleMinutes}m
+                                      STALLED ({stalledInfo.idleMinutes}m)
                                     </span>
                                   )}
                                 </div>
