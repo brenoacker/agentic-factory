@@ -10,6 +10,7 @@ export {
   commentOnGitHubIssue,
   updateGitHubIssue,
   closeGitHubIssue,
+  validateGitHubWebhookSignature,
 } from './src/github.mjs';
 export { prepareWorktree, provisionTaskWorkspace } from './src/worktree.mjs';
 export { approveTask, dispatchTask } from './src/dispatcher.mjs';
