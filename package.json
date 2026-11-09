@@ -8,6 +8,7 @@
     "validate": "node packages/core/cli.mjs validate",
     "build:panel": "node scripts/build-panel.mjs",
     "sync-skills": "node scripts/sync-skills.mjs --verify-only",
+    "lint": "node --check scripts/*.mjs packages/**/*.mjs",
     "selftest:spec": "python3 skills/vendor/tlc-spec-lean/scripts/selftest.py",
     "check:static": "npm run build:panel && npm run sync-skills && npm run validate && npm run selftest:spec",
     "test:unit": "node --test \"scripts/__test__/*.test.mjs\" \"packages/**/__test__/*.test.mjs\" \"apps/**/__test__/*.test.mjs\"",
