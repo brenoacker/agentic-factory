@@ -561,80 +561,14 @@ function ControlPanelApp() {
         <TopNavigation
           identity={{
             href: '#overview',
-            title: 'AWS Cloudscape — Agentic Factory Console',
+            title: 'Agentic Factory Control Plane',
             logo: {
               src: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23ec7211"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
-              alt: 'AWS Cloudscape Logo',
+              alt: 'Agentic Factory Logo',
             },
           }}
-          utilities={[
-            {
-              type: 'button',
-              text: `AUTONOMY: ${String(f.autonomy).toUpperCase()}`,
-            },
-            {
-              type: 'button',
-              text: stalledList.length > 0 ? `${stalledList.length} STALLED` : '0 ALARMS',
-            },
-            {
-              type: 'button',
-              text: 'Refresh Telemetry',
-              onClick: loadDashboard,
-            },
-          ]}
+          utilities={[]}
         />
-      </div>
-
-      {/* Cloudscape Top Quick Navigation Tabs (compatible with test selectors) */}
-      <div
-        id="tabs"
-        data-testid="cloudscape-tab-bar"
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '8px',
-          padding: '8px 24px',
-          background: '#0f1b2a',
-          borderBottom: '1px solid #232f3e',
-          alignItems: 'center',
-        }}
-      >
-        {NAV_ITEMS.map((item) => (
-          <button
-            key={item.id}
-            data-tab={item.id}
-            onClick={() => setActiveTab(item.id)}
-            className={activeTab === item.id ? 'active' : ''}
-            style={{
-              background: activeTab === item.id ? '#0972d3' : '#1e293b',
-              color: '#ffffff',
-              border: activeTab === item.id ? '1px solid #539fe5' : '1px solid #334155',
-              borderRadius: '6px',
-              padding: '6px 14px',
-              fontSize: '13px',
-              cursor: 'pointer',
-              fontWeight: activeTab === item.id ? '600' : 'normal',
-            }}
-          >
-            {item.text}
-          </button>
-        ))}
-        <button
-          id="refresh-telemetry-btn"
-          onClick={loadDashboard}
-          style={{
-            marginLeft: 'auto',
-            background: '#232f3e',
-            color: '#d1d5db',
-            border: '1px solid #414d5c',
-            borderRadius: '6px',
-            padding: '6px 14px',
-            fontSize: '13px',
-            cursor: 'pointer',
-          }}
-        >
-          Refresh Telemetry
-        </button>
       </div>
 
       <div className="awsui-app-layout">
@@ -645,7 +579,7 @@ function ControlPanelApp() {
             <div className="awsui-side-navigation">
               <SideNavigation
                 activeHref={`#${activeTab}`}
-                header={{ href: '#overview', text: 'Agentic Factory' }}
+                header={{ text: 'Agentic Factory' }}
                 items={NAV_ITEMS.map((item) => ({
                   type: 'link',
                   text: item.text,
@@ -774,6 +708,16 @@ function ControlPanelApp() {
                         : `CRON: MANUAL (#${scheduler.pollCount || 0})`}
                     </span>
                   </SpaceBetween>
+                }
+                actions={
+                  <Button
+                    id="refresh-telemetry-btn"
+                    data-testid="refresh-telemetry-btn"
+                    iconName="refresh"
+                    onClick={loadDashboard}
+                  >
+                    Refresh Telemetry
+                  </Button>
                 }
               >
                 {activeTab === 'overview' && 'Overview & Telemetry'}
