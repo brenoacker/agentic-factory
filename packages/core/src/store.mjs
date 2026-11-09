@@ -136,7 +136,14 @@ export class FactoryStore {
   }
 
   close() {
-    this.db.close();
+    try {
+      this.db.close();
+    } catch {}
+  }
+
+  ping() {
+    this.db.prepare('SELECT 1').get();
+    return true;
   }
 
   getRuntimeHealth(runtime) {

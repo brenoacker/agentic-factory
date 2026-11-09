@@ -102,6 +102,38 @@ export function createPanelServer({
         }
       }
 
+      // 1b. GET /api/health
+      if (req.method === 'GET' && pathname === '/api/health') {
+        let dbOk = false;
+        try {
+          if (store && typeof store.ping === 'function') {
+            store.ping();
+            dbOk = true;
+          } else if (store?.db) {
+            store.db.prepare('SELECT 1').get();
+            dbOk = true;
+          }
+        } catch {
+          dbOk = false;
+        }
+
+        const uptimeSeconds = Math.floor(process.uptime());
+        if (dbOk) {
+          sendJson(res, 200, {
+            status: 'healthy',
+            version: '1.0.0',
+            uptimeSeconds,
+            database: 'connected',
+          });
+        } else {
+          sendJson(res, 503, {
+            status: 'unhealthy',
+            database: 'disconnected',
+          });
+        }
+        return;
+      }
+
       // 2. GET /api/dashboard
       if (req.method === 'GET' && pathname === '/api/dashboard') {
         const cfg = loadAndValidateFactory(root);
