@@ -535,11 +535,18 @@ export function createPanelServer({
           return;
         }
         const prNumber = Number(prMatch[1]);
-        const mergeRes = spawnSync(
+        let mergeRes = spawnSync(
           'gh',
           ['pr', 'merge', String(prNumber), '--repo', ghRepo, '--squash', '--delete-branch'],
           { encoding: 'utf8' },
         );
+        if (mergeRes.status !== 0) {
+          mergeRes = spawnSync(
+            'gh',
+            ['pr', 'merge', String(prNumber), '--repo', ghRepo, '--squash', '--delete-branch', '--admin'],
+            { encoding: 'utf8' },
+          );
+        }
         if (mergeRes.status !== 0) {
           sendJson(res, 500, { ok: false, error: `gh pr merge failed: ${mergeRes.stderr || mergeRes.stdout}` });
           return;

@@ -125,7 +125,28 @@ export function provisionTaskWorkspace({
       // 1. Fetch latest remote main to guarantee fresh upstream base
       spawnSync('git', ['fetch', 'origin', defaultBranch], { cwd: gitSource, encoding: 'utf8' });
 
-      // 2. Check if origin/<defaultBranch> exists, fallback to <defaultBranch>
+      // 2. Remove any previous worktree holding taskBranch and prune
+      try {
+        const wtList = spawnSync('git', ['worktree', 'list', '--porcelain'], { cwd: gitSource, encoding: 'utf8' });
+        if (wtList.status === 0 && wtList.stdout) {
+          const lines = wtList.stdout.split('\n');
+          let currentWt = null;
+          for (const line of lines) {
+            if (line.startsWith('worktree ')) {
+              currentWt = line.slice('worktree '.length).trim();
+            } else if (line.startsWith('branch ') && (line.endsWith(`/${taskBranch}`) || line.endsWith(` ${taskBranch}`))) {
+              if (currentWt && currentWt !== gitSource) {
+                spawnSync('git', ['worktree', 'remove', '--force', currentWt], { cwd: gitSource, encoding: 'utf8' });
+              }
+            }
+          }
+        }
+        spawnSync('git', ['worktree', 'prune'], { cwd: gitSource, encoding: 'utf8' });
+      } catch {
+        // non-blocking
+      }
+
+      // 3. Check if origin/<defaultBranch> exists, fallback to <defaultBranch>
       const hasOrigin =
         spawnSync('git', ['rev-parse', '--verify', `origin/${defaultBranch}`], {
           cwd: gitSource,
@@ -133,7 +154,7 @@ export function provisionTaskWorkspace({
         }).status === 0;
       const baseCommit = hasOrigin ? `origin/${defaultBranch}` : defaultBranch;
 
-      // 3. Create fresh worktree starting cleanly from baseCommit
+      // 4. Create fresh worktree starting cleanly from baseCommit
       spawnSync('git', ['worktree', 'add', '--force', '-B', taskBranch, workspacePath, baseCommit], {
         cwd: gitSource,
         encoding: 'utf8',
