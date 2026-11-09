@@ -757,3 +757,43 @@ test('C11: Deliverable validation gate enforces mandatory PR for code workflows 
     rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+test('C1: GET /api/health returns 200 with status healthy, version 1.0.0, uptimeSeconds, and database connected', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    const res = await fetch(`${baseUrl}/api/health`);
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get('content-type'), 'application/json; charset=utf-8');
+    const data = await res.json();
+    assert.equal(data.status, 'healthy');
+    assert.equal(data.version, '1.0.0');
+    assert.equal(typeof data.uptimeSeconds, 'number');
+    assert.ok(data.uptimeSeconds >= 0);
+    assert.equal(data.database, 'connected');
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
+
+test('C2: GET /api/health returns 503 with status unhealthy and database disconnected when database fails', async () => {
+  const tmpDir = makeTempFactoryClone();
+  const dbPath = join(tmpDir, 'factory.db');
+  const { panel, baseUrl } = await startTestServer(tmpDir, dbPath);
+
+  try {
+    panel.store.close();
+
+    const res = await fetch(`${baseUrl}/api/health`);
+    assert.equal(res.status, 503);
+    const data = await res.json();
+    assert.equal(data.status, 'unhealthy');
+    assert.equal(data.database, 'disconnected');
+  } finally {
+    await panel.close();
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+});
